@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuthStore } from './lib/auth-store';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { GoogleCallbackPage } from './pages/GoogleCallbackPage';
 import { WelcomePage } from './pages/WelcomePage';
 
 function AuthBootstrap() {
@@ -14,6 +15,7 @@ function AuthBootstrap() {
     <Route path="/" element={<Navigate to="/login" replace />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/register" element={<RegisterPage />} />
+    <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
     <Route path="/app" element={<ProtectedRoute><WelcomePage /></ProtectedRoute>} />
     <Route path="*" element={<Navigate to="/login" replace />} />
   </Routes>;
