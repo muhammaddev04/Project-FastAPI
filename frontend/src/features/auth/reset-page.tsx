@@ -26,7 +26,7 @@ export function ResetPage() {
         <FormField labelClassName={authLabel} label={t('auth.fields.phone')} hint={t('auth.reset.phoneHint')} error={error && t(error)}>
           <Input variant="outline" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="900 12 34 56" data addon="+992" {...form.register('phone')} />
         </FormField>
-        <Button type="submit" block className={`!mt-6 ${authPrimaryButton}`} disabled={!available}>
+        <Button type="submit" block className={`!mt-6 ${authPrimaryButton}`} disabled={!available} loading={meta.isPending}>
           {t('auth.reset.submit')}
         </Button>
       </form>

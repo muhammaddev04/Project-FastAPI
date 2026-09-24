@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import type { ReactNode } from 'react';
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
+import type { PointerEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useOutlet } from 'react-router-dom';
 import { useMeta } from '@/shared/api/meta';
@@ -33,23 +33,51 @@ function Wordmark() {
 function BrandPanel() {
   const { t } = useTranslation();
   const key = headlineKey(useLocation().pathname);
+  // Subtle pointer parallax for the glows (desktop pointers only; off with reduced motion).
+  const reduced = useReducedMotion();
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const sx = useSpring(px, { stiffness: 60, damping: 18 });
+  const sy = useSpring(py, { stiffness: 60, damping: 18 });
+  const farX = useTransform(sx, (v) => v * -18);
+  const farY = useTransform(sy, (v) => v * -14);
+  const nearX = useTransform(sx, (v) => v * 10);
+  const nearY = useTransform(sy, (v) => v * 8);
+  const onPointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (reduced || event.pointerType !== 'mouse') return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    px.set((event.clientX - rect.left) / rect.width - 0.5);
+    py.set((event.clientY - rect.top) / rect.height - 0.5);
+  };
+  const onPointerLeave = () => {
+    px.set(0);
+    py.set(0);
+  };
   return (
-    <aside className="relative overflow-hidden bg-[#030A24] text-white dark:bg-[#01040F] lg:sticky lg:top-0 lg:h-screen">
+    <aside
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      className="relative overflow-hidden bg-[#030A24] text-white dark:bg-[#01040F] lg:sticky lg:top-0 lg:h-screen"
+    >
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-gradient-to-br from-[#0A1647] via-[#0D1B5E] to-[#1B2E8C] dark:from-[#07102F] dark:via-[#0A1648] dark:to-[#15247A] sm:left-[8%] lg:bottom-[11%] lg:left-[13%] lg:top-[11%]"
       >
         <div className="absolute inset-0 opacity-[0.05] [background-image:repeating-linear-gradient(90deg,#fff_0,#fff_1px,transparent_1px,transparent_42px)]" />
-        <motion.div
-          className="absolute -right-24 -top-24 size-80 rounded-full bg-[#2B4BD6]/25 blur-3xl"
-          animate={{ x: [0, -28, 0], y: [0, 22, 0], scale: [1, 1.08, 1] }}
-          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute -bottom-32 left-10 size-72 rounded-full bg-[#1E3FB8]/20 blur-3xl"
-          animate={{ x: [0, 24, 0], y: [0, -18, 0] }}
-          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        <motion.div className="absolute -right-24 -top-24" style={{ x: farX, y: farY }}>
+          <motion.div
+            className="size-80 rounded-full bg-[#2B4BD6]/25 blur-3xl"
+            animate={{ x: [0, -28, 0], y: [0, 22, 0], scale: [1, 1.08, 1] }}
+            transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </motion.div>
+        <motion.div className="absolute -bottom-32 left-10" style={{ x: nearX, y: nearY }}>
+          <motion.div
+            className="size-72 rounded-full bg-[#1E3FB8]/20 blur-3xl"
+            animate={{ x: [0, 24, 0], y: [0, -18, 0] }}
+            transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        </motion.div>
       </div>
 
       <div className="relative flex min-h-[15rem] flex-col justify-between gap-8 px-6 py-7 sm:px-12 lg:h-full lg:justify-center lg:gap-0 lg:py-0 lg:pl-[max(4rem,19%)] lg:pr-10">

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Building2, Check, Mail, MessageSquareText, Store, UserCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
@@ -82,6 +83,8 @@ export function RegisterPage() {
   const { t } = useTranslation();
   const { available, meta } = useAuthMethod('registration');
   const [step, setStep] = useState<StepId>('account');
+  /** +1 moving forward, -1 going back: the next step slides in from that side. */
+  const [direction, setDirection] = useState(1);
   const [code, setCode] = useState('');
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -107,9 +110,13 @@ export function RegisterPage() {
   async function next() {
     const definition = REGISTER_STEPS.find((item) => item.id === step);
     if (definition && !(await form.trigger(definition.fields, { shouldFocus: true }))) return;
+    setDirection(1);
     setStep(ORDER[ORDER.indexOf(step) + 1] ?? 'confirm');
   }
-  const back = () => setStep(ORDER[ORDER.indexOf(step) - 1] ?? 'account');
+  const back = () => {
+    setDirection(-1);
+    setStep(ORDER[ORDER.indexOf(step) - 1] ?? 'account');
+  };
 
   return (
     <AuthCard title={t('auth.register.title')}>
@@ -122,6 +129,21 @@ export function RegisterPage() {
 
       {/* Account creation (SMS/e-mail verification, then session) is wired by the deferred P01 flow. */}
       <form className="space-y-4" noValidate onSubmit={(event) => event.preventDefault()}>
+        <AnimatePresence mode="wait" initial={false} custom={direction}>
+          <motion.div
+            key={step}
+            custom={direction}
+            variants={{
+              enter: (dir: number) => ({ opacity: 0, x: dir * 24 }),
+              center: { opacity: 1, x: 0 },
+              exit: (dir: number) => ({ opacity: 0, x: dir * -24 }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+            className="space-y-4"
+          >
         {step === 'account' ? (
           <>
             <RoleChoice selected={values.orgType} field={form.register('orgType')} />
@@ -243,6 +265,9 @@ export function RegisterPage() {
           </div>
         ) : null}
 
+          </motion.div>
+        </AnimatePresence>
+
         <div className="flex gap-2 pt-2">
           {step !== 'account' ? (
             <Button type="button" variant="secondary" className="h-11 rounded-md text-[0.8125rem]" onClick={back}>
@@ -250,7 +275,7 @@ export function RegisterPage() {
             </Button>
           ) : null}
           {step === 'confirm' ? (
-            <Button type="submit" className={`flex-1 ${authPrimaryButton}`} disabled={!available}>
+            <Button type="submit" className={`flex-1 ${authPrimaryButton}`} disabled={!available} loading={meta.isPending}>
               {t('auth.register.submit')}
             </Button>
           ) : (

@@ -32,7 +32,8 @@ describe('auth screens', () => {
     it('explains that password sign-in is not enabled and sends no credentials', async () => {
       const { calls } = mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
-      expect(await screen.findByText("Sign-in isn't enabled yet")).toBeInTheDocument();
+      // The notice replaces the animated "checking" row once /meta has answered.
+      expect(await screen.findByText("Sign-in isn't enabled yet", {}, { timeout: 3000 })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Login now' })).toBeDisabled();
       expect(screen.getByRole('button', { name: /continue with google/i })).toBeDisabled();
       expect(nonMetaCalls(calls)).toHaveLength(0);
@@ -59,6 +60,7 @@ describe('auth screens', () => {
     it('shows a retryable error when sign-in options cannot be loaded', async () => {
       mockApi([{ path: '/meta', status: 503, body: { error: { code: 'service_unavailable', message: '', details: {}, request_id: 'r' } } }]);
       renderRoutes(routes, '/login');
+      expect(screen.getByText('Checking sign-in options…')).toBeInTheDocument();
       // One automatic retry for 5xx happens first (query-client.ts), so allow for its back-off.
       expect(await screen.findByText("Couldn't load sign-in options", {}, { timeout: 4000 })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
@@ -115,17 +117,19 @@ describe('auth screens', () => {
       renderRoutes(routes, '/register');
       await fillAccount();
       expect(await screen.findByText('Step 2 of 3: Organization')).toBeInTheDocument();
-      await userEvent.type(screen.getByLabelText(/store name/i), 'Corner Market');
+      // Steps animate: the next step mounts after the previous one has left.
+      await userEvent.type(await screen.findByLabelText(/store name/i), 'Corner Market');
       await userEvent.click(screen.getByRole('button', { name: /back/i }));
-      expect(screen.getByLabelText(/full name/i)).toHaveValue('Nigina Karimova');
+      expect(await screen.findByLabelText(/full name/i)).toHaveValue('Nigina Karimova');
       await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      await screen.findByLabelText(/store name/i);
       await userEvent.click(await screen.findByRole('button', { name: 'Continue' }));
 
       expect(await screen.findByText('Corner Market · Store')).toBeInTheDocument();
       expect(screen.getByText('+992901234567')).toBeInTheDocument();
       expect(screen.getByText(/6-digit code to \+992901234567/)).toBeInTheDocument();
       expect(screen.getByText(/confirm nigina@example.tj/i)).toBeInTheDocument();
-      expect(screen.getByText("Registration isn't open yet")).toBeInTheDocument();
+      expect(await screen.findByText("Registration isn't open yet", {}, { timeout: 3000 })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
       expect(nonMetaCalls(calls)).toHaveLength(0);
     });
@@ -134,7 +138,7 @@ describe('auth screens', () => {
   it('password reset explains it is not enabled yet', async () => {
     mockApi([{ path: '/meta', body: META_DISABLED }]);
     renderRoutes(routes, '/reset');
-    expect(await screen.findByText("Password reset isn't enabled yet")).toBeInTheDocument();
+    expect(await screen.findByText("Password reset isn't enabled yet", {}, { timeout: 3000 })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Send code' })).toBeDisabled();
   });
 

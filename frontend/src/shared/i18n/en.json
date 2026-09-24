@@ -174,7 +174,8 @@
       "google": {
         "title": "Google sign-in isn't enabled",
         "text": "Continue with Google isn't configured on this server yet. Use your phone number instead."
-      }
+      },
+      "checking": "Checking sign-in options…"
     },
     "google": {
       "button": "Continue with Google",

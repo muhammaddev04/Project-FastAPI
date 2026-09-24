@@ -60,7 +60,7 @@ export function LoginPage() {
         >
           <PasswordInput variant="outline" placeholder={t('auth.login.passwordPlaceholder')} autoComplete="current-password" {...form.register('password')} />
         </FormField>
-        <Button type="submit" block className={`!mt-6 ${authPrimaryButton}`} disabled={!available}>
+        <Button type="submit" block className={`!mt-6 ${authPrimaryButton}`} disabled={!available} loading={meta.isPending}>
           {t('auth.login.submit')}
         </Button>
         <p className="text-center text-[0.75rem] text-muted-foreground">{t('auth.login.lockoutHint')}</p>
