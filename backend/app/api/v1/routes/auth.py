@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.config import settings
 from app.models import User, build_user
+from app.rate_limit import rate_limiter
 from app.security import create_token, decode_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -194,6 +195,9 @@ def register_complete(payload: RegisterCompleteRequest):
 
 @router.post("/login")
 def login(payload: LoginRequest):
+    key = f"login:{payload.phone}"
+    if not rate_limiter.check(key):
+        raise build_error("rate_limit_exceeded", "Too many failed login attempts", status.HTTP_429_TOO_MANY_REQUESTS)
     user = USERS.get(payload.phone)
     if not user or not verify_password(payload.password, user.password_hash):
         raise build_error("invalid_credentials", "Invalid phone or password", status.HTTP_401_UNAUTHORIZED)
