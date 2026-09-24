@@ -1,4 +1,5 @@
 import { Navigate, createBrowserRouter, type RouteObject } from 'react-router-dom';
+import { AuthShell } from '@/features/auth/auth-layout';
 import { GoogleCallbackPage } from '@/features/auth/google-callback-page';
 import { LoginPage } from '@/features/auth/login-page';
 import { RegisterPage } from '@/features/auth/register-page';
@@ -30,10 +31,16 @@ function RootRedirect() {
 /** FND-031 route table. */
 export const routes: RouteObject[] = [
   { path: '/', element: <RootRedirect /> },
-  { path: '/login', element: <RequireGuest><LoginPage /></RequireGuest> },
-  { path: '/register', element: <RequireGuest><RegisterPage /></RequireGuest> },
-  { path: '/reset', element: <RequireGuest><ResetPage /></RequireGuest> },
-  { path: '/auth/google/callback', element: <RequireGuest><GoogleCallbackPage /></RequireGuest> },
+  {
+    // Auth layout route: the brand panel stays mounted while the card animates between pages.
+    element: <RequireGuest><AuthShell /></RequireGuest>,
+    children: [
+      { path: '/login', element: <LoginPage /> },
+      { path: '/register', element: <RegisterPage /> },
+      { path: '/reset', element: <ResetPage /> },
+      { path: '/auth/google/callback', element: <GoogleCallbackPage /> },
+    ],
+  },
   { path: '/welcome', element: <RequireAuth>{(me) => <WelcomePage me={me} />}</RequireAuth> },
   { path: '/profile', element: <RequireAuth>{(me) => <ProfilePage me={me} />}</RequireAuth> },
   {

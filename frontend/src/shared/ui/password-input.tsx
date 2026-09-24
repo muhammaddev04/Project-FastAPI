@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { forwardRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,11 +16,22 @@ export const PasswordInput = forwardRef<HTMLInputElement, Omit<InputProps, 'type
         <button
           type="button"
           onClick={() => setVisible((value) => !value)}
-          className="rounded p-1 text-muted-foreground hover:text-foreground [&_svg]:size-4"
+          className="relative flex size-7 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-subtle hover:text-foreground active:scale-90 [&_svg]:size-4"
           aria-label={visible ? t('common.hidePassword') : t('common.showPassword')}
           aria-pressed={visible}
         >
-          {visible ? <EyeOff /> : <Eye />}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={visible ? 'hide' : 'show'}
+              initial={{ opacity: 0, rotate: -45, scale: 0.7 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 45, scale: 0.7 }}
+              transition={{ duration: 0.15 }}
+              className="flex"
+            >
+              {visible ? <EyeOff /> : <Eye />}
+            </motion.span>
+          </AnimatePresence>
         </button>
       }
       {...props}
