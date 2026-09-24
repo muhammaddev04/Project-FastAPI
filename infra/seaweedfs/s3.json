@@ -1,0 +1,9 @@
+{
+  "identities": [
+    {
+      "name": "tezfarmo-dev",
+      "credentials": [{ "accessKey": "tezfarmo", "secretKey": "tezfarmo-dev-secret" }],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

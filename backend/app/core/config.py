@@ -26,6 +26,13 @@ class Settings(BaseSettings):
     jwt_access_secret: str = INSECURE_DEFAULT + "-access"
     access_token_ttl_minutes: int = 15
 
+    # FND-017 private S3-compatible storage. Buckets are never public; files are reached via signed URLs (SEC-008).
+    s3_endpoint: str = "localhost:9000"
+    s3_access_key: str = "tezfarmo"
+    s3_secret_key: str = "tezfarmo-dev-secret"
+    s3_bucket_private: str = "tezfarmo-private"
+    s3_secure: bool = False
+
     # Optional "Continue with Google" (owner requirement, not in TZ v4). Secrets stay server-side.
     google_client_id: str = ""
     google_client_secret: str = ""

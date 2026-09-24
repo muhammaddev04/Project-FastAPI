@@ -29,5 +29,17 @@ services:
       timeout: 3s
       retries: 10
 
+  # S3-compatible private file storage (SeaweedFS; any S3 provider works in production). Dev-only credentials.
+  storage:
+    image: chrislusf/seaweedfs:latest
+    container_name: tezfarmo-storage
+    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -ip.bind=0.0.0.0
+    ports:
+      - "9000:8333"
+    volumes:
+      - ./infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+      - storage_data:/data
+
 volumes:
   postgres_data:
+  storage_data:
