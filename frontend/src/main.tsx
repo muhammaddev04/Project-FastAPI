@@ -8,6 +8,7 @@ import './styles/forms.css';
 import './styles/roles.css';
 import './styles/pages.css';
 import './styles/welcome.css';
+import './styles/app-shell.css';
 import App from './App';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
