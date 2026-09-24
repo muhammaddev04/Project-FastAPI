@@ -14,7 +14,11 @@
     "hidePassword": "Hide password",
     "notAvailableYet": "Not available yet"
   },
-  "languages": { "tg": "Тоҷикӣ", "ru": "Русский", "en": "English" },
+  "languages": {
+    "tg": "Тоҷикӣ",
+    "ru": "Русский",
+    "en": "English"
+  },
   "states": {
     "errorTitle": "Something went wrong",
     "forbiddenTitle": "You don't have access",
@@ -60,7 +64,8 @@
     "cannot_modify_owner": "The owner's role can't be changed here.",
     "self_role_change_forbidden": "You can't change your own role.",
     "membership_already_exists": "You're already a member of this organization.",
-    "organization_blocked": "This organization is blocked."
+    "organization_blocked": "This organization is blocked.",
+    "organization_limit_reached": "You already own the maximum number of organizations (5)."
   },
   "validation": {
     "required": "This field is required.",
@@ -72,5 +77,54 @@
     "nameTooShort": "Enter at least 2 characters.",
     "tooLong": "This value is too long.",
     "email": "Enter a valid email address."
+  },
+  "roles": {
+    "OWNER": "Owner",
+    "MANAGER": "Manager",
+    "OPERATOR": "Operator",
+    "WAREHOUSE": "Warehouse",
+    "COURIER": "Courier",
+    "SELLER": "Seller"
+  },
+  "orgTypes": {
+    "COMPANY": "Company",
+    "STORE": "Store"
+  },
+  "account": {
+    "menu": "Account menu",
+    "signedInAs": "Signed in as",
+    "profile": "Profile",
+    "signOut": "Sign out"
+  },
+  "onboarding": {
+    "eyebrow": "Workspace setup",
+    "title": "Welcome, {{name}}. Let's set up your workspace.",
+    "subtitle": "TezFarmo connects suppliers and the stores they serve. Choose which side of the trade you're on — you'll become the owner and can invite your team later.",
+    "existingTitle": "Your organizations",
+    "typeLegend": "What are you setting up?",
+    "company": {
+      "title": "Company",
+      "description": "A supplier or distributor that sells to stores.",
+      "points": [
+        "Catalog, units and price lists",
+        "Store partnerships and credit terms",
+        "Orders, warehouse, delivery and receivables"
+      ]
+    },
+    "store": {
+      "title": "Store",
+      "description": "A shop that buys from its suppliers.",
+      "points": [
+        "Order from connected suppliers",
+        "Track deliveries with a confirmation code",
+        "See what you owe each supplier"
+      ]
+    },
+    "companyName": "Company name",
+    "storeName": "Store name",
+    "nameHint": "Shown to your partners. You'll add the legal details during verification.",
+    "ownerNote": "You'll be the owner of this organization.",
+    "createCompany": "Create company",
+    "createStore": "Create store"
   }
 }
