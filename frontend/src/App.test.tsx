@@ -64,4 +64,26 @@ describe('authentication frontend', () => {
     fireEvent.click(screen.getByRole('button', { name: /^sign in$/i }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/not correct/i);
   });
+
+  it('completes the phone, OTP, profile, and Store registration flow', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, headers: new Headers({ 'content-type': 'application/json' }), json: async () => ({ debug_code: '123456' }) })
+      .mockResolvedValueOnce({ ok: true, headers: new Headers({ 'content-type': 'application/json' }), json: async () => ({ registration_token: 'registration-token' }) })
+      .mockResolvedValueOnce({ ok: true, headers: new Headers({ 'content-type': 'application/json' }), json: async () => session });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<App />, { wrapper: ({ children }) => <MemoryRouter initialEntries={['/register']}>{children}</MemoryRouter> });
+    fireEvent.change(screen.getByLabelText(/phone number/i), { target: { value: user.phone } });
+    fireEvent.click(screen.getByRole('button', { name: /^continue$/i }));
+    fireEvent.change(await screen.findByLabelText(/verification code/i), { target: { value: '123456' } });
+    fireEvent.click(screen.getByRole('button', { name: /verify phone/i }));
+    fireEvent.change(await screen.findByLabelText(/full name/i), { target: { value: 'Test User' } });
+    fireEvent.change(screen.getByLabelText(/create password/i), { target: { value: 'UniqueStrongPass123' } });
+    fireEvent.change(screen.getByLabelText(/confirm password/i), { target: { value: 'UniqueStrongPass123' } });
+    const storeCard = screen.getAllByText('Retail store').map((element) => element.closest('button')).find(Boolean);
+    if (!storeCard) throw new Error('Store role card was not rendered');
+    fireEvent.click(storeCard);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(useAuthStore.getState().user?.full_name).toBe('Test User'));
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
 });
