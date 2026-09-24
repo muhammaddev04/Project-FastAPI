@@ -2,12 +2,19 @@ import { z } from 'zod';
 
 /** Mirrors backend PHONE check (users.phone, E.164). Spaces, dashes and brackets typed by users are removed. */
 export const PHONE_PATTERN = /^\+[1-9][0-9]{7,14}$/;
-export const normalizePhone = (value: string) => value.replace(/[\s()-]/g, '');
+export const COUNTRY_CODE = '+992';
+
+/** Fields show a fixed +992 block, so users type the national number; a full +<code> number is kept as typed. */
+export const normalizePhone = (value: string) => {
+  const compact = value.replace(/[\s()-]/g, '');
+  return !compact || compact.startsWith('+') ? compact : `${COUNTRY_CODE}${compact}`;
+};
 
 export const phoneSchema = z
   .string()
   .transform(normalizePhone)
-  .refine((value) => PHONE_PATTERN.test(value), 'validation.phone');
+  // TZ §20: Tajik numbers are +992 followed by exactly 9 digits; other countries follow generic E.164.
+  .refine((value) => PHONE_PATTERN.test(value) && (!value.startsWith(COUNTRY_CODE) || /^\+992\d{9}$/.test(value)), 'validation.phone');
 
 /** IAM-003 as enforced by backend app/modules/auth/password_policy.py (the common-password list is server-side). */
 export const PASSWORD_MIN = 8;
@@ -41,6 +48,7 @@ export const registerSchema = z
     orgName: z.string().trim().min(2, 'validation.nameTooShort').max(200, 'validation.tooLong'),
     fullName: z.string().trim().min(2, 'validation.nameTooShort').max(150, 'validation.tooLong'),
     phone: phoneSchema,
+    acceptTerms: z.literal(true, { errorMap: () => ({ message: 'validation.acceptTerms' }) }),
     email: z.union([z.literal(''), z.string().trim().email('validation.email').max(254, 'validation.tooLong')]),
     language: z.enum(['tg', 'ru', 'en']),
     password: newPasswordSchema,
@@ -52,10 +60,14 @@ export const registerSchema = z
   });
 export type RegisterValues = z.input<typeof registerSchema>;
 
-export const REGISTER_STEPS: { id: 'business' | 'details' | 'security'; fields: (keyof RegisterValues)[] }[] = [
-  { id: 'business', fields: ['orgType', 'orgName'] },
-  { id: 'details', fields: ['fullName', 'phone', 'email', 'language'] },
-  { id: 'security', fields: ['password', 'confirmPassword'] },
+/** Three steps (screenshot flow): account + phone + SMS, organization, final confirmation. */
+export const REGISTER_STEPS: { id: 'account' | 'organization' | 'confirm'; fields: (keyof RegisterValues)[] }[] = [
+  {
+    id: 'account',
+    fields: ['orgType', 'fullName', 'phone', 'email', 'password', 'confirmPassword', 'acceptTerms'],
+  },
+  { id: 'organization', fields: ['orgName', 'language'] },
+  { id: 'confirm', fields: [] },
 ];
 
 export const resetSchema = z.object({ phone: phoneSchema });

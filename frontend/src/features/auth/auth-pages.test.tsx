@@ -24,7 +24,8 @@ describe('auth screens', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
       expect(screen.getByRole('heading', { name: 'Sign in to TezFarmo' })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Create an account' })).toHaveAttribute('href', '/register');
+      expect(screen.getByRole('link', { name: 'Register in the system' })).toHaveAttribute('href', '/register');
+      expect(screen.getByRole('link', { name: /support/i })).toHaveAttribute('href', 'https://t.me/tezfarmo_support');
       expect(screen.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute('href', '/reset');
     });
 
@@ -41,10 +42,9 @@ describe('auth screens', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
       const phone = screen.getByLabelText('Phone number');
-      await userEvent.clear(phone);
       await userEvent.type(phone, '12345');
       await userEvent.tab();
-      expect(await screen.findByText(/international format/i)).toBeInTheDocument();
+      expect(await screen.findByText(/9-digit number after \+992/i)).toBeInTheDocument();
       expect(phone).toHaveAttribute('aria-invalid', 'true');
     });
 
@@ -66,57 +66,60 @@ describe('auth screens', () => {
   });
 
   describe('registration', () => {
-    async function fillBusiness() {
-      await userEvent.click(screen.getByRole('radio', { name: /^store/i }));
-      await userEvent.type(screen.getByLabelText('Store name'), 'Corner Market');
-      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    }
-
-    async function fillDetails() {
-      await userEvent.type(await screen.findByLabelText('Full name'), 'Nigina Karimova');
-      const phone = screen.getByLabelText('Phone number');
-      await userEvent.clear(phone);
-      await userEvent.type(phone, '+992 90 123 4567');
+    async function fillAccount({ confirm = 'Dushanbe2026', terms = true } = {}) {
+      await userEvent.type(screen.getByLabelText(/full name/i), 'Nigina Karimova');
+      await userEvent.type(screen.getByLabelText(/mobile number/i), '90 123 4567');
       await userEvent.type(screen.getByLabelText(/^email/i), 'nigina@example.tj');
+      await userEvent.type(screen.getByLabelText(/create a password/i), 'Dushanbe2026');
+      await userEvent.type(screen.getByLabelText(/repeat the password/i), confirm);
+      if (terms) await userEvent.click(screen.getByRole('checkbox', { name: /terms of use/i }));
       await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
     }
 
-    it('validates each step before moving on', async () => {
+    it('starts on step 1 with the Store/Company choice and validates before moving on', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
+      expect(screen.getByText('Step 1 of 3: Phone and SMS code')).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /^store/i })).toBeChecked();
+      expect(screen.getByText('100% free to use')).toBeInTheDocument();
+      expect(screen.getByText('14-day trial')).toBeInTheDocument();
       await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
-      expect(await screen.findByText('Enter at least 2 characters.')).toBeInTheDocument();
-      expect(screen.getByText('Business')).toBeInTheDocument();
+      expect((await screen.findAllByText('Enter at least 2 characters.')).length).toBeGreaterThan(0);
+      expect(screen.getByText('Accept the terms to continue.')).toBeInTheDocument();
+      expect(screen.getByText('Step 1 of 3: Phone and SMS code')).toBeInTheDocument();
     });
 
-    it('walks through business, details and password, keeping answers when going back', async () => {
+    it('shows password strength and the disabled SMS code field', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      await fillBusiness();
-      await fillDetails();
-
-      const password = await screen.findByLabelText('Create a password');
+      const password = screen.getByLabelText(/create a password/i);
       await userEvent.type(password, 'short');
-      expect(screen.getByText('8+ characters').closest('li')).toHaveClass('text-muted-foreground');
+      expect(screen.getByText('Very weak')).toBeInTheDocument();
       await userEvent.clear(password);
       await userEvent.type(password, 'Dushanbe2026');
-      expect(screen.getByText('8+ characters').closest('li')).toHaveClass('text-success');
-      await userEvent.type(screen.getByLabelText('Repeat the password'), 'Different2026');
-      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
-      expect(await screen.findByText("Passwords don't match.")).toBeInTheDocument();
-
-      await userEvent.click(screen.getByRole('button', { name: /back/i }));
-      expect(screen.getByLabelText('Full name')).toHaveValue('Nigina Karimova');
+      expect(screen.getByText('At least 8 characters').closest('li')).toHaveClass('text-primary');
+      expect(await screen.findByText(/activates once phone verification is enabled/i)).toBeInTheDocument();
+      expect(screen.getByRole('group', { name: 'SMS confirmation code' })).toBeInTheDocument();
+      screen.getAllByLabelText(/SMS confirmation code \d/).forEach((box) => expect(box).toBeDisabled());
     });
 
-    it('reviews the details and explains verification without creating anything', async () => {
+    it('rejects mismatched passwords', async () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      renderRoutes(routes, '/register');
+      await fillAccount({ confirm: 'Different2026' });
+      expect(await screen.findByText("Passwords don't match.")).toBeInTheDocument();
+    });
+
+    it('keeps answers across steps and reviews them without creating anything', async () => {
       const { calls } = mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      await fillBusiness();
-      await fillDetails();
-      await userEvent.type(await screen.findByLabelText('Create a password'), 'Dushanbe2026');
-      await userEvent.type(screen.getByLabelText('Repeat the password'), 'Dushanbe2026');
+      await fillAccount();
+      expect(await screen.findByText('Step 2 of 3: Organization')).toBeInTheDocument();
+      await userEvent.type(screen.getByLabelText(/store name/i), 'Corner Market');
+      await userEvent.click(screen.getByRole('button', { name: /back/i }));
+      expect(screen.getByLabelText(/full name/i)).toHaveValue('Nigina Karimova');
       await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Continue' }));
 
       expect(await screen.findByText('Corner Market · Store')).toBeInTheDocument();
       expect(screen.getByText('+992901234567')).toBeInTheDocument();

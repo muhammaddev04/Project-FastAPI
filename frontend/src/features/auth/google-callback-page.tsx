@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Alert, Button } from '@/shared/ui';
-import { AuthLayout } from './auth-layout';
+import { AuthCard, AuthFrame, AuthHero } from './auth-layout';
 import { useAuthMethod } from './use-auth-method';
 
 /**
@@ -15,19 +15,22 @@ export function GoogleCallbackPage() {
   const cancelled = params.get('error') === 'access_denied';
 
   return (
-    <AuthLayout title={t('auth.google.callbackTitle')}>
-      {cancelled ? (
-        <Alert tone="warning" title={t('auth.google.cancelledTitle')}>
-          {t('auth.google.cancelledText')}
-        </Alert>
-      ) : !available ? (
-        <Alert tone="info" title={t('auth.unavailable.google.title')}>
-          {t('auth.unavailable.google.text')}
-        </Alert>
-      ) : null}
-      <Button asChild variant="secondary" block className="mt-5">
-        <Link to="/login">{t('auth.reset.back')}</Link>
-      </Button>
-    </AuthLayout>
+    <AuthFrame>
+      <AuthHero title={t('auth.google.callbackTitle')} subtitle={t('auth.google.callbackSubtitle')} />
+      <AuthCard className="mx-auto max-w-2xl">
+        {cancelled ? (
+          <Alert tone="warning" title={t('auth.google.cancelledTitle')}>
+            {t('auth.google.cancelledText')}
+          </Alert>
+        ) : !available ? (
+          <Alert tone="info" title={t('auth.unavailable.google.title')}>
+            {t('auth.unavailable.google.text')}
+          </Alert>
+        ) : null}
+        <Button asChild variant="secondary" block size="lg" className="mt-5">
+          <Link to="/login">{t('auth.reset.back')}</Link>
+        </Button>
+      </AuthCard>
+    </AuthFrame>
   );
 }

@@ -12,7 +12,8 @@
     "language": "Language",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
-    "notAvailableYet": "Not available yet"
+    "notAvailableYet": "Not available yet",
+    "support": "Support"
   },
   "languages": {
     "tg": "Тоҷикӣ",
@@ -69,14 +70,15 @@
   },
   "validation": {
     "required": "This field is required.",
-    "phone": "Enter the number in international format, e.g. +992 90 000 0000.",
+    "phone": "Enter the 9-digit number after +992, e.g. 900 12 34 56.",
     "passwordTooShort": "Use at least 8 characters.",
     "passwordTooLong": "Use at most 128 characters.",
     "passwordLetterDigit": "Use at least one letter and one digit.",
     "passwordsMismatch": "Passwords don't match.",
     "nameTooShort": "Enter at least 2 characters.",
     "tooLong": "This value is too long.",
-    "email": "Enter a valid email address."
+    "email": "Enter a valid email address.",
+    "acceptTerms": "Accept the terms to continue."
   },
   "roles": {
     "OWNER": "Owner",
@@ -159,19 +161,20 @@
       "confirmPassword": "Repeat the password",
       "fullName": "Full name",
       "email": "Email",
-      "language": "Preferred language"
+      "language": "Preferred language",
+      "mobile": "Mobile number"
     },
     "password": {
-      "weak": "Weak",
+      "weak": "Very weak",
       "fair": "Good",
       "strong": "Strong",
       "met": "requirement met",
       "notMet": "requirement not met",
       "rules": {
-        "length": "8+ characters",
-        "letter": "A letter",
-        "digit": "A digit"
-      }
+        "length": "At least 8 characters",
+        "letterDigit": "Letter and digit"
+      },
+      "strengthTitle": "Password strength"
     },
     "unavailable": {
       "metaErrorTitle": "Couldn't load sign-in options",
@@ -201,34 +204,33 @@
       "notEnabled": "Not enabled on this server yet",
       "callbackTitle": "Google sign-in",
       "cancelledTitle": "Google sign-in was cancelled",
-      "cancelledText": "No account was connected. You can try again or sign in with your phone number."
+      "cancelledText": "No account was connected. You can try again or sign in with your phone number.",
+      "callbackSubtitle": "Returning from Google."
     },
     "login": {
       "title": "Sign in to TezFarmo",
-      "subtitle": "Use the phone number you registered with.",
+      "subtitle": "Wholesale trade platform for stores and companies in Tajikistan",
       "sessionEnded": "You were signed out",
       "forgot": "Forgot password?",
       "submit": "Sign in",
-      "noAccount": "New to TezFarmo?",
-      "createAccount": "Create an account"
+      "noAccount": "No work account yet?",
+      "createAccount": "Register in the system",
+      "accessTitle": "Professional access",
+      "accessText": "Sign-in for store owners, company staff and couriers",
+      "phoneHint": "Your company's or store's official number",
+      "lockoutHint": "5 attempts per 15 minutes (brute-force protection)",
+      "securityNote": "Passwords are protected with Argon2id encryption"
     },
     "register": {
-      "title": "Create your TezFarmo account",
+      "title": "Create a new account",
       "progress": "Step {{step}} of {{total}}",
-      "typeLegend": "Which side of the trade are you on?",
+      "typeLegend": "Choose your role in the system",
       "steps": {
-        "business": "Business",
-        "details": "Your details",
-        "security": "Password",
-        "review": "Confirm"
+        "account": "Phone and SMS code",
+        "organization": "Organization",
+        "confirm": "Final confirmation"
       },
-      "subtitles": {
-        "business": "Tell us whether you supply stores or buy from suppliers.",
-        "details": "Your phone number is how you sign in and receive codes.",
-        "security": "Protect your account with a strong password.",
-        "review": "Check your details before we verify your phone."
-      },
-      "phoneHint": "We'll send a 6-digit confirmation code to this number.",
+      "phoneHint": "A 6-digit confirmation code is sent by SMS",
       "emailHint": "Used for receipts and account notices once confirmed.",
       "commonNote": "Very common passwords are rejected by the server.",
       "review": {
@@ -240,7 +242,33 @@
       },
       "submit": "Create account",
       "haveAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "network": "B2B trade network of Tajikistan",
+      "stepOf": "Step {{step}} of {{total}}: {{name}}",
+      "subtitle": "Join the B2B wholesale trade network of Tajikistan",
+      "storeBadge": "100% free to use",
+      "companyBadge": "14-day trial",
+      "roles": {
+        "STORE": {
+          "title": "Store / Shop",
+          "description": "Buy wholesale with fast delivery and payment on terms"
+        },
+        "COMPANY": {
+          "title": "Company / Distributor",
+          "description": "Supplier of goods and wholesale seller"
+        }
+      },
+      "orNetworks": "or via networks",
+      "namePlaceholder": "e.g. Jamshed Karimov",
+      "otp": {
+        "title": "SMS confirmation code",
+        "digits": "6 digits",
+        "text": "Wait for the one-time SMS code to the number you entered:",
+        "disabled": "The SMS code field activates once phone verification is enabled on this server."
+      },
+      "terms": "I agree to the TezFarmo Terms of Use and Privacy Policy (electronic offer of the Republic of Tajikistan) and confirm my business identity.",
+      "continueSms": "Continue and get SMS code",
+      "dataNote": "Your data is stored securely under the legal protection of the Republic of Tajikistan."
     },
     "reset": {
       "title": "Reset your password",
@@ -248,6 +276,11 @@
       "phoneHint": "The number you use to sign in.",
       "submit": "Send code",
       "back": "Back to sign in"
+    },
+    "frame": {
+      "terms": "By signing in you agree to the TezFarmo Terms of Use and Privacy Policy.",
+      "apiOnline": "TezFarmo API · v{{version}}",
+      "apiOffline": "Server unavailable"
     }
   },
   "shell": {

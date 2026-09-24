@@ -2,6 +2,18 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui';
 import { useAuthMethod } from './use-auth-method';
 
+/** Google's standard "G" mark, as required by its sign-in branding guidelines. */
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 48 48" className="!size-5" aria-hidden="true">
+      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+    </svg>
+  );
+}
+
 /**
  * "Continue with Google". The OAuth flow (authorization code + state + PKCE, server-side exchange)
  * is owned by the backend; until /meta reports it as enabled the button stays disabled and explains why.
@@ -11,10 +23,16 @@ export function GoogleButton() {
   const { available, meta } = useAuthMethod('google');
   return (
     <div className="space-y-1.5">
-      <Button type="button" variant="secondary" block size="lg" disabled={!available} aria-describedby="google-status">
-        <span aria-hidden="true" className="flex size-4 items-center justify-center rounded-full border text-[0.625rem] font-bold">
-          G
-        </span>
+      <Button
+        type="button"
+        variant="secondary"
+        block
+        size="xl"
+        className="gap-3 border-input bg-surface font-medium text-foreground"
+        disabled={!available}
+        aria-describedby="google-status"
+      >
+        <GoogleMark />
         {t('auth.google.button')}
       </Button>
       {!available && !meta.isPending ? (
@@ -26,12 +44,12 @@ export function GoogleButton() {
   );
 }
 
-export function OrDivider() {
+export function OrDivider({ label }: { label?: string }) {
   const { t } = useTranslation();
   return (
-    <div className="my-6 flex items-center gap-3 text-2xs font-medium uppercase tracking-wide text-muted-foreground" role="separator">
+    <div className="my-5 flex items-center gap-4 text-[0.8125rem] font-medium text-muted-foreground" role="separator">
       <span className="h-px flex-1 bg-border" />
-      {t('auth.or')}
+      {label ?? t('auth.or')}
       <span className="h-px flex-1 bg-border" />
     </div>
   );
