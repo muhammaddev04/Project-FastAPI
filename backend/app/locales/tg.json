@@ -32,5 +32,13 @@
   "validation.password_needs_letter_and_digit": "Ақаллан як ҳарф ва як рақам лозим аст.",
   "validation.password_too_common": "Ин парол хеле маъмул аст.",
   "validation.value_error": "Қимат нодуруст аст.",
-  "errors.organization_limit_reached": "Шумо аллакай шумораи ниҳоии ташкилотҳоро (5) доред."
+  "errors.organization_limit_reached": "Шумо аллакай шумораи ниҳоии ташкилотҳоро (5) доред.",
+  "errors.tax_identifier_taken": "Ин РМА аллакай ба қайд гирифта шудааст.",
+  "errors.verification_not_editable": "Дар ҳолати ҷории тасдиқ инро тағйир додан мумкин нест.",
+  "errors.verification_documents_missing": "Ҳуҷҷатҳои ҳатмии тасдиқ нестанд.",
+  "errors.rejection_reason_required": "Сабаби радро нависед (ақаллан 10 аломат).",
+  "errors.file_too_large": "Файл аз 10 МБ калон аст.",
+  "errors.file_type_not_allowed": "Танҳо файлҳои PDF, JPEG ё PNG қабул мешаванд.",
+  "errors.invalid_coordinates": "Ҳам арз ва ҳам тӯлро нишон диҳед ё ҳеҷ кадомро.",
+  "validation.invalid_tax_identifier": "РМА-и 9–12 рақамаро ворид кунед."
 }

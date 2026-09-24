@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-# P01 §5 permission registry keyed by (organization type, role). Later parts add their own codes.
+# Permission registry keyed by (organization type, role); each TZ part adds its codes (P01 §5, P02 §4).
 _MEMBER_ADMIN = frozenset(
     {"members.view", "members.invite", "members.change_role", "members.suspend", "members.revoke"}
 )
+_ORG_OWNER = frozenset({"org.view", "org.edit_contacts", "org.edit_legal", "verification.submit", "verification.view"})
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
-    ("COMPANY", "OWNER"): _MEMBER_ADMIN,
-    ("COMPANY", "MANAGER"): frozenset({"members.view"}),
-    ("COMPANY", "OPERATOR"): frozenset(),
-    ("COMPANY", "WAREHOUSE"): frozenset(),
-    ("COMPANY", "COURIER"): frozenset(),
-    ("STORE", "OWNER"): _MEMBER_ADMIN,
-    ("STORE", "SELLER"): frozenset(),
+    ("COMPANY", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER,
+    ("COMPANY", "MANAGER"): frozenset({"members.view", "org.view", "org.edit_contacts", "verification.view"}),
+    ("COMPANY", "OPERATOR"): frozenset({"org.view"}),
+    ("COMPANY", "WAREHOUSE"): frozenset({"org.view"}),
+    ("COMPANY", "COURIER"): frozenset({"org.view"}),
+    ("STORE", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER,
+    ("STORE", "SELLER"): frozenset({"org.view"}),
 }
 
 

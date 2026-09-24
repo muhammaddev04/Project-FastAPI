@@ -42,10 +42,15 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
         "members.revoke",
         "members.suspend",
         "members.view",
+        "org.edit_contacts",
+        "org.edit_legal",
+        "org.view",
+        "verification.submit",
+        "verification.view",
     ]
     assert memberships["Corner Market"]["org_type"] == "STORE"
     assert memberships["Corner Market"]["role"] == "SELLER"
-    assert memberships["Corner Market"]["permissions"] == []
+    assert memberships["Corner Market"]["permissions"] == ["org.view"]
     assert company.id and store.id
 
 

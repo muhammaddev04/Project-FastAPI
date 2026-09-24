@@ -32,5 +32,13 @@
   "validation.password_needs_letter_and_digit": "Нужна хотя бы одна буква и одна цифра.",
   "validation.password_too_common": "Этот пароль слишком распространён.",
   "validation.value_error": "Недопустимое значение.",
-  "errors.organization_limit_reached": "Вы уже владеете максимальным числом организаций (5)."
+  "errors.organization_limit_reached": "Вы уже владеете максимальным числом организаций (5).",
+  "errors.tax_identifier_taken": "Этот ИНН уже зарегистрирован.",
+  "errors.verification_not_editable": "В текущем состоянии верификации это изменить нельзя.",
+  "errors.verification_documents_missing": "Не хватает обязательных документов для верификации.",
+  "errors.rejection_reason_required": "Укажите причину отказа (не менее 10 символов).",
+  "errors.file_too_large": "Файл больше 10 МБ.",
+  "errors.file_type_not_allowed": "Принимаются только файлы PDF, JPEG или PNG.",
+  "errors.invalid_coordinates": "Укажите и широту, и долготу, либо ни одну.",
+  "validation.invalid_tax_identifier": "Введите ИНН из 9–12 цифр."
 }

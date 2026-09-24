@@ -12,8 +12,12 @@ from app.core.config import get_settings
 from app.core.security import hash_password
 from app.core.time import new_id, utcnow
 from app.modules.identity.models import Membership, Organization, User
+from app.modules.organizations.models import Company, Store
 
 _phones = count(900_000_001)
+_tax_ids = count(100_000_001)
+_codes = count(0)
+_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 
 async def make_user(
@@ -32,10 +36,37 @@ async def make_user(
     return user
 
 
-async def make_org(session: AsyncSession, owner: User, org_type: str = "COMPANY", name: str = "Org") -> Organization:
+def _fixture_public_code() -> str:
+    number, code = next(_codes), ""
+    for _ in range(8):
+        number, index = divmod(number, len(_CODE_ALPHABET))
+        code += _CODE_ALPHABET[index]
+    return code
+
+
+async def make_org(
+    session: AsyncSession,
+    owner: User,
+    org_type: str = "COMPANY",
+    name: str = "Org",
+    verification_status: str = "NOT_SUBMITTED",
+) -> Organization:
+    """Organization + its P02 profile + ACTIVE OWNER membership (what POST /organizations/* creates)."""
     org = Organization(type=org_type, name=name, created_by=owner.id)
     session.add(org)
     await session.flush()
+    common = {
+        "id": org.id,
+        "legal_name": f"{name} LLC",
+        "phone": f"+992{next(_phones)}",
+        "city": "Dushanbe",
+        "address": "Rudaki Ave 1",
+        "verification_status": verification_status,
+    }
+    if org_type == "COMPANY":
+        session.add(Company(**common, tax_identifier=str(next(_tax_ids)), public_code=_fixture_public_code()))
+    else:
+        session.add(Store(**common))
     session.add(Membership(user_id=owner.id, organization_id=org.id, role="OWNER", joined_at=utcnow()))
     await session.flush()
     return org

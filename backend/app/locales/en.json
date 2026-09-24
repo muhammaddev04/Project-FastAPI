@@ -32,5 +32,13 @@
   "validation.password_needs_letter_and_digit": "Use at least one letter and one digit.",
   "validation.password_too_common": "This password is too common.",
   "validation.value_error": "This value is not valid.",
-  "errors.organization_limit_reached": "You already own the maximum number of organizations (5)."
+  "errors.organization_limit_reached": "You already own the maximum number of organizations (5).",
+  "errors.tax_identifier_taken": "This tax identifier is already registered.",
+  "errors.verification_not_editable": "This cannot be changed in the current verification state.",
+  "errors.verification_documents_missing": "Required verification documents are missing.",
+  "errors.rejection_reason_required": "Give a rejection reason of at least 10 characters.",
+  "errors.file_too_large": "The file is larger than 10 MB.",
+  "errors.file_type_not_allowed": "Only PDF, JPEG or PNG files are accepted.",
+  "errors.invalid_coordinates": "Give both latitude and longitude, or neither.",
+  "validation.invalid_tax_identifier": "Enter a tax identifier of 9 to 12 digits."
 }
