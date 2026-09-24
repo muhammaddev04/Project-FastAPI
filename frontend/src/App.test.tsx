@@ -4,10 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { RoleSelector } from './components/RoleSelector';
 import { useAuthStore } from './lib/auth-store';
+import { changeLanguage } from './i18n';
 
 const user = {
   id: 'user-1', phone: '+992123456789', full_name: 'Test User', language: 'en', status: 'ACTIVE',
   is_superadmin: false, roles: ['OWNER'], permissions: ['members.view'], phone_verified_at: '', last_login_at: null, created_at: '', account_type: 'COMPANY',
+  memberships: [{ id: 'membership-1', organization_id: 'org-1', organization_type: 'COMPANY', organization_name: 'Test Company', role: 'OWNER', status: 'ACTIVE' }],
 };
 const session = { access_token: 'access-token', refresh_token: 'refresh-token', expires_in: 1800, user };
 
@@ -17,6 +19,8 @@ function mockFetch(response: unknown, ok = true) {
 
 describe('authentication frontend', () => {
   beforeEach(() => {
+    localStorage.setItem('tezfarmo.language', 'en');
+    changeLanguage('en');
     sessionStorage.clear();
     useAuthStore.getState().clearSession();
     vi.restoreAllMocks();
