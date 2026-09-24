@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 32% 12%;
+    --surface: 0 0% 100%;
+    --subtle: 210 22% 96%;
+    --muted: 210 18% 94%;
+    --muted-foreground: 216 12% 40%;
+    --border: 214 18% 88%;
+    --input: 214 16% 80%;
+    --ring: 166 72% 26%;
+    --primary: 166 74% 21%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 162 45% 94%;
+    --danger: 0 70% 45%;
+    --danger-soft: 0 86% 97%;
+    --success: 152 62% 30%;
+    --success-soft: 145 55% 95%;
+    --warning: 32 92% 38%;
+    --warning-soft: 42 95% 95%;
+
+    /* Area accent. Company = brand teal on a dark console sidebar; Store = cobalt on a light app frame. */
+    --accent: var(--primary);
+    --accent-foreground: 0 0% 100%;
+    --accent-soft: var(--primary-soft);
+    --sidebar: 170 32% 9%;
+    --sidebar-foreground: 160 14% 92%;
+    --sidebar-muted: 165 10% 62%;
+    --sidebar-active: 168 30% 16%;
+    --sidebar-border: 168 22% 16%;
+  }
+
+  [data-area='store'] {
+    --accent: 222 72% 46%;
+    --accent-soft: 222 90% 96%;
+    --ring: 222 72% 46%;
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 222 32% 14%;
+    --sidebar-muted: 216 12% 44%;
+    --sidebar-active: 222 90% 96%;
+    --sidebar-border: 214 18% 90%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply min-h-screen bg-background font-sans text-[0.875rem] leading-6 text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
