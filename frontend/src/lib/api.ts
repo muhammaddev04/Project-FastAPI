@@ -42,12 +42,29 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, accessTo
   if (!res.ok) {
     const payload = typeof data === 'string' ? { message: data } : data;
     const apiError = payload?.detail ?? payload;
-    const error = new Error(apiError?.code ?? apiError?.message ?? 'request_failed');
-    (error as Error & { apiError?: ApiError }).apiError = apiError;
+    const error = new Error(apiError?.code ?? apiError?.message ?? 'request_failed') as Error & { status?: number; apiError?: ApiError };
+    error.status = res.status;
+    error.apiError = apiError;
     throw error;
   }
 
   return data as T;
+}
+
+export async function apiFetchWithRefresh<T>(
+  path: string,
+  init: RequestInit,
+  accessToken: string,
+  refresh: () => Promise<string | null>,
+): Promise<T> {
+  try {
+    return await apiFetch<T>(path, init, accessToken);
+  } catch (cause) {
+    if (!(cause instanceof Error) || (cause as Error & { status?: number }).status !== 401) throw cause;
+    const nextAccessToken = await refresh();
+    if (!nextAccessToken) throw cause;
+    return apiFetch<T>(path, init, nextAccessToken);
+  }
 }
 
 export type MeResponse = User;

@@ -9,6 +9,7 @@ type AuthState = {
   isRestoring: boolean;
   setSession: (session: AuthResponse) => void;
   restore: () => Promise<void>;
+  refreshAccess: () => Promise<string | null>;
   logout: () => Promise<void>;
   clearSession: () => void;
 };
@@ -36,6 +37,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch {
       sessionStorage.removeItem('tezfarmo.refresh');
       set({ accessToken: null, refreshToken: null, user: null, isRestoring: false });
+    }
+  },
+  refreshAccess: async () => {
+    const refreshToken = get().refreshToken;
+    if (!refreshToken) return null;
+    try {
+      const session = await apiFetch<AuthResponse>('/api/v1/auth/refresh', { method: 'POST', body: JSON.stringify({ refresh_token: refreshToken }) });
+      sessionStorage.setItem('tezfarmo.refresh', session.refresh_token);
+      set({ accessToken: session.access_token, refreshToken: session.refresh_token, isRestoring: false });
+      return session.access_token;
+    } catch {
+      get().clearSession();
+      return null;
     }
   },
   logout: async () => {
