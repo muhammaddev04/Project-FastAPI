@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from urllib.parse import urlencode
 
+import httpx
+
 from app.config import settings
 
 
@@ -29,9 +31,37 @@ class GoogleOAuthProvider:
             raise ValueError("google_oauth_not_configured")
         if not code:
             raise ValueError("google_code_missing")
+        try:
+            with httpx.Client(timeout=8.0) as client:
+                token_response = client.post(
+                    "https://oauth2.googleapis.com/token",
+                    data={
+                        "code": code,
+                        "client_id": self.client_id,
+                        "client_secret": self.client_secret,
+                        "redirect_uri": self.redirect_uri,
+                        "grant_type": "authorization_code",
+                    },
+                )
+                token_response.raise_for_status()
+                access_token = token_response.json().get("access_token")
+                if not access_token:
+                    raise ValueError("google_exchange_failed")
+                profile_response = client.get(
+                    "https://www.googleapis.com/oauth2/v3/userinfo",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                )
+                profile_response.raise_for_status()
+                profile = profile_response.json()
+        except (httpx.HTTPError, ValueError) as exc:
+            if isinstance(exc, ValueError) and str(exc) in {"google_exchange_failed", "google_code_missing", "google_oauth_not_configured"}:
+                raise
+            raise ValueError("google_exchange_failed") from exc
+        if not profile.get("sub") or not profile.get("email"):
+            raise ValueError("google_profile_invalid")
         return {
             "provider": "google",
-            "email": "google-user@example.com",
-            "name": "Google User",
-            "sub": "google-user-1",
+            "email": str(profile["email"]),
+            "name": str(profile.get("name") or profile["email"]),
+            "sub": str(profile["sub"]),
         }
