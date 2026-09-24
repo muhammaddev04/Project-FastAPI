@@ -6,6 +6,26 @@ from uuid import uuid4
 
 
 @dataclass
+class Membership:
+    id: str
+    organization_id: str
+    organization_type: str
+    organization_name: str
+    role: str
+    status: str = "ACTIVE"
+
+    def to_public_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "organization_id": self.organization_id,
+            "organization_type": self.organization_type,
+            "organization_name": self.organization_name,
+            "role": self.role,
+            "status": self.status,
+        }
+
+
+@dataclass
 class User:
     id: str
     phone: str
@@ -17,6 +37,7 @@ class User:
     token_version: int = 1
     roles: list[str] = field(default_factory=lambda: ["OWNER"])
     account_type: str = "COMPANY"
+    memberships: list[Membership] = field(default_factory=list)
     phone_verified_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     last_login_at: datetime | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -32,6 +53,7 @@ class User:
             "is_superadmin": self.is_superadmin,
             "roles": self.roles,
             "account_type": self.account_type,
+            "memberships": [membership.to_public_dict() for membership in self.memberships],
             "permissions": sorted({permission for role in self.roles for permission in get_role_permissions(role)}),
             "phone_verified_at": self.phone_verified_at.isoformat(),
             "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
@@ -84,6 +106,14 @@ def get_role_permissions(role: str) -> list[str]:
 
 
 def build_user(phone: str, full_name: str, password_hash: str, language: str = "en", roles: list[str] | None = None, account_type: str = "COMPANY") -> User:
+    organization_name = f"{full_name}'s {account_type.lower()}"
+    membership = Membership(
+        id=str(uuid4()),
+        organization_id=str(uuid4()),
+        organization_type=account_type,
+        organization_name=organization_name,
+        role="OWNER",
+    )
     return User(
         id=str(uuid4()),
         phone=phone,
@@ -92,4 +122,5 @@ def build_user(phone: str, full_name: str, password_hash: str, language: str = "
         language=language,
         roles=roles or ["OWNER"],
         account_type=account_type,
+        memberships=[membership],
     )
