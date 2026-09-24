@@ -1,5 +1,5 @@
-version: "3.9"
-
+# Local development services. Start with: docker compose up -d
+# Ports avoid the common 5432/6379 defaults, which are often taken on developer machines.
 services:
   postgres:
     image: postgres:16-alpine
@@ -9,58 +9,25 @@ services:
       POSTGRES_USER: tezfarmo
       POSTGRES_PASSWORD: tezfarmo
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U tezfarmo -d tezfarmo"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   redis:
     image: redis:7-alpine
     container_name: tezfarmo-redis
     ports:
-      - "6379:6379"
-
-  backend:
-    build:
-      context: ./backend
-    container_name: tezfarmo-backend
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: postgresql+psycopg://tezfarmo:tezfarmo@postgres:5432/tezfarmo
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    ports:
-      - "8000:8000"
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-  worker:
-    build:
-      context: ./backend
-    container_name: tezfarmo-worker
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: postgresql+psycopg://tezfarmo:tezfarmo@postgres:5432/tezfarmo
-      REDIS_URL: redis://redis:6379/0
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    command: celery -A app.worker worker --loglevel=info
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
   postgres_data:
