@@ -9,12 +9,14 @@ export function FormField({
   hint,
   error,
   action,
+  labelClassName,
   children,
 }: {
   label: ReactNode;
   hint?: ReactNode;
   error?: string;
   action?: ReactNode;
+  labelClassName?: string;
   children: ReactElement<FieldControlProps>;
 }) {
   const generated = useId();
@@ -23,7 +25,9 @@ export function FormField({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-3">
-        <Label htmlFor={id}>{label}</Label>
+        <Label htmlFor={id} className={labelClassName}>
+          {label}
+        </Label>
         {action}
       </div>
       {cloneElement(children, { id, invalid: Boolean(error), 'aria-describedby': describedBy })}

@@ -9,23 +9,33 @@ export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'prefix'> &
   addon?: ReactNode;
   /** Monospaced digits for phone numbers and codes. */
   data?: boolean;
+  /** `tinted` (app default) or `outline` (white field with a border and soft focus ring, used on auth pages). */
+  variant?: 'tinted' | 'outline';
 };
 
 /** Tinted, borderless field (#EFF4FF) that gains a teal edge on focus. */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, invalid, leading, trailing, addon, data = false, ...props }, ref) => (
+  ({ className, invalid, leading, trailing, addon, data = false, variant = 'tinted', ...props }, ref) => (
     <div
       className={cn(
-        'flex h-12 w-full items-stretch overflow-hidden rounded border bg-subtle transition-[border-color,box-shadow,background-color] duration-150',
+        'flex w-full items-stretch overflow-hidden border transition-[border-color,box-shadow,background-color] duration-150',
+        variant === 'outline' ? 'h-11 rounded-md bg-surface' : 'h-12 rounded bg-subtle',
         invalid
-          ? 'border-danger bg-danger-soft/40 focus-within:shadow-[inset_0_0_0_1px_hsl(var(--danger))]'
-          : 'border-transparent hover:border-input focus-within:border-primary focus-within:bg-surface focus-within:shadow-[inset_0_0_0_1px_hsl(var(--primary))]',
+          ? 'border-danger focus-within:shadow-[0_0_0_3px_hsl(var(--danger)/0.12)]'
+          : variant === 'outline'
+            ? 'border-input hover:border-primary/50 focus-within:border-primary/70 focus-within:shadow-[0_0_0_3px_hsl(var(--primary)/0.14)]'
+            : 'border-transparent hover:border-input focus-within:border-primary focus-within:bg-surface focus-within:shadow-[inset_0_0_0_1px_hsl(var(--primary))]',
         props.disabled && 'cursor-not-allowed opacity-60',
         className,
       )}
     >
       {addon ? (
-        <span className="flex shrink-0 items-center gap-2 bg-muted/70 px-3.5 font-data text-[0.9375rem] text-foreground [&_svg]:size-4 [&_svg]:text-primary">
+        <span
+          className={cn(
+            'flex shrink-0 items-center gap-2 px-3.5 font-data text-[0.9375rem] text-foreground [&_svg]:size-4 [&_svg]:text-primary',
+            variant === 'outline' ? 'border-r border-input bg-subtle text-[0.875rem]' : 'bg-muted/70',
+          )}
+        >
           {addon}
         </span>
       ) : null}
@@ -35,7 +45,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           aria-invalid={invalid || undefined}
           className={cn(
-            'h-full w-full min-w-0 bg-transparent text-[0.9375rem] text-foreground outline-none placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed',
+            'h-full w-full min-w-0 bg-transparent text-foreground outline-none placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed',
+            variant === 'outline' ? 'text-[0.875rem]' : 'text-[0.9375rem]',
             data && 'font-data tracking-[0.02em]',
           )}
           {...props}

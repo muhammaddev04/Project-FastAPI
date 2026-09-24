@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Alert, Button } from '@/shared/ui';
-import { AuthCard, AuthFrame, AuthHero } from './auth-layout';
+import { AuthCard, AuthSplit } from './auth-layout';
 import { useAuthMethod } from './use-auth-method';
 
 /**
@@ -15,9 +15,8 @@ export function GoogleCallbackPage() {
   const cancelled = params.get('error') === 'access_denied';
 
   return (
-    <AuthFrame>
-      <AuthHero title={t('auth.google.callbackTitle')} subtitle={t('auth.google.callbackSubtitle')} />
-      <AuthCard className="mx-auto max-w-2xl">
+    <AuthSplit headline={t('auth.split.login.headline')} tagline={[t('auth.split.login.line1'), t('auth.split.login.line2')]}>
+      <AuthCard title={t('auth.google.callbackTitle')}>
         {cancelled ? (
           <Alert tone="warning" title={t('auth.google.cancelledTitle')}>
             {t('auth.google.cancelledText')}
@@ -27,10 +26,10 @@ export function GoogleCallbackPage() {
             {t('auth.unavailable.google.text')}
           </Alert>
         ) : null}
-        <Button asChild variant="secondary" block size="lg" className="mt-5">
+        <Button asChild block className="mt-5 h-11 rounded-md text-[0.8125rem]">
           <Link to="/login">{t('auth.reset.back')}</Link>
         </Button>
       </AuthCard>
-    </AuthFrame>
+    </AuthSplit>
   );
 }

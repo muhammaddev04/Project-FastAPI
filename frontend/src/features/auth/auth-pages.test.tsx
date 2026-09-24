@@ -23,17 +23,17 @@ describe('auth screens', () => {
     it('is a dedicated sign-in page with links to registration and password reset', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
-      expect(screen.getByRole('heading', { name: 'Sign in to TezFarmo' })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Register in the system' })).toHaveAttribute('href', '/register');
+      expect(screen.getByRole('heading', { name: 'Login to your account' })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/register');
       expect(screen.getByRole('link', { name: /support/i })).toHaveAttribute('href', 'https://t.me/tezfarmo_support');
-      expect(screen.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute('href', '/reset');
+      expect(screen.getByRole('link', { name: 'Forgot?' })).toHaveAttribute('href', '/reset');
     });
 
     it('explains that password sign-in is not enabled and sends no credentials', async () => {
       const { calls } = mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
       expect(await screen.findByText("Sign-in isn't enabled yet")).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Login now' })).toBeDisabled();
       expect(screen.getByRole('button', { name: /continue with google/i })).toBeDisabled();
       expect(nonMetaCalls(calls)).toHaveLength(0);
     });

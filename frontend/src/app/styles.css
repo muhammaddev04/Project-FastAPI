@@ -54,6 +54,19 @@
     --sidebar-border: 220 45% 91%;
   }
 
+  /* Auth pages (split navy/white reference): bright blue actions, white outlined fields, geometric type. */
+  .auth-theme {
+    --primary: 212 100% 52%; /* #0A7CFF */
+    --primary-hover: 214 100% 45%;
+    --primary-soft: 216 100% 95%; /* #E6F0FF */
+    --ring: 212 100% 52%;
+    --input: 216 17% 84%; /* #D0D5DD */
+    --background: 0 0% 100%;
+    --foreground: 222 30% 9%;
+    --muted-foreground: 220 9% 46%;
+    font-family: 'Montserrat Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  }
+
   * {
     @apply border-border;
   }

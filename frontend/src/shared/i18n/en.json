@@ -131,29 +131,6 @@
   },
   "auth": {
     "or": "or",
-    "layout": {
-      "eyebrow": "B2B wholesale platform",
-      "headline": "Orders, delivery and debts between suppliers and stores — in one place.",
-      "footnote": "TezFarmo · Built for wholesale trade in Tajikistan",
-      "points": {
-        "companies": {
-          "title": "For suppliers",
-          "text": "Catalog, price lists and store credit terms you control."
-        },
-        "stores": {
-          "title": "For stores",
-          "text": "Order from your suppliers without calls and paper notes."
-        },
-        "delivery": {
-          "title": "Confirmed delivery",
-          "text": "Every handover is confirmed with a one-time code."
-        },
-        "trust": {
-          "title": "Clear balances",
-          "text": "An immutable ledger both sides can rely on."
-        }
-      }
-    },
     "fields": {
       "phone": "Phone number",
       "password": "Password",
@@ -208,21 +185,17 @@
       "callbackSubtitle": "Returning from Google."
     },
     "login": {
-      "title": "Sign in to TezFarmo",
-      "subtitle": "Wholesale trade platform for stores and companies in Tajikistan",
+      "title": "Login to your account",
       "sessionEnded": "You were signed out",
-      "forgot": "Forgot password?",
-      "submit": "Sign in",
-      "noAccount": "No work account yet?",
-      "createAccount": "Register in the system",
-      "accessTitle": "Professional access",
-      "accessText": "Sign-in for store owners, company staff and couriers",
-      "phoneHint": "Your company's or store's official number",
+      "forgot": "Forgot?",
+      "submit": "Login now",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Sign up",
       "lockoutHint": "5 attempts per 15 minutes (brute-force protection)",
-      "securityNote": "Passwords are protected with Argon2id encryption"
+      "passwordPlaceholder": "Enter your password"
     },
     "register": {
-      "title": "Create a new account",
+      "title": "Create an account",
       "progress": "Step {{step}} of {{total}}",
       "typeLegend": "Choose your role in the system",
       "steps": {
@@ -242,10 +215,8 @@
       },
       "submit": "Create account",
       "haveAccount": "Already have an account?",
-      "signIn": "Sign in",
-      "network": "B2B trade network of Tajikistan",
+      "signIn": "Log in",
       "stepOf": "Step {{step}} of {{total}}: {{name}}",
-      "subtitle": "Join the B2B wholesale trade network of Tajikistan",
       "storeBadge": "100% free to use",
       "companyBadge": "14-day trial",
       "roles": {
@@ -258,7 +229,6 @@
           "description": "Supplier of goods and wholesale seller"
         }
       },
-      "orNetworks": "or via networks",
       "namePlaceholder": "e.g. Jamshed Karimov",
       "otp": {
         "title": "SMS confirmation code",
@@ -267,20 +237,35 @@
         "disabled": "The SMS code field activates once phone verification is enabled on this server."
       },
       "terms": "I agree to the TezFarmo Terms of Use and Privacy Policy (electronic offer of the Republic of Tajikistan) and confirm my business identity.",
-      "continueSms": "Continue and get SMS code",
-      "dataNote": "Your data is stored securely under the legal protection of the Republic of Tajikistan."
+      "continueSms": "Continue and get SMS code"
     },
     "reset": {
       "title": "Reset your password",
       "subtitle": "We'll send a code to your phone so you can choose a new password.",
       "phoneHint": "The number you use to sign in.",
       "submit": "Send code",
-      "back": "Back to sign in"
+      "back": "Back to sign in",
+      "remembered": "Remembered your password?"
     },
     "frame": {
-      "terms": "By signing in you agree to the TezFarmo Terms of Use and Privacy Policy.",
-      "apiOnline": "TezFarmo API · v{{version}}",
-      "apiOffline": "Server unavailable"
+      "terms": "By signing in you agree to the TezFarmo Terms of Use and Privacy Policy."
+    },
+    "split": {
+      "login": {
+        "headline": "Welcome back",
+        "line1": "Your supply route",
+        "line2": "continues here"
+      },
+      "register": {
+        "headline": "Join TezFarmo",
+        "line1": "Start your journey",
+        "line2": "now with us"
+      },
+      "reset": {
+        "headline": "Account access",
+        "line1": "Recover your password",
+        "line2": "in a few steps"
+      }
     }
   },
   "shell": {

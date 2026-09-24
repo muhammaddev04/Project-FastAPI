@@ -10,7 +10,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, Omit<InputProps, 'type
     <Input
       ref={ref}
       type={visible ? 'text' : 'password'}
-      leading={<LockKeyhole />}
+      leading={props.variant === 'outline' ? undefined : <LockKeyhole />}
       trailing={
         <button
           type="button"
