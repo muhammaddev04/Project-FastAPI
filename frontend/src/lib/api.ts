@@ -1,4 +1,5 @@
 import type { AuthResponse, User } from './types';
+import i18n from 'i18next';
 
 export type ApiError = {
   code: string;
@@ -10,16 +11,10 @@ export type ApiError = {
 const baseUrl = (globalThis as typeof globalThis & { __API_BASE_URL__?: string }).__API_BASE_URL__ ?? 'http://localhost:8000';
 
 export function friendlyAuthError(error: unknown): string {
-  if (!(error instanceof Error)) return 'Something went wrong. Please try again.';
-  const messages: Record<string, string> = {
-    invalid_credentials: 'That phone number or password is not correct.',
-    phone_already_registered: 'This phone number is already registered. Try signing in.',
-    invalid_code: 'The verification code is not correct.',
-    rate_limit_exceeded: 'Too many attempts. Please wait a few minutes and try again.',
-    google_oauth_not_configured: 'Google sign-in is not configured yet.',
-    google_code_missing: 'Google sign-in was cancelled. Please try again.',
-  };
-  return messages[error.message] ?? error.message ?? 'Something went wrong. Please try again.';
+  if (!(error instanceof Error)) return i18n.t('errors.generic');
+  const code = error.message;
+  const knownCodes = ['invalid_credentials', 'phone_already_registered', 'otp_invalid', 'otp_expired', 'rate_limited', 'rate_limit_exceeded', 'permission_denied', 'network'];
+  return knownCodes.includes(code) ? i18n.t(`errors.${code}`) : i18n.t('errors.generic');
 }
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}, accessToken?: string): Promise<T> {
