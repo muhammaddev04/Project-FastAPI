@@ -20,6 +20,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 USERS: dict[str, User] = {}
 USER_BY_ID: dict[str, User] = {}
 OTP_CODES: dict[str, dict[str, Any]] = {}
+REFRESH_TOKENS: dict[str, dict[str, Any]] = {}
 
 PHONE_REGEX = re.compile(r"^\+[1-9][0-9]{7,14}$")
 COMMON_PASSWORDS = {
@@ -186,7 +187,9 @@ def register_complete(payload: RegisterCompleteRequest):
     USERS[phone] = user
     USER_BY_ID[user.id] = user
     access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
-    return {"access_token": access_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
+    refresh_token = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
+    REFRESH_TOKENS[refresh_token] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
+    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
 
 
 @router.post("/login")
@@ -195,7 +198,37 @@ def login(payload: LoginRequest):
     if not user or not verify_password(payload.password, user.password_hash):
         raise build_error("invalid_credentials", "Invalid phone or password", status.HTTP_401_UNAUTHORIZED)
     access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
-    return {"access_token": access_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
+    refresh_token = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
+    REFRESH_TOKENS[refresh_token] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
+    user.last_login_at = datetime.now(timezone.utc)
+    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
+
+
+@router.post("/logout")
+def logout(user: User = Depends(_get_current_user)):
+    family_id = f"family-{user.id}"
+    for token_record in REFRESH_TOKENS.values():
+        if token_record.get("family_id") == family_id:
+            token_record["revoked"] = True
+    return {"status": "ok", "message": "Logged out"}
+
+
+@router.post("/refresh")
+def refresh_token(payload: dict[str, str]):
+    refresh = payload.get("refresh_token")
+    if not refresh:
+        raise build_error("refresh_token_required", "Refresh token is required", status.HTTP_400_BAD_REQUEST)
+    record = REFRESH_TOKENS.get(refresh)
+    if record is None or record.get("revoked") is True:
+        raise build_error("refresh_token_reused", "Refresh token has been revoked or reused", status.HTTP_401_UNAUTHORIZED)
+    user = USER_BY_ID.get(record["user_id"])
+    if user is None:
+        raise build_error("user_not_found", "User no longer exists", status.HTTP_404_NOT_FOUND)
+    record["revoked"] = True
+    new_refresh = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
+    REFRESH_TOKENS[new_refresh] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
+    access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
+    return {"access_token": access_token, "refresh_token": new_refresh, "expires_in": settings.access_token_expire_minutes * 60}
 
 
 @profile_router.get("/me")

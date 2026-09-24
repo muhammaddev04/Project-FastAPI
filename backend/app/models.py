@@ -15,6 +15,7 @@ class User:
     status: str = "ACTIVE"
     is_superadmin: bool = False
     token_version: int = 1
+    roles: list[str] = field(default_factory=lambda: ["OWNER"])
     phone_verified_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     last_login_at: datetime | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -28,6 +29,8 @@ class User:
             "language": self.language,
             "status": self.status,
             "is_superadmin": self.is_superadmin,
+            "roles": self.roles,
+            "permissions": sorted({permission for role in self.roles for permission in get_role_permissions(role)}),
             "phone_verified_at": self.phone_verified_at.isoformat(),
             "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
             "created_at": self.created_at.isoformat(),
@@ -66,11 +69,24 @@ class RegistrationTokenPayload:
     expires_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc) + timedelta(minutes=15))
 
 
-def build_user(phone: str, full_name: str, password_hash: str, language: str = "en") -> User:
+def get_role_permissions(role: str) -> list[str]:
+    role_permissions = {
+        "OWNER": ["members.view", "members.invite", "members.change_role", "members.suspend", "members.revoke"],
+        "MANAGER": ["members.view"],
+        "OPERATOR": [],
+        "WAREHOUSE": [],
+        "COURIER": [],
+        "SELLER": [],
+    }
+    return role_permissions.get(role, [])
+
+
+def build_user(phone: str, full_name: str, password_hash: str, language: str = "en", roles: list[str] | None = None) -> User:
     return User(
         id=str(uuid4()),
         phone=phone,
         full_name=full_name,
         password_hash=password_hash,
         language=language,
+        roles=roles or ["OWNER"],
     )
