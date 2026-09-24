@@ -15,10 +15,13 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
-  refreshToken: null,
+  refreshToken: typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('tezfarmo.refresh') : null,
   user: null,
   isRestoring: true,
-  setSession: (session) => set({ accessToken: session.access_token, refreshToken: session.refresh_token, user: session.user, isRestoring: false }),
+  setSession: (session) => {
+    sessionStorage.setItem('tezfarmo.refresh', session.refresh_token);
+    set({ accessToken: session.access_token, refreshToken: session.refresh_token, user: session.user, isRestoring: false });
+  },
   restore: async () => {
     const refreshToken = get().refreshToken;
     if (!refreshToken) {
@@ -28,8 +31,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const session = await apiFetch<AuthResponse>('/api/v1/auth/refresh', { method: 'POST', body: JSON.stringify({ refresh_token: refreshToken }) });
       const user = await apiFetch<User>('/api/v1/me', {}, session.access_token);
+      sessionStorage.setItem('tezfarmo.refresh', session.refresh_token);
       set({ accessToken: session.access_token, refreshToken: session.refresh_token, user, isRestoring: false });
     } catch {
+      sessionStorage.removeItem('tezfarmo.refresh');
       set({ accessToken: null, refreshToken: null, user: null, isRestoring: false });
     }
   },
@@ -40,8 +45,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch {
       friendlyAuthError(new Error('logout_failed'));
     } finally {
+      sessionStorage.removeItem('tezfarmo.refresh');
       set({ accessToken: null, refreshToken: null, user: null });
     }
   },
-  clearSession: () => set({ accessToken: null, refreshToken: null, user: null }),
+  clearSession: () => {
+    sessionStorage.removeItem('tezfarmo.refresh');
+    set({ accessToken: null, refreshToken: null, user: null });
+  },
 }));
