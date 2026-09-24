@@ -23,9 +23,13 @@ export function friendlyAuthError(error: unknown): string {
 }
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}, accessToken?: string): Promise<T> {
+  const language = typeof localStorage !== 'undefined' ? localStorage.getItem('tezfarmo.language') ?? 'tg' : 'tg';
+  const requestId = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `req-${Date.now()}`;
   const res = await fetch(`${baseUrl}${path.startsWith('/') ? path : `/${path}`}`, {
     headers: {
       'Content-Type': 'application/json',
+      'Accept-Language': language,
+      'X-Request-Id': requestId,
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(init.headers ?? {}),
     },
