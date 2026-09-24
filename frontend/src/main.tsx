@@ -1,4 +1,6 @@
 import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource-variable/noto-serif';
 import './app/styles.css';
 import './shared/i18n';
 import { StrictMode } from 'react';
