@@ -9,9 +9,9 @@ import os
 
 os.environ["APP_ENV"] = "testing"
 os.environ["DATABASE_URL"] = os.environ.get(
-    "TEST_DATABASE_URL", "postgresql+asyncpg://tezfarmo:tezfarmo@localhost:5433/tezfarmo_test"
+    "TEST_DATABASE_URL", "postgresql+asyncpg://tezfarmo:tezfarmo@localhost:5434/tezfarmo_test"
 )
-os.environ["REDIS_URL"] = os.environ.get("TEST_REDIS_URL", "redis://localhost:6380/15")
+os.environ["REDIS_URL"] = os.environ.get("TEST_REDIS_URL", "redis://localhost:6381/15")
 os.environ["GOOGLE_CLIENT_ID"] = ""
 os.environ["GOOGLE_CLIENT_SECRET"] = ""
 

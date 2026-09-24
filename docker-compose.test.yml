@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: tezfarmo
       POSTGRES_PASSWORD: tezfarmo
     ports:
-      - "5433:5432"
+      - "5434:5432"
     tmpfs:
       - /var/lib/postgresql/data
     healthcheck:
@@ -22,4 +22,4 @@ services:
     image: redis:7-alpine
     container_name: tezfarmo-redis-test
     ports:
-      - "6380:6379"
+      - "6381:6379"
