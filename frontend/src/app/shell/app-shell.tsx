@@ -7,7 +7,8 @@ import type { Area } from '@/shared/auth/context';
 import type { Me, Membership } from '@/shared/auth/types';
 import { LanguageSwitcher } from '@/shared/i18n/language-switcher';
 import { cn } from '@/shared/lib/cn';
-import { Badge, BrandMark, Button } from '@/shared/ui';
+import { Badge, BrandMark, Button, LogoMark } from '@/shared/ui';
+import { NotificationsButton } from './notifications-button';
 import { navFor, type NavItem, type NavSection } from './nav-config';
 import { OrgSwitcher } from './org-switcher';
 
@@ -102,6 +103,8 @@ export function AppShell({ area, me, membership, children }: { area: Area; me: M
   const hasTabs = area !== 'company' && tabs.length > 0;
 
   useEffect(() => setDrawerOpen(false), [location.pathname]);
+  const relative = location.pathname.replace(`/${area}`, '').replace(/^\//, '');
+  const current = sections.flatMap((section) => section.items).find((item) => item.path === relative);
 
   return (
     <div data-area={area} className="min-h-screen bg-background">
@@ -138,27 +141,35 @@ export function AppShell({ area, me, membership, children }: { area: Area; me: M
       ) : null}
 
       <div className={cn(area !== 'courier' && 'lg:pl-64')}>
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b bg-surface/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-surface/80 sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border/60 bg-background/90 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:gap-3 sm:px-6">
           {area !== 'courier' ? (
-            <Button variant="ghost" size="icon" className="-ml-2 lg:hidden" aria-label={t('shell.openMenu')} onClick={() => setDrawerOpen(true)}>
+            <Button variant="ghost" size="icon" className="lg:hidden" aria-label={t('shell.openMenu')} onClick={() => setDrawerOpen(true)}>
               <Menu />
             </Button>
           ) : null}
+          <span className="hidden rounded-md bg-surface p-1 shadow-raised sm:block lg:hidden">
+            <LogoMark className="h-6" />
+          </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[0.8125rem] font-semibold lg:hidden">{membership.org_name}</p>
+            <p className="flex items-center gap-1.5 truncate text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+              <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-primary" />
+              <span className="truncate">{membership.org_name}</span>
+            </p>
+            <p className="truncate text-[1.125rem] font-semibold leading-6 text-foreground">{t(`nav.${area}.${current?.key ?? sections[0]?.items[0]?.key ?? 'dashboard'}`)}</p>
           </div>
-          <LanguageSwitcher />
-          <AccountMenu me={me} />
+          <LanguageSwitcher className="hidden sm:inline-flex" />
+          <NotificationsButton />
+          <AccountMenu me={me} compact />
         </header>
 
-        <main className={cn('mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8', hasTabs && 'pb-24 lg:pb-8')}>{children}</main>
+        <main className={cn('mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8', hasTabs && 'pb-28 lg:pb-8')}>{children}</main>
       </div>
 
       {hasTabs ? (
         <nav
           aria-label={t('shell.quickNavigation')}
           className={cn(
-            'fixed inset-x-0 bottom-0 z-20 grid border-t bg-surface pb-[env(safe-area-inset-bottom)]',
+            'fixed inset-x-0 bottom-0 z-20 grid border-t bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur',
             area === 'store' && 'lg:hidden',
           )}
           style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
@@ -172,13 +183,18 @@ export function AppShell({ area, me, membership, children }: { area: Area; me: M
                 end={!item.path}
                 className={({ isActive }) =>
                   cn(
-                    'flex h-14 flex-col items-center justify-center gap-0.5 text-2xs font-medium transition-colors',
-                    isActive ? 'text-accent' : 'text-muted-foreground hover:text-foreground',
+                    'relative flex h-16 flex-col items-center justify-center gap-1 text-[0.75rem] transition-colors',
+                    isActive ? 'font-semibold text-primary' : 'font-medium text-muted-foreground hover:text-foreground',
                   )
                 }
               >
-                <Icon className="size-5" aria-hidden="true" />
-                {t(`nav.${area}.${item.key}`)}
+                {({ isActive }) => (
+                  <>
+                    {isActive ? <span aria-hidden="true" className="absolute inset-x-5 top-0 h-0.5 rounded-full bg-primary" /> : null}
+                    <Icon className="size-6" strokeWidth={isActive ? 2.1 : 1.8} aria-hidden="true" />
+                    {t(`nav.${area}.${item.key}`)}
+                  </>
+                )}
               </NavLink>
             );
           })}

@@ -1,4 +1,5 @@
 import {
+  Archive,
   BarChart3,
   Boxes,
   Building2,
@@ -6,9 +7,9 @@ import {
   CreditCard,
   Handshake,
   LayoutDashboard,
+  LayoutGrid,
   type LucideIcon,
   Package,
-  Receipt,
   RotateCcw,
   Settings,
   ShoppingCart,
@@ -67,12 +68,12 @@ const STORE: NavSection[] = [
   {
     key: 'buying',
     items: [
-      { key: 'dashboard', path: '', icon: LayoutDashboard, primary: true },
-      { key: 'suppliers', path: 'suppliers', icon: Building2, phase: 'P06', primary: true },
-      { key: 'catalog', path: 'catalog', icon: Package, phase: 'P04' },
+      { key: 'dashboard', path: '', icon: LayoutGrid, primary: true },
+      { key: 'suppliers', path: 'suppliers', icon: Building2, phase: 'P06' },
+      { key: 'catalog', path: 'catalog', icon: Archive, phase: 'P04', primary: true },
       { key: 'cart', path: 'cart', icon: ShoppingCart, phase: 'P07', primary: true },
       { key: 'orders', path: 'orders', icon: ClipboardList, phase: 'P07', primary: true },
-      { key: 'debt', path: 'debt', icon: Receipt, roles: ['OWNER'], phase: 'P09' },
+      { key: 'debt', path: 'debt', icon: Wallet, roles: ['OWNER'], phase: 'P09', primary: true },
       { key: 'returns', path: 'returns', icon: RotateCcw, roles: ['OWNER'], phase: 'P10' },
     ],
   },
