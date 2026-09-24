@@ -26,7 +26,7 @@ export function Alert({
   return (
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
-      className={cn('flex animate-fade-in gap-3 rounded-md border px-3.5 py-3 text-[0.8125rem] leading-5 text-foreground', box, className)}
+      className={cn('flex animate-fade-in gap-3 rounded border px-3.5 py-3 text-[0.8125rem] leading-5 text-foreground', box, className)}
     >
       <Icon className={cn('mt-0.5 size-4 shrink-0', iconClass)} aria-hidden="true" />
       <div className="min-w-0 flex-1 space-y-0.5">

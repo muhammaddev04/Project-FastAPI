@@ -21,7 +21,7 @@ export function FormField({
   const id = (isValidElement(children) && children.props.id) || generated;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-center justify-between gap-3">
         <Label htmlFor={id}>{label}</Label>
         {action}
@@ -32,7 +32,7 @@ export function FormField({
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-[0.8125rem] text-muted-foreground">
+        <p id={`${id}-hint`} className="px-0.5 text-[0.8125rem] text-muted-foreground">
           {hint}
         </p>
       ) : null}
