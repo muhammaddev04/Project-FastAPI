@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRight, Building2, Check, Store } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -8,22 +8,17 @@ import { errorMessage, fieldErrorMap } from '@/shared/api/errors';
 import { AccountMenu } from '@/shared/auth/account-menu';
 import { areaFor, areaHome, isUsable } from '@/shared/auth/context';
 import { useSessionStore } from '@/shared/auth/session-store';
-import type { Me, OrgType } from '@/shared/auth/types';
+import type { Me } from '@/shared/auth/types';
 import { LanguageSwitcher } from '@/shared/i18n/language-switcher';
-import { cn } from '@/shared/lib/cn';
 import { Alert, Badge, BrandMark, Button, Card, FormField, Input } from '@/shared/ui';
 import { useCreateOrganization } from './api';
+import { OrgTypeChoice } from './org-type-choice';
 
 const schema = z.object({
   type: z.enum(['COMPANY', 'STORE']),
   name: z.string().trim().min(2, 'validation.nameTooShort').max(200, 'validation.tooLong'),
 });
 type FormValues = z.infer<typeof schema>;
-
-const OPTIONS: { type: OrgType; icon: typeof Building2; key: 'company' | 'store' }[] = [
-  { type: 'COMPANY', icon: Building2, key: 'company' },
-  { type: 'STORE', icon: Store, key: 'store' },
-];
 
 export function WelcomePage({ me }: { me: Me }) {
   const { t } = useTranslation();
@@ -93,59 +88,7 @@ export function WelcomePage({ me }: { me: Me }) {
         ) : null}
 
         <form onSubmit={onSubmit} noValidate className="mt-8 space-y-6">
-          <fieldset>
-            <legend className="mb-3 text-[0.8125rem] font-medium">{t('onboarding.typeLegend')}</legend>
-            <div className="grid gap-3 sm:grid-cols-2" role="radiogroup">
-              {OPTIONS.map(({ type, icon: Icon, key }) => {
-                const active = selected === type;
-                return (
-                  <label
-                    key={type}
-                    className={cn(
-                      'relative flex cursor-pointer flex-col gap-3 rounded-lg border bg-surface p-4 shadow-card transition-all',
-                      'focus-within:ring-2 focus-within:ring-ring',
-                      active ? 'border-primary ring-1 ring-primary' : 'hover:border-input',
-                    )}
-                  >
-                    <input type="radio" value={type} className="sr-only" {...form.register('type')} />
-                    <span className="flex items-center justify-between">
-                      <span
-                        className={cn(
-                          'flex size-9 items-center justify-center rounded-md border',
-                          active ? 'border-primary/20 bg-primary-soft text-primary' : 'bg-subtle text-muted-foreground',
-                        )}
-                      >
-                        <Icon className="size-[18px]" aria-hidden="true" />
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        className={cn(
-                          'flex size-5 items-center justify-center rounded-full border',
-                          active ? 'border-primary bg-primary text-primary-foreground' : 'border-input',
-                        )}
-                      >
-                        {active ? <Check className="size-3" /> : null}
-                      </span>
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold">{t(`onboarding.${key}.title`)}</span>
-                      <span className="mt-0.5 block text-[0.8125rem] text-muted-foreground">
-                        {t(`onboarding.${key}.description`)}
-                      </span>
-                    </span>
-                    <ul className="space-y-1 border-t pt-3 text-[0.8125rem] text-muted-foreground">
-                      {(t(`onboarding.${key}.points`, { returnObjects: true }) as string[]).map((point) => (
-                        <li key={point} className="flex gap-2">
-                          <Check className="mt-1 size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
+          <OrgTypeChoice selected={selected} field={form.register('type')} legend={t('onboarding.typeLegend')} />
 
           <Card className="p-5">
             <FormField

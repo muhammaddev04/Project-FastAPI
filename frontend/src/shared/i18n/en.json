@@ -126,5 +126,128 @@
     "ownerNote": "You'll be the owner of this organization.",
     "createCompany": "Create company",
     "createStore": "Create store"
+  },
+  "auth": {
+    "or": "or",
+    "layout": {
+      "eyebrow": "B2B wholesale platform",
+      "headline": "Orders, delivery and debts between suppliers and stores — in one place.",
+      "footnote": "TezFarmo · Built for wholesale trade in Tajikistan",
+      "points": {
+        "companies": {
+          "title": "For suppliers",
+          "text": "Catalog, price lists and store credit terms you control."
+        },
+        "stores": {
+          "title": "For stores",
+          "text": "Order from your suppliers without calls and paper notes."
+        },
+        "delivery": {
+          "title": "Confirmed delivery",
+          "text": "Every handover is confirmed with a one-time code."
+        },
+        "trust": {
+          "title": "Clear balances",
+          "text": "An immutable ledger both sides can rely on."
+        }
+      }
+    },
+    "fields": {
+      "phone": "Phone number",
+      "password": "Password",
+      "newPassword": "Create a password",
+      "confirmPassword": "Repeat the password",
+      "fullName": "Full name",
+      "email": "Email",
+      "language": "Preferred language"
+    },
+    "password": {
+      "weak": "Weak",
+      "fair": "Good",
+      "strong": "Strong",
+      "met": "requirement met",
+      "notMet": "requirement not met",
+      "rules": {
+        "length": "8+ characters",
+        "letter": "A letter",
+        "digit": "A digit"
+      }
+    },
+    "unavailable": {
+      "metaErrorTitle": "Couldn't load sign-in options",
+      "password_login": {
+        "title": "Sign-in isn't enabled yet",
+        "text": "This TezFarmo server doesn't accept password sign-in yet. The form is ready and will work as soon as it's enabled."
+      },
+      "registration": {
+        "title": "Registration isn't open yet",
+        "text": "You can review the steps now; creating an account becomes available once phone verification is enabled on this server."
+      },
+      "password_reset": {
+        "title": "Password reset isn't enabled yet",
+        "text": "Resetting a password by SMS code will be available soon. Contact your organization owner or TezFarmo support meanwhile."
+      },
+      "email_verification": {
+        "title": "Email verification isn't enabled yet",
+        "text": "Email confirmation will be available soon."
+      },
+      "google": {
+        "title": "Google sign-in isn't enabled",
+        "text": "Continue with Google isn't configured on this server yet. Use your phone number instead."
+      }
+    },
+    "google": {
+      "button": "Continue with Google",
+      "notEnabled": "Not enabled on this server yet",
+      "callbackTitle": "Google sign-in",
+      "cancelledTitle": "Google sign-in was cancelled",
+      "cancelledText": "No account was connected. You can try again or sign in with your phone number."
+    },
+    "login": {
+      "title": "Sign in to TezFarmo",
+      "subtitle": "Use the phone number you registered with.",
+      "sessionEnded": "You were signed out",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "New to TezFarmo?",
+      "createAccount": "Create an account"
+    },
+    "register": {
+      "title": "Create your TezFarmo account",
+      "progress": "Step {{step}} of {{total}}",
+      "typeLegend": "Which side of the trade are you on?",
+      "steps": {
+        "business": "Business",
+        "details": "Your details",
+        "security": "Password",
+        "review": "Confirm"
+      },
+      "subtitles": {
+        "business": "Tell us whether you supply stores or buy from suppliers.",
+        "details": "Your phone number is how you sign in and receive codes.",
+        "security": "Protect your account with a strong password.",
+        "review": "Check your details before we verify your phone."
+      },
+      "phoneHint": "We'll send a 6-digit confirmation code to this number.",
+      "emailHint": "Used for receipts and account notices once confirmed.",
+      "commonNote": "Very common passwords are rejected by the server.",
+      "review": {
+        "organization": "Organization",
+        "nextTitle": "What happens next",
+        "sms": "We send a 6-digit code to {{phone}} to confirm the number.",
+        "email": "We ask you to confirm {{email}} with a code.",
+        "owner": "You become the owner of the new {{type}} and can invite your team."
+      },
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "reset": {
+      "title": "Reset your password",
+      "subtitle": "We'll send a code to your phone so you can choose a new password.",
+      "phoneHint": "The number you use to sign in.",
+      "submit": "Send code",
+      "back": "Back to sign in"
+    }
   }
 }
