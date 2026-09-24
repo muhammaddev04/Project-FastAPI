@@ -31,5 +31,6 @@
   "validation.password_too_long": "Максимум 128 символов.",
   "validation.password_needs_letter_and_digit": "Нужна хотя бы одна буква и одна цифра.",
   "validation.password_too_common": "Этот пароль слишком распространён.",
-  "validation.value_error": "Недопустимое значение."
+  "validation.value_error": "Недопустимое значение.",
+  "errors.organization_limit_reached": "Вы уже владеете максимальным числом организаций (5)."
 }

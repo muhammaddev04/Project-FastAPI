@@ -31,5 +31,6 @@
   "validation.password_too_long": "Ҳадди аксар 128 аломат.",
   "validation.password_needs_letter_and_digit": "Ақаллан як ҳарф ва як рақам лозим аст.",
   "validation.password_too_common": "Ин парол хеле маъмул аст.",
-  "validation.value_error": "Қимат нодуруст аст."
+  "validation.value_error": "Қимат нодуруст аст.",
+  "errors.organization_limit_reached": "Шумо аллакай шумораи ниҳоии ташкилотҳоро (5) доред."
 }

@@ -31,5 +31,6 @@
   "validation.password_too_long": "Use at most 128 characters.",
   "validation.password_needs_letter_and_digit": "Use at least one letter and one digit.",
   "validation.password_too_common": "This password is too common.",
-  "validation.value_error": "This value is not valid."
+  "validation.value_error": "This value is not valid.",
+  "errors.organization_limit_reached": "You already own the maximum number of organizations (5)."
 }
