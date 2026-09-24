@@ -1,0 +1,47 @@
+import { create } from 'zustand';
+import type { AuthResponse, User } from './types';
+import { apiFetch, friendlyAuthError } from './api';
+
+type AuthState = {
+  accessToken: string | null;
+  refreshToken: string | null;
+  user: User | null;
+  isRestoring: boolean;
+  setSession: (session: AuthResponse) => void;
+  restore: () => Promise<void>;
+  logout: () => Promise<void>;
+  clearSession: () => void;
+};
+
+export const useAuthStore = create<AuthState>((set, get) => ({
+  accessToken: null,
+  refreshToken: null,
+  user: null,
+  isRestoring: true,
+  setSession: (session) => set({ accessToken: session.access_token, refreshToken: session.refresh_token, user: session.user, isRestoring: false }),
+  restore: async () => {
+    const refreshToken = get().refreshToken;
+    if (!refreshToken) {
+      set({ isRestoring: false });
+      return;
+    }
+    try {
+      const session = await apiFetch<AuthResponse>('/api/v1/auth/refresh', { method: 'POST', body: JSON.stringify({ refresh_token: refreshToken }) });
+      const user = await apiFetch<User>('/api/v1/me', {}, session.access_token);
+      set({ accessToken: session.access_token, refreshToken: session.refresh_token, user, isRestoring: false });
+    } catch {
+      set({ accessToken: null, refreshToken: null, user: null, isRestoring: false });
+    }
+  },
+  logout: async () => {
+    const { accessToken } = get();
+    try {
+      if (accessToken) await apiFetch('/api/v1/auth/logout', { method: 'POST' }, accessToken);
+    } catch {
+      friendlyAuthError(new Error('logout_failed'));
+    } finally {
+      set({ accessToken: null, refreshToken: null, user: null });
+    }
+  },
+  clearSession: () => set({ accessToken: null, refreshToken: null, user: null }),
+}));
