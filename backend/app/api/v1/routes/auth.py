@@ -179,7 +179,19 @@ def _get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer
     user = USER_BY_ID.get(str(payload.get("sub")))
     if user is None:
         raise build_error("user_not_found", "User no longer exists", status.HTTP_404_NOT_FOUND)
+    if user.status != "ACTIVE":
+        raise build_error("user_blocked", "User access is blocked", status.HTTP_403_FORBIDDEN)
+    if payload.get("tv") != user.token_version:
+        raise build_error("token_invalid", "Access token has been revoked", status.HTTP_401_UNAUTHORIZED)
     return user
+
+
+def _issue_session(user: User) -> dict[str, Any]:
+    family_id = f"family-{user.id}"
+    access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes, extra={"sid": family_id, "tv": user.token_version})
+    refresh_token = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": family_id})
+    REFRESH_TOKENS[refresh_token] = {"user_id": user.id, "family_id": family_id, "revoked": False}
+    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
 
 
 @router.post("/register/start", status_code=status.HTTP_202_ACCEPTED)
@@ -217,10 +229,7 @@ def register_complete(payload: RegisterCompleteRequest):
     user = build_user(phone, payload.full_name, hash_password(payload.password), payload.language, account_type=payload.role)
     USERS[phone] = user
     USER_BY_ID[user.id] = user
-    access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
-    refresh_token = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
-    REFRESH_TOKENS[refresh_token] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
-    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
+    return _issue_session(user)
 
 
 @router.get("/google/start")
@@ -244,10 +253,7 @@ def google_exchange(payload: GoogleExchangeRequest):
         user = build_user(payload.phone, payload.full_name or identity["name"], hash_password(f"google:{identity['sub']}"), account_type=payload.role)
         USERS[payload.phone] = user
         USER_BY_ID[user.id] = user
-    access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
-    refresh_token = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
-    REFRESH_TOKENS[refresh_token] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
-    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
+    return _issue_session(user)
 
 
 @router.post("/login")
@@ -258,11 +264,8 @@ def login(payload: LoginRequest):
     user = USERS.get(payload.phone)
     if not user or not verify_password(payload.password, user.password_hash):
         raise build_error("invalid_credentials", "Invalid phone or password", status.HTTP_401_UNAUTHORIZED)
-    access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
-    refresh_token = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
-    REFRESH_TOKENS[refresh_token] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
     user.last_login_at = datetime.now(timezone.utc)
-    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
+    return _issue_session(user)
 
 
 @router.post("/logout")
@@ -285,11 +288,11 @@ def refresh_token(payload: dict[str, str]):
     user = USER_BY_ID.get(record["user_id"])
     if user is None:
         raise build_error("user_not_found", "User no longer exists", status.HTTP_404_NOT_FOUND)
+    if user.status != "ACTIVE":
+        raise build_error("user_blocked", "User access is blocked", status.HTTP_403_FORBIDDEN)
     record["revoked"] = True
-    new_refresh = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
-    REFRESH_TOKENS[new_refresh] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
-    access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
-    return {"access_token": access_token, "refresh_token": new_refresh, "expires_in": settings.access_token_expire_minutes * 60}
+    session = _issue_session(user)
+    return {key: session[key] for key in ("access_token", "refresh_token", "expires_in")}
 
 
 @profile_router.get("/me")
