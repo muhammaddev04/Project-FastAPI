@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
-import { createMemoryRouter, RouterProvider, type RouteObject } from 'react-router-dom';
+import { MemoryRouter, useLocation, useRoutes, type Location, type RouteObject } from 'react-router-dom';
 import { AppProviders } from '@/app/providers';
 import { createQueryClient } from '@/app/query-client';
 import { setLanguage } from '@/shared/i18n';
@@ -28,15 +28,23 @@ export function mockApi(routes: MockRoute[]) {
   return { calls, fetchMock };
 }
 
+function RouteTable({ routes, onLocation }: { routes: RouteObject[]; onLocation: (location: Location) => void }) {
+  onLocation(useLocation());
+  return useRoutes(routes);
+}
+
+/** Renders a route table in a MemoryRouter and exposes the current location for assertions. */
 export function renderRoutes(routes: RouteObject[], initialPath: string) {
   setLanguage('en');
-  const router = createMemoryRouter(routes, { initialEntries: [initialPath] });
+  const current: { location: Location | null } = { location: null };
   const utils = render(
     <AppProviders client={createQueryClient()}>
-      <RouterProvider router={router} />
+      <MemoryRouter initialEntries={[initialPath]}>
+        <RouteTable routes={routes} onLocation={(location) => (current.location = location)} />
+      </MemoryRouter>
     </AppProviders>,
   );
-  return { ...utils, router };
+  return { ...utils, current };
 }
 
 export function renderWithProviders(ui: ReactElement) {
