@@ -6,6 +6,17 @@
     <meta name="theme-color" content="#0f766e" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>TezFarmo</title>
+    <script>
+      // Apply the saved (or system) theme before first paint so the wrong theme never flashes.
+      (function () {
+        try {
+          var mode = localStorage.getItem('tezfarmo.theme');
+          var dark = mode === 'dark' || ((mode === null || mode === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

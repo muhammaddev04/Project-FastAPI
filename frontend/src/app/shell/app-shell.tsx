@@ -6,6 +6,7 @@ import { AccountMenu } from '@/shared/auth/account-menu';
 import type { Area } from '@/shared/auth/context';
 import type { Me, Membership } from '@/shared/auth/types';
 import { LanguageSwitcher } from '@/shared/i18n/language-switcher';
+import { ThemeSwitcher } from '@/shared/theme/theme-switcher';
 import { cn } from '@/shared/lib/cn';
 import { Badge, BrandMark, Button, LogoMark } from '@/shared/ui';
 import { NotificationsButton } from './notifications-button';
@@ -157,6 +158,7 @@ export function AppShell({ area, me, membership, children }: { area: Area; me: M
             </p>
             <p className="truncate text-[1.125rem] font-semibold leading-6 text-foreground">{t(`nav.${area}.${current?.key ?? sections[0]?.items[0]?.key ?? 'dashboard'}`)}</p>
           </div>
+          <ThemeSwitcher className="hidden md:inline-flex" />
           <LanguageSwitcher className="hidden sm:inline-flex" />
           <NotificationsButton />
           <AccountMenu me={me} compact />

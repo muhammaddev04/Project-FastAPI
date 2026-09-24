@@ -4,6 +4,7 @@ const token = (name: string) => `hsl(var(--${name}) / <alpha-value>)`;
 
 /** Tokens follow DESIGN.md: 8px grid, 4px controls, 6-8px surfaces, pills only for status chips. */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {

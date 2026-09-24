@@ -10,7 +10,9 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { AppProviders } from './app/providers';
 import { createAppRouter } from './app/router';
+import { initTheme } from './shared/theme/theme';
 
+initTheme();
 const router = createAppRouter();
 
 createRoot(document.getElementById('root')!).render(

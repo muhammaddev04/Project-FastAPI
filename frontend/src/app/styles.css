@@ -54,6 +54,48 @@
     --sidebar-border: 220 45% 91%;
   }
 
+  /* Dark theme: layered navy-slate surfaces (not an inversion); accents lifted for contrast on dark. */
+  .dark {
+    --background: 222 47% 7%; /* #0A0F1C */
+    --foreground: 214 40% 93%;
+    --surface: 222 38% 11%; /* #111827-ish card */
+    --subtle: 222 33% 14%;
+    --container: 222 30% 17%;
+    --muted: 221 26% 21%;
+    --muted-foreground: 216 18% 66%;
+    --border: 221 25% 20%;
+    --input: 220 22% 28%;
+    --ring: 172 66% 45%;
+
+    --primary: 174 72% 38%; /* brighter teal on dark */
+    --primary-hover: 173 70% 44%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 176 45% 15%;
+
+    --warning: 38 92% 56%;
+    --warning-soft: 32 55% 15%;
+    --danger: 0 84% 64%;
+    --danger-soft: 0 50% 16%;
+    --success: 158 64% 48%;
+    --success-soft: 160 45% 14%;
+    --info: 217 91% 64%;
+    --info-soft: 220 50% 17%;
+
+    --sidebar: 222 45% 9%;
+    --sidebar-foreground: 214 40% 93%;
+    --sidebar-muted: 216 18% 62%;
+    --sidebar-active: 222 30% 16%;
+    --sidebar-border: 221 25% 17%;
+  }
+
+  .dark [data-area='store'] {
+    --sidebar: 222 38% 11%;
+    --sidebar-foreground: 214 40% 93%;
+    --sidebar-muted: 216 18% 66%;
+    --sidebar-active: 176 45% 15%;
+    --sidebar-border: 221 25% 20%;
+  }
+
   /* Auth pages (split navy/white reference): bright blue actions, white outlined fields, geometric type. */
   .auth-theme {
     --primary: 212 100% 52%; /* #0A7CFF */
@@ -65,6 +107,30 @@
     --foreground: 222 30% 9%;
     --muted-foreground: 220 9% 46%;
     font-family: 'Montserrat Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .dark .auth-theme {
+    --primary: 214 100% 62%; /* #3D8BFF */
+    --primary-hover: 214 100% 68%;
+    --primary-soft: 218 60% 17%;
+    --ring: 214 100% 62%;
+    --input: 222 24% 27%;
+    --background: 226 45% 6%; /* #080C18 work area */
+    --surface: 225 36% 10%; /* card */
+    --subtle: 225 30% 13%;
+    --foreground: 220 40% 94%;
+    --muted-foreground: 220 16% 66%;
+    --border: 224 25% 18%;
+  }
+
+  /* Colors cross-fade only while the theme is being switched, never during normal interaction. */
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow !important;
+    transition-duration: 280ms !important;
+    transition-timing-function: ease !important;
   }
 
   * {
@@ -101,10 +167,47 @@
 }
 
 @layer utilities {
+  /* Staggered entrance for form rows (disabled by prefers-reduced-motion above). */
+  .stagger-in > * {
+    animation: rise-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .stagger-in > *:nth-child(2) { animation-delay: 40ms; }
+  .stagger-in > *:nth-child(3) { animation-delay: 80ms; }
+  .stagger-in > *:nth-child(4) { animation-delay: 120ms; }
+  .stagger-in > *:nth-child(5) { animation-delay: 160ms; }
+  .stagger-in > *:nth-child(6) { animation-delay: 200ms; }
+  .stagger-in > *:nth-child(7) { animation-delay: 240ms; }
+  .stagger-in > *:nth-child(8) { animation-delay: 280ms; }
+  .stagger-in > *:nth-child(n + 9) { animation-delay: 320ms; }
+
+  /* Link with an underline that grows from the left on hover/focus. */
+  .link-grow {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0 1px;
+    transition: background-size 220ms ease, color 150ms ease;
+  }
+  .link-grow:hover,
+  .link-grow:focus-visible {
+    background-size: 100% 1px;
+  }
+
   /* Codes, phone numbers, amounts: tabular digits that align in columns (DESIGN.md financial-mono). */
   .font-data {
     font-family: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

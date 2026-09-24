@@ -507,5 +507,11 @@
     "securityPending": "Changing your password and signing out of all devices will be available soon.",
     "changePassword": "Change password",
     "logoutAll": "Sign out everywhere"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }
