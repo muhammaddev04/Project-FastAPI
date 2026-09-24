@@ -1,6 +1,7 @@
 import { AlertCircle, CheckCircle2, Phone, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AuthButton } from '../components/AuthButton';
 import { AuthDivider } from '../components/AuthDivider';
 import { AuthLayout } from '../components/AuthLayout';
@@ -10,11 +11,12 @@ import { PasswordField } from '../components/PasswordField';
 import { RoleSelector } from '../components/RoleSelector';
 import { apiFetch, friendlyAuthError } from '../lib/api';
 import { useAuthStore } from '../lib/auth-store';
-import type { AccountRole, AuthResponse } from '../lib/types';
+import { roleHome, type AccountRole, type AuthResponse } from '../lib/types';
 
 type Step = 'contact' | 'verify' | 'profile';
 
 export function RegisterPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const setSession = useAuthStore((state) => state.setSession);
   const [step, setStep] = useState<Step>('contact');
@@ -59,8 +61,8 @@ export function RegisterPage() {
     try {
       setBusy(true);
       const result = await apiFetch<AuthResponse>('/api/v1/auth/register/complete', { method: 'POST', body: JSON.stringify({ registration_token: registrationToken, full_name: fullName.trim(), password, language: 'en', role }) });
-      setSession(result); setSuccess('Your TezFarmo account is ready.');
-      setTimeout(() => navigate('/app', { replace: true }), 650);
+      setSession(result); setSuccess(t('auth.accountReady'));
+      setTimeout(() => navigate(roleHome(result.user), { replace: true }), 650);
     } catch (cause) { setError(friendlyAuthError(cause)); } finally { setBusy(false); }
   }
 
@@ -70,7 +72,7 @@ export function RegisterPage() {
     catch (cause) { setError(friendlyAuthError(cause)); setGoogleBusy(false); }
   }
 
-  return <AuthLayout eyebrow="Start with the right route" title="Build a better way to supply." subtitle="Choose how your business works, then invite your supply network when you are ready.">
+  return <AuthLayout eyebrow={t('brand.tagline')} title="Build a better way to supply." subtitle="Choose how your business works, then invite your supply network when you are ready.">
     <div className="auth-page">
       <div className="auth-heading"><p className="auth-heading__kicker">Create your workspace</p><h2>Join TezFarmo</h2><p>{step === 'contact' ? 'It takes less than two minutes to get started.' : step === 'verify' ? 'A quick check keeps your account secure.' : 'Tell us how your business buys or supplies.'}</p></div>
       <div className="stepper" aria-label={`Registration step ${step === 'contact' ? 1 : step === 'verify' ? 2 : 3} of 3`}><span className="stepper__active">01</span><i /><span className={step !== 'contact' ? 'stepper__active' : ''}>02</span><i /><span className={step === 'profile' ? 'stepper__active' : ''}>03</span></div>
@@ -80,7 +82,7 @@ export function RegisterPage() {
       {step === 'verify' ? <form className="auth-form" onSubmit={verifyRegistration} noValidate><FormField id="register-code" label="Verification code" name="code" inputMode="numeric" maxLength={6} placeholder="000000" autoComplete="one-time-code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} hint={debugCode ? `Development code: ${debugCode}` : 'Check the code sent to your phone.'} /><AuthButton type="submit" busy={busy}>Verify phone</AuthButton><button className="text-button text-button--center" type="button" onClick={() => setStep('contact')}>Use a different number</button></form> : null}
       {step === 'profile' ? <form className="auth-form" onSubmit={completeRegistration} noValidate><FormField id="register-name" label="Full name" name="full_name" placeholder="Your name" autoComplete="name" value={fullName} onChange={(event) => setFullName(event.target.value)} icon={<UserRound size={16} />} /><RoleSelector value={role} onChange={setRole} /><PasswordField id="register-password" label="Create password" name="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} hint="At least 8 characters, with letters and numbers." /><PasswordField id="register-confirm-password" label="Confirm password" name="confirm_password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /><AuthButton type="submit" busy={busy}>{busy ? 'Creating account...' : 'Create account'}</AuthButton></form> : null}
       {step === 'contact' ? <><AuthDivider /><GoogleButton busy={googleBusy} onClick={continueWithGoogle} /></> : null}
-      <p className="auth-switch">Already have an account? <Link to="/login">Sign in</Link></p>
+      <p className="auth-switch">Already have an account? <Link to="/login">{t('auth.loginLink')}</Link></p>
     </div>
   </AuthLayout>;
 }

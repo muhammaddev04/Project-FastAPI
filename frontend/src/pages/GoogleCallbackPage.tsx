@@ -1,6 +1,7 @@
 import { AlertCircle, Phone, UserRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { roleHome } from '../lib/types';
 import { AuthButton } from '../components/AuthButton';
 import { AuthLayout } from '../components/AuthLayout';
 import { FormField } from '../components/FormField';
@@ -29,7 +30,7 @@ export function GoogleCallbackPage() {
     try {
       setBusy(true);
       const session = await apiFetch<AuthResponse>('/api/v1/auth/google/exchange', { method: 'POST', body: JSON.stringify({ code, phone, full_name: fullName.trim(), role }) });
-      setSession(session); navigate('/app', { replace: true });
+      setSession(session); navigate(roleHome(session.user), { replace: true });
     } catch (cause) { setError(friendlyAuthError(cause)); } finally { setBusy(false); }
   }
 
