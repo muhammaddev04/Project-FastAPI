@@ -5,7 +5,7 @@ import { useSessionStore } from '@/shared/auth/session-store';
 import { meFixture, storeMembership } from '@/test/fixtures';
 import { mockApi, renderRoutes } from '@/test/render';
 
-const withStoreArea = [...routes.filter((route) => route.path !== '*'), { path: '/store', element: <p>store app</p> }];
+const withStoreArea = [...routes.filter((route) => route.path !== '*' && route.path !== '/store'), { path: '/store', element: <p>store app</p> }];
 
 describe('onboarding /welcome', () => {
   beforeEach(() => useSessionStore.setState({ accessToken: 'fixture-token', activeOrgId: null, endedReason: null }));

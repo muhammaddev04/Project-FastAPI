@@ -249,5 +249,245 @@
       "submit": "Send code",
       "back": "Back to sign in"
     }
+  },
+  "shell": {
+    "areas": {
+      "company": "Company",
+      "store": "Store",
+      "courier": "Courier"
+    },
+    "mainNavigation": "Main navigation",
+    "quickNavigation": "Quick navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "switchOrganization": "Switch organization",
+    "organizations": "Organizations",
+    "current": "Current",
+    "newOrganization": "New organization"
+  },
+  "nav": {
+    "sections": {
+      "operations": "Operations",
+      "organization": "Organization",
+      "buying": "Purchasing",
+      "runs": "Runs"
+    },
+    "company": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "catalog": "Catalog & prices",
+      "inventory": "Inventory",
+      "partners": "Clients",
+      "delivery": "Delivery",
+      "finance": "Finance",
+      "returns": "Returns & disputes",
+      "reports": "Reports",
+      "team": "Team",
+      "subscription": "Subscription",
+      "settings": "Settings"
+    },
+    "store": {
+      "dashboard": "Home",
+      "suppliers": "Suppliers",
+      "catalog": "Catalog",
+      "cart": "Cart",
+      "orders": "Orders",
+      "debt": "My debt",
+      "returns": "Returns & disputes",
+      "team": "Team",
+      "settings": "Settings"
+    },
+    "courier": {
+      "today": "Today",
+      "history": "History"
+    }
+  },
+  "planned": {
+    "badge": "{{phase}}",
+    "title": "Arrives in {{phase}}",
+    "description": "This module is part of the TezFarmo plan but isn't built yet. Nothing here is sample data — it will fill with your organization's real records once the module ships.",
+    "phases": {
+      "P02": "Phase P02 · Organizations & verification",
+      "P03": "Phase P03 · Subscriptions",
+      "P04": "Phase P04 · Catalog & pricing",
+      "P05": "Phase P05 · Inventory",
+      "P06": "Phase P06 · Partnerships",
+      "P07": "Phase P07 · Orders",
+      "P08": "Phase P08 · Delivery",
+      "P09": "Phase P09 · Finance",
+      "P10": "Phase P10 · Returns & disputes",
+      "P11": "Phase P11 · Notifications",
+      "P12": "Phase P12 · Reports"
+    },
+    "company": {
+      "orders": "Incoming store orders with confirm, partial confirm and reject.",
+      "catalog": "Products, units, price lists and Excel import.",
+      "inventory": "Stock levels, movements and assembly.",
+      "partners": "Store partnerships, terms, credit limits and invitations.",
+      "delivery": "Zones, schedules, delivery runs and confirmation codes.",
+      "finance": "Charges, payments, the partnership ledger and receivables.",
+      "returns": "Returns and disputes with their decision history.",
+      "reports": "Sales, receivables and delivery reports with export.",
+      "subscription": "Plan, status and payment history of your company subscription.",
+      "settings": "Company profile, legal details and verification documents."
+    },
+    "store": {
+      "suppliers": "Your supplier partnerships and their terms.",
+      "catalog": "Supplier catalogs with your prices and units.",
+      "cart": "A separate cart per supplier with the minimum order shown.",
+      "orders": "Your orders, their status and the delivery code.",
+      "debt": "What you owe each supplier, due dates and payment confirmation.",
+      "returns": "Returns and disputes for delivered orders.",
+      "settings": "Store profile, location and verification."
+    },
+    "courier": {
+      "history": "Completed delivery runs."
+    }
+  },
+  "dashboard": {
+    "pending": {
+      "title": "Nothing to show yet"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "Order, delivery and payment notifications will appear here."
+    },
+    "access": {
+      "title": "Your access",
+      "description": "What your role allows in this organization.",
+      "role": "Role",
+      "none": "Your role has no management permissions in this part of TezFarmo yet."
+    },
+    "team": {
+      "title": "Team",
+      "open": "Open",
+      "members": "members in this organization"
+    },
+    "readiness": {
+      "title": "Getting ready",
+      "description": "The steps TezFarmo will guide you through as each module becomes available.",
+      "company": {
+        "verification": {
+          "title": "Verify your company",
+          "text": "Upload registration and tax certificates so stores can partner with you."
+        },
+        "catalog": {
+          "title": "Add your catalog",
+          "text": "Create products and units, or import them from Excel."
+        },
+        "prices": {
+          "title": "Set your prices",
+          "text": "Publish a default price list and store-specific ones."
+        },
+        "delivery": {
+          "title": "Plan delivery",
+          "text": "Define zones and a delivery schedule."
+        },
+        "clients": {
+          "title": "Connect your first store",
+          "text": "Invite a store and agree on terms."
+        }
+      },
+      "store": {
+        "profile": {
+          "title": "Complete your store profile",
+          "text": "Add your address and location for deliveries."
+        },
+        "supplier": {
+          "title": "Connect a supplier",
+          "text": "Request a partnership with a supplier's code or accept an invitation."
+        },
+        "firstOrder": {
+          "title": "Place your first order",
+          "text": "Order from your supplier's catalog in three steps."
+        }
+      }
+    },
+    "company": {
+      "greeting": "Welcome back, {{name}}. Here's where your company stands.",
+      "newOrders": "New orders",
+      "newOrdersEmpty": "Store orders will appear here once partnerships and ordering are live.",
+      "receivables": "Receivables",
+      "receivablesEmpty": "Store balances and overdue amounts will appear here with the finance module.",
+      "roleFocus": {
+        "OPERATOR": {
+          "title": "Your work queue",
+          "text": "Orders waiting for confirmation will be listed here."
+        },
+        "WAREHOUSE": {
+          "title": "Assembly queue",
+          "text": "Orders to assemble and stock alerts will be listed here."
+        },
+        "COURIER": {
+          "title": "Your runs",
+          "text": "Your delivery runs will be listed here."
+        },
+        "OWNER": {
+          "title": "",
+          "text": ""
+        },
+        "MANAGER": {
+          "title": "",
+          "text": ""
+        }
+      }
+    },
+    "store": {
+      "greeting": "Hello, {{name}}. Here's your store at a glance.",
+      "repeatTitle": "Repeat an order",
+      "repeatText": "Reorder what you bought last time in one step once ordering is available.",
+      "repeatAction": "Repeat order",
+      "suppliers": "My suppliers",
+      "suppliersEmpty": "Suppliers you partner with will appear here.",
+      "debts": "Upcoming payments",
+      "debtsEmpty": "Amounts due to each supplier will appear here with the finance module."
+    },
+    "courier": {
+      "title": "Today's run",
+      "emptyTitle": "No run assigned",
+      "emptyText": "Delivery runs, addresses and confirmation codes will appear here when the delivery module is live."
+    }
+  },
+  "team": {
+    "title": "Team",
+    "description": "People with access to this organization and their roles.",
+    "invite": "Invite member",
+    "inviteLater": "Invitations will be available soon",
+    "search": "Search members",
+    "searchPlaceholder": "Search by name or phone",
+    "roleFilter": "Filter by role",
+    "statusFilter": "Filter by status",
+    "allRoles": "All roles",
+    "allStatuses": "All statuses",
+    "statuses": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "REVOKED": "Removed"
+    },
+    "columns": {
+      "member": "Member",
+      "role": "Role",
+      "status": "Status",
+      "joined": "Joined"
+    },
+    "emptyTitle": "No members match",
+    "emptyText": "Try a different search or filter.",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "profile": {
+    "title": "Your profile",
+    "subtitle": "Personal details used across all your organizations.",
+    "details": "Details",
+    "languageHint": "Used for the interface and for SMS messages to you.",
+    "saved": "Your profile was saved.",
+    "contacts": "Contact",
+    "verified": "Verified",
+    "unverified": "Not verified",
+    "security": "Security",
+    "securityPending": "Changing your password and signing out of all devices will be available soon.",
+    "changePassword": "Change password",
+    "logoutAll": "Sign out everywhere"
   }
 }

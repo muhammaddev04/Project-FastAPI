@@ -3,11 +3,18 @@ import { GoogleCallbackPage } from '@/features/auth/google-callback-page';
 import { LoginPage } from '@/features/auth/login-page';
 import { RegisterPage } from '@/features/auth/register-page';
 import { ResetPage } from '@/features/auth/reset-page';
+import { CompanyDashboard } from '@/features/dashboard/company-dashboard';
+import { CourierHome } from '@/features/dashboard/courier-home';
+import { StoreDashboard } from '@/features/dashboard/store-dashboard';
+import { PlannedModulePage } from '@/features/modules/planned-module-page';
 import { WelcomePage } from '@/features/onboarding/welcome-page';
+import { ProfilePage } from '@/features/profile/profile-page';
+import { TeamPage } from '@/features/team/team-page';
 import { useMe } from '@/shared/auth/api';
 import { homePath } from '@/shared/auth/context';
 import { RequireAuth, RequireGuest } from '@/shared/auth/guards';
 import { useSessionStore } from '@/shared/auth/session-store';
+import { AreaLayout } from './shell/area-layout';
 import { ForbiddenPage, NotFoundPage } from './status-pages';
 
 /** `/`: signed-in users go to their application (or onboarding); everyone else to sign-in. */
@@ -28,6 +35,33 @@ export const routes: RouteObject[] = [
   { path: '/reset', element: <RequireGuest><ResetPage /></RequireGuest> },
   { path: '/auth/google/callback', element: <RequireGuest><GoogleCallbackPage /></RequireGuest> },
   { path: '/welcome', element: <RequireAuth>{(me) => <WelcomePage me={me} />}</RequireAuth> },
+  { path: '/profile', element: <RequireAuth>{(me) => <ProfilePage me={me} />}</RequireAuth> },
+  {
+    path: '/company',
+    element: <AreaLayout area="company" />,
+    children: [
+      { index: true, element: <CompanyDashboard /> },
+      { path: 'team', element: <TeamPage /> },
+      { path: ':module', element: <PlannedModulePage /> },
+    ],
+  },
+  {
+    path: '/store',
+    element: <AreaLayout area="store" />,
+    children: [
+      { index: true, element: <StoreDashboard /> },
+      { path: 'team', element: <TeamPage /> },
+      { path: ':module', element: <PlannedModulePage /> },
+    ],
+  },
+  {
+    path: '/courier',
+    element: <AreaLayout area="courier" />,
+    children: [
+      { index: true, element: <CourierHome /> },
+      { path: ':module', element: <PlannedModulePage /> },
+    ],
+  },
   { path: '/403', element: <ForbiddenPage /> },
   { path: '/404', element: <NotFoundPage /> },
   { path: '*', element: <NotFoundPage /> },
