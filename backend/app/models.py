@@ -16,6 +16,7 @@ class User:
     is_superadmin: bool = False
     token_version: int = 1
     roles: list[str] = field(default_factory=lambda: ["OWNER"])
+    account_type: str = "COMPANY"
     phone_verified_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     last_login_at: datetime | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -30,6 +31,7 @@ class User:
             "status": self.status,
             "is_superadmin": self.is_superadmin,
             "roles": self.roles,
+            "account_type": self.account_type,
             "permissions": sorted({permission for role in self.roles for permission in get_role_permissions(role)}),
             "phone_verified_at": self.phone_verified_at.isoformat(),
             "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
@@ -81,7 +83,7 @@ def get_role_permissions(role: str) -> list[str]:
     return role_permissions.get(role, [])
 
 
-def build_user(phone: str, full_name: str, password_hash: str, language: str = "en", roles: list[str] | None = None) -> User:
+def build_user(phone: str, full_name: str, password_hash: str, language: str = "en", roles: list[str] | None = None, account_type: str = "COMPANY") -> User:
     return User(
         id=str(uuid4()),
         phone=phone,
@@ -89,4 +91,5 @@ def build_user(phone: str, full_name: str, password_hash: str, language: str = "
         password_hash=password_hash,
         language=language,
         roles=roles or ["OWNER"],
+        account_type=account_type,
     )

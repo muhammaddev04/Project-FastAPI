@@ -10,6 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.config import settings
+from app.google_oauth import GoogleOAuthProvider
 from app.models import User, build_user
 from app.rate_limit import rate_limiter
 from app.security import create_token, decode_token, hash_password, verify_password
@@ -62,6 +63,14 @@ class RegisterCompleteRequest(BaseModel):
     full_name: str
     password: str
     language: str = "en"
+    role: str = "COMPANY"
+
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, value: str) -> str:
+        if value not in {"COMPANY", "STORE"}:
+            raise ValueError("role must be COMPANY or STORE")
+        return value
 
     @field_validator("password")
     @classmethod
@@ -104,6 +113,27 @@ class ProfileUpdateRequest(BaseModel):
 class ApiError(BaseModel):
     code: str
     message: str
+
+
+class GoogleExchangeRequest(BaseModel):
+    code: str
+    phone: str
+    full_name: str
+    role: str = "COMPANY"
+
+    @field_validator("phone")
+    @classmethod
+    def validate_google_phone(cls, value: str) -> str:
+        if not PHONE_REGEX.match(value):
+            raise ValueError("phone must be a valid E.164 number")
+        return value
+
+    @field_validator("role")
+    @classmethod
+    def validate_google_role(cls, value: str) -> str:
+        if value not in {"COMPANY", "STORE"}:
+            raise ValueError("role must be COMPANY or STORE")
+        return value
 
 
 def build_error(code: str, message: str, status_code: int = 401) -> HTTPException:
@@ -184,9 +214,36 @@ def register_complete(payload: RegisterCompleteRequest):
     phone = _decode_registration_token(payload.registration_token)
     if _phone_exists(phone):
         raise build_error("phone_already_registered", "This phone is already registered", status.HTTP_409_CONFLICT)
-    user = build_user(phone, payload.full_name, hash_password(payload.password), payload.language)
+    user = build_user(phone, payload.full_name, hash_password(payload.password), payload.language, account_type=payload.role)
     USERS[phone] = user
     USER_BY_ID[user.id] = user
+    access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
+    refresh_token = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
+    REFRESH_TOKENS[refresh_token] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
+    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": settings.access_token_expire_minutes * 60, "user": user.to_public_dict()}
+
+
+@router.get("/google/start")
+def google_start():
+    provider = GoogleOAuthProvider()
+    if not provider.client_id or not provider.client_secret:
+        raise build_error("google_oauth_not_configured", "Google sign-in is not configured", status.HTTP_503_SERVICE_UNAVAILABLE)
+    return {"authorization_url": provider.build_auth_url()}
+
+
+@router.post("/google/exchange")
+def google_exchange(payload: GoogleExchangeRequest):
+    try:
+        identity = GoogleOAuthProvider().exchange_code_for_user(payload.code)
+    except ValueError as exc:
+        code = str(exc)
+        raise build_error(code, "Google sign-in could not be completed", status.HTTP_401_UNAUTHORIZED) from exc
+    if _phone_exists(payload.phone):
+        user = USERS[payload.phone]
+    else:
+        user = build_user(payload.phone, payload.full_name or identity["name"], hash_password(f"google:{identity['sub']}"), account_type=payload.role)
+        USERS[payload.phone] = user
+        USER_BY_ID[user.id] = user
     access_token = create_token(user.id, "access", ttl_minutes=settings.access_token_expire_minutes)
     refresh_token = create_token(user.id, "refresh", ttl_minutes=60 * 24 * settings.refresh_token_expire_days, extra={"sid": f"family-{user.id}"})
     REFRESH_TOKENS[refresh_token] = {"user_id": user.id, "family_id": f"family-{user.id}", "revoked": False}
