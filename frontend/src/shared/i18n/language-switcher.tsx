@@ -19,7 +19,7 @@ export function LanguageSwitcher({ className, tone = 'default' }: { className?: 
       <Globe className="size-3.5" aria-hidden="true" />
       <span className="sr-only">{t('common.language')}</span>
       <select
-        className="cursor-pointer appearance-none bg-transparent pr-1 font-medium uppercase outline-none"
+        className="cursor-pointer appearance-none bg-transparent pr-1 font-medium outline-none"
         value={i18n.resolvedLanguage}
         onChange={(event) => {
           if (isLanguage(event.target.value)) setLanguage(event.target.value);
