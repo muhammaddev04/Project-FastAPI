@@ -1,5 +1,5 @@
 import { AlertCircle, CheckCircle2, Phone, UserRound } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthButton } from '../components/AuthButton';
@@ -32,6 +32,13 @@ export function RegisterPage() {
   const [success, setSuccess] = useState('');
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const timer = window.setInterval(() => setResendIn((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [resendIn]);
 
   async function startRegistration(event: React.FormEvent) {
     event.preventDefault(); setError('');
@@ -39,7 +46,18 @@ export function RegisterPage() {
     try {
       setBusy(true);
       const result = await apiFetch<{ debug_code?: string }>('/api/v1/auth/register/start', { method: 'POST', body: JSON.stringify({ phone }) });
-      setDebugCode(result.debug_code ?? ''); setStep('verify');
+      setDebugCode(result.debug_code ?? ''); setResendIn(60); setStep('verify');
+    } catch (cause) { setError(friendlyAuthError(cause)); } finally { setBusy(false); }
+  }
+
+  async function resendCode() {
+    if (resendIn > 0) return;
+    setError('');
+    try {
+      setBusy(true);
+      const result = await apiFetch<{ debug_code?: string }>('/api/v1/auth/register/start', { method: 'POST', body: JSON.stringify({ phone }) });
+      setDebugCode(result.debug_code ?? '');
+      setResendIn(60);
     } catch (cause) { setError(friendlyAuthError(cause)); } finally { setBusy(false); }
   }
 
@@ -79,7 +97,7 @@ export function RegisterPage() {
       {error ? <div className="auth-alert" role="alert"><AlertCircle size={17} /> <span>{error}</span></div> : null}
       {success ? <div className="auth-alert auth-success" role="status"><CheckCircle2 size={17} /> <span>{success}</span></div> : null}
       {step === 'contact' ? <form className="auth-form" onSubmit={startRegistration} noValidate><FormField id="register-phone" label="Phone number" name="phone" type="tel" placeholder="+992 00 000 0000" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} icon={<Phone size={16} />} /><AuthButton type="submit" busy={busy}>Continue</AuthButton></form> : null}
-      {step === 'verify' ? <form className="auth-form" onSubmit={verifyRegistration} noValidate><FormField id="register-code" label="Verification code" name="code" inputMode="numeric" maxLength={6} placeholder="000000" autoComplete="one-time-code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} hint={debugCode ? `Development code: ${debugCode}` : 'Check the code sent to your phone.'} /><AuthButton type="submit" busy={busy}>Verify phone</AuthButton><button className="text-button text-button--center" type="button" onClick={() => setStep('contact')}>Use a different number</button></form> : null}
+      {step === 'verify' ? <form className="auth-form" onSubmit={verifyRegistration} noValidate><FormField id="register-code" label={t('auth.code')} name="code" inputMode="numeric" maxLength={6} placeholder="000000" autoComplete="one-time-code" value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} hint={debugCode ? `Development code: ${debugCode}` : 'Check the code sent to your phone.'} /><AuthButton type="submit" busy={busy}>{t('auth.verifyPhone')}</AuthButton><div className="otp-actions"><button className="text-button" type="button" disabled={resendIn > 0 || busy} onClick={() => void resendCode()}>{resendIn > 0 ? `${t('auth.resend')} in ${resendIn}s` : t('auth.resend')}</button><button className="text-button" type="button" onClick={() => setStep('contact')}>{t('auth.changePhone')}</button></div></form> : null}
       {step === 'profile' ? <form className="auth-form" onSubmit={completeRegistration} noValidate><FormField id="register-name" label="Full name" name="full_name" placeholder="Your name" autoComplete="name" value={fullName} onChange={(event) => setFullName(event.target.value)} icon={<UserRound size={16} />} /><RoleSelector value={role} onChange={setRole} /><PasswordField id="register-password" label="Create password" name="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} hint="At least 8 characters, with letters and numbers." /><PasswordField id="register-confirm-password" label="Confirm password" name="confirm_password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /><AuthButton type="submit" busy={busy}>{busy ? 'Creating account...' : 'Create account'}</AuthButton></form> : null}
       {step === 'contact' ? <><AuthDivider /><GoogleButton busy={googleBusy} onClick={continueWithGoogle} /></> : null}
       <p className="auth-switch">Already have an account? <Link to="/login">{t('auth.loginLink')}</Link></p>
