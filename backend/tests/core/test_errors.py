@@ -101,6 +101,7 @@ def test_fnd_002_production_refuses_insecure_defaults() -> None:
         app_env="production",
         app_secret_key="a" * 40,
         jwt_access_secret="s" * 40,
+        jwt_refresh_secret="r" * 40,
         email_provider="smtp",
         smtp_host="smtp.gmail.com",
         from_email="noreply@tezfarmo.tj",

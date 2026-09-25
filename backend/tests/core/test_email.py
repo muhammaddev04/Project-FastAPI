@@ -172,11 +172,12 @@ def test_smtp_password_is_never_rendered() -> None:
 def test_production_requires_smtp_delivery() -> None:
     strong = "s" * 40
     with pytest.raises(ValueError, match="EMAIL_PROVIDER=smtp"):
-        Settings(app_env="production", app_secret_key=strong, jwt_access_secret=strong)
+        Settings(app_env="production", app_secret_key=strong, jwt_access_secret=strong, jwt_refresh_secret=strong)
     Settings(
         app_env="production",
         app_secret_key=strong,
         jwt_access_secret=strong,
+        jwt_refresh_secret=strong,
         email_provider="smtp",
         smtp_host="smtp.gmail.com",
         from_email="a@b.tj",

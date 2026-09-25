@@ -65,5 +65,7 @@
   "email.account_exists.footer": "Если кнопка не работает, откройте ссылку:",
   "errors.email_token_invalid": "Ссылка недействительна или уже использована.",
   "errors.email_token_expired": "Срок действия ссылки истёк. Запросите новую.",
-  "errors.email_resend_too_early": "Подождите минуту, прежде чем запросить письмо снова."
+  "errors.email_resend_too_early": "Подождите минуту, прежде чем запросить письмо снова.",
+  "errors.invalid_credentials": "Неверный email или пароль.",
+  "errors.email_not_verified": "Подтвердите адрес электронной почты перед входом. Ссылка отправлена вам на почту."
 }

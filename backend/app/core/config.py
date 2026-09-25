@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # SEC-003: access tokens are signed with their own secret.
     jwt_access_secret: str = INSECURE_DEFAULT + "-access"
     access_token_ttl_minutes: int = 15
+    # SEC-003 / SEC-004: refresh tokens (30 days) have their own secret and live in an httpOnly cookie.
+    jwt_refresh_secret: str = INSECURE_DEFAULT + "-refresh"
+    refresh_token_ttl_days: int = 30
 
     # FND-017 private S3-compatible storage. Buckets are never public; files are reached via signed URLs (SEC-008).
     s3_endpoint: str = "localhost:9000"
@@ -69,7 +72,7 @@ class Settings(BaseSettings):
     def _refuse_insecure_production(self) -> Settings:
         """FND-002: production must not start with debug on or weak/default secrets."""
         if self.app_env == "production":
-            secrets = (self.app_secret_key, self.jwt_access_secret)
+            secrets = (self.app_secret_key, self.jwt_access_secret, self.jwt_refresh_secret)
             weak = any(len(value) < 32 or value.startswith(INSECURE_DEFAULT) for value in secrets)
             if self.app_debug or weak:
                 raise ValueError("production requires 32+ byte explicit secrets and APP_DEBUG=false")

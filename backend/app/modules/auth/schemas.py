@@ -4,7 +4,7 @@ from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, EmailStr, Field, field_validator
 
-from app.modules.identity.schemas import Language
+from app.modules.identity.schemas import Language, MeResponse
 
 # CR-001: one canonical email form everywhere - trimmed, then lowercased (matches the unique index on lower(email)).
 NormalizedEmail = Annotated[
@@ -55,3 +55,24 @@ class ResendVerificationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     email: NormalizedEmail
+
+
+class LoginRequest(BaseModel):
+    """P01 §6 `POST /auth/login`: `{email, password}` (F-1.2, CR-001)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    email: NormalizedEmail
+    # Presence only: the password is checked against the stored hash, never against the policy (IAM-004).
+    password: str = Field(min_length=1, max_length=1024)
+
+
+class LoginResponse(BaseModel):
+    """P01 §6: `{access_token, expires_in, user}`; the refresh token travels only in its httpOnly cookie (SEC-004).
+
+    `user` is the same object `GET /me` returns.
+    """
+
+    access_token: str
+    expires_in: int
+    user: MeResponse

@@ -1,4 +1,4 @@
-"""P01 registration, email verification and resend (IAM-001, IAM-002, IAM-003, IAM-016; CR-001).
+"""P01 registration, email verification, resend and login (IAM-001..004, IAM-016; CR-001).
 
 Registration only creates the user: the organization comes later from `/welcome` (ORG-001). The response never
 reveals whether an email is registered: a new address gets a verification link, a known one gets an
@@ -8,6 +8,7 @@ reveals whether an email is registered: a new address gets a verification link, 
 from __future__ import annotations
 
 import hashlib
+from functools import cache
 
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
@@ -18,14 +19,30 @@ from app.core.config import get_settings
 from app.core.email import EmailDeliveryError, OutgoingEmail, get_email
 from app.core.email_templates import render
 from app.core.errors import AppError
-from app.core.rate_limit import AUTH_EMAIL_SEND, AUTH_EMAIL_VERIFY, EMAIL_RESEND_COOLDOWN, check, hit, record
+from app.core.rate_limit import (
+    AUTH_EMAIL_SEND,
+    AUTH_EMAIL_VERIFY,
+    AUTH_LOGIN,
+    EMAIL_RESEND_COOLDOWN,
+    check,
+    hit,
+    record,
+)
 from app.core.request_context import get_client_ip
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 from app.core.time import utcnow
 from app.modules.auth.password_policy import password_problems
-from app.modules.auth.schemas import RegisterRequest, ResendVerificationRequest, VerifyEmailRequest
+from app.modules.auth.schemas import (
+    LoginRequest,
+    LoginResponse,
+    RegisterRequest,
+    ResendVerificationRequest,
+    VerifyEmailRequest,
+)
+from app.modules.auth.sessions import IssuedSession, start_session
 from app.modules.auth.tokens import TOKEN_LIFETIMES, consume_email_token, issue_email_token
 from app.modules.identity.models import User
+from app.modules.identity.service import build_me
 
 VERIFY_EMAIL = "VERIFY_EMAIL"
 
@@ -145,3 +162,39 @@ async def resend_verification(session: AsyncSession, payload: ResendVerification
     if user is None or user.email_verified_at is not None:
         return
     await _send_verification(session, user)
+
+
+@cache
+def _dummy_password_hash() -> str:
+    """IAM-004: unknown emails are checked against this hash so they cost the same time as wrong passwords."""
+    return hash_password("timing-equalizer-not-a-real-password-0")
+
+
+async def login(session: AsyncSession, payload: LoginRequest) -> tuple[LoginResponse, IssuedSession]:
+    """F-1.2 / IAM-004: email + password. Unknown email and wrong password are the same `invalid_credentials`;
+    only after a correct password does the answer say more (`user_blocked`, `email_not_verified`)."""
+    limit_key = f"{_rate_key(payload.email)}:{get_client_ip() or 'unknown'}"
+    await check(AUTH_LOGIN, limit_key)
+
+    user = await session.scalar(select(User).where(func.lower(User.email) == payload.email))
+    password_ok = verify_password(payload.password, user.password_hash if user else _dummy_password_hash())
+    if user is None or not password_ok:
+        # F-1.6: failed attempts count toward the 5 / 15 min lock, for known and unknown addresses alike.
+        await record(AUTH_LOGIN, limit_key)
+        if user is not None:
+            await audit.record(session, "auth.login_failed", "user", user.id, new={"reason": "invalid_credentials"})
+            # Keep the audit row although the request itself fails.
+            await session.commit()
+        raise AppError("invalid_credentials", 401)
+    if user.status != "ACTIVE":
+        raise AppError("user_blocked", 403)
+    if user.email_verified_at is None:
+        raise AppError("email_not_verified", 403)
+
+    issued = await start_session(session, user)
+    user.last_login_at = utcnow()
+    await audit.record(session, "auth.login", "user", user.id, actor_id=user.id)
+    await session.flush()
+    return LoginResponse(
+        access_token=issued.access_token, expires_in=issued.expires_in, user=await build_me(session, user)
+    ), issued

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from typing import Any
+from uuid import UUID
 
 import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
 
 from app.core.config import get_settings
+from app.core.time import utcnow
 
 _hasher = PasswordHasher()
 
@@ -32,10 +35,7 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 
 def decode_access_token(token: str) -> dict[str, Any]:
-    """IAM-005: validate signature, expiry and `typ=access`; claims sub/sid/tv are checked by the caller.
-
-    Issuing tokens belongs to the P01 session service, which is deferred; this module only verifies them.
-    """
+    """IAM-005: validate signature, expiry and `typ=access`; claims sub/sid/tv are checked by the caller."""
     try:
         claims: dict[str, Any] = jwt.decode(
             token,
@@ -50,3 +50,35 @@ def decode_access_token(token: str) -> dict[str, Any]:
     if claims.get("typ") != "access":
         raise TokenError("token_invalid")
     return claims
+
+
+def create_access_token(user_id: UUID, session_family_id: UUID, token_version: int) -> tuple[str, int]:
+    """IAM-005 claims: `sub`, `sid` (refresh family), `tv`, `typ=access`, `iat`, `exp` (SEC-003).
+
+    Returns the token and its lifetime in seconds (`expires_in`).
+    """
+    settings = get_settings()
+    now = utcnow()
+    lifetime = timedelta(minutes=settings.access_token_ttl_minutes)
+    claims = {
+        "sub": str(user_id),
+        "sid": str(session_family_id),
+        "tv": token_version,
+        "typ": "access",
+        "iat": int(now.timestamp()),
+        "exp": int((now + lifetime).timestamp()),
+    }
+    return jwt.encode(claims, settings.jwt_access_secret, algorithm="HS256"), int(lifetime.total_seconds())
+
+
+def create_refresh_token(user_id: UUID, session_family_id: UUID, token_id: UUID, expires_at: datetime) -> str:
+    """SEC-003 / P01 §2.3: refresh JWT signed with its own secret; `jti` is the `refresh_tokens` row id."""
+    claims = {
+        "sub": str(user_id),
+        "sid": str(session_family_id),
+        "jti": str(token_id),
+        "typ": "refresh",
+        "iat": int(utcnow().timestamp()),
+        "exp": int(expires_at.timestamp()),
+    }
+    return jwt.encode(claims, get_settings().jwt_refresh_secret, algorithm="HS256")

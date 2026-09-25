@@ -2,8 +2,16 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Response, status
 
+from app.core.time import utcnow
 from app.modules.auth import service
-from app.modules.auth.schemas import RegisterRequest, ResendVerificationRequest, VerifyEmailRequest
+from app.modules.auth.schemas import (
+    LoginRequest,
+    LoginResponse,
+    RegisterRequest,
+    ResendVerificationRequest,
+    VerifyEmailRequest,
+)
+from app.modules.auth.sessions import CSRF_COOKIE, REFRESH_COOKIE
 from app.modules.identity.deps import SessionDep
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -60,3 +68,39 @@ async def verify_email(payload: VerifyEmailRequest, session: SessionDep) -> Resp
 async def resend_verification(payload: ResendVerificationRequest, session: SessionDep) -> Response:
     await service.resend_verification(session, payload)
     return Response(status_code=status.HTTP_202_ACCEPTED)
+
+
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+    summary="Sign in with email and password (F-1.2, IAM-004, CR-001)",
+    responses={
+        200: {
+            "description": "`{access_token, expires_in, user}`. Sets the httpOnly refresh cookie (SEC-004) and the "
+            "`csrf_token` cookie for the double-submit check on refresh/logout (SEC-005)."
+        },
+        401: {"description": "`invalid_credentials`: unknown email or wrong password (indistinguishable)."},
+        403: {"description": "`email_not_verified` or `user_blocked` (only after a correct password)."},
+        422: {"description": "`validation_error`."},
+        429: {"description": "`rate_limited` (auth_login, 5 failed attempts per 15 minutes per email + IP)."},
+    },
+)
+async def login(payload: LoginRequest, session: SessionDep, response: Response) -> LoginResponse:
+    body, issued = await service.login(session, payload)
+    max_age = int((issued.refresh_expires_at - utcnow()).total_seconds())
+    # SEC-004: httpOnly; Secure; SameSite=Strict; Path=/api/v1/auth.
+    response.set_cookie(
+        REFRESH_COOKIE,
+        issued.refresh_token,
+        max_age=max_age,
+        path="/api/v1/auth",
+        secure=True,
+        httponly=True,
+        samesite="strict",
+    )
+    # SEC-005 double submit: readable by the app, echoed as X-CSRF-Token on refresh/logout.
+    response.set_cookie(
+        CSRF_COOKIE, issued.csrf_token, max_age=max_age, path="/", secure=True, httponly=False, samesite="strict"
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return body
