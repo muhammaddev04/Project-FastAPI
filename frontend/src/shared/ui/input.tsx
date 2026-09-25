@@ -19,7 +19,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     <div
       className={cn(
         'flex w-full items-stretch overflow-hidden border transition-[border-color,box-shadow,background-color] duration-150',
-        variant === 'outline' ? 'h-11 rounded-md bg-surface' : variant === 'auth' ? 'h-[3.25rem] rounded-2xl bg-subtle sm:h-14' : 'h-12 rounded bg-subtle',
+        variant === 'outline' ? 'h-11 rounded-md bg-surface' : variant === 'auth' ? 'h-[3.25rem] rounded-2xl bg-subtle sm:h-14 short:h-12 short:sm:h-12' : 'h-12 rounded bg-subtle',
         invalid
           ? 'border-danger focus-within:shadow-[0_0_0_3px_hsl(var(--danger)/0.12)]'
           : variant === 'outline' || variant === 'auth'

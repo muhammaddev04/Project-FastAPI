@@ -46,7 +46,7 @@ export function MethodUnavailable({ method, meta }: { method: keyof AuthMethods;
         </motion.div>
       ) : (
         <motion.div key="unavailable" {...fade}>
-          <Alert tone="info" title={t(`auth.unavailable.${method}.title`)}>
+          <Alert tone="info" className="short:py-2 short:leading-[1.125rem]" title={t(`auth.unavailable.${method}.title`)}>
             {t(`auth.unavailable.${method}.text`)}
           </Alert>
         </motion.div>

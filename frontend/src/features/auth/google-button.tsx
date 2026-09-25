@@ -27,7 +27,7 @@ export function GoogleButton() {
         type="button"
         variant="ghost"
         block
-        className="h-[3.25rem] gap-3 rounded-2xl border border-slate-200 bg-white text-[0.9375rem] font-semibold text-slate-800 shadow-[0_6px_18px_-10px_rgba(15,27,58,0.35)] hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_12px_26px_-12px_rgba(15,27,58,0.45)] active:translate-y-0 disabled:hover:translate-y-0 sm:h-14 [&_svg]:!size-5"
+        className="h-[3.25rem] gap-3 rounded-2xl border border-slate-200 bg-white text-[0.9375rem] font-semibold text-slate-800 shadow-[0_6px_18px_-10px_rgba(15,27,58,0.35)] hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_12px_26px_-12px_rgba(15,27,58,0.45)] active:translate-y-0 disabled:hover:translate-y-0 sm:h-14 short:h-12 short:sm:h-12 [&_svg]:!size-5"
         disabled={!available}
         aria-describedby="google-status"
       >
@@ -47,7 +47,7 @@ export function GoogleButton() {
 export function OrDivider({ label }: { label?: string }) {
   const { t } = useTranslation();
   return (
-    <div className="my-6 flex items-center gap-3" role="separator">
+    <div className="my-5 flex items-center gap-3 short:my-2.5" role="separator">
       <span className="h-px flex-1 bg-border" />
       <span className="rounded-full border border-border bg-subtle/70 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         {label ?? t('auth.shell.orVia')}

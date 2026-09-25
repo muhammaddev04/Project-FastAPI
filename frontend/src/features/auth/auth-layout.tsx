@@ -62,7 +62,7 @@ function Header() {
   const { t } = useTranslation();
   return (
     <header className="relative z-10 border-b border-border/60 bg-surface/50 backdrop-blur-md dark:border-white/[0.06] dark:bg-[#050D22]/60">
-      <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-4 sm:px-6 lg:h-[4.75rem] lg:px-10">
+      <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-4 sm:px-6 lg:h-[4.75rem] lg:px-10 short:lg:h-16">
         <Brand />
         <div className="hidden h-11 items-center gap-4 rounded-full border border-border/80 bg-surface/40 px-5 text-[0.8125rem] font-medium text-foreground/85 xl:flex">
           <span className="flex items-center gap-2">
@@ -181,13 +181,13 @@ export function AuthShell() {
       <div className="auth-theme relative flex min-h-screen flex-col overflow-x-hidden bg-background font-sans text-foreground">
         <Backdrop />
         <Header />
-        <main className="relative z-10 mx-auto grid w-full max-w-[90rem] flex-1 items-center gap-10 px-4 py-6 sm:px-6 sm:py-10 lg:grid-cols-[minmax(0,1fr)_31rem] lg:gap-12 lg:px-10 lg:py-12 xl:grid-cols-[minmax(0,1fr)_34rem] xl:gap-16">
+        <main className="relative z-10 mx-auto grid w-full max-w-[90rem] flex-1 items-center gap-10 px-4 py-5 sm:px-6 sm:py-8 lg:grid-cols-[minmax(0,1fr)_31rem] lg:gap-12 lg:px-10 lg:py-6 short:py-3 short:sm:py-4 short:lg:py-2 xl:grid-cols-[minmax(0,1fr)_34rem] xl:gap-16">
           <Hero />
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, ease: EASE }}
-            className="mx-auto w-full max-w-[31rem] rounded-[2rem] border border-border bg-surface/90 px-5 py-7 shadow-[0_30px_80px_-30px_rgba(15,27,58,0.28)] backdrop-blur-xl dark:border-white/10 dark:bg-surface/80 dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-9 sm:py-9 lg:max-w-none lg:rounded-[1.75rem] xl:px-10 xl:py-11"
+            className="mx-auto w-full max-w-[31rem] rounded-[2rem] border border-border bg-surface/90 px-5 py-6 shadow-[0_30px_80px_-30px_rgba(15,27,58,0.28)] backdrop-blur-xl dark:border-white/10 dark:bg-surface/80 dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-9 sm:py-8 lg:max-w-none lg:rounded-[1.75rem] xl:px-10 short:py-5 short:sm:py-5"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -228,7 +228,7 @@ export function AuthTabs() {
   ];
   const slideFrom = from.current && from.current !== current ? (current === '/register' ? '-100%' : '100%') : 0;
   return (
-    <nav aria-label={t('auth.shell.tabsLabel')} className="mt-7 grid grid-cols-2 gap-1 rounded-2xl border border-border bg-subtle/60 p-1.5">
+    <nav aria-label={t('auth.shell.tabsLabel')} className="mt-5 grid grid-cols-2 gap-1 rounded-2xl border border-border bg-subtle/60 p-1.5 short:mt-3.5 short:p-1">
       {tabs.map(({ to, icon: Icon, label }) => {
         const active = to === current;
         return (
@@ -237,7 +237,7 @@ export function AuthTabs() {
             to={to}
             replace
             className={cn(
-              'relative flex h-11 items-center justify-center gap-2 rounded-xl text-[0.9375rem] font-semibold transition-colors sm:h-12 sm:text-[1rem]',
+              'relative flex h-11 items-center justify-center gap-2 rounded-xl text-[0.9375rem] font-semibold transition-colors sm:h-12 sm:text-[1rem] short:h-10 short:sm:h-10',
               active ? 'text-white' : 'text-muted-foreground hover:bg-surface/60 hover:text-foreground',
             )}
           >
@@ -275,15 +275,15 @@ export function AuthCard({
   return (
     <div>
       <div className="text-center">
-        <p className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-1.5 text-[0.6875rem] font-bold tracking-[0.12em] text-primary sm:text-[0.75rem]">
+        <p className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-1.5 short:hidden text-[0.6875rem] font-bold tracking-[0.12em] text-primary sm:text-[0.75rem]">
           <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
           {t('auth.shell.cardBadge')}
         </p>
-        <h1 className="auth-display mt-5 text-[1.625rem] font-extrabold leading-tight sm:text-[1.875rem] xl:text-[2rem]">{title}</h1>
-        {subtitle ? <p className="mx-auto mt-3 max-w-[24rem] text-[0.9375rem] leading-relaxed text-muted-foreground sm:text-[1rem]">{subtitle}</p> : null}
+        <h1 className="auth-display mt-4 text-[1.625rem] short:mt-0 font-extrabold leading-tight sm:text-[1.875rem] xl:text-[2rem] short:sm:text-[1.75rem] short:xl:text-[1.875rem]">{title}</h1>
+        {subtitle ? <p className="mx-auto mt-2 max-w-[24rem] text-[0.9375rem] leading-relaxed text-muted-foreground sm:text-[1rem] short:mt-1.5 short:leading-snug">{subtitle}</p> : null}
       </div>
       {tabs ? <AuthTabs /> : null}
-      <div className="stagger-in mt-6">{children}</div>
+      <div className="stagger-in mt-5 short:mt-4">{children}</div>
     </div>
   );
 }
@@ -296,12 +296,12 @@ export const authLabel = 'text-[0.9375rem] font-medium text-foreground/90';
  * sky→cyan gradient with navy text from the laptop screenshot. Lifts on hover, presses on click.
  */
 export const authPrimaryButton =
-  'group h-[3.25rem] rounded-2xl bg-gradient-to-r from-[#0B7D72] to-[#1D4ED8] text-[1rem] font-bold text-white shadow-[0_12px_30px_-12px_rgba(29,78,216,0.6)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-12px_rgba(29,78,216,0.7)] hover:brightness-110 active:translate-y-0 active:scale-[0.99] disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:shadow-none sm:h-14 sm:text-[1.0625rem] dark:lg:from-[#0EA5E9] dark:lg:to-[#06B6D4] dark:lg:text-[#06122B] dark:lg:shadow-[0_12px_30px_-12px_rgba(6,182,212,0.7)]';
+  'group h-[3.25rem] short:h-12 rounded-2xl bg-gradient-to-r from-[#0B7D72] to-[#1D4ED8] text-[1rem] font-bold text-white shadow-[0_12px_30px_-12px_rgba(29,78,216,0.6)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-12px_rgba(29,78,216,0.7)] hover:brightness-110 active:translate-y-0 active:scale-[0.99] disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:shadow-none sm:h-14 sm:text-[1.0625rem] short:sm:h-12 dark:lg:from-[#0EA5E9] dark:lg:to-[#06B6D4] dark:lg:text-[#06122B] dark:lg:shadow-[0_12px_30px_-12px_rgba(6,182,212,0.7)]';
 
 /** Bottom line of a card: muted question + teal link with a growing underline. */
 export function CardSwitch({ question, to, link }: { question: string; to: string; link: string }) {
   return (
-    <p className="mt-6 border-t border-border pt-5 text-center text-[0.9375rem] text-muted-foreground">
+    <p className="mt-5 border-t border-border pt-4 text-center text-[0.9375rem] text-muted-foreground short:mt-3 short:pt-2.5">
       {question}{' '}
       <Link to={to} className="link-grow font-semibold text-primary hover:text-primary-hover">
         {link}

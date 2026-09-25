@@ -25,7 +25,7 @@ export function LoginPage() {
   return (
     <AuthCard title={<BrandTitle i18nKey="auth.shell.loginTitle" />} subtitle={t('auth.shell.loginSubtitle')} tabs>
       {endedReason || !available ? (
-        <div className="mb-5 space-y-2">
+        <div className="mb-4 space-y-2 short:mb-3">
           {endedReason ? (
             <Alert tone="warning" title={t('auth.login.sessionEnded')}>
               {t(`errors.${endedReason}`, { defaultValue: t('errors.token_invalid') })}
@@ -36,7 +36,7 @@ export function LoginPage() {
       ) : null}
 
       {/* Submission is wired by the P01 session service; until it is enabled no credentials are sent anywhere. */}
-      <form className="space-y-5" noValidate onSubmit={form.handleSubmit(() => undefined)}>
+      <form className="space-y-4 short:space-y-2.5" noValidate onSubmit={form.handleSubmit(() => undefined)}>
         <FormField labelClassName={authLabel} label={t('auth.fields.email')} error={errors.email?.message && t(errors.email.message)}>
           <Input
             variant="auth"

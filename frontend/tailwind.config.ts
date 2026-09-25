@@ -8,6 +8,10 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      screens: {
+        /* Viewports up to ~900px tall (laptops, most phones): tighter vertical rhythm so auth forms fit. */
+        short: { raw: '(max-height: 920px)' },
+      },
       fontFamily: {
         sans: ['"Inter Variable"', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         serif: ['"Noto Serif Variable"', 'Georgia', 'serif'],
