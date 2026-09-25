@@ -79,20 +79,20 @@ export function ProfilePage({ me }: { me: Me }) {
           <CardBody className="space-y-3 text-[0.8125rem]">
             <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-2 text-muted-foreground">
-                <Phone className="size-4" aria-hidden="true" /> {t('auth.fields.phone')}
+                <Mail className="size-4" aria-hidden="true" /> {t('auth.fields.email')}
               </span>
-              <span className="flex items-center gap-2 font-medium">
-                {me.phone} <Badge tone="success">{t('profile.verified')}</Badge>
+              <span className="flex min-w-0 items-center gap-2 font-medium">
+                <span className="truncate">{me.email}</span>
+                <Badge tone={me.email_verified ? 'success' : 'warning'}>
+                  {me.email_verified ? t('profile.verified') : t('profile.unverified')}
+                </Badge>
               </span>
             </div>
             <div className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-2 text-muted-foreground">
-                <Mail className="size-4" aria-hidden="true" /> {t('auth.fields.email')}
+                <Phone className="size-4" aria-hidden="true" /> {t('auth.fields.phone')}
               </span>
-              <span className="flex items-center gap-2 font-medium">
-                {me.email ?? '—'}
-                {me.email ? <Badge tone={me.email_verified ? 'success' : 'warning'}>{me.email_verified ? t('profile.verified') : t('profile.unverified')}</Badge> : null}
-              </span>
+              <span className="font-data font-medium">{me.phone ?? '—'}</span>
             </div>
           </CardBody>
         </Card>

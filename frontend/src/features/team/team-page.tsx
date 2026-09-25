@@ -132,7 +132,7 @@ export function TeamPage() {
                             <Avatar name={member.full_name} />
                             <div className="min-w-0">
                               <p className="truncate font-medium">{member.full_name}</p>
-                              <p className="text-muted-foreground">{member.phone}</p>
+                              <p className="text-muted-foreground">{member.email}</p>
                             </div>
                           </div>
                         </td>

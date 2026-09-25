@@ -1,20 +1,13 @@
 import { z } from 'zod';
 
-/** Mirrors backend PHONE check (users.phone, E.164). Spaces, dashes and brackets typed by users are removed. */
-export const PHONE_PATTERN = /^\+[1-9][0-9]{7,14}$/;
-export const COUNTRY_CODE = '+992';
-
-/** Fields show a fixed +992 block, so users type the national number; a full +<code> number is kept as typed. */
-export const normalizePhone = (value: string) => {
-  const compact = value.replace(/[\s()-]/g, '');
-  return !compact || compact.startsWith('+') ? compact : `${COUNTRY_CODE}${compact}`;
-};
-
-export const phoneSchema = z
+/** CR-001: email is the sign-in identifier. Trimmed and compared case-insensitively (the server lowercases too). */
+export const emailSchema = z
   .string()
-  .transform(normalizePhone)
-  // TZ §20: Tajik numbers are +992 followed by exactly 9 digits; other countries follow generic E.164.
-  .refine((value) => PHONE_PATTERN.test(value) && (!value.startsWith(COUNTRY_CODE) || /^\+992\d{9}$/.test(value)), 'validation.phone');
+  .trim()
+  .min(1, 'validation.required')
+  .max(254, 'validation.tooLong')
+  .email('validation.email')
+  .transform((value) => value.toLowerCase());
 
 /** IAM-003 as enforced by backend app/modules/auth/password_policy.py (the common-password list is server-side). */
 export const PASSWORD_MIN = 8;
@@ -30,6 +23,7 @@ export function passwordRules(password: string): Record<PasswordRule, boolean> {
   };
 }
 
+/** The same rule for registration, password reset and password change. */
 export const newPasswordSchema = z
   .string()
   .min(PASSWORD_MIN, 'validation.passwordTooShort')
@@ -37,7 +31,7 @@ export const newPasswordSchema = z
   .refine((value) => passwordRules(value).letter && passwordRules(value).digit, 'validation.passwordLetterDigit');
 
 export const loginSchema = z.object({
-  phone: phoneSchema,
+  email: emailSchema,
   password: z.string().min(1, 'validation.required'),
 });
 export type LoginValues = z.input<typeof loginSchema>;
@@ -47,9 +41,8 @@ export const registerSchema = z
     orgType: z.enum(['COMPANY', 'STORE']),
     orgName: z.string().trim().min(2, 'validation.nameTooShort').max(200, 'validation.tooLong'),
     fullName: z.string().trim().min(2, 'validation.nameTooShort').max(150, 'validation.tooLong'),
-    phone: phoneSchema,
+    email: emailSchema,
     acceptTerms: z.literal(true, { errorMap: () => ({ message: 'validation.acceptTerms' }) }),
-    email: z.union([z.literal(''), z.string().trim().email('validation.email').max(254, 'validation.tooLong')]),
     language: z.enum(['tg', 'ru', 'en']),
     password: newPasswordSchema,
     confirmPassword: z.string(),
@@ -60,15 +53,20 @@ export const registerSchema = z
   });
 export type RegisterValues = z.input<typeof registerSchema>;
 
-/** Three steps (screenshot flow): account + phone + SMS, organization, final confirmation. */
+/** Three steps: account (email + password), organization, final confirmation. */
 export const REGISTER_STEPS: { id: 'account' | 'organization' | 'confirm'; fields: (keyof RegisterValues)[] }[] = [
-  {
-    id: 'account',
-    fields: ['orgType', 'fullName', 'phone', 'email', 'password', 'confirmPassword', 'acceptTerms'],
-  },
+  { id: 'account', fields: ['orgType', 'fullName', 'email', 'password', 'confirmPassword', 'acceptTerms'] },
   { id: 'organization', fields: ['orgName', 'language'] },
   { id: 'confirm', fields: [] },
 ];
 
-export const resetSchema = z.object({ phone: phoneSchema });
-export type ResetValues = z.input<typeof resetSchema>;
+export const forgotPasswordSchema = z.object({ email: emailSchema });
+export type ForgotPasswordValues = z.input<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({ password: newPasswordSchema, confirmPassword: z.string() })
+  .refine((values) => values.password === values.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'validation.passwordsMismatch',
+  });
+export type ResetPasswordValues = z.input<typeof resetPasswordSchema>;

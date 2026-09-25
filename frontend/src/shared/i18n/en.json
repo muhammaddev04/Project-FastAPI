@@ -138,8 +138,7 @@
       "confirmPassword": "Repeat the password",
       "fullName": "Full name",
       "email": "Email",
-      "language": "Preferred language",
-      "mobile": "Mobile number"
+      "language": "Preferred language"
     },
     "password": {
       "weak": "Very weak",
@@ -161,11 +160,11 @@
       },
       "registration": {
         "title": "Registration isn't open yet",
-        "text": "You can review the steps now; creating an account becomes available once phone verification is enabled on this server."
+        "text": "You can review the steps now; creating an account becomes available once email verification is enabled on this server."
       },
       "password_reset": {
         "title": "Password reset isn't enabled yet",
-        "text": "Resetting a password by SMS code will be available soon. Contact your organization owner or TezFarmo support meanwhile."
+        "text": "Resetting a password by email will be available soon. Contact TezFarmo support meanwhile."
       },
       "email_verification": {
         "title": "Email verification isn't enabled yet",
@@ -200,18 +199,16 @@
       "progress": "Step {{step}} of {{total}}",
       "typeLegend": "Choose your role in the system",
       "steps": {
-        "account": "Phone and SMS code",
+        "account": "Account",
         "organization": "Organization",
         "confirm": "Final confirmation"
       },
-      "phoneHint": "A 6-digit confirmation code is sent by SMS",
-      "emailHint": "Used for receipts and account notices once confirmed.",
+      "emailHint": "You'll sign in with this address. We'll send a confirmation link to it.",
       "commonNote": "Very common passwords are rejected by the server.",
       "review": {
         "organization": "Organization",
         "nextTitle": "What happens next",
-        "sms": "We send a 6-digit code to {{phone}} to confirm the number.",
-        "email": "We ask you to confirm {{email}} with a code.",
+        "email": "We send a confirmation link to {{email}}. Your account works after you confirm it.",
         "owner": "You become the owner of the new {{type}} and can invite your team."
       },
       "submit": "Create account",
@@ -231,20 +228,9 @@
         }
       },
       "namePlaceholder": "e.g. Jamshed Karimov",
-      "otp": {
-        "title": "SMS confirmation code",
-        "digits": "6 digits",
-        "text": "Wait for the one-time SMS code to the number you entered:",
-        "disabled": "The SMS code field activates once phone verification is enabled on this server."
-      },
-      "terms": "I agree to the TezFarmo Terms of Use and Privacy Policy (electronic offer of the Republic of Tajikistan) and confirm my business identity.",
-      "continueSms": "Continue and get SMS code"
+      "terms": "I agree to the TezFarmo Terms of Use and Privacy Policy (electronic offer of the Republic of Tajikistan) and confirm my business identity."
     },
     "reset": {
-      "title": "Reset your password",
-      "subtitle": "We'll send a code to your phone so you can choose a new password.",
-      "phoneHint": "The number you use to sign in.",
-      "submit": "Send code",
       "back": "Back to sign in",
       "remembered": "Remembered your password?"
     },
@@ -266,7 +252,36 @@
         "headline": "Account access",
         "line1": "Recover your password",
         "line2": "in a few steps"
+      },
+      "verify": {
+        "headline": "One more step",
+        "line1": "Confirm your email",
+        "line2": "to secure your account"
       }
+    },
+    "forgot": {
+      "title": "Forgot your password?",
+      "subtitle": "Enter the email you sign in with. If an account exists for it, we'll send a link to choose a new password.",
+      "emailHint": "The link works once and expires soon.",
+      "submit": "Send reset link"
+    },
+    "resetPassword": {
+      "title": "Choose a new password",
+      "subtitle": "Use a strong password you don't use anywhere else.",
+      "signOutNote": "After the change you'll be signed out of all devices.",
+      "submit": "Save new password",
+      "invalidTitle": "This reset link isn't valid",
+      "invalidText": "The link is incomplete. Request a new one; each link works once and expires.",
+      "requestNew": "Request a new link"
+    },
+    "verify": {
+      "title": "Confirm your email",
+      "checkInbox": "We sent a confirmation link to your email. Open it on this device to activate your account. Check spam if you don't see it.",
+      "withLink": "Confirm your email address to activate your TezFarmo account.",
+      "confirm": "Confirm email",
+      "resend": "Send the link again",
+      "wrongEmail": "Used the wrong email? Register again",
+      "alreadyVerified": "Already confirmed?"
     }
   },
   "shell": {
@@ -499,7 +514,7 @@
     "title": "Your profile",
     "subtitle": "Personal details used across all your organizations.",
     "details": "Details",
-    "languageHint": "Used for the interface and for SMS messages to you.",
+    "languageHint": "Used for the interface and for emails we send you.",
     "saved": "Your profile was saved.",
     "contacts": "Contact",
     "verified": "Verified",

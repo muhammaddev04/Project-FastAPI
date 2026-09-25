@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { routes } from '@/app/router';
 import { useSessionStore } from '@/shared/auth/session-store';
@@ -16,40 +16,52 @@ function nonMetaCalls(calls: { path: string }[]) {
   return calls.filter((call) => call.path !== '/api/v1/meta');
 }
 
-describe('auth screens', () => {
+// The notice replaces the animated "checking" row once /meta has answered.
+const NOTICE_TIMEOUT = { timeout: 3000 };
+const continueButton = () => screen.getByRole('button', { name: /^continue$/i });
+
+describe('auth screens (CR-001: email)', () => {
   beforeEach(() => useSessionStore.setState({ accessToken: null, activeOrgId: null, endedReason: null }));
 
   describe('login', () => {
-    it('is a dedicated sign-in page with links to registration and password reset', async () => {
+    it('signs in with email and links to registration and forgot-password', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
       expect(screen.getByRole('heading', { name: 'Login to your account' })).toBeInTheDocument();
+      expect(screen.getByLabelText('Email')).toHaveAttribute('type', 'email');
+      expect(screen.queryByLabelText(/phone/i)).not.toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/register');
+      expect(screen.getByRole('link', { name: 'Forgot?' })).toHaveAttribute('href', '/forgot-password');
       expect(screen.getByRole('link', { name: /support/i })).toHaveAttribute('href', 'https://t.me/tezfarmo_support');
-      expect(screen.getByRole('link', { name: 'Forgot?' })).toHaveAttribute('href', '/reset');
     });
 
-    it('explains that password sign-in is not enabled and sends no credentials', async () => {
+    it('explains that sign-in is not enabled and sends no credentials', async () => {
       const { calls } = mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
-      // The notice replaces the animated "checking" row once /meta has answered.
-      expect(await screen.findByText("Sign-in isn't enabled yet", {}, { timeout: 3000 })).toBeInTheDocument();
+      expect(await screen.findByText("Sign-in isn't enabled yet", {}, NOTICE_TIMEOUT)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Login now' })).toBeDisabled();
       expect(screen.getByRole('button', { name: /continue with google/i })).toBeDisabled();
       expect(nonMetaCalls(calls)).toHaveLength(0);
     });
 
-    it('validates the phone number format', async () => {
+    it('shows a loading state while sign-in options are checked', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
-      const phone = screen.getByLabelText('Phone number');
-      await userEvent.type(phone, '12345');
-      await userEvent.tab();
-      expect(await screen.findByText(/9-digit number after \+992/i)).toBeInTheDocument();
-      expect(phone).toHaveAttribute('aria-invalid', 'true');
+      expect(screen.getByText('Checking sign-in options…')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Login now' })).toHaveAttribute('aria-busy', 'true');
     });
 
-    it('tells the user why their session ended', async () => {
+    it('validates the email format', async () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      renderRoutes(routes, '/login');
+      const email = screen.getByLabelText('Email');
+      await userEvent.type(email, 'not-an-email');
+      await userEvent.tab();
+      expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument();
+      expect(email).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('tells the user why their session ended', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       useSessionStore.setState({ endedReason: 'token_expired' });
       renderRoutes(routes, '/login');
@@ -60,7 +72,6 @@ describe('auth screens', () => {
     it('shows a retryable error when sign-in options cannot be loaded', async () => {
       mockApi([{ path: '/meta', status: 503, body: { error: { code: 'service_unavailable', message: '', details: {}, request_id: 'r' } } }]);
       renderRoutes(routes, '/login');
-      expect(screen.getByText('Checking sign-in options…')).toBeInTheDocument();
       // One automatic retry for 5xx happens first (query-client.ts), so allow for its back-off.
       expect(await screen.findByText("Couldn't load sign-in options", {}, { timeout: 4000 })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
@@ -70,44 +81,39 @@ describe('auth screens', () => {
   describe('registration', () => {
     async function fillAccount({ confirm = 'Dushanbe2026', terms = true } = {}) {
       await userEvent.type(screen.getByLabelText(/full name/i), 'Nigina Karimova');
-      await userEvent.type(screen.getByLabelText(/mobile number/i), '90 123 4567');
-      await userEvent.type(screen.getByLabelText(/^email/i), 'nigina@example.tj');
+      await userEvent.type(screen.getByLabelText(/^email/i), '  Nigina@Example.TJ ');
       await userEvent.type(screen.getByLabelText(/create a password/i), 'Dushanbe2026');
       await userEvent.type(screen.getByLabelText(/repeat the password/i), confirm);
       if (terms) await userEvent.click(screen.getByRole('checkbox', { name: /terms of use/i }));
-      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      await userEvent.click(continueButton());
     }
 
-    it('starts on step 1 with the Store/Company choice and validates before moving on', async () => {
+    it('asks for email and password only, with no phone or SMS code', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      expect(screen.getByText('Step 1 of 3: Phone and SMS code')).toBeInTheDocument();
+      expect(screen.getByText('Step 1 of 3: Account')).toBeInTheDocument();
+      expect(screen.getByLabelText(/^email/i)).toHaveAttribute('type', 'email');
+      expect(screen.queryByLabelText(/mobile|phone/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('group', { name: /sms/i })).not.toBeInTheDocument();
       expect(screen.getByRole('radio', { name: /^store/i })).toBeChecked();
-      expect(screen.getByText('100% free to use')).toBeInTheDocument();
-      expect(screen.getByText('14-day trial')).toBeInTheDocument();
-      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    });
+
+    it('validates each field before moving on', async () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      renderRoutes(routes, '/register');
+      await userEvent.click(continueButton());
       expect((await screen.findAllByText('Enter at least 2 characters.')).length).toBeGreaterThan(0);
+      // The email hint animates out before its error animates in.
+      expect(await screen.findByText('This field is required.')).toBeInTheDocument();
       expect(screen.getByText('Accept the terms to continue.')).toBeInTheDocument();
-      expect(screen.getByText('Step 1 of 3: Phone and SMS code')).toBeInTheDocument();
     });
 
-    it('shows password strength and the disabled SMS code field', async () => {
+    it('shows password strength and rejects mismatched passwords', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      const password = screen.getByLabelText(/create a password/i);
-      await userEvent.type(password, 'short');
+      await userEvent.type(screen.getByLabelText(/create a password/i), 'short');
       expect(screen.getByText('Very weak')).toBeInTheDocument();
-      await userEvent.clear(password);
-      await userEvent.type(password, 'Dushanbe2026');
-      expect(screen.getByText('At least 8 characters').closest('li')).toHaveClass('text-primary');
-      expect(await screen.findByText(/activates once phone verification is enabled/i)).toBeInTheDocument();
-      expect(screen.getByRole('group', { name: 'SMS confirmation code' })).toBeInTheDocument();
-      screen.getAllByLabelText(/SMS confirmation code \d/).forEach((box) => expect(box).toBeDisabled());
-    });
-
-    it('rejects mismatched passwords', async () => {
-      mockApi([{ path: '/meta', body: META_DISABLED }]);
-      renderRoutes(routes, '/register');
+      await userEvent.clear(screen.getByLabelText(/create a password/i));
       await fillAccount({ confirm: 'Different2026' });
       expect(await screen.findByText("Passwords don't match.")).toBeInTheDocument();
     });
@@ -116,30 +122,79 @@ describe('auth screens', () => {
       const { calls } = mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
       await fillAccount();
-      expect(await screen.findByText('Step 2 of 3: Organization')).toBeInTheDocument();
       // Steps animate: the next step mounts after the previous one has left.
       await userEvent.type(await screen.findByLabelText(/store name/i), 'Corner Market');
       await userEvent.click(screen.getByRole('button', { name: /back/i }));
       expect(await screen.findByLabelText(/full name/i)).toHaveValue('Nigina Karimova');
-      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      await userEvent.click(continueButton());
       await screen.findByLabelText(/store name/i);
-      await userEvent.click(await screen.findByRole('button', { name: 'Continue' }));
+      await userEvent.click(continueButton());
 
       expect(await screen.findByText('Corner Market · Store')).toBeInTheDocument();
-      expect(screen.getByText('+992901234567')).toBeInTheDocument();
-      expect(screen.getByText(/6-digit code to \+992901234567/)).toBeInTheDocument();
-      expect(screen.getByText(/confirm nigina@example.tj/i)).toBeInTheDocument();
-      expect(await screen.findByText("Registration isn't open yet", {}, { timeout: 3000 })).toBeInTheDocument();
+      expect(screen.getByText('nigina@example.tj')).toBeInTheDocument();
+      expect(screen.getByText(/confirmation link to nigina@example.tj/i)).toBeInTheDocument();
+      expect(await screen.findByText("Registration isn't open yet", {}, NOTICE_TIMEOUT)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
       expect(nonMetaCalls(calls)).toHaveLength(0);
     });
   });
 
-  it('password reset explains it is not enabled yet', async () => {
-    mockApi([{ path: '/meta', body: META_DISABLED }]);
-    renderRoutes(routes, '/reset');
-    expect(await screen.findByText("Password reset isn't enabled yet", {}, { timeout: 3000 })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Send code' })).toBeDisabled();
+  describe('forgot and reset password', () => {
+    it('requests a reset link by email and explains it is not enabled yet', async () => {
+      const { calls } = mockApi([{ path: '/meta', body: META_DISABLED }]);
+      renderRoutes(routes, '/forgot-password');
+      expect(screen.getByRole('heading', { name: 'Forgot your password?' })).toBeInTheDocument();
+      expect(screen.getByText(/if an account exists for it/i)).toBeInTheDocument();
+      await userEvent.type(screen.getByLabelText(/^email/i), 'wrong');
+      await userEvent.tab();
+      expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument();
+      expect(await screen.findByText("Password reset isn't enabled yet", {}, NOTICE_TIMEOUT)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Send reset link' })).toBeDisabled();
+      expect(nonMetaCalls(calls)).toHaveLength(0);
+    });
+
+    it('sends the old /reset path to /forgot-password', () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      const { current } = renderRoutes(routes, '/reset');
+      expect(current.location?.pathname).toBe('/forgot-password');
+    });
+
+    it('treats a reset link without a token as invalid', () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      renderRoutes(routes, '/reset-password');
+      expect(screen.getByText("This reset link isn't valid")).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Request a new link' })).toHaveAttribute('href', '/forgot-password');
+    });
+
+    it('takes the token out of the address bar and validates the new password', async () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      const { current } = renderRoutes(routes, `/reset-password?token=${'a'.repeat(43)}`);
+      expect(screen.getByRole('heading', { name: 'Choose a new password' })).toBeInTheDocument();
+      await waitFor(() => expect(current.location?.search).toBe(''));
+      await userEvent.type(screen.getByLabelText(/create a password/i), 'Dushanbe2026');
+      await userEvent.type(screen.getByLabelText(/repeat the password/i), 'Other2026x');
+      await userEvent.tab();
+      expect(await screen.findByText("Passwords don't match.")).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Save new password' })).toBeDisabled();
+    });
+  });
+
+  describe('verify email', () => {
+    it('explains the inbox step when opened without a link', async () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      renderRoutes(routes, '/verify-email');
+      expect(screen.getByRole('heading', { name: 'Confirm your email' })).toBeInTheDocument();
+      expect(screen.getByText(/we sent a confirmation link/i)).toBeInTheDocument();
+      expect(await screen.findByText("Email verification isn't enabled yet", {}, NOTICE_TIMEOUT)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Send the link again' })).toBeDisabled();
+    });
+
+    it('offers confirmation for a link and removes the token from the URL', async () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      const { current } = renderRoutes(routes, `/verify-email?token=${'b'.repeat(43)}`);
+      expect(screen.getByRole('button', { name: 'Confirm email' })).toBeDisabled();
+      await waitFor(() => expect(current.location?.search).toBe(''));
+    });
   });
 
   it('Google callback reports a cancelled sign-in without touching the code', async () => {

@@ -11,9 +11,10 @@ import { LogoMark, SupportLink } from '@/shared/ui';
 const EASE = [0.2, 0.8, 0.2, 1] as const;
 
 /** Which left-panel copy each auth route shows. */
-function headlineKey(pathname: string): 'login' | 'register' | 'reset' {
+function headlineKey(pathname: string): 'login' | 'register' | 'reset' | 'verify' {
   if (pathname.startsWith('/register')) return 'register';
-  if (pathname.startsWith('/reset')) return 'reset';
+  if (pathname.startsWith('/verify-email')) return 'verify';
+  if (pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password')) return 'reset';
   return 'login';
 }
 

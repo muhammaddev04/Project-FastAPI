@@ -20,14 +20,15 @@ export type Membership = {
 
 export type Me = {
   id: string;
-  phone: string;
+  /** CR-001: email is the sign-in identifier; phone is an optional contact. */
+  email: string;
+  phone: string | null;
   full_name: string;
-  email: string | null;
   email_verified: boolean;
   language: Language;
   status: 'ACTIVE' | 'BLOCKED';
   is_superadmin: boolean;
-  phone_verified_at: string;
+  phone_verified_at: string | null;
   last_login_at: string | null;
   created_at: string;
   memberships: Membership[];
@@ -37,7 +38,8 @@ export type Member = {
   id: string;
   user_id: string;
   full_name: string;
-  phone: string;
+  email: string;
+  phone: string | null;
   role: Role;
   status: MembershipStatus;
   joined_at: string;

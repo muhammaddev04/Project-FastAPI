@@ -19,10 +19,10 @@ export function membershipFixture(overrides: Partial<Membership> = {}): Membersh
 export function meFixture(memberships: Membership[] = [membershipFixture()], overrides: Partial<Me> = {}): Me {
   return {
     id: 'user-1',
+    email: 'dilshod@pamir.tj',
     phone: '+992900000001',
     full_name: 'Dilshod Rahimov',
-    email: null,
-    email_verified: false,
+    email_verified: true,
     language: 'en',
     status: 'ACTIVE',
     is_superadmin: false,

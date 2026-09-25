@@ -17,7 +17,7 @@ export function LoginPage() {
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     mode: 'onTouched',
-    defaultValues: { phone: '', password: '' },
+    defaultValues: { email: '', password: '' },
   });
   const errors = form.formState.errors;
 
@@ -36,16 +36,14 @@ export function LoginPage() {
 
       {/* Submission is wired by the P01 session service; until it is enabled no credentials are sent anywhere. */}
       <form className="space-y-4" noValidate onSubmit={form.handleSubmit(() => undefined)}>
-        <FormField labelClassName={authLabel} label={t('auth.fields.phone')} error={errors.phone?.message && t(errors.phone.message)}>
+        <FormField labelClassName={authLabel} label={t('auth.fields.email')} error={errors.email?.message && t(errors.email.message)}>
           <Input
             variant="outline"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel-national"
-            placeholder="900 12 34 56"
-            data
-            addon="+992"
-            {...form.register('phone')}
+            type="email"
+            inputMode="email"
+            autoComplete="username"
+            placeholder="name@company.tj"
+            {...form.register('email')}
           />
         </FormField>
         <FormField
@@ -53,7 +51,7 @@ export function LoginPage() {
           label={t('auth.fields.password')}
           error={errors.password?.message && t(errors.password.message)}
           action={
-            <Link to="/reset" className="link-grow text-[0.8125rem] font-medium text-primary hover:text-primary-hover">
+            <Link to="/forgot-password" className="link-grow text-[0.8125rem] font-medium text-primary hover:text-primary-hover">
               {t('auth.login.forgot')}
             </Link>
           }

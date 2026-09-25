@@ -3,7 +3,9 @@ import { AuthShell } from '@/features/auth/auth-layout';
 import { GoogleCallbackPage } from '@/features/auth/google-callback-page';
 import { LoginPage } from '@/features/auth/login-page';
 import { RegisterPage } from '@/features/auth/register-page';
-import { ResetPage } from '@/features/auth/reset-page';
+import { ForgotPasswordPage } from '@/features/auth/forgot-password-page';
+import { ResetPasswordPage } from '@/features/auth/reset-password-page';
+import { VerifyEmailPage } from '@/features/auth/verify-email-page';
 import { CompanyDashboard } from '@/features/dashboard/company-dashboard';
 import { CourierHome } from '@/features/dashboard/courier-home';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
@@ -37,10 +39,14 @@ export const routes: RouteObject[] = [
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
-      { path: '/reset', element: <ResetPage /> },
+      { path: '/forgot-password', element: <ForgotPasswordPage /> },
+      { path: '/reset-password', element: <ResetPasswordPage /> },
+      { path: '/verify-email', element: <VerifyEmailPage /> },
       { path: '/auth/google/callback', element: <GoogleCallbackPage /> },
     ],
   },
+  // CR-001: recovery starts with email; the old SMS-era path points there.
+  { path: '/reset', element: <Navigate to="/forgot-password" replace /> },
   { path: '/welcome', element: <RequireAuth>{(me) => <WelcomePage me={me} />}</RequireAuth> },
   { path: '/profile', element: <RequireAuth>{(me) => <ProfilePage me={me} />}</RequireAuth> },
   {

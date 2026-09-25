@@ -1,17 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, Building2, Check, Mail, MessageSquareText, Store, UserCheck } from 'lucide-react';
+import { ArrowLeft, Building2, Check, Mail, Store, UserCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { currentLanguage } from '@/shared/i18n';
 import { cn } from '@/shared/lib/cn';
-import { Button, FormField, Input, OtpInput, PasswordInput, Select } from '@/shared/ui';
+import { Button, FormField, Input, PasswordInput, Select } from '@/shared/ui';
 import { AuthCard, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
 import { MethodUnavailable } from './availability';
 import { GoogleButton, OrDivider } from './google-button';
 import { PasswordChecklist } from './password-checklist';
-import { REGISTER_STEPS, normalizePhone, registerSchema, type RegisterValues } from './schemas';
+import { REGISTER_STEPS, registerSchema, type RegisterValues } from './schemas';
 import { useAuthMethod } from './use-auth-method';
 
 type StepId = (typeof REGISTER_STEPS)[number]['id'];
@@ -85,7 +85,6 @@ export function RegisterPage() {
   const [step, setStep] = useState<StepId>('account');
   /** +1 moving forward, -1 going back: the next step slides in from that side. */
   const [direction, setDirection] = useState(1);
-  const [code, setCode] = useState('');
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
@@ -94,7 +93,6 @@ export function RegisterPage() {
       orgType: 'STORE',
       orgName: '',
       fullName: '',
-      phone: '',
       email: '',
       acceptTerms: false as unknown as true,
       language: currentLanguage(),
@@ -105,7 +103,6 @@ export function RegisterPage() {
   const errors = form.formState.errors;
   const values = form.watch();
   const message = (key?: string) => (key ? t(key) : undefined);
-  const phone = normalizePhone(values.phone);
 
   async function next() {
     const definition = REGISTER_STEPS.find((item) => item.id === step);
@@ -127,7 +124,7 @@ export function RegisterPage() {
         </div>
       ) : null}
 
-      {/* Account creation (SMS/e-mail verification, then session) is wired by the deferred P01 flow. */}
+      {/* Account creation (email verification, then session) is wired by the deferred P01 flow. */}
       <form className="space-y-4" noValidate onSubmit={(event) => event.preventDefault()}>
         <AnimatePresence mode="wait" initial={false} custom={direction}>
           <motion.div
@@ -152,22 +149,11 @@ export function RegisterPage() {
             </FormField>
             <FormField
               labelClassName={authLabel}
-              label={t('auth.fields.mobile')}
-              hint={t('auth.register.phoneHint')}
-              error={message(errors.phone?.message)}
-            >
-              <Input variant="outline" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="900 12 34 56" data addon="+992" {...form.register('phone')} />
-            </FormField>
-            <FormField
-              labelClassName={authLabel}
-              label={
-                <>
-                  {t('auth.fields.email')} <span className="font-normal text-muted-foreground">({t('common.optional')})</span>
-                </>
-              }
+              label={t('auth.fields.email')}
+              hint={t('auth.register.emailHint')}
               error={message(errors.email?.message)}
             >
-              <Input variant="outline" type="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
+              <Input variant="outline" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
             </FormField>
             <div className="space-y-2">
               <FormField labelClassName={authLabel} label={t('auth.fields.newPassword')} error={message(errors.password?.message)}>
@@ -179,20 +165,6 @@ export function RegisterPage() {
               <PasswordInput variant="outline" autoComplete="new-password" {...form.register('confirmPassword')} />
             </FormField>
 
-            <section className="rounded-md border border-input p-3" aria-labelledby="otp-title">
-              <div className="flex items-center justify-between gap-2">
-                <h2 id="otp-title" className="text-[0.8125rem] font-semibold">
-                  {t('auth.register.otp.title')}
-                </h2>
-                <span className="text-[0.6875rem] font-medium text-muted-foreground">{t('auth.register.otp.digits')}</span>
-              </div>
-              <p className="mt-1 text-[0.75rem] text-muted-foreground">
-                {available ? t('auth.register.otp.text') : t('auth.register.otp.disabled')}
-              </p>
-              <div className="mt-3">
-                <OtpInput value={code} onChange={setCode} disabled={!available} label={t('auth.register.otp.title')} />
-              </div>
-            </section>
 
             <div className="space-y-1">
               <label className="flex cursor-pointer items-start gap-2.5 text-[0.75rem] leading-5 text-muted-foreground">
@@ -234,8 +206,7 @@ export function RegisterPage() {
               {[
                 [t('auth.register.review.organization'), `${values.orgName} · ${t(`orgTypes.${values.orgType}`)}`],
                 [t('auth.fields.fullName'), values.fullName],
-                [t('auth.fields.phone'), phone],
-                [t('auth.fields.email'), values.email || '—'],
+                [t('auth.fields.email'), values.email.trim().toLowerCase()],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-4 px-3 py-2.5">
                   <dt className="text-muted-foreground">{label}</dt>
@@ -247,15 +218,9 @@ export function RegisterPage() {
               <p className="text-[0.8125rem] font-semibold">{t('auth.register.review.nextTitle')}</p>
               <ul className="mt-1.5 space-y-1 text-[0.75rem] text-muted-foreground">
                 <li className="flex gap-2">
-                  <MessageSquareText className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                  {t('auth.register.review.sms', { phone })}
+                  <Mail className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
+                  {t('auth.register.review.email', { email: values.email.trim().toLowerCase() })}
                 </li>
-                {values.email ? (
-                  <li className="flex gap-2">
-                    <Mail className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                    {t('auth.register.review.email', { email: values.email })}
-                  </li>
-                ) : null}
                 <li className="flex gap-2">
                   <UserCheck className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
                   {t('auth.register.review.owner', { type: t(`orgTypes.${values.orgType}`) })}
@@ -280,7 +245,7 @@ export function RegisterPage() {
             </Button>
           ) : (
             <Button type="button" className={`flex-1 ${authPrimaryButton}`} onClick={() => void next()}>
-              {step === 'account' && available ? t('auth.register.continueSms') : t('common.continue')}
+              {t('common.continue')}
             </Button>
           )}
         </div>

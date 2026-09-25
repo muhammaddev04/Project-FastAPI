@@ -8,7 +8,6 @@ export * from './form-field';
 export * from './input';
 export * from './label';
 export * from './motion';
-export * from './otp-input';
 export * from './page-header';
 export * from './password-input';
 export * from './segmented-control';
