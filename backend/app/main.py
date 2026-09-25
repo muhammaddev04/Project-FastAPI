@@ -8,6 +8,7 @@ from app.core.errors import register_error_handlers
 from app.core.health import health_router, meta_router
 from app.core.logging import configure_logging
 from app.core.request_context import RequestContextMiddleware
+from app.modules.auth.router import router as auth_router
 from app.modules.identity.router import router as identity_router
 from app.modules.organizations.router import router as organizations_router
 
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
     register_error_handlers(app)
     app.include_router(health_router)
     app.include_router(meta_router)
+    app.include_router(auth_router)
     app.include_router(identity_router)
     app.include_router(organizations_router)
     return app

@@ -99,6 +99,7 @@ def test_fnd_002_production_refuses_insecure_defaults() -> None:
         Settings(app_env="production")
     production = Settings(
         app_env="production",
+        app_secret_key="a" * 40,
         jwt_access_secret="s" * 40,
         email_provider="smtp",
         smtp_host="smtp.gmail.com",

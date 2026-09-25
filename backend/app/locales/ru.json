@@ -45,7 +45,7 @@
   "email.verification.heading": "Подтвердите адрес электронной почты",
   "email.verification.intro": "Здравствуйте, {name}! Подтвердите этот адрес, чтобы завершить создание аккаунта TezFarmo.",
   "email.verification.action": "Подтвердить email",
-  "email.verification.expiry": "Ссылка действует один раз и истекает через {minutes} мин.",
+  "email.verification.expiry": "Ссылка действует один раз и истекает через {hours} ч.",
   "email.verification.ignore": "Если вы не создавали аккаунт TezFarmo, просто проигнорируйте это письмо.",
   "email.verification.footer": "Если кнопка не работает, откройте ссылку:",
   "email.password_reset.subject": "Восстановление пароля TezFarmo",
@@ -54,5 +54,13 @@
   "email.password_reset.action": "Задать новый пароль",
   "email.password_reset.expiry": "Ссылка действует один раз и истекает через {minutes} мин. После смены пароля вы выйдете на всех устройствах.",
   "email.password_reset.ignore": "Если вы не запрашивали смену пароля, проигнорируйте письмо — пароль останется прежним.",
-  "email.password_reset.footer": "Если кнопка не работает, откройте ссылку:"
+  "email.password_reset.footer": "Если кнопка не работает, откройте ссылку:",
+  "errors.weak_password": "Выберите более надёжный пароль.",
+  "email.account_exists.subject": "Ваш аккаунт TezFarmo",
+  "email.account_exists.heading": "У вас уже есть аккаунт",
+  "email.account_exists.intro": "Здравствуйте, {name}! Кто-то попытался зарегистрировать новый аккаунт TezFarmo с этим адресом. Аккаунт с этим адресом уже существует, поэтому ничего не создано.",
+  "email.account_exists.action": "Войти",
+  "email.account_exists.expiry": "Забыли пароль? Нажмите «Забыли пароль?» на странице входа.",
+  "email.account_exists.ignore": "Если это были не вы, просто проигнорируйте письмо: ваш аккаунт не затронут.",
+  "email.account_exists.footer": "Если кнопка не работает, откройте ссылку:"
 }

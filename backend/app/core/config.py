@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6380/0"
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
+    # SEC-010: general application secret; keys the HMAC of one-time email tokens (P01 §2.2).
+    app_secret_key: str = INSECURE_DEFAULT + "-app"
+
     # SEC-003: access tokens are signed with their own secret.
     jwt_access_secret: str = INSECURE_DEFAULT + "-access"
     access_token_ttl_minutes: int = 15
@@ -66,7 +69,7 @@ class Settings(BaseSettings):
     def _refuse_insecure_production(self) -> Settings:
         """FND-002: production must not start with debug on or weak/default secrets."""
         if self.app_env == "production":
-            secrets = (self.jwt_access_secret,)
+            secrets = (self.app_secret_key, self.jwt_access_secret)
             weak = any(len(value) < 32 or value.startswith(INSECURE_DEFAULT) for value in secrets)
             if self.app_debug or weak:
                 raise ValueError("production requires 32+ byte explicit secrets and APP_DEBUG=false")

@@ -45,7 +45,7 @@
   "email.verification.heading": "Суроғаи почтаи электрониро тасдиқ кунед",
   "email.verification.intro": "Салом, {name}! Барои анҷом додани сохтани ҳисоби TezFarmo ин суроғаро тасдиқ кунед.",
   "email.verification.action": "Тасдиқи почта",
-  "email.verification.expiry": "Пайванд як бор кор мекунад ва баъди {minutes} дақиқа эътибор надорад.",
+  "email.verification.expiry": "Пайванд як бор кор мекунад ва баъди {hours} соат эътибор надорад.",
   "email.verification.ignore": "Агар шумо ҳисоби TezFarmo насохта бошед, ин мактубро нодида гиред.",
   "email.verification.footer": "Агар тугма кор накунад, ин пайвандро кушоед:",
   "email.password_reset.subject": "Барқарории пароли TezFarmo",
@@ -54,5 +54,13 @@
   "email.password_reset.action": "Пароли навро интихоб кунед",
   "email.password_reset.expiry": "Пайванд як бор кор мекунад ва баъди {minutes} дақиқа эътибор надорад. Баъди иваз шумо аз ҳамаи дастгоҳҳо мебароед.",
   "email.password_reset.ignore": "Агар шумо инро дархост накарда бошед, мактубро нодида гиред — парол тағйир намеёбад.",
-  "email.password_reset.footer": "Агар тугма кор накунад, ин пайвандро кушоед:"
+  "email.password_reset.footer": "Агар тугма кор накунад, ин пайвандро кушоед:",
+  "errors.weak_password": "Пароли мустаҳкамтар интихоб кунед.",
+  "email.account_exists.subject": "Ҳисоби шумо дар TezFarmo",
+  "email.account_exists.heading": "Шумо аллакай ҳисоб доред",
+  "email.account_exists.intro": "Салом, {name}! Касе кӯшиш кард бо ин суроғаи почта ҳисоби нави TezFarmo сабт кунад. Ҳисоб бо ин суроға аллакай мавҷуд аст, бинобар ин чизе сохта нашуд.",
+  "email.account_exists.action": "Ворид шудан",
+  "email.account_exists.expiry": "Паролро фаромӯш кардед? Дар саҳифаи вуруд «Паролро фаромӯш кардед?»-ро пахш кунед.",
+  "email.account_exists.ignore": "Агар ин шумо набудед, ин мактубро нодида гиред: ҳисоби шумо бетағйир аст.",
+  "email.account_exists.footer": "Агар тугма кор накунад, ин пайвандро кушоед:"
 }

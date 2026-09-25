@@ -10,7 +10,8 @@ from html import escape
 from app.core.email import OutgoingEmail
 from app.core.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, translate
 
-TEMPLATES = ("verification", "password_reset")
+# `account_exists` answers a registration attempt for an address that already has an account (IAM-001).
+TEMPLATES = ("verification", "password_reset", "account_exists")
 _BRAND = "#0F766E"
 
 
@@ -48,7 +49,8 @@ def render(template: str, language: str, *, to: str, name: str, action_url: str,
     language = language if language in SUPPORTED_LANGUAGES else DEFAULT_LANGUAGE
 
     def text(key: str) -> str:
-        return translate(f"email.{template}.{key}", language, name=name, minutes=minutes)
+        # Copy may state the lifetime in minutes or whole hours (the 24-hour verification link).
+        return translate(f"email.{template}.{key}", language, name=name, minutes=minutes, hours=minutes // 60)
 
     heading, intro, expiry, ignore = text("heading"), text("intro"), text("expiry"), text("ignore")
     action, footer = text("action"), text("footer")

@@ -17,8 +17,9 @@ class RateLimit:
 
 # P00 §4.1 global rate-limit table.
 AUTH_LOGIN = RateLimit("auth_login", 5, 15 * 60)
-AUTH_OTP_SEND = RateLimit("auth_otp_send", 5, 60 * 60)
-AUTH_OTP_VERIFY = RateLimit("auth_otp_verify", 10, 60 * 60)
+# CR-001: the email-channel limits replace the SMS OTP ones (same numbers).
+AUTH_EMAIL_SEND = RateLimit("auth_email_send", 5, 60 * 60)
+AUTH_EMAIL_VERIFY = RateLimit("auth_email_verify", 10, 60 * 60)
 PASSWORD_RESET = RateLimit("password_reset", 3, 60 * 60)
 DEFAULT_AUTHENTICATED = RateLimit("default_authenticated", 300, 60)
 

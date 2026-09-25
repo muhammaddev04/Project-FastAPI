@@ -32,10 +32,11 @@ SECRET_LINK = "https://app.tezfarmo.tj/verify-email?token=SECRET-ONE-TIME-VALUE"
 )
 def test_verification_email_is_localized(language: str, subject: str) -> None:
     message = render(
-        "verification", language, to="nigina@example.tj", name="Nigina", action_url=SECRET_LINK, minutes=30
+        "verification", language, to="nigina@example.tj", name="Nigina", action_url=SECRET_LINK, minutes=24 * 60
     )
     assert message.subject == subject
-    assert "Nigina" in message.text and "30" in message.text
+    # P01 §2.2: the verification link lives 24 hours, stated in hours in every language.
+    assert "Nigina" in message.text and "24" in message.text
     assert SECRET_LINK in message.text
     assert f'href="{SECRET_LINK}"' in message.html
     assert message.template == "verification"
@@ -171,9 +172,10 @@ def test_smtp_password_is_never_rendered() -> None:
 def test_production_requires_smtp_delivery() -> None:
     strong = "s" * 40
     with pytest.raises(ValueError, match="EMAIL_PROVIDER=smtp"):
-        Settings(app_env="production", jwt_access_secret=strong)
+        Settings(app_env="production", app_secret_key=strong, jwt_access_secret=strong)
     Settings(
         app_env="production",
+        app_secret_key=strong,
         jwt_access_secret=strong,
         email_provider="smtp",
         smtp_host="smtp.gmail.com",
