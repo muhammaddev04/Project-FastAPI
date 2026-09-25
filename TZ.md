@@ -287,7 +287,7 @@ Telegram-бот), ки мағозаро мустақиман бо фирма м�
 
 Корбар (User)
 
-Одаме, ки бо телефон ва парол ба система медарояд.
+Одаме, ки бо email ва парол ба система медарояд.
 
 Узвият (Membership)
 
@@ -605,10 +605,11 @@ Minimum Viable Product — нусхаи ҳадди ақали корӣ.
 
 Идораи вуруд, нақшҳо ва бехатарии дастрасӣ.
 
-F-1.1 [Ҳатмӣ] Сабти ном бо рақами телефон ва тасдиқи он тавассути
-SMS-код.
+F-1.1 [Ҳатмӣ] Сабти ном бо email ва тасдиқи он тавассути пайванди
+яккарата, ки ба email фиристода мешавад ва 24 соат эътибор дорад (CR-001).
 
-F-1.2 [Ҳатмӣ] Вуруд бо телефон ва парол; парол бо алгоритми argon2
+F-1.2 [Ҳатмӣ] Вуруд бо email ва парол, танҳо баъди тасдиқи email;
+парол бо алгоритми argon2
 ё bcrypt ҳэш мешавад, ҳеҷ гоҳ кушода нигоҳ дошта намешавад.
 
 F-1.3 [Ҳатмӣ] JWT: токени дастрасӣ (access) бо мӯҳлати кӯтоҳ
@@ -625,10 +626,15 @@ F-1.5 [Ҳатмӣ] Ҳангоми ғайрифаъолкунии узвият (�
 F-1.6 [Ҳатмӣ] Маҳдудкунии кӯшишҳои вуруд (rate limiting): масалан
 5 кӯшиш дар 15 дақиқа, баъд қулфи муваққатӣ.
 
-F-1.7 [Ҳатмӣ] Барқарорсозии парол тавассути SMS-код.
+F-1.7 [Ҳатмӣ] Барқарорсозии парол тавассути email: пайванди яккарата,
+ки 30 дақиқа эътибор дорад (CR-001).
 
 F-1.8 [Ҳатмӣ] Корбар забони интерфейсро (тоҷикӣ/русӣ/англисӣ)
 интихоб мекунад; интихоб дар профил сабт ва нигоҳ дошта мешавад.
+
+F-1.9 [Матлуб] Вуруд тавассути Google OAuth ҳамчун усули иловагӣ ва
+ихтиёрӣ (CR-001). Сабти ном ва вуруди асосӣ бо email ва парол аз Google
+вобаста нестанд.
 
 5.2. Модули верификатсия
 
@@ -1918,11 +1924,23 @@ ID
 
 Рақами беназир
 
-phone
+email
 
 Матн (беназир)
 
-Телефон — логини асосӣ, бо SMS тасдиқ
+Email — логини асосӣ, бо пайванди email тасдиқ мешавад (CR-001)
+
+email_verified_at
+
+Вақт
+
+Кай email тасдиқ шуд; то тасдиқ вуруд бо парол манъ аст
+
+phone
+
+Матн (беназир, ихтиёрӣ)
+
+Телефони тамос; барои вуруд ва барқарорсозии парол истифода намешавад
 
 password_hash
 
@@ -1952,7 +1970,7 @@ phone_verified_at
 
 Вақт
 
-Кай телефон бо SMS тасдиқ шуд
+Ихтиёрӣ; ба аутентификатсия дахл надорад (CR-001)
 
 memberships
 
@@ -3834,7 +3852,7 @@ POST /api/payments/{id}/confirm // аз тарафи мағоза
 
 Вуруд/сабти ном
 
-Телефон + SMS-код + парол.
+Email + парол; тасдиқи email бо пайванд (CR-001).
 
 Асосӣ (дашборд)
 
@@ -7662,7 +7680,7 @@ git push ҚАТЪИЯН МАНЪ — push-ро ман худам мекунам.
 | Inventory | танҳо `quantity` | `stock_movements` append-only journal |
 | Units | норавшан | base unit + sale units бо coefficient |
 | Pricing | холӣ | price lists + price history |
-| Auth | норавшан | phone + password + SMS OTP + JWT rotation |
+| Auth | норавшан | email + password + тасдиқи email + JWT rotation (CR-001) |
 | Delivery code | 4 рақам | 6 рақам, HMAC, 5 кӯшиш |
 | Requirement ID | танҳо формат | ҳар талабот ID дорад |
 | Permission | тавсифӣ | матритсаи role × action дар ҳар қисм |
@@ -7923,7 +7941,7 @@ frontend/src/
 | DEC-14 | Completion | `DELIVERED → COMPLETED` автоматӣ пас аз `dispute_window_hours` (default 48) агар dispute-и кушода набошад. |
 | DEC-15 | Return window | `terms.return_days` (default 14) аз `delivered_at`. |
 | DEC-16 | Delivery code | 6 рақам, HMAC-SHA256, 5 кӯшиш, пас lock; MANAGER метавонад regenerate кунад (audit). |
-| DEC-17 | Auth | Phone (E.164) + password; тасдиқи phone бо SMS OTP. |
+| DEC-17 | Auth | Email + password; email пеш аз вуруд бо пайванди яккарата тасдиқ мешавад. Phone — атрибути ихтиёрии тамос, на барои аутентификатсия (CR-001). |
 | DEC-18 | Role assignment | Танҳо Company/Store **OWNER** role таъин мекунад. Self-assignment манъ. OWNER-ро танҳо SUPERADMIN иваз мекунад. |
 | DEC-19 | Verification | Партнёршип танҳо вақте `ACTIVE` мешавад, ки ҳам Company ва ҳам Store `APPROVED` бошанд. |
 | DEC-20 | Subscription billing | Дар MVP дастӣ: SUPERADMIN пардохти subscription-ро сабт мекунад. |
@@ -8097,7 +8115,7 @@ Celery Beat ҳар 5 сония `dispatch_outbox`: `SELECT … WHERE status='PEN
 | SEC-008 | File upload: whitelist-и MIME + санҷиши magic bytes + андоза; номи файл аз user ҳеҷ гоҳ path намешавад; private bucket; signed URL 5 дақиқа. |
 | SEC-009 | CORS: танҳо origin-ҳои аз config. |
 | SEC-010 | Secrets танҳо дар env / secret manager; `.env` дар `.gitignore`. |
-| SEC-011 | Logs: phone mask (`+992*****1234`), бе password, token, OTP, delivery code, маблағҳои пурраи молиявии шахсӣ дар debug. |
+| SEC-011 | Logs: phone ва email mask (`+992*****1234`), бе password, token, email token, SMTP credentials, delivery code, маблағҳои пурраи молиявии шахсӣ дар debug. |
 | SEC-012 | Security headers дар Nginx: HSTS, X-Content-Type-Options, X-Frame-Options DENY, Referrer-Policy, CSP барои SPA. |
 
 ---
@@ -8258,18 +8276,18 @@ test impact, approval (ном + сана)
 | `token_expired` | 401 | Access token кӯҳна |
 | `token_invalid` | 401 | Token нодуруст |
 | `refresh_token_reused` | 401 | Reuse ошкор шуд — ҳамаи session-ҳои family revoke шуданд |
-| `invalid_credentials` | 401 | Phone ё password нодуруст (якхела барои ҳарду) |
+| `invalid_credentials` | 401 | Email ё password нодуруст (якхела барои ҳарду) |
 | `user_blocked` | 403 | User блок |
-| `phone_already_registered` | 409 | |
-| `otp_invalid` | 422 | |
-| `otp_expired` | 422 | |
-| `otp_attempts_exceeded` | 429 | |
-| `otp_resend_too_early` | 429 | |
+| `email_already_registered` | 409 | |
+| `email_not_verified` | 403 | Email тасдиқ нашудааст — вуруд бо парол манъ (CR-001) |
+| `email_token_invalid` | 422 | Пайванди email нодуруст ё истифодашуда |
+| `email_token_expired` | 422 | Мӯҳлати пайванди email гузаштааст |
+| `email_resend_too_early` | 429 | |
 | `weak_password` | 422 | |
 | `org_context_required` | 400 | `X-Org-Id` нест |
 | `membership_inactive` | 403 | Membership `ACTIVE` нест |
 | `invitation_invalid` | 422 | Invitation нест/кӯҳна/истифодашуда |
-| `invitation_phone_mismatch` | 403 | Phone-и user бо invitation мувофиқ нест |
+| `invitation_email_mismatch` | 403 | Email-и user бо invitation мувофиқ нест |
 | `cannot_modify_owner` | 409 | OWNER-ро танҳо SUPERADMIN иваз мекунад |
 | `self_role_change_forbidden` | 403 | |
 | `membership_already_exists` | 409 | |
@@ -8468,6 +8486,10 @@ S3_ENDPOINT= S3_ACCESS_KEY= S3_SECRET_KEY= S3_BUCKET_PRIVATE=
 CORS_ORIGINS=
 SENTRY_DSN=
 SMS_PROVIDER=console|<provider>
+EMAIL_PROVIDER=console|smtp
+SMTP_HOST= SMTP_PORT=587 SMTP_USERNAME= SMTP_PASSWORD= SMTP_STARTTLS=true
+FROM_EMAIL=
+FRONTEND_BASE_URL=
 TELEGRAM_BOT_TOKEN= TELEGRAM_WEBHOOK_SECRET= TELEGRAM_WEBHOOK_PATH_TOKEN=
 DEFAULT_LANGUAGE=tg
 ```
@@ -8525,7 +8547,7 @@ UNIQUE (`scope`, `key`). Тоза кардан: Celery task-и ҳаррӯза (`
 
 Indexes: (`org_id`, `created_at DESC`), (`entity_type`, `entity_id`), (`actor_id`, `created_at DESC`).
 
-Маълумоти ҳассос (password hash, token, OTP, delivery code) ба `old_data/new_data` **дохил намешавад** — `AuditService` рӯйхати `REDACTED_FIELDS` дорад.
+Маълумоти ҳассос (password hash, token, email token, delivery code) ба `old_data/new_data` **дохил намешавад** — `AuditService` рӯйхати `REDACTED_FIELDS` дорад.
 
 #### 3.4. `outbox_events`
 
@@ -8587,10 +8609,10 @@ END; $$ LANGUAGE plpgsql;
 
 | Name | Limit | Key |
 |---|---|---|
-| `auth_login` | 5 / 15 дақ | phone + ip |
-| `auth_otp_send` | 5 / соат | phone |
-| `auth_otp_verify` | 10 / соат | phone |
-| `password_reset` | 3 / соат | phone |
+| `auth_login` | 5 / 15 дақ | email + ip |
+| `auth_email_send` | 5 / соат | email |
+| `auth_email_verify` | 10 / соат | ip |
+| `password_reset` | 3 / соат | email |
 | `delivery_confirm` | 20 / соат | user |
 | `telegram_webhook` | 60 / дақ | ip |
 | `import_upload` | 10 / соат | org |
@@ -8684,13 +8706,13 @@ Test infrastructure: `conftest.py` — PostgreSQL-и тестӣ (docker), ҳар
 ## [P01_identity_access] P01 — IDENTITY & ACCESS
 
 **Вобастагӣ:** P00
-**Мақсад:** User, бақайдгирӣ бо SMS OTP, login, JWT rotation, organizations-и базавӣ, membership, invitation, RBAC.
+**Мақсад:** User, бақайдгирӣ бо тасдиқи email (CR-001), login, JWT rotation, organizations-и базавӣ, membership, invitation, RBAC.
 
 ---
 
 ### 1. Доира
 
-**Дохил:** users, OTP, tokens, `organizations` (ҷадвали умумӣ), memberships, invitations, permission registry, `/me`, org switcher.
+**Дохил:** users, email tokens, refresh tokens, `organizations` (ҷадвали умумӣ), memberships, invitations, permission registry, `/me`, org switcher.
 **Берун:** профили Company/Store ва verification (P02).
 
 ---
@@ -8702,33 +8724,34 @@ Test infrastructure: `conftest.py` — PostgreSQL-и тестӣ (docker), ҳар
 | Field | Type | Constraints |
 |---|---|---|
 | id | UUID | PK |
-| phone | VARCHAR(16) | NOT NULL, UNIQUE, CHECK формати E.164 (`^\+[1-9][0-9]{7,14}$`) |
+| email | VARCHAR(254) | NOT NULL, UNIQUE аз рӯи `lower(email)` — логин (CR-001) |
+| email_verified_at | timestamptz | NULL; то тасдиқ вуруд бо парол манъ (`email_not_verified`) |
+| phone | VARCHAR(16) | NULL, UNIQUE, CHECK формати E.164 (`^\+[1-9][0-9]{7,14}$`) — тамос, на логин |
 | full_name | VARCHAR(150) | NOT NULL |
 | password_hash | VARCHAR(255) | NOT NULL |
 | language | VARCHAR(2) | CHECK IN (`tg`,`ru`,`en`), DEFAULT `tg` |
 | status | VARCHAR(16) | CHECK IN (`ACTIVE`,`BLOCKED`) |
 | is_superadmin | BOOLEAN | DEFAULT false |
 | token_version | INTEGER | NOT NULL DEFAULT 1 |
-| phone_verified_at | timestamptz | NOT NULL |
+| phone_verified_at | timestamptz | NULL (ба аутентификатсия дахл надорад) |
 | last_login_at | timestamptz | NULL |
 | created_at / updated_at | timestamptz | |
 
 `is_superadmin` танҳо тавассути CLI (`python -m app.cli create-superadmin`) — API барои он нест.
 
-#### 2.2. `otp_codes`
+#### 2.2. `email_tokens` (CR-001, ба ҷои `otp_codes`)
 
 | Field | Type | Constraints |
 |---|---|---|
 | id | UUID | PK |
-| phone | VARCHAR(16) | NOT NULL, INDEX |
-| purpose | VARCHAR(16) | CHECK IN (`REGISTER`,`RESET_PASSWORD`) |
-| code_hash | CHAR(64) | HMAC-SHA256(secret, phone+purpose+code) |
-| attempts | SMALLINT | DEFAULT 0 |
+| user_id | UUID | FK users, INDEX |
+| purpose | VARCHAR(16) | CHECK IN (`VERIFY_EMAIL`,`RESET_PASSWORD`) |
+| token_hash | CHAR(64) | UNIQUE; HMAC-SHA256(secret, token) — худи token нигоҳ дошта намешавад |
 | expires_at | timestamptz | NOT NULL |
 | consumed_at | timestamptz | NULL |
 | created_at | timestamptz | |
 
-Қоидаҳо: код 6 рақам; TTL 5 дақиқа; 5 кӯшиш; resend баъд аз 60 сония; OTP-и нав OTP-ҳои кӯҳнаи ҳамон phone+purpose-ро беэътибор мекунад.
+Қоидаҳо: token тасодуфӣ ва дароз (≥ 256 bit), танҳо дар пайванди email фиристода мешавад; мӯҳлат: `VERIFY_EMAIL` 24 соат, `RESET_PASSWORD` 30 дақиқа; як истифода; resend баъд аз 60 сония; token-и нав token-ҳои кӯҳнаи ҳамон user+purpose-ро беэътибор мекунад.
 
 #### 2.3. `refresh_tokens`
 
@@ -8784,7 +8807,7 @@ Constraints:
 |---|---|---|
 | id | UUID | PK |
 | organization_id | UUID | FK |
-| phone | VARCHAR(16) | NOT NULL |
+| email | VARCHAR(254) | NOT NULL (CR-001) |
 | role | VARCHAR(16) | (OWNER манъ) |
 | status | VARCHAR(16) | CHECK IN (`PENDING`,`ACCEPTED`,`DECLINED`,`REVOKED`,`EXPIRED`) |
 | invited_by | UUID | FK users |
@@ -8792,7 +8815,7 @@ Constraints:
 | responded_at | timestamptz | NULL |
 | created_at | timestamptz | |
 
-Partial UNIQUE (`organization_id`, `phone`) WHERE `status = 'PENDING'`.
+Partial UNIQUE (`organization_id`, `lower(email)`) WHERE `status = 'PENDING'`.
 
 ---
 
@@ -8825,10 +8848,10 @@ REVOKED — ниҳоӣ. Амалҳои таърихии user боқӣ мемон
 
 | ID | Қоида |
 |---|---|
-| IAM-001 | Бақайдгирӣ: `register/start` ҳамеша `202` бармегардонад (enumeration манъ). Агар phone аллакай бақайд бошад, SMS-и «шумо аллакай ҳисоб доред» фиристода мешавад, OTP не. |
-| IAM-002 | `register/verify` бо OTP-и дуруст `registration_token` медиҳад (JWT, `typ=registration`, 15 дақиқа, як истифода — `jti` дар Redis). |
-| IAM-003 | `register/complete`: password ≥ 8 аломат, ақаллан як ҳарф ва як рақам, на аз рӯйхати 10k password-ҳои маъмул → вагарна `weak_password`. |
-| IAM-004 | Login: хатои phone ё password — ҳамон `invalid_credentials` ва тақрибан ҳамон вақт (dummy hash барои phone-и номаълум). |
+| IAM-001 | Бақайдгирӣ: `POST /auth/register` ҳамеша `202` бармегардонад (enumeration манъ); user-ро бо email-и тасдиқнашуда месозад ва пайванди тасдиқро ба email мефиристад. Агар email аллакай бақайд бошад, email-и «шумо аллакай ҳисоб доред» фиристода мешавад ва ҳисоби нав сохта намешавад. Бақайдгирӣ танҳо user месозад; organization баъди вуруди аввал тавассути `/welcome` (ORG-001) сохта мешавад (CR-001). |
+| IAM-002 | `POST /auth/email/verify` бо token-и дуруст, истифоданашуда ва бемӯҳлат `email_verified_at`-ро сабт мекунад, token-ро истифодашуда мекунад ва `204` бармегардонад; вагарна `email_token_invalid` ё `email_token_expired`. Баъд frontend ба `/login` мегузарад (CR-001). |
+| IAM-003 | `register`: password ≥ 8 аломат, ақаллан як ҳарф ва як рақам, на аз рӯйхати 10k password-ҳои маъмул → вагарна `weak_password`. |
+| IAM-004 | Login: хатои email ё password — ҳамон `invalid_credentials` ва тақрибан ҳамон вақт (dummy hash барои email-и номаълум). Password дуруст, вале email тасдиқнашуда → `403 email_not_verified` (CR-001). |
 | IAM-005 | Access JWT: `sub`, `sid` (family_id), `tv` (token_version), `typ=access`, `exp` 15 дақ. Ҳар request `user.status = ACTIVE` ва `tv = users.token_version`-ро месанҷад. |
 | IAM-006 | Refresh rotation: ҳар `/auth/refresh` token-и кӯҳнаро `revoked_at` + `replaced_by_id` мекунад ва нав медиҳад (ҳамон family). |
 | IAM-007 | Reuse detection: refresh-и аллакай revoked пешниҳод шавад → тамоми family revoke, `401 refresh_token_reused`, audit `auth.refresh_reuse`. |
@@ -8836,11 +8859,11 @@ REVOKED — ниҳоӣ. Амалҳои таърихии user боқӣ мемон
 | IAM-009 | Block-и user (SUPERADMIN, P12): `status=BLOCKED`, `token_version++`. |
 | IAM-010 | `X-Org-Id` барои endpoint-ҳои org-scoped ҳатмӣ; membership бояд `ACTIVE` ва `organizations.status ≠ BLOCKED` бошад. |
 | IAM-011 | Танҳо OWNER role таъин/иваз мекунад (DEC-18). Role-и худро иваз кардан манъ. Role-и OWNER-ро тавассути API додан манъ. |
-| IAM-012 | Invitation танҳо ба phone; accept танҳо аз ҷониби user бо ҳамон `users.phone` → вагарна `invitation_phone_mismatch`. |
+| IAM-012 | Invitation танҳо ба email; accept танҳо аз ҷониби user бо ҳамон email (`lower(users.email)`) → вагарна `invitation_email_mismatch`. Даъватнома ба email фиристода мешавад (CR-001). |
 | IAM-013 | Accept: агар membership-и ғайри-REVOKED бо org аллакай бошад → `membership_already_exists`. |
 | IAM-014 | Revoked/suspended membership дар request-и навбатӣ дарҳол `403 membership_inactive` мегирад (кеш нест). |
-| IAM-015 | Password reset: OTP → `reset_token` (15 дақ, як истифода) → password-и нав → `token_version++`. |
-| IAM-016 | OTP SMS тавассути `SmsPort`: `ConsoleSmsProvider` дар dev/test, provider-и воқеӣ дар P11. OTP мустақиман фиристода мешавад (на тавассути outbox), вале бо timeout 5 сония; ноком → `503 service_unavailable`. |
+| IAM-015 | Password reset: `password/reset/start` ҳамеша `202` (enumeration манъ) → пайванди email бо token-и `RESET_PASSWORD` (30 дақ, як истифода) → `password/reset/complete` бо password-и нав → `token_version++` (CR-001). |
+| IAM-016 | Email-ҳои аутентификатсия (тасдиқ, reset, invitation) тавассути `EmailPort`: console provider дар dev/test, SMTP дар production (`EMAIL_PROVIDER`). Мустақиман фиристода мешаванд (на тавассути outbox), вале бо timeout 5 сония; ноком → `503 service_unavailable`. SMS барои аутентификатсия истифода намешавад (CR-001). |
 
 ---
 
@@ -8871,24 +8894,23 @@ Permission code формат: `<module>.<action>` (масалан `members.invit
 
 | Method | Path | Auth | Idempotent | Тавсиф |
 |---|---|---|---|---|
-| POST | `/api/v1/auth/register/start` | — | — | `{phone}` → 202 |
-| POST | `/api/v1/auth/register/verify` | — | — | `{phone, code}` → `{registration_token}` |
-| POST | `/api/v1/auth/register/complete` | reg token | — | `{registration_token, full_name, password, language}` → 201 + tokens |
-| POST | `/api/v1/auth/login` | — | — | `{phone, password}` → `{access_token, expires_in, user}` + cookie refresh |
+| POST | `/api/v1/auth/register` | — | — | `{email, password, full_name, language}` → 202 |
+| POST | `/api/v1/auth/email/verify` | — | — | `{token}` → 204 |
+| POST | `/api/v1/auth/email/resend` | — | — | `{email}` → 202 |
+| POST | `/api/v1/auth/login` | — | — | `{email, password}` → `{access_token, expires_in, user}` + cookie refresh; `403 email_not_verified` |
 | POST | `/api/v1/auth/refresh` | cookie + CSRF | — | → access нав + cookie нав |
 | POST | `/api/v1/auth/logout` | cookie + CSRF | — | 204 |
 | POST | `/api/v1/auth/logout-all` | access | — | 204 |
-| POST | `/api/v1/auth/password/reset/start` | — | — | 202 |
-| POST | `/api/v1/auth/password/reset/verify` | — | — | → `{reset_token}` |
-| POST | `/api/v1/auth/password/reset/complete` | — | — | 204 |
+| POST | `/api/v1/auth/password/reset/start` | — | — | `{email}` → 202 |
+| POST | `/api/v1/auth/password/reset/complete` | — | — | `{token, new_password}` → 204 |
 | POST | `/api/v1/auth/password/change` | access | — | `{current_password, new_password}` → 204 |
 | GET | `/api/v1/me` | access | — | user + memberships (+ `permissions`, `org_type`, `org_name`, `org_status`) |
 | PATCH | `/api/v1/me` | access | — | `{full_name?, language?}` |
-| GET | `/api/v1/me/invitations` | access | — | Invitation-ҳои PENDING барои phone-и ман |
+| GET | `/api/v1/me/invitations` | access | — | Invitation-ҳои PENDING барои email-и ман |
 | POST | `/api/v1/me/invitations/{id}/accept` | access | ✓ | → membership |
 | POST | `/api/v1/me/invitations/{id}/decline` | access | — | |
 | GET | `/api/v1/members` | org | — | `members.view`; filter: `role`, `status`; search: `full_name`, `phone` |
-| POST | `/api/v1/members/invitations` | org | ✓ | `members.invite`; `{phone, role}` |
+| POST | `/api/v1/members/invitations` | org | ✓ | `members.invite`; `{email, role}` |
 | GET | `/api/v1/members/invitations` | org | — | `members.view` |
 | POST | `/api/v1/members/invitations/{id}/revoke` | org | — | `members.invite` |
 | PATCH | `/api/v1/members/{id}` | org | — | `members.change_role`; `{role, version}` |
@@ -8907,14 +8929,15 @@ Rate limits: GLOBAL/P00 §4.1.
 
 ### 8. Domain events
 
-`USER_REGISTERED`, `MEMBERSHIP_CREATED`, `MEMBERSHIP_ROLE_CHANGED`, `MEMBERSHIP_REVOKED`, `INVITATION_CREATED` (→ P11: SMS ба phone).
+`USER_REGISTERED`, `MEMBERSHIP_CREATED`, `MEMBERSHIP_ROLE_CHANGED`, `MEMBERSHIP_REVOKED`, `INVITATION_CREATED` (email ба даъватшуда тавассути `EmailPort`, IAM-016).
 
 ### 9. Ports (барои қисмҳои оянда)
 
 | Port | Default дар P01 | Implementation |
 |---|---|---|
 | `SubscriptionGuardPort.check_limit(org_id, "users")` | ҳамеша OK | P03 |
-| `SmsPort.send(phone, text)` | `ConsoleSmsProvider` | P11 |
+| `EmailPort.send(message)` | console provider | P01 (SMTP) |
+| `SmsPort.send(phone, text)` | `ConsoleSmsProvider` | P11 (танҳо огоҳиномаҳо, на аутентификатсия) |
 
 ---
 
@@ -8922,13 +8945,15 @@ Rate limits: GLOBAL/P00 §4.1.
 
 | Экран | Route | Тавсиф |
 |---|---|---|
-| Login | `/login` | phone (маска `+992`), password; линк ба register ва reset |
-| Register | `/register` | 3 қадам: phone → OTP (таймери resend 60 с) → ном + password + забон |
-| Password reset | `/reset` | 3 қадам |
+| Login | `/login` | email, password; линк ба register ва `/forgot-password` |
+| Register | `/register` | Як экрани кӯтоҳ: Company/Store, номи ташкилот, ному насаб, email, password, розигӣ бо шартҳо. Backend танҳо user месозад (IAM-001); organization баъди вуруди аввал тавассути `/welcome` (ORG-001) |
+| Verify email | `/verify-email` | Пайванд (`token`) → `204` → `/login`; resend |
+| Forgot password | `/forgot-password` | email → `202` (ҷавоби якхела) |
+| Reset password | `/reset-password` | Пайванд (`token`) + password-и нав; `/reset` → `/forgot-password` |
 | No organization | `/welcome` | Агар membership нест: «Ширкат созед» / «Мағоза созед» (P02) ва рӯйхати invitation-ҳо |
 | Org switcher | header | Рӯйхати membership-ҳо; интихоб → `X-Org-Id` + гузариш ба area-и мувофиқ |
 | Profile | `/profile` | ном, забон, иваз кардани password, logout-all |
-| Team | `/company/team`, `/store/team` | Ҷадвал, invite dialog (phone + role), иваз кардани role, suspend/revoke бо тасдиқ |
+| Team | `/company/team`, `/store/team` | Ҷадвал, invite dialog (email + role), иваз кардани role, suspend/revoke бо тасдиқ |
 | Invitations inbox | `/welcome`, header badge | accept/decline |
 
 Auth store (Zustand): `accessToken` (memory), `user`, `activeOrgId` (`localStorage`). Refresh: FE-008. Guard-ҳо: `RequireAuth`, `RequireOrgType('COMPANY'|'STORE')`, `RequirePermission(code)`.
@@ -8938,10 +8963,11 @@ Auth store (Zustand): `accessToken` (memory), `user`, `activeOrgId` (`localStora
 ### 11. Tests (ҳадди ақал)
 
 ```text
-test_iam_001_register_start_always_202
-test_iam_002_register_verify_wrong_code_attempts_decrement / _expired / _locked_after_5
+test_iam_001_register_always_202
+test_iam_002_email_verify_invalid / _expired / _already_used
 test_iam_003_weak_password_rejected
 test_iam_004_login_invalid_credentials_same_error
+test_iam_004_login_email_not_verified_403
 test_iam_005_access_token_rejected_after_token_version_bump
 test_iam_006_refresh_rotation
 test_iam_007_refresh_reuse_revokes_family
@@ -8949,7 +8975,7 @@ test_iam_008_logout_all_revokes_everything
 test_iam_010_org_header_required / _foreign_org_404 / _blocked_org_403
 test_iam_011_only_owner_changes_role (parametrized ҳамаи role-ҳо)
 test_iam_011_cannot_change_own_role / cannot_grant_owner
-test_iam_012_invitation_phone_mismatch
+test_iam_012_invitation_email_mismatch
 test_iam_013_duplicate_membership
 test_iam_014_revoked_membership_immediate_403
 test_iam_015_password_reset_flow
@@ -8964,7 +8990,7 @@ test_rate_limit_login_5_per_15min
 ### 12. Part Acceptance
 
 ```text
-[ ] Register → login → refresh → logout кор мекунанд (API + UI)
+[ ] Register → тасдиқи email → login → refresh → logout кор мекунанд (API + UI)
 [ ] Reuse-и refresh family-ро revoke мекунад
 [ ] OWNER invite мекунад, user accept мекунад, role иваз мешавад, revoke → 403 дарҳол
 [ ] Матритсаи permission пурра тест шудааст
@@ -11353,7 +11379,7 @@ outbox_events (PENDING)
 
 | Event | Recipients | Group | Telegram | SMS |
 |---|---|---|---|---|
-| `INVITATION_CREATED` | phone-и даъватшуда (SMS мустақим, бе user) | — | ✗ | ✓ critical |
+| `INVITATION_CREATED` | email-и даъватшуда (email мустақим аз P01, IAM-016) | — | ✗ | ✗ |
 | `VERIFICATION_SUBMITTED` | SUPERADMIN-ҳо | admin | ✓ | ✗ |
 | `VERIFICATION_APPROVED/REJECTED` | Org OWNER | account | ✓ | ✓ critical |
 | `SUBSCRIPTION_EXPIRING`, `SUBSCRIPTION_STATUS_CHANGED` | C.OWNER (+MANAGER барои SOFT/FULL_BLOCK) | billing | ✓ | ✓ critical (GRACE, FULL_BLOCK) |
@@ -11388,7 +11414,7 @@ outbox_events (PENDING)
 |---|---|
 | NTF-020 | `SmsPort` (P01) — implementation-и воқеӣ: адаптери provider-и SMS-и маҳаллӣ (HTTP API), тавассути `SMS_PROVIDER` интихоб мешавад; `ConsoleSmsProvider` дар dev/test. |
 | NTF-021 | Timeout 5 с; retry танҳо барои хатоҳои network/5xx; матн ≤ 160 аломат (лотинӣ) ё 70 (кириллӣ) — шаблонҳои SMS кӯтоҳ ва алоҳида (`sms.<event>`). |
-| NTF-022 | Лимит: ≤ 20 SMS/рӯз барои як phone (ба ҷуз OTP), зидди хароҷоти ногаҳонӣ. |
+| NTF-022 | Лимит: ≤ 20 SMS/рӯз барои як phone, зидди хароҷоти ногаҳонӣ. |
 
 ---
 
@@ -11495,7 +11521,7 @@ test_bot_debt_store_vs_company
 ```text
 [ ] Ҳар event аз ҷадвали §3 ба recipient-ҳои дуруст мерасад (in-app)
 [ ] Telegram: пайваст → notification → фармонҳо (тест бо bot-и тестӣ)
-[ ] SMS: OTP ва critical тавассути provider (staging)
+[ ] SMS: critical тавассути provider (staging)
 [ ] Преференсҳо кор мекунанд
 [ ] PART_REPORT.md
 ```
@@ -11703,7 +11729,7 @@ test_export_unauthorized_kind_403
 | 12 | Mass assignment: field-ҳои иловагӣ дар body (`status`, `company_id`, `allocated_amount`) | 422 (`extra="forbid"` дар ҳамаи request schema-ҳо) |
 | 13 | Delivery code brute force | lock баъд аз 5 |
 | 14 | Webhook бе secret | 401 |
-| 15 | Маълумоти махфӣ дар logs (password, token, OTP, code) — санҷиш бо caplog дар тамоми suite | нест |
+| 15 | Маълумоти махфӣ дар logs (password, token, email token, code) — санҷиш бо caplog дар тамоми suite | нест |
 | 16 | CSRF дар `/auth/refresh` бе header | 403 |
 | 17 | Ledger/stock/audit mutation бо SQL-и мустақим | exception (trigger) |
 
