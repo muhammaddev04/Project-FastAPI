@@ -74,7 +74,7 @@ async def list_members(
     limit: int,
     offset: int,
 ) -> MemberPage:
-    """GET /members (P01 §6): filter role/status, search full_name/phone, API-002 pagination."""
+    """GET /members (P01 §6, CR-001): filter role/status, search full_name/email/phone, API-002 pagination."""
     query = (
         select(Membership)
         .join(User, Membership.user_id == User.id)
@@ -86,7 +86,7 @@ async def list_members(
         query = query.where(Membership.status == status)
     if search:
         pattern = f"%{search.strip()}%"
-        query = query.where(or_(User.full_name.ilike(pattern), User.phone.ilike(pattern)))
+        query = query.where(or_(User.full_name.ilike(pattern), User.email.ilike(pattern), User.phone.ilike(pattern)))
     total = (await session.execute(select(func.count()).select_from(query.subquery()))).scalar_one()
     rows = (await session.execute(query.order_by(Membership.joined_at).limit(limit).offset(offset))).scalars().unique()
     return MemberPage(
@@ -98,6 +98,7 @@ async def list_members(
                 id=m.id,
                 user_id=m.user_id,
                 full_name=m.user.full_name,
+                email=m.user.email,
                 phone=m.user.phone,
                 role=m.role,
                 status=m.status,

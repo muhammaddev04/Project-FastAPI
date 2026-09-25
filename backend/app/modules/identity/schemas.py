@@ -23,17 +23,17 @@ class MembershipOut(BaseModel):
 
 
 class MeResponse(BaseModel):
-    """GET /me (P01 §6): user + memberships with org_type, org_name, org_status and permissions."""
+    """GET /me (P01 §6, CR-001): user + memberships with org_type, org_name, org_status and permissions."""
 
     id: UUID
-    phone: str
+    email: str
+    phone: str | None
     full_name: str
-    email: str | None
     email_verified: bool
     language: Language
     status: str
     is_superadmin: bool
-    phone_verified_at: datetime
+    phone_verified_at: datetime | None
     last_login_at: datetime | None
     created_at: datetime
     memberships: list[MembershipOut]
@@ -50,7 +50,8 @@ class MemberOut(BaseModel):
     id: UUID
     user_id: UUID
     full_name: str
-    phone: str
+    email: str
+    phone: str | None
     role: str
     status: str
     joined_at: datetime

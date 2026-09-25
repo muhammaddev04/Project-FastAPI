@@ -15,29 +15,27 @@ ROLES_BY_ORG_TYPE: dict[str, tuple[str, ...]] = {"COMPANY": COMPANY_ROLES, "STOR
 
 
 class User(IdMixin, TimestampMixin, Base):
-    """P01 §2.1, plus optional e-mail with verification timestamp (owner requirement, not in TZ v4)."""
+    """P01 §2.1 as changed by CR-001: email is the required login identifier; phone is an optional contact."""
 
     __tablename__ = "users"
     __table_args__ = (
-        CheckConstraint(r"phone ~ '^\+[1-9][0-9]{7,14}$'", name="phone_e164"),
+        CheckConstraint(r"phone IS NULL OR phone ~ '^\+[1-9][0-9]{7,14}$'", name="phone_e164"),
         CheckConstraint("language IN ('tg','ru','en')", name="language"),
         CheckConstraint("status IN ('ACTIVE','BLOCKED')", name="status"),
-        CheckConstraint("email_verified_at IS NULL OR email IS NOT NULL", name="email_verified_requires_email"),
-        Index(
-            "uq_users_email_lower", func.lower(text("email")), unique=True, postgresql_where=text("email IS NOT NULL")
-        ),
+        # CR-001: email is the login identifier, unique regardless of letter case.
+        Index("uq_users_email_lower", func.lower(text("email")), unique=True),
     )
 
-    phone: Mapped[str] = mapped_column(String(16), unique=True)
+    phone: Mapped[str | None] = mapped_column(String(16), unique=True)
     full_name: Mapped[str] = mapped_column(String(150))
     password_hash: Mapped[str] = mapped_column(String(255))
-    email: Mapped[str | None] = mapped_column(String(254))
+    email: Mapped[str] = mapped_column(String(254))
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     language: Mapped[str] = mapped_column(String(2), default="tg", server_default="tg")
     status: Mapped[str] = mapped_column(String(16), default="ACTIVE", server_default="ACTIVE")
     is_superadmin: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
     token_version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
-    phone_verified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    phone_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 

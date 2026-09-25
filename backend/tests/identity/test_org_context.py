@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.time import utcnow
-from app.modules.identity.models import Membership
+from app.modules.identity.models import Membership, User
 from tests.factories import add_member, auth, make_org, make_user
 
 ROLE_MATRIX = [
@@ -103,7 +103,7 @@ async def test_members_list_filters_search_and_paginates(client: AsyncClient, se
 
     page = (await client.get("/api/v1/members", params={"limit": 2}, headers=headers)).json()
     assert page["count"] == 4 and page["limit"] == 2 and len(page["results"]) == 2
-    assert set(page["results"][0]) == {"id", "user_id", "full_name", "phone", "role", "status", "joined_at"}
+    assert set(page["results"][0]) == {"id", "user_id", "full_name", "email", "phone", "role", "status", "joined_at"}
 
     by_role = (await client.get("/api/v1/members", params={"role": "WAREHOUSE"}, headers=headers)).json()
     assert [m["full_name"] for m in by_role["results"]] == ["Sitora Warehouse"]
@@ -143,3 +143,20 @@ async def test_user_email_unique_case_insensitive(session: AsyncSession) -> None
     await make_user(session, email="owner@example.tj")
     with pytest.raises(IntegrityError):
         await make_user(session, email="Owner@Example.tj")
+
+
+async def test_cr_001_email_required_and_phone_optional(session: AsyncSession) -> None:
+    user = await make_user(session, phone=None)
+    assert user.phone is None
+    session.add(User(full_name="No Email", password_hash="x"))
+    with pytest.raises(IntegrityError):
+        await session.flush()
+
+
+async def test_members_search_by_email(client: AsyncClient, session: AsyncSession) -> None:
+    owner = await make_user(session)
+    org = await make_org(session, owner)
+    await add_member(session, org, await make_user(session, email="sitora@warehouse.tj"), "WAREHOUSE")
+    await session.commit()
+    found = (await client.get("/api/v1/members", params={"search": "warehouse.tj"}, headers=auth(owner, org))).json()
+    assert [m["email"] for m in found["results"]] == ["sitora@warehouse.tj"]

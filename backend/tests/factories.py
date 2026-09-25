@@ -23,11 +23,13 @@ _CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 async def make_user(
     session: AsyncSession, *, full_name: str = "Test User", status: str = "ACTIVE", **extra: object
 ) -> User:
+    number = next(_phones)
+    extra.setdefault("email", f"user{number}@example.tj")
+    extra.setdefault("email_verified_at", utcnow())
+    extra.setdefault("phone", f"+992{number}")
     user = User(
-        phone=f"+992{next(_phones)}",
         full_name=full_name,
         password_hash=hash_password("Tezfarmo2026"),
-        phone_verified_at=utcnow(),
         status=status,
         **extra,
     )

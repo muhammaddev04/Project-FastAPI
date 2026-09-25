@@ -31,7 +31,8 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
     assert response.status_code == 200
     body = response.json()
     assert body["full_name"] == "Dilshod Rahimov"
-    assert body["email"] is None and body["email_verified"] is False
+    # CR-001: email is the identifier and always present; phone is an optional contact.
+    assert body["email"].endswith("@example.tj") and body["email_verified"] is True
     assert "password_hash" not in body and "token_version" not in body
     memberships = {m["org_name"]: m for m in body["memberships"]}
     assert memberships["Pamir Distribution"]["org_type"] == "COMPANY"
