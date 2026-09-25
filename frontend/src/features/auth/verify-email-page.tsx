@@ -18,9 +18,9 @@ export function VerifyEmailPage() {
 
   return (
     <AuthCard title={t('auth.verify.title')}>
-      <div className="flex items-start gap-3 rounded-md bg-primary-soft/50 px-3.5 py-3">
+      <div className="flex items-start gap-3 rounded-2xl bg-primary/10 px-4 py-3.5">
         <MailCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-        <p className="text-[0.8125rem] text-foreground/80">{token ? t('auth.verify.withLink') : t('auth.verify.checkInbox')}</p>
+        <p className="text-[0.9375rem] leading-relaxed text-foreground/85">{token ? t('auth.verify.withLink') : t('auth.verify.checkInbox')}</p>
       </div>
       {!available ? (
         <div className="mt-4">
@@ -31,7 +31,7 @@ export function VerifyEmailPage() {
         <Button type="button" block className={authPrimaryButton} disabled={!available} loading={meta.isPending}>
           {token ? t('auth.verify.confirm') : t('auth.verify.resend')}
         </Button>
-        <Button asChild variant="ghost" block className="h-10 text-[0.8125rem] text-muted-foreground">
+        <Button asChild variant="ghost" block className="h-11 rounded-2xl text-[0.875rem] text-muted-foreground">
           <Link to="/register">{t('auth.verify.wrongEmail')}</Link>
         </Button>
       </div>

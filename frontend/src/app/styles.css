@@ -96,31 +96,55 @@
     --sidebar-border: 221 25% 20%;
   }
 
-  /* Auth pages (split navy/white reference): bright blue actions, white outlined fields, geometric type. */
+  /*
+   * Auth pages (navy/teal screenshots). Dark is the reference look; light keeps the same identity on a pale
+   * blue canvas. Headings use Montserrat (covers Tajik Cyrillic), body text Inter.
+   */
   .auth-theme {
-    --primary: 212 100% 52%; /* #0A7CFF */
-    --primary-hover: 214 100% 45%;
-    --primary-soft: 216 100% 95%; /* #E6F0FF */
-    --ring: 212 100% 52%;
-    --input: 216 17% 84%; /* #D0D5DD */
-    --background: 0 0% 100%;
-    --foreground: 222 30% 9%;
-    --muted-foreground: 220 9% 46%;
-    font-family: 'Montserrat Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    --background: 214 45% 97%; /* #F3F7FC */
+    --foreground: 222 55% 14%; /* #0F1B3A */
+    --surface: 0 0% 100%;
+    --subtle: 214 45% 96%;
+    --muted-foreground: 219 16% 38%;
+    --input: 216 28% 84%;
+    --border: 216 32% 89%;
+    --primary: 174 84% 26%; /* #0B7D72: white text passes AA */
+    --primary-hover: 174 88% 21%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 170 60% 92%;
+    --ring: 174 72% 32%;
+    --brand-from: 174 84% 30%;
+    --brand-to: 221 83% 48%;
   }
 
   .dark .auth-theme {
-    --primary: 214 100% 62%; /* #3D8BFF */
-    --primary-hover: 214 100% 68%;
-    --primary-soft: 218 60% 17%;
-    --ring: 214 100% 62%;
-    --input: 222 24% 27%;
-    --background: 226 45% 6%; /* #080C18 work area */
-    --surface: 225 36% 10%; /* card */
-    --subtle: 225 30% 13%;
-    --foreground: 220 40% 94%;
-    --muted-foreground: 220 16% 66%;
-    --border: 224 25% 18%;
+    --background: 224 72% 8%; /* #061129 */
+    --foreground: 210 40% 97%;
+    --surface: 223 50% 13%; /* #111C38 card */
+    --subtle: 222 42% 17%; /* #18244A fields */
+    --muted-foreground: 218 25% 72%;
+    --input: 220 30% 27%;
+    --border: 221 35% 21%;
+    --primary: 172 66% 50%; /* #2DD4BF on navy */
+    --primary-hover: 172 70% 60%;
+    --primary-foreground: 224 72% 8%;
+    --primary-soft: 176 50% 16%;
+    --ring: 172 66% 50%;
+    --brand-from: 172 66% 50%;
+    --brand-to: 199 89% 60%;
+  }
+
+  .auth-display {
+    font-family: 'Montserrat Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Teal-to-blue text used for the brand word in headings. */
+  .auth-brand-text {
+    background-image: linear-gradient(90deg, hsl(var(--brand-from)), hsl(var(--brand-to)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   /* Colors cross-fade only while the theme is being switched, never during normal interaction. */

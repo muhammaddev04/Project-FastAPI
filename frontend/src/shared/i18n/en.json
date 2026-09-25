@@ -70,7 +70,6 @@
   },
   "validation": {
     "required": "This field is required.",
-    "phone": "Enter the 9-digit number after +992, e.g. 900 12 34 56.",
     "passwordTooShort": "Use at least 8 characters.",
     "passwordTooLong": "Use at most 128 characters.",
     "passwordLetterDigit": "Use at least one letter and one digit.",
@@ -160,7 +159,7 @@
       },
       "registration": {
         "title": "Registration isn't open yet",
-        "text": "You can review the steps now; creating an account becomes available once email verification is enabled on this server."
+        "text": "Creating an account becomes available once email verification is enabled on this server."
       },
       "password_reset": {
         "title": "Password reset isn't enabled yet",
@@ -172,7 +171,7 @@
       },
       "google": {
         "title": "Google sign-in isn't enabled",
-        "text": "Continue with Google isn't configured on this server yet. Use your phone number instead."
+        "text": "Continue with Google isn't configured on this server yet. Use your email and password instead."
       },
       "checking": "Checking sign-in options…"
     },
@@ -181,13 +180,12 @@
       "notEnabled": "Not enabled on this server yet",
       "callbackTitle": "Google sign-in",
       "cancelledTitle": "Google sign-in was cancelled",
-      "cancelledText": "No account was connected. You can try again or sign in with your phone number.",
+      "cancelledText": "No account was connected. You can try again or sign in with your email.",
       "callbackSubtitle": "Returning from Google."
     },
     "login": {
-      "title": "Login to your account",
       "sessionEnded": "You were signed out",
-      "forgot": "Forgot?",
+      "forgot": "Forgot password?",
       "submit": "Login now",
       "noAccount": "Don't have an account?",
       "createAccount": "Sign up",
@@ -195,26 +193,11 @@
       "passwordPlaceholder": "Enter your password"
     },
     "register": {
-      "title": "Create an account",
-      "progress": "Step {{step}} of {{total}}",
       "typeLegend": "Choose your role in the system",
-      "steps": {
-        "account": "Account",
-        "organization": "Organization",
-        "confirm": "Final confirmation"
-      },
       "emailHint": "You'll sign in with this address. We'll send a confirmation link to it.",
-      "commonNote": "Very common passwords are rejected by the server.",
-      "review": {
-        "organization": "Organization",
-        "nextTitle": "What happens next",
-        "email": "We send a confirmation link to {{email}}. Your account works after you confirm it.",
-        "owner": "You become the owner of the new {{type}} and can invite your team."
-      },
       "submit": "Create account",
       "haveAccount": "Already have an account?",
       "signIn": "Log in",
-      "stepOf": "Step {{step}} of {{total}}: {{name}}",
       "storeBadge": "100% free to use",
       "companyBadge": "14-day trial",
       "roles": {
@@ -233,31 +216,6 @@
     "reset": {
       "back": "Back to sign in",
       "remembered": "Remembered your password?"
-    },
-    "frame": {
-      "terms": "By signing in you agree to the TezFarmo Terms of Use and Privacy Policy."
-    },
-    "split": {
-      "login": {
-        "headline": "Welcome back",
-        "line1": "Your supply route",
-        "line2": "continues here"
-      },
-      "register": {
-        "headline": "Join TezFarmo",
-        "line1": "Start your journey",
-        "line2": "now with us"
-      },
-      "reset": {
-        "headline": "Account access",
-        "line1": "Recover your password",
-        "line2": "in a few steps"
-      },
-      "verify": {
-        "headline": "One more step",
-        "line1": "Confirm your email",
-        "line2": "to secure your account"
-      }
     },
     "forgot": {
       "title": "Forgot your password?",
@@ -282,6 +240,36 @@
       "resend": "Send the link again",
       "wrongEmail": "Used the wrong email? Register again",
       "alreadyVerified": "Already confirmed?"
+    },
+    "shell": {
+      "network": "B2B NETWORK",
+      "pillNetwork": "Companies and stores in one network",
+      "pillVerified": "Verified organizations only",
+      "support": "Support",
+      "heroBadge": "B2B platform for Tajikistan",
+      "heroLine1": "Direct supply",
+      "heroLine2": "between companies",
+      "heroAccent": "and stores",
+      "heroText": "Suppliers and stores work together directly: catalog and prices, orders, delivery and settlements in one place.",
+      "fastTitle": "Fast ordering",
+      "fastText": "Orders go straight to your partner supplier.",
+      "verifiedTitle": "Verified partners",
+      "verifiedText": "Every company and store is reviewed before trading.",
+      "joinText": "Companies and stores start trading once their organization is verified.",
+      "rights": "© {{year}} TezFarmo B2B Commerce Network. Dushanbe, Tajikistan.",
+      "cardBadge": "B2B PLATFORM",
+      "tabsLabel": "Sign in or register",
+      "tabLogin": "Log in",
+      "tabRegister": "Register",
+      "loginTitle": "Welcome to <b>TezFarmo</b>",
+      "loginSubtitle": "Direct trade between stores and suppliers",
+      "registerTitle": "Join <b>TezFarmo</b>",
+      "registerSubtitle": "Takes a minute. You complete the profile after verification.",
+      "orVia": "or via",
+      "flowTitle": "After registration",
+      "flowEmail": "Confirm email",
+      "flowReview": "Organization review",
+      "flowAccess": "Approval and access"
     }
   },
   "shell": {

@@ -1,47 +1,15 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, Building2, Check, Mail, Store, UserCheck } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, Building2, Check, Mail, Store, UserRound } from 'lucide-react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { currentLanguage } from '@/shared/i18n';
 import { cn } from '@/shared/lib/cn';
-import { Button, FormField, Input, PasswordInput, Select } from '@/shared/ui';
-import { AuthCard, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
+import { Button, FormField, Input, PasswordInput } from '@/shared/ui';
+import { AuthCard, BrandTitle, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
 import { MethodUnavailable } from './availability';
-import { GoogleButton, OrDivider } from './google-button';
 import { PasswordChecklist } from './password-checklist';
-import { REGISTER_STEPS, registerSchema, type RegisterValues } from './schemas';
+import { registerSchema, type RegisterValues } from './schemas';
 import { useAuthMethod } from './use-auth-method';
-
-type StepId = (typeof REGISTER_STEPS)[number]['id'];
-const ORDER: StepId[] = REGISTER_STEPS.map((step) => step.id);
-
-function StepMeter({ step }: { step: StepId }) {
-  const { t } = useTranslation();
-  const index = ORDER.indexOf(step);
-  const percent = Math.round(((index + 1) / ORDER.length) * 100);
-  return (
-    <div className="mb-5">
-      <div className="flex items-center justify-between text-[0.75rem] font-medium">
-        <span className="text-primary">
-          {t('auth.register.stepOf', { step: index + 1, total: ORDER.length, name: t(`auth.register.steps.${step}`) })}
-        </span>
-        <span className="font-data text-muted-foreground">{percent}%</span>
-      </div>
-      <div
-        className="mt-2 h-1 overflow-hidden rounded-full bg-primary-soft"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}
-        aria-label={t('auth.register.progress', { step: index + 1, total: ORDER.length })}
-      >
-        <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${percent}%` }} />
-      </div>
-    </div>
-  );
-}
 
 /** Store / Company choice as two compact tiles with their TZ commercial terms (Store free, Company trial). */
 function RoleChoice({ selected, field }: { selected: RegisterValues['orgType']; field: UseFormRegisterReturn }) {
@@ -53,24 +21,31 @@ function RoleChoice({ selected, field }: { selected: RegisterValues['orgType']; 
   return (
     <fieldset>
       <legend className={cn(authLabel, 'mb-2')}>{t('auth.register.typeLegend')}</legend>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2.5">
         {options.map(({ type, icon: Icon, badge }) => {
           const active = selected === type;
           return (
             <label
               key={type}
               className={cn(
-                'relative flex cursor-pointer flex-col gap-1 rounded-md border px-3 py-2.5 transition-[border-color,box-shadow] focus-within:shadow-[0_0_0_3px_hsl(var(--primary)/0.14)]',
-                active ? 'border-primary/70 bg-primary-soft/40' : 'border-input hover:border-primary/40',
+                'relative flex cursor-pointer items-center gap-2 rounded-2xl border px-2.5 py-3 sm:gap-3 transition-[border-color,background-color,box-shadow,transform] duration-200 focus-within:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)] active:scale-[0.98] sm:px-3.5',
+                active ? 'border-primary/70 bg-primary/10' : 'border-input bg-subtle/60 hover:-translate-y-0.5 hover:border-primary/40',
               )}
             >
               <input type="radio" value={type} className="sr-only" {...field} />
-              <span className="flex items-center justify-between">
-                <Icon className={cn('size-4', active ? 'text-primary' : 'text-muted-foreground')} aria-hidden="true" />
-                {active ? <Check className="size-3.5 text-primary" aria-hidden="true" /> : null}
+              <span
+                className={cn(
+                  'flex size-8 shrink-0 items-center sm:size-9 justify-center rounded-xl transition-colors',
+                  active ? 'bg-[#0B7D72] text-white dark:bg-[#0D8276]' : 'bg-surface text-muted-foreground',
+                )}
+              >
+                <Icon className="size-[1.125rem]" aria-hidden="true" />
               </span>
-              <span className="text-[0.8125rem] font-semibold leading-tight">{t(`auth.register.roles.${type}.title`)}</span>
-              <span className="text-[0.6875rem] font-medium text-muted-foreground">{badge}</span>
+              <span className="min-w-0">
+                <span className="block break-words text-[0.8125rem] font-semibold leading-tight sm:text-[0.875rem]">{t(`auth.register.roles.${type}.title`)}</span>
+                <span className="block text-[0.6875rem] font-medium text-muted-foreground">{badge}</span>
+              </span>
+              {active ? <Check className="absolute right-2.5 top-2.5 size-3.5 text-primary" aria-hidden="true" /> : null}
             </label>
           );
         })}
@@ -79,184 +54,111 @@ function RoleChoice({ selected, field }: { selected: RegisterValues['orgType']; 
   );
 }
 
+/** What happens after the form: email confirmation → organization review → approval (TZ P01/P02). */
+function NextSteps() {
+  const { t } = useTranslation();
+  const steps = [t('auth.shell.flowEmail'), t('auth.shell.flowReview'), t('auth.shell.flowAccess')];
+  return (
+    <div className="rounded-2xl bg-subtle/60 px-3.5 py-3">
+      <p className="text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{t('auth.shell.flowTitle')}</p>
+      <ol className="mt-2 grid grid-cols-3 gap-2 text-[0.75rem] font-medium leading-tight sm:text-[0.8125rem]">
+        {steps.map((step, index) => (
+          <li key={step} className="flex items-start gap-1.5">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[0.6875rem] font-bold text-primary">
+              {index + 1}
+            </span>
+            <span>{step}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/**
+ * Short registration (one screen): only what creating the account and starting the organization review needs.
+ * The full company/store profile, documents and team come later, after email confirmation.
+ */
 export function RegisterPage() {
   const { t } = useTranslation();
   const { available, meta } = useAuthMethod('registration');
-  const [step, setStep] = useState<StepId>('account');
-  /** +1 moving forward, -1 going back: the next step slides in from that side. */
-  const [direction, setDirection] = useState(1);
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
-    shouldUnregister: false,
     defaultValues: {
       orgType: 'STORE',
       orgName: '',
       fullName: '',
       email: '',
-      acceptTerms: false as unknown as true,
-      language: currentLanguage(),
       password: '',
-      confirmPassword: '',
+      acceptTerms: false as unknown as true,
     },
   });
   const errors = form.formState.errors;
-  const values = form.watch();
+  const orgType = form.watch('orgType');
+  const password = form.watch('password');
   const message = (key?: string) => (key ? t(key) : undefined);
 
-  async function next() {
-    const definition = REGISTER_STEPS.find((item) => item.id === step);
-    if (definition && !(await form.trigger(definition.fields, { shouldFocus: true }))) return;
-    setDirection(1);
-    setStep(ORDER[ORDER.indexOf(step) + 1] ?? 'confirm');
-  }
-  const back = () => {
-    setDirection(-1);
-    setStep(ORDER[ORDER.indexOf(step) - 1] ?? 'account');
-  };
-
   return (
-    <AuthCard title={t('auth.register.title')}>
-      <StepMeter step={step} />
+    <AuthCard title={<BrandTitle i18nKey="auth.shell.registerTitle" />} subtitle={t('auth.shell.registerSubtitle')} tabs>
       {!available ? (
         <div className="mb-5">
           <MethodUnavailable method="registration" meta={meta} />
         </div>
       ) : null}
 
-      {/* Account creation (email verification, then session) is wired by the deferred P01 flow. */}
-      <form className="space-y-4" noValidate onSubmit={(event) => event.preventDefault()}>
-        <AnimatePresence mode="wait" initial={false} custom={direction}>
-          <motion.div
-            key={step}
-            custom={direction}
-            variants={{
-              enter: (dir: number) => ({ opacity: 0, x: dir * 24 }),
-              center: { opacity: 1, x: 0 },
-              exit: (dir: number) => ({ opacity: 0, x: dir * -24 }),
-            }}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
-            className="space-y-4"
-          >
-        {step === 'account' ? (
-          <>
-            <RoleChoice selected={values.orgType} field={form.register('orgType')} />
-            <FormField labelClassName={authLabel} label={t('auth.fields.fullName')} error={message(errors.fullName?.message)}>
-              <Input variant="outline" autoComplete="name" placeholder={t('auth.register.namePlaceholder')} {...form.register('fullName')} />
-            </FormField>
-            <FormField
-              labelClassName={authLabel}
-              label={t('auth.fields.email')}
-              hint={t('auth.register.emailHint')}
-              error={message(errors.email?.message)}
-            >
-              <Input variant="outline" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
-            </FormField>
-            <div className="space-y-2">
-              <FormField labelClassName={authLabel} label={t('auth.fields.newPassword')} error={message(errors.password?.message)}>
-                <PasswordInput variant="outline" placeholder={t('auth.login.passwordPlaceholder')} autoComplete="new-password" {...form.register('password')} />
-              </FormField>
-              <PasswordChecklist password={values.password} />
-            </div>
-            <FormField labelClassName={authLabel} label={t('auth.fields.confirmPassword')} error={message(errors.confirmPassword?.message)}>
-              <PasswordInput variant="outline" autoComplete="new-password" {...form.register('confirmPassword')} />
-            </FormField>
-
-
-            <div className="space-y-1">
-              <label className="flex cursor-pointer items-start gap-2.5 text-[0.75rem] leading-5 text-muted-foreground">
-                <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-[hsl(var(--primary))]" {...form.register('acceptTerms')} />
-                <span>{t('auth.register.terms')}</span>
-              </label>
-              {errors.acceptTerms?.message ? (
-                <p role="alert" className="pl-6 text-[0.75rem] text-danger">
-                  {t(errors.acceptTerms.message)}
-                </p>
-              ) : null}
-            </div>
-          </>
-        ) : null}
-
-        {step === 'organization' ? (
-          <>
-            <FormField
-              labelClassName={authLabel}
-              label={values.orgType === 'COMPANY' ? t('onboarding.companyName') : t('onboarding.storeName')}
-              hint={t('onboarding.nameHint')}
-              error={message(errors.orgName?.message)}
-            >
-              <Input variant="outline" autoComplete="organization" {...form.register('orgName')} />
-            </FormField>
-            <FormField labelClassName={authLabel} label={t('auth.fields.language')} hint={t('profile.languageHint')}>
-              <Select {...form.register('language')}>
-                <option value="tg">{t('languages.tg')}</option>
-                <option value="ru">{t('languages.ru')}</option>
-                <option value="en">{t('languages.en')}</option>
-              </Select>
-            </FormField>
-          </>
-        ) : null}
-
-        {step === 'confirm' ? (
-          <div className="space-y-3">
-            <dl className="divide-y rounded-md border border-input text-[0.8125rem]">
-              {[
-                [t('auth.register.review.organization'), `${values.orgName} · ${t(`orgTypes.${values.orgType}`)}`],
-                [t('auth.fields.fullName'), values.fullName],
-                [t('auth.fields.email'), values.email.trim().toLowerCase()],
-              ].map(([label, value]) => (
-                <div key={label} className="flex justify-between gap-4 px-3 py-2.5">
-                  <dt className="text-muted-foreground">{label}</dt>
-                  <dd className="truncate text-right font-semibold">{value}</dd>
-                </div>
-              ))}
-            </dl>
-            <div className="rounded-md bg-primary-soft/50 px-3 py-2.5">
-              <p className="text-[0.8125rem] font-semibold">{t('auth.register.review.nextTitle')}</p>
-              <ul className="mt-1.5 space-y-1 text-[0.75rem] text-muted-foreground">
-                <li className="flex gap-2">
-                  <Mail className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                  {t('auth.register.review.email', { email: values.email.trim().toLowerCase() })}
-                </li>
-                <li className="flex gap-2">
-                  <UserCheck className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                  {t('auth.register.review.owner', { type: t(`orgTypes.${values.orgType}`) })}
-                </li>
-              </ul>
-            </div>
-          </div>
-        ) : null}
-
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="flex gap-2 pt-2">
-          {step !== 'account' ? (
-            <Button type="button" variant="secondary" className="h-11 rounded-md text-[0.8125rem]" onClick={back}>
-              <ArrowLeft /> {t('common.back')}
-            </Button>
-          ) : null}
-          {step === 'confirm' ? (
-            <Button type="submit" className={`flex-1 ${authPrimaryButton}`} disabled={!available} loading={meta.isPending}>
-              {t('auth.register.submit')}
-            </Button>
-          ) : (
-            <Button type="button" className={`flex-1 ${authPrimaryButton}`} onClick={() => void next()}>
-              {t('common.continue')}
-            </Button>
-          )}
+      {/* Account creation (email verification, then organization review) is wired by the deferred P01 flow. */}
+      <form className="space-y-4" noValidate onSubmit={form.handleSubmit(() => undefined)}>
+        <RoleChoice selected={orgType} field={form.register('orgType')} />
+        <FormField
+          labelClassName={authLabel}
+          label={orgType === 'COMPANY' ? t('onboarding.companyName') : t('onboarding.storeName')}
+          error={message(errors.orgName?.message)}
+        >
+          <Input variant="auth" autoComplete="organization" leading={orgType === 'COMPANY' ? <Building2 /> : <Store />} {...form.register('orgName')} />
+        </FormField>
+        <FormField labelClassName={authLabel} label={t('auth.fields.fullName')} error={message(errors.fullName?.message)}>
+          <Input variant="auth" autoComplete="name" placeholder={t('auth.register.namePlaceholder')} leading={<UserRound />} {...form.register('fullName')} />
+        </FormField>
+        <FormField labelClassName={authLabel} label={t('auth.fields.email')} hint={t('auth.register.emailHint')} error={message(errors.email?.message)}>
+          <Input variant="auth" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" leading={<Mail />} {...form.register('email')} />
+        </FormField>
+        <div className="space-y-2">
+          <FormField labelClassName={authLabel} label={t('auth.fields.newPassword')} error={message(errors.password?.message)}>
+            <PasswordInput variant="auth" placeholder={t('auth.login.passwordPlaceholder')} autoComplete="new-password" {...form.register('password')} />
+          </FormField>
+          <AnimatePresence initial={false}>
+            {password ? (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <PasswordChecklist password={password} />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
+        <div className="space-y-1">
+          <label className="flex cursor-pointer items-start gap-2.5 text-[0.8125rem] leading-5 text-muted-foreground">
+            <input type="checkbox" className="mt-0.5 size-4 shrink-0 cursor-pointer rounded accent-[hsl(var(--primary))]" {...form.register('acceptTerms')} />
+            <span>{t('auth.register.terms')}</span>
+          </label>
+          {errors.acceptTerms?.message ? (
+            <p role="alert" className="pl-6 text-[0.8125rem] text-danger">
+              {t(errors.acceptTerms.message)}
+            </p>
+          ) : null}
+        </div>
+        <NextSteps />
+        <Button type="submit" block className={authPrimaryButton} disabled={!available} loading={meta.isPending}>
+          {t('auth.register.submit')}
+          <ArrowRight className="transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
+        </Button>
       </form>
 
-      {step === 'account' ? (
-        <>
-          <OrDivider />
-          <GoogleButton />
-        </>
-      ) : null}
       <CardSwitch question={t('auth.register.haveAccount')} to="/login" link={t('auth.register.signIn')} />
     </AuthCard>
   );

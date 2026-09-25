@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Mail } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Button, FormField, Input } from '@/shared/ui';
@@ -22,8 +23,7 @@ export function ForgotPasswordPage() {
   const error = form.formState.errors.email?.message;
 
   return (
-    <AuthCard title={t('auth.forgot.title')}>
-      <p className="-mt-2 mb-5 text-[0.8125rem] text-muted-foreground">{t('auth.forgot.subtitle')}</p>
+    <AuthCard title={t('auth.forgot.title')} subtitle={t('auth.forgot.subtitle')}>
       {!available ? (
         <div className="mb-5">
           <MethodUnavailable method="password_reset" meta={meta} />
@@ -32,7 +32,7 @@ export function ForgotPasswordPage() {
       {/* The reset request is wired by the deferred P01 reset flow; nothing is sent until it is enabled. */}
       <form className="space-y-4" noValidate onSubmit={form.handleSubmit(() => undefined)}>
         <FormField labelClassName={authLabel} label={t('auth.fields.email')} hint={t('auth.forgot.emailHint')} error={error && t(error)}>
-          <Input variant="outline" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
+          <Input variant="auth" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" leading={<Mail />} {...form.register('email')} />
         </FormField>
         <Button type="submit" block className={`!mt-6 ${authPrimaryButton}`} disabled={!available} loading={meta.isPending}>
           {t('auth.forgot.submit')}

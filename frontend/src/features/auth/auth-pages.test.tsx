@@ -18,7 +18,6 @@ function nonMetaCalls(calls: { path: string }[]) {
 
 // The notice replaces the animated "checking" row once /meta has answered.
 const NOTICE_TIMEOUT = { timeout: 3000 };
-const continueButton = () => screen.getByRole('button', { name: /^continue$/i });
 
 describe('auth screens (CR-001: email)', () => {
   beforeEach(() => useSessionStore.setState({ accessToken: null, activeOrgId: null, endedReason: null }));
@@ -27,11 +26,14 @@ describe('auth screens (CR-001: email)', () => {
     it('signs in with email and links to registration and forgot-password', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
-      expect(screen.getByRole('heading', { name: 'Login to your account' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Welcome to TezFarmo' })).toBeInTheDocument();
+      const tabs = screen.getByRole('navigation', { name: 'Sign in or register' });
+      expect(within(tabs).getByRole('link', { name: 'Log in' })).toHaveAttribute('aria-current', 'page');
+      expect(within(tabs).getByRole('link', { name: 'Register' })).toHaveAttribute('href', '/register');
       expect(screen.getByLabelText('Email')).toHaveAttribute('type', 'email');
       expect(screen.queryByLabelText(/phone/i)).not.toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/register');
-      expect(screen.getByRole('link', { name: 'Forgot?' })).toHaveAttribute('href', '/forgot-password');
+      expect(screen.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute('href', '/forgot-password');
       expect(screen.getByRole('link', { name: /support/i })).toHaveAttribute('href', 'https://t.me/tezfarmo_support');
     });
 
@@ -79,60 +81,50 @@ describe('auth screens (CR-001: email)', () => {
   });
 
   describe('registration', () => {
-    async function fillAccount({ confirm = 'Dushanbe2026', terms = true } = {}) {
-      await userEvent.type(screen.getByLabelText(/full name/i), 'Nigina Karimova');
-      await userEvent.type(screen.getByLabelText(/^email/i), '  Nigina@Example.TJ ');
-      await userEvent.type(screen.getByLabelText(/create a password/i), 'Dushanbe2026');
-      await userEvent.type(screen.getByLabelText(/repeat the password/i), confirm);
-      if (terms) await userEvent.click(screen.getByRole('checkbox', { name: /terms of use/i }));
-      await userEvent.click(continueButton());
-    }
-
-    it('asks for email and password only, with no phone or SMS code', () => {
+    it('is one short screen: role, organization, name, email, password, terms — no phone or SMS', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      expect(screen.getByText('Step 1 of 3: Account')).toBeInTheDocument();
-      expect(screen.getByLabelText(/^email/i)).toHaveAttribute('type', 'email');
-      expect(screen.queryByLabelText(/mobile|phone/i)).not.toBeInTheDocument();
-      expect(screen.queryByRole('group', { name: /sms/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Join TezFarmo' })).toBeInTheDocument();
       expect(screen.getByRole('radio', { name: /^store/i })).toBeChecked();
+      expect(screen.getByLabelText(/store name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^email/i)).toHaveAttribute('type', 'email');
+      expect(screen.getByLabelText(/create a password/i)).toBeInTheDocument();
+      expect(screen.getAllByRole('textbox')).toHaveLength(3);
+      expect(screen.queryByLabelText(/mobile|phone|repeat the password|preferred language/i)).not.toBeInTheDocument();
+      expect(screen.getByText('Organization review')).toBeInTheDocument();
     });
 
-    it('validates each field before moving on', async () => {
+    it('names the organization field after the chosen role', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      await userEvent.click(continueButton());
-      expect((await screen.findAllByText('Enter at least 2 characters.')).length).toBeGreaterThan(0);
+      await userEvent.click(screen.getByRole('radio', { name: /^company/i }));
+      expect(screen.getByLabelText(/company name/i)).toBeInTheDocument();
+    });
+
+    it('validates fields as the user leaves them', async () => {
+      mockApi([{ path: '/meta', body: META_DISABLED }]);
+      renderRoutes(routes, '/register');
+      await userEvent.click(screen.getByLabelText(/store name/i));
+      await userEvent.tab();
+      expect(await screen.findByText('Enter at least 2 characters.')).toBeInTheDocument();
+      await userEvent.type(screen.getByLabelText(/^email/i), 'nope');
+      await userEvent.tab();
       // The email hint animates out before its error animates in.
-      expect(await screen.findByText('This field is required.')).toBeInTheDocument();
-      expect(screen.getByText('Accept the terms to continue.')).toBeInTheDocument();
+      expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument();
     });
 
-    it('shows password strength and rejects mismatched passwords', async () => {
+    it('shows password strength only once typing starts', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
+      expect(screen.queryByText('Password strength')).not.toBeInTheDocument();
       await userEvent.type(screen.getByLabelText(/create a password/i), 'short');
       expect(screen.getByText('Very weak')).toBeInTheDocument();
-      await userEvent.clear(screen.getByLabelText(/create a password/i));
-      await fillAccount({ confirm: 'Different2026' });
-      expect(await screen.findByText("Passwords don't match.")).toBeInTheDocument();
     });
 
-    it('keeps answers across steps and reviews them without creating anything', async () => {
+    it('explains registration is not open and sends nothing', async () => {
       const { calls } = mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      await fillAccount();
-      // Steps animate: the next step mounts after the previous one has left.
-      await userEvent.type(await screen.findByLabelText(/store name/i), 'Corner Market');
-      await userEvent.click(screen.getByRole('button', { name: /back/i }));
-      expect(await screen.findByLabelText(/full name/i)).toHaveValue('Nigina Karimova');
-      await userEvent.click(continueButton());
-      await screen.findByLabelText(/store name/i);
-      await userEvent.click(continueButton());
-
-      expect(await screen.findByText('Corner Market · Store')).toBeInTheDocument();
-      expect(screen.getByText('nigina@example.tj')).toBeInTheDocument();
-      expect(screen.getByText(/confirmation link to nigina@example.tj/i)).toBeInTheDocument();
       expect(await screen.findByText("Registration isn't open yet", {}, NOTICE_TIMEOUT)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Create account' })).toBeDisabled();
       expect(nonMetaCalls(calls)).toHaveLength(0);

@@ -40,8 +40,7 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <AuthCard title={t('auth.resetPassword.title')}>
-      <p className="-mt-2 mb-5 text-[0.8125rem] text-muted-foreground">{t('auth.resetPassword.subtitle')}</p>
+    <AuthCard title={t('auth.resetPassword.title')} subtitle={t('auth.resetPassword.subtitle')}>
       {!available ? (
         <div className="mb-5">
           <MethodUnavailable method="password_reset" meta={meta} />
@@ -50,7 +49,7 @@ export function ResetPasswordPage() {
       <form className="space-y-4" noValidate onSubmit={form.handleSubmit(() => undefined)}>
         <div className="space-y-2">
           <FormField labelClassName={authLabel} label={t('auth.fields.newPassword')} error={errors.password?.message && t(errors.password.message)}>
-            <PasswordInput variant="outline" autoComplete="new-password" {...form.register('password')} />
+            <PasswordInput variant="auth" autoComplete="new-password" {...form.register('password')} />
           </FormField>
           <PasswordChecklist password={password} />
         </div>
@@ -59,7 +58,7 @@ export function ResetPasswordPage() {
           label={t('auth.fields.confirmPassword')}
           error={errors.confirmPassword?.message && t(errors.confirmPassword.message)}
         >
-          <PasswordInput variant="outline" autoComplete="new-password" {...form.register('confirmPassword')} />
+          <PasswordInput variant="auth" autoComplete="new-password" {...form.register('confirmPassword')} />
         </FormField>
         <p className="text-[0.75rem] text-muted-foreground">{t('auth.resetPassword.signOutNote')}</p>
         <Button type="submit" block className={`!mt-6 ${authPrimaryButton}`} disabled={!available} loading={meta.isPending}>

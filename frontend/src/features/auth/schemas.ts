@@ -36,29 +36,20 @@ export const loginSchema = z.object({
 });
 export type LoginValues = z.input<typeof loginSchema>;
 
-export const registerSchema = z
-  .object({
-    orgType: z.enum(['COMPANY', 'STORE']),
-    orgName: z.string().trim().min(2, 'validation.nameTooShort').max(200, 'validation.tooLong'),
-    fullName: z.string().trim().min(2, 'validation.nameTooShort').max(150, 'validation.tooLong'),
-    email: emailSchema,
-    acceptTerms: z.literal(true, { errorMap: () => ({ message: 'validation.acceptTerms' }) }),
-    language: z.enum(['tg', 'ru', 'en']),
-    password: newPasswordSchema,
-    confirmPassword: z.string(),
-  })
-  .refine((values) => values.password === values.confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'validation.passwordsMismatch',
-  });
+/**
+ * Short registration: only what creating the account and starting the organization review needs
+ * (role, organization name, owner name, email, password, terms). The rest of the profile is filled in later.
+ * The interface language is sent as the preferred language; the password has a show/hide toggle instead of a repeat field.
+ */
+export const registerSchema = z.object({
+  orgType: z.enum(['COMPANY', 'STORE']),
+  orgName: z.string().trim().min(2, 'validation.nameTooShort').max(200, 'validation.tooLong'),
+  fullName: z.string().trim().min(2, 'validation.nameTooShort').max(150, 'validation.tooLong'),
+  email: emailSchema,
+  password: newPasswordSchema,
+  acceptTerms: z.literal(true, { errorMap: () => ({ message: 'validation.acceptTerms' }) }),
+});
 export type RegisterValues = z.input<typeof registerSchema>;
-
-/** Three steps: account (email + password), organization, final confirmation. */
-export const REGISTER_STEPS: { id: 'account' | 'organization' | 'confirm'; fields: (keyof RegisterValues)[] }[] = [
-  { id: 'account', fields: ['orgType', 'fullName', 'email', 'password', 'confirmPassword', 'acceptTerms'] },
-  { id: 'organization', fields: ['orgName', 'language'] },
-  { id: 'confirm', fields: [] },
-];
 
 export const forgotPasswordSchema = z.object({ email: emailSchema });
 export type ForgotPasswordValues = z.input<typeof forgotPasswordSchema>;
