@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Response, status
 
 from app.modules.auth import service
-from app.modules.auth.schemas import RegisterRequest, VerifyEmailRequest
+from app.modules.auth.schemas import RegisterRequest, ResendVerificationRequest, VerifyEmailRequest
 from app.modules.identity.deps import SessionDep
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -40,3 +40,23 @@ async def register(payload: RegisterRequest, session: SessionDep) -> Response:
 async def verify_email(payload: VerifyEmailRequest, session: SessionDep) -> Response:
     await service.verify_email(session, payload)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/email/resend",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_class=Response,
+    summary="Send a new confirmation link to an unverified address (P01 §6, CR-001)",
+    responses={
+        202: {"description": "Accepted. The same answer for unknown, verified and unverified addresses."},
+        422: {"description": "`validation_error`."},
+        429: {
+            "description": "`email_resend_too_early` (60 s after the previous email) or `rate_limited` "
+            "(auth_email_send, 5 per hour per email); both with Retry-After."
+        },
+        503: {"description": "`service_unavailable`: the email could not be sent; earlier links stay valid."},
+    },
+)
+async def resend_verification(payload: ResendVerificationRequest, session: SessionDep) -> Response:
+    await service.resend_verification(session, payload)
+    return Response(status_code=status.HTTP_202_ACCEPTED)

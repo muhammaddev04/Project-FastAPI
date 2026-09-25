@@ -13,6 +13,8 @@ class RateLimit:
     name: str
     limit: int
     window_seconds: int
+    #: 02_ERROR_CODES code answered when the window is full (429).
+    error_code: str = "rate_limited"
 
 
 # P00 §4.1 global rate-limit table.
@@ -20,6 +22,8 @@ AUTH_LOGIN = RateLimit("auth_login", 5, 15 * 60)
 # CR-001: the email-channel limits replace the SMS OTP ones (same numbers).
 AUTH_EMAIL_SEND = RateLimit("auth_email_send", 5, 60 * 60)
 AUTH_EMAIL_VERIFY = RateLimit("auth_email_verify", 10, 60 * 60)
+# P01 §2.2: another verification email only 60 s after the previous one (per email).
+EMAIL_RESEND_COOLDOWN = RateLimit("auth_email_resend", 1, 60, error_code="email_resend_too_early")
 PASSWORD_RESET = RateLimit("password_reset", 3, 60 * 60)
 DEFAULT_AUTHENTICATED = RateLimit("default_authenticated", 300, 60)
 
@@ -38,7 +42,7 @@ async def check(rule: RateLimit, key: str) -> None:
         _, count, oldest = await pipe.execute()
     if count >= rule.limit:
         retry_after = int(rule.window_seconds - (now - oldest[0][1])) + 1 if oldest else rule.window_seconds
-        raise AppError("rate_limited", 429, {"retry_after": retry_after}, headers={"Retry-After": str(retry_after)})
+        raise AppError(rule.error_code, 429, {"retry_after": retry_after}, headers={"Retry-After": str(retry_after)})
 
 
 async def record(rule: RateLimit, key: str) -> None:

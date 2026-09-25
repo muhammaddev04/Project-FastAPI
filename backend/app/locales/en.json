@@ -64,5 +64,6 @@
   "email.account_exists.ignore": "If it wasn't you, ignore this email; your account is not affected.",
   "email.account_exists.footer": "If the button doesn't work, open this link:",
   "errors.email_token_invalid": "This confirmation link is not valid or was already used.",
-  "errors.email_token_expired": "This confirmation link has expired. Request a new one."
+  "errors.email_token_expired": "This confirmation link has expired. Request a new one.",
+  "errors.email_resend_too_early": "Please wait a minute before requesting another email."
 }

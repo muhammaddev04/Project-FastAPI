@@ -1,4 +1,4 @@
-"""P01 registration and email verification (IAM-001, IAM-002, IAM-003, IAM-016; CR-001).
+"""P01 registration, email verification and resend (IAM-001, IAM-002, IAM-003, IAM-016; CR-001).
 
 Registration only creates the user: the organization comes later from `/welcome` (ORG-001). The response never
 reveals whether an email is registered: a new address gets a verification link, a known one gets an
@@ -18,12 +18,12 @@ from app.core.config import get_settings
 from app.core.email import EmailDeliveryError, OutgoingEmail, get_email
 from app.core.email_templates import render
 from app.core.errors import AppError
-from app.core.rate_limit import AUTH_EMAIL_SEND, AUTH_EMAIL_VERIFY, hit
+from app.core.rate_limit import AUTH_EMAIL_SEND, AUTH_EMAIL_VERIFY, EMAIL_RESEND_COOLDOWN, check, hit, record
 from app.core.request_context import get_client_ip
 from app.core.security import hash_password
 from app.core.time import utcnow
 from app.modules.auth.password_policy import password_problems
-from app.modules.auth.schemas import RegisterRequest, VerifyEmailRequest
+from app.modules.auth.schemas import RegisterRequest, ResendVerificationRequest, VerifyEmailRequest
 from app.modules.auth.tokens import TOKEN_LIFETIMES, consume_email_token, issue_email_token
 from app.modules.identity.models import User
 
@@ -48,12 +48,30 @@ async def _deliver(email: OutgoingEmail) -> None:
         raise AppError("service_unavailable", 503) from exc
 
 
+async def _send_verification(session: AsyncSession, user: User) -> None:
+    """New VERIFY_EMAIL token (earlier unused ones expire) and the localized link email, in the caller's transaction."""
+    token = await issue_email_token(session, user.id, VERIFY_EMAIL)
+    lifetime_minutes = int(TOKEN_LIFETIMES[VERIFY_EMAIL].total_seconds() // 60)
+    await _deliver(
+        render(
+            "verification",
+            user.language,
+            to=user.email,
+            name=user.full_name,
+            action_url=_link("/verify-email", token),
+            minutes=lifetime_minutes,
+        )
+    )
+
+
 async def register(session: AsyncSession, payload: RegisterRequest) -> None:
     problems = password_problems(payload.password)
     if problems:
         raise AppError("weak_password", 422, {"fields": [{"field": "password", "code": code} for code in problems]})
 
     await hit(AUTH_EMAIL_SEND, _rate_key(payload.email))
+    # Whatever the address, an email goes out now, so the 60 s resend cooldown starts (P01 §2.2).
+    await record(EMAIL_RESEND_COOLDOWN, _rate_key(payload.email))
     # Hash before looking the address up, so known and unknown emails cost about the same time (no enumeration).
     password_hash = hash_password(payload.password)
 
@@ -85,7 +103,6 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
         # The same address was registered concurrently; answer exactly like any known address.
         return
 
-    token = await issue_email_token(session, user.id, VERIFY_EMAIL)
     await audit.record(
         session,
         "user.registered",
@@ -94,17 +111,7 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
         actor_id=user.id,
         new={"language": user.language, "email_verified": False},
     )
-    lifetime_minutes = int(TOKEN_LIFETIMES[VERIFY_EMAIL].total_seconds() // 60)
-    await _deliver(
-        render(
-            "verification",
-            user.language,
-            to=user.email,
-            name=user.full_name,
-            action_url=_link("/verify-email", token),
-            minutes=lifetime_minutes,
-        )
-    )
+    await _send_verification(session, user)
 
 
 async def verify_email(session: AsyncSession, payload: VerifyEmailRequest) -> None:
@@ -122,3 +129,19 @@ async def verify_email(session: AsyncSession, payload: VerifyEmailRequest) -> No
         await audit.record(
             session, "user.email_verified", "user", user_id, actor_id=user_id, new={"email_verified": True}
         )
+
+
+async def resend_verification(session: AsyncSession, payload: ResendVerificationRequest) -> None:
+    """P01 §6 `email/resend`: always `202`. Only an unverified account gets a new link; unknown and already
+    verified addresses get nothing. The cooldown and hourly limit apply to every address alike, so neither the
+    answer nor a 429 reveals whether an account exists or is verified.
+    """
+    key = _rate_key(payload.email)
+    await check(EMAIL_RESEND_COOLDOWN, key)
+    await hit(AUTH_EMAIL_SEND, key)
+    await record(EMAIL_RESEND_COOLDOWN, key)
+
+    user = await session.scalar(select(User).where(func.lower(User.email) == payload.email))
+    if user is None or user.email_verified_at is not None:
+        return
+    await _send_verification(session, user)
