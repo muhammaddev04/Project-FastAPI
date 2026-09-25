@@ -62,5 +62,7 @@
   "email.account_exists.action": "Войти",
   "email.account_exists.expiry": "Забыли пароль? Нажмите «Забыли пароль?» на странице входа.",
   "email.account_exists.ignore": "Если это были не вы, просто проигнорируйте письмо: ваш аккаунт не затронут.",
-  "email.account_exists.footer": "Если кнопка не работает, откройте ссылку:"
+  "email.account_exists.footer": "Если кнопка не работает, откройте ссылку:",
+  "errors.email_token_invalid": "Ссылка недействительна или уже использована.",
+  "errors.email_token_expired": "Срок действия ссылки истёк. Запросите новую."
 }

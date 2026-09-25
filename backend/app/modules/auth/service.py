@@ -1,4 +1,4 @@
-"""P01 registration (IAM-001, IAM-003, IAM-016; CR-001).
+"""P01 registration and email verification (IAM-001, IAM-002, IAM-003, IAM-016; CR-001).
 
 Registration only creates the user: the organization comes later from `/welcome` (ORG-001). The response never
 reveals whether an email is registered: a new address gets a verification link, a known one gets an
@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import hashlib
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,11 +18,13 @@ from app.core.config import get_settings
 from app.core.email import EmailDeliveryError, OutgoingEmail, get_email
 from app.core.email_templates import render
 from app.core.errors import AppError
-from app.core.rate_limit import AUTH_EMAIL_SEND, hit
+from app.core.rate_limit import AUTH_EMAIL_SEND, AUTH_EMAIL_VERIFY, hit
+from app.core.request_context import get_client_ip
 from app.core.security import hash_password
+from app.core.time import utcnow
 from app.modules.auth.password_policy import password_problems
-from app.modules.auth.schemas import RegisterRequest
-from app.modules.auth.tokens import TOKEN_LIFETIMES, issue_email_token
+from app.modules.auth.schemas import RegisterRequest, VerifyEmailRequest
+from app.modules.auth.tokens import TOKEN_LIFETIMES, consume_email_token, issue_email_token
 from app.modules.identity.models import User
 
 VERIFY_EMAIL = "VERIFY_EMAIL"
@@ -103,3 +105,20 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
             minutes=lifetime_minutes,
         )
     )
+
+
+async def verify_email(session: AsyncSession, payload: VerifyEmailRequest) -> None:
+    """IAM-002: a valid, unused, unexpired VERIFY_EMAIL token confirms the address once; the caller answers 204."""
+    await hit(AUTH_EMAIL_VERIFY, get_client_ip() or "unknown")
+    user_id = await consume_email_token(session, payload.token, VERIFY_EMAIL)
+    # Keep the first confirmation time if the address was somehow confirmed already; consuming the token is enough.
+    verified_at = await session.scalar(
+        update(User)
+        .where(User.id == user_id, User.email_verified_at.is_(None))
+        .values(email_verified_at=utcnow())
+        .returning(User.email_verified_at)
+    )
+    if verified_at is not None:
+        await audit.record(
+            session, "user.email_verified", "user", user_id, actor_id=user_id, new={"email_verified": True}
+        )

@@ -39,3 +39,12 @@ class RegisterRequest(BaseModel):
         if len(value) < 2:
             raise ValueError("full_name too short")
         return value
+
+
+class VerifyEmailRequest(BaseModel):
+    """P01 §6 `POST /auth/email/verify`: `{token}` from the email link (IAM-002)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    # Issued tokens are 43 URL-safe characters; anything malformed simply never matches a stored hash.
+    token: str = Field(min_length=1, max_length=512)
