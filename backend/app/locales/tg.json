@@ -40,5 +40,19 @@
   "errors.file_too_large": "Файл аз 10 МБ калон аст.",
   "errors.file_type_not_allowed": "Танҳо файлҳои PDF, JPEG ё PNG қабул мешаванд.",
   "errors.invalid_coordinates": "Ҳам арз ва ҳам тӯлро нишон диҳед ё ҳеҷ кадомро.",
-  "validation.invalid_tax_identifier": "РМА-и 9–12 рақамаро ворид кунед."
+  "validation.invalid_tax_identifier": "РМА-и 9–12 рақамаро ворид кунед.",
+  "email.verification.subject": "Почтаи худро барои TezFarmo тасдиқ кунед",
+  "email.verification.heading": "Суроғаи почтаи электрониро тасдиқ кунед",
+  "email.verification.intro": "Салом, {name}! Барои анҷом додани сохтани ҳисоби TezFarmo ин суроғаро тасдиқ кунед.",
+  "email.verification.action": "Тасдиқи почта",
+  "email.verification.expiry": "Пайванд як бор кор мекунад ва баъди {minutes} дақиқа эътибор надорад.",
+  "email.verification.ignore": "Агар шумо ҳисоби TezFarmo насохта бошед, ин мактубро нодида гиред.",
+  "email.verification.footer": "Агар тугма кор накунад, ин пайвандро кушоед:",
+  "email.password_reset.subject": "Барқарории пароли TezFarmo",
+  "email.password_reset.heading": "Барқарории парол",
+  "email.password_reset.intro": "Салом, {name}! Мо дархости иваз кардани пароли ҳисоби TezFarmo-и шуморо гирифтем.",
+  "email.password_reset.action": "Пароли навро интихоб кунед",
+  "email.password_reset.expiry": "Пайванд як бор кор мекунад ва баъди {minutes} дақиқа эътибор надорад. Баъди иваз шумо аз ҳамаи дастгоҳҳо мебароед.",
+  "email.password_reset.ignore": "Агар шумо инро дархост накарда бошед, мактубро нодида гиред — парол тағйир намеёбад.",
+  "email.password_reset.footer": "Агар тугма кор накунад, ин пайвандро кушоед:"
 }

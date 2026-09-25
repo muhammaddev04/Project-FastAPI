@@ -97,4 +97,11 @@ def test_sec_011_logs_mask_phone_numbers() -> None:
 def test_fnd_002_production_refuses_insecure_defaults() -> None:
     with pytest.raises(ValueError):
         Settings(app_env="production")
-    assert Settings(app_env="production", jwt_access_secret="s" * 40).app_env == "production"
+    production = Settings(
+        app_env="production",
+        jwt_access_secret="s" * 40,
+        email_provider="smtp",
+        smtp_host="smtp.gmail.com",
+        from_email="noreply@tezfarmo.tj",
+    )
+    assert production.app_env == "production"

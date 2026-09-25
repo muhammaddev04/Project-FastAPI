@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 INSECURE_DEFAULT = "dev-only-insecure-secret-change-me-before-deploy"
@@ -33,6 +33,18 @@ class Settings(BaseSettings):
     s3_bucket_private: str = "tezfarmo-private"
     s3_secure: bool = False
 
+    # Email delivery (CR-001: email is the authentication channel). Server-side only; never exposed to the frontend.
+    email_provider: Literal["console", "smtp"] = "console"
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: SecretStr = SecretStr("")
+    smtp_starttls: bool = True
+    smtp_timeout_seconds: int = 10
+    from_email: str = ""
+    #: Public URL of the web app, used to build links in emails (e.g. /verify-email?token=...).
+    frontend_base_url: str = "http://localhost:5174"
+
     # Optional "Continue with Google" (owner requirement, not in TZ v4). Secrets stay server-side.
     google_client_id: str = ""
     google_client_secret: str = ""
@@ -58,6 +70,8 @@ class Settings(BaseSettings):
             weak = any(len(value) < 32 or value.startswith(INSECURE_DEFAULT) for value in secrets)
             if self.app_debug or weak:
                 raise ValueError("production requires 32+ byte explicit secrets and APP_DEBUG=false")
+            if self.email_provider != "smtp" or not (self.smtp_host and self.from_email):
+                raise ValueError("production requires EMAIL_PROVIDER=smtp with SMTP_HOST and FROM_EMAIL")
         return self
 
 

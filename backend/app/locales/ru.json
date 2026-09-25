@@ -40,5 +40,19 @@
   "errors.file_too_large": "Файл больше 10 МБ.",
   "errors.file_type_not_allowed": "Принимаются только файлы PDF, JPEG или PNG.",
   "errors.invalid_coordinates": "Укажите и широту, и долготу, либо ни одну.",
-  "validation.invalid_tax_identifier": "Введите ИНН из 9–12 цифр."
+  "validation.invalid_tax_identifier": "Введите ИНН из 9–12 цифр.",
+  "email.verification.subject": "Подтвердите email для TezFarmo",
+  "email.verification.heading": "Подтвердите адрес электронной почты",
+  "email.verification.intro": "Здравствуйте, {name}! Подтвердите этот адрес, чтобы завершить создание аккаунта TezFarmo.",
+  "email.verification.action": "Подтвердить email",
+  "email.verification.expiry": "Ссылка действует один раз и истекает через {minutes} мин.",
+  "email.verification.ignore": "Если вы не создавали аккаунт TezFarmo, просто проигнорируйте это письмо.",
+  "email.verification.footer": "Если кнопка не работает, откройте ссылку:",
+  "email.password_reset.subject": "Восстановление пароля TezFarmo",
+  "email.password_reset.heading": "Восстановление пароля",
+  "email.password_reset.intro": "Здравствуйте, {name}! Мы получили запрос на смену пароля вашего аккаунта TezFarmo.",
+  "email.password_reset.action": "Задать новый пароль",
+  "email.password_reset.expiry": "Ссылка действует один раз и истекает через {minutes} мин. После смены пароля вы выйдете на всех устройствах.",
+  "email.password_reset.ignore": "Если вы не запрашивали смену пароля, проигнорируйте письмо — пароль останется прежним.",
+  "email.password_reset.footer": "Если кнопка не работает, откройте ссылку:"
 }

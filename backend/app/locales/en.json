@@ -40,5 +40,19 @@
   "errors.file_too_large": "The file is larger than 10 MB.",
   "errors.file_type_not_allowed": "Only PDF, JPEG or PNG files are accepted.",
   "errors.invalid_coordinates": "Give both latitude and longitude, or neither.",
-  "validation.invalid_tax_identifier": "Enter a tax identifier of 9 to 12 digits."
+  "validation.invalid_tax_identifier": "Enter a tax identifier of 9 to 12 digits.",
+  "email.verification.subject": "Confirm your email for TezFarmo",
+  "email.verification.heading": "Confirm your email address",
+  "email.verification.intro": "Hello {name}, confirm this email address to finish creating your TezFarmo account.",
+  "email.verification.action": "Confirm email",
+  "email.verification.expiry": "The link works once and expires in {minutes} minutes.",
+  "email.verification.ignore": "If you didn't create a TezFarmo account, ignore this email; nothing will change.",
+  "email.verification.footer": "If the button doesn't work, open this link:",
+  "email.password_reset.subject": "Reset your TezFarmo password",
+  "email.password_reset.heading": "Reset your password",
+  "email.password_reset.intro": "Hello {name}, we received a request to reset the password of your TezFarmo account.",
+  "email.password_reset.action": "Choose a new password",
+  "email.password_reset.expiry": "The link works once and expires in {minutes} minutes. After the reset you will be signed out of all devices.",
+  "email.password_reset.ignore": "If you didn't ask for this, ignore this email; your password stays the same.",
+  "email.password_reset.footer": "If the button doesn't work, open this link:"
 }
