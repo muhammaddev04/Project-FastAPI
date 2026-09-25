@@ -136,3 +136,29 @@ async def refresh(
     body, issued = await service.refresh(session, refresh_token, csrf_cookie, csrf_header)
     _set_session_cookies(response, issued)
     return body
+
+
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+    summary="End this device's session: revoke its refresh family and clear the cookies (IAM-008, SEC-005)",
+    responses={
+        204: {"description": "Logged out (also when this session had already ended). Session cookies are cleared."},
+        401: {"description": "`not_authenticated` (no cookie) or `token_invalid`."},
+        403: {"description": "`permission_denied` (CSRF check failed)."},
+    },
+)
+async def logout(
+    session: SessionDep,
+    refresh_token: Annotated[str | None, Cookie(alias=REFRESH_COOKIE)] = None,
+    csrf_cookie: Annotated[str | None, Cookie(alias=CSRF_COOKIE)] = None,
+    csrf_header: Annotated[str | None, Header(alias=CSRF_HEADER)] = None,
+) -> Response:
+    await service.logout(session, refresh_token, csrf_cookie, csrf_header)
+    response = Response(status_code=status.HTTP_204_NO_CONTENT)
+    # Deletion must repeat the attributes the cookies were set with, or browsers keep the originals.
+    response.delete_cookie(REFRESH_COOKIE, path="/api/v1/auth", secure=True, httponly=True, samesite="strict")
+    response.delete_cookie(CSRF_COOKIE, path="/", secure=True, httponly=False, samesite="strict")
+    response.headers["Cache-Control"] = "no-store"
+    return response

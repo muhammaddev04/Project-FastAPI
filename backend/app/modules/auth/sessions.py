@@ -92,20 +92,30 @@ async def start_session(session: AsyncSession, user: User) -> IssuedSession:
     return _issued(user, row, refresh, secrets.token_urlsafe(32))
 
 
-async def _revoke_family(session: AsyncSession, family_id: UUID) -> None:
-    await session.execute(
+async def _revoke_family(session: AsyncSession, family_id: UUID) -> int:
+    """Revoke every live token of one family; returns how many were still live."""
+    revoked = await session.scalars(
         update(RefreshToken)
         .where(RefreshToken.family_id == family_id, RefreshToken.revoked_at.is_(None))
         .values(revoked_at=utcnow())
+        .returning(RefreshToken.id)
+        .execution_options(synchronize_session=False)
     )
+    return len(revoked.all())
 
 
-async def rotate_session(session: AsyncSession, refresh: str | None, csrf_token: str) -> IssuedSession:
-    """IAM-006 / IAM-007: exchange a valid refresh token for a new access token and a new refresh token."""
+async def _authenticate(
+    session: AsyncSession, refresh: str | None, *, allow_expired: bool = False
+) -> tuple[UUID, UUID, UUID]:
+    """The presented refresh token is genuine and is the one issued for its row: (token id, user id, family id).
+
+    401 `not_authenticated` without a cookie, `token_expired`, or `token_invalid` for anything else (bad
+    signature or type, missing claims, unknown `jti`, a different token for that row, or another family).
+    """
     if not refresh:
         raise AppError("not_authenticated", 401)
     try:
-        claims = decode_refresh_token(refresh)
+        claims = decode_refresh_token(refresh, allow_expired=allow_expired)
         token_id, user_id, family_id = UUID(str(claims["jti"])), UUID(str(claims["sub"])), UUID(str(claims["sid"]))
     except TokenError as exc:
         raise AppError(exc.code, 401) from exc
@@ -120,6 +130,12 @@ async def rotate_session(session: AsyncSession, refresh: str | None, csrf_token:
         or row.family_id != family_id
     ):
         raise AppError("token_invalid", 401)
+    return token_id, user_id, family_id
+
+
+async def rotate_session(session: AsyncSession, refresh: str | None, csrf_token: str) -> IssuedSession:
+    """IAM-006 / IAM-007: exchange a valid refresh token for a new access token and a new refresh token."""
+    token_id, user_id, family_id = await _authenticate(session, refresh)
 
     user = await session.get(User, user_id)
     if user is None:
@@ -157,3 +173,15 @@ async def rotate_session(session: AsyncSession, refresh: str | None, csrf_token:
         .execution_options(synchronize_session=False)
     )
     return _issued(user, replacement, new_refresh, csrf_token)
+
+
+async def end_session(session: AsyncSession, refresh: str | None) -> None:
+    """IAM-008 logout: revoke the presented token's family (this device's session) and nothing else.
+
+    Idempotent for a genuine token: an already ended session (logged out, rotated away or expired) is simply
+    ended again; that is not reuse (IAM-007 applies to refresh only). `auth.logout` is audited only when
+    something was actually revoked, so repeated or concurrent logouts record it once.
+    """
+    _, user_id, family_id = await _authenticate(session, refresh, allow_expired=True)
+    if await _revoke_family(session, family_id):
+        await audit.record(session, "auth.logout", "user", user_id, actor_id=user_id, new={"family_id": str(family_id)})

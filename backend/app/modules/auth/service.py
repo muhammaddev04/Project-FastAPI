@@ -1,4 +1,4 @@
-"""P01 registration, email verification, resend, login and refresh (IAM-001..007, IAM-016; CR-001).
+"""P01 registration, email verification, resend, login, refresh and logout (IAM-001..008, IAM-016; CR-001).
 
 Registration only creates the user: the organization comes later from `/welcome` (ORG-001). The response never
 reveals whether an email is registered: a new address gets a verification link, a known one gets an
@@ -40,7 +40,7 @@ from app.modules.auth.schemas import (
     ResendVerificationRequest,
     VerifyEmailRequest,
 )
-from app.modules.auth.sessions import IssuedSession, require_csrf, rotate_session, start_session
+from app.modules.auth.sessions import IssuedSession, end_session, require_csrf, rotate_session, start_session
 from app.modules.auth.tokens import TOKEN_LIFETIMES, consume_email_token, issue_email_token
 from app.modules.identity.models import User
 from app.modules.identity.service import build_me
@@ -209,3 +209,15 @@ async def refresh(
     assert csrf_cookie is not None  # guaranteed by require_csrf
     issued = await rotate_session(session, refresh_cookie, csrf_cookie)
     return RefreshResponse(access_token=issued.access_token, expires_in=issued.expires_in), issued
+
+
+async def logout(
+    session: AsyncSession, refresh_cookie: str | None, csrf_cookie: str | None, csrf_header: str | None
+) -> None:
+    """P01 §6 `auth/logout` (cookie + CSRF): CSRF first, then this session's family is revoked (IAM-008).
+
+    Committed here, before the caller answers 204, so success is never reported for a revocation that was lost.
+    """
+    require_csrf(csrf_cookie, csrf_header)
+    await end_session(session, refresh_cookie)
+    await session.commit()
