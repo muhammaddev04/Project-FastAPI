@@ -82,3 +82,24 @@ def create_refresh_token(user_id: UUID, session_family_id: UUID, token_id: UUID,
         "exp": int(expires_at.timestamp()),
     }
     return jwt.encode(claims, get_settings().jwt_refresh_secret, algorithm="HS256")
+
+
+def decode_refresh_token(token: str) -> dict[str, Any]:
+    """IAM-006: signature (refresh secret, HS256 only), expiry, `typ=refresh` and the `sub`/`sid`/`jti` claims.
+
+    Raises `TokenError` (`token_expired` / `token_invalid`); the database row stays the authority for revocation.
+    """
+    try:
+        claims: dict[str, Any] = jwt.decode(
+            token,
+            get_settings().jwt_refresh_secret,
+            algorithms=["HS256"],
+            options={"require": ["exp", "sub", "sid", "jti", "typ"]},
+        )
+    except jwt.ExpiredSignatureError as exc:
+        raise TokenError("token_expired") from exc
+    except jwt.PyJWTError as exc:
+        raise TokenError("token_invalid") from exc
+    if claims.get("typ") != "refresh":
+        raise TokenError("token_invalid")
+    return claims

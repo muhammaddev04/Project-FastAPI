@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Response, status
+from typing import Annotated
+
+from fastapi import APIRouter, Cookie, Header, Response, status
 
 from app.core.time import utcnow
 from app.modules.auth import service
 from app.modules.auth.schemas import (
     LoginRequest,
     LoginResponse,
+    RefreshResponse,
     RegisterRequest,
     ResendVerificationRequest,
     VerifyEmailRequest,
 )
-from app.modules.auth.sessions import CSRF_COOKIE, REFRESH_COOKIE
+from app.modules.auth.sessions import CSRF_COOKIE, CSRF_HEADER, REFRESH_COOKIE, IssuedSession
 from app.modules.identity.deps import SessionDep
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -70,6 +73,25 @@ async def resend_verification(payload: ResendVerificationRequest, session: Sessi
     return Response(status_code=status.HTTP_202_ACCEPTED)
 
 
+def _set_session_cookies(response: Response, issued: IssuedSession) -> None:
+    max_age = int((issued.refresh_expires_at - utcnow()).total_seconds())
+    # SEC-004: httpOnly; Secure; SameSite=Strict; Path=/api/v1/auth.
+    response.set_cookie(
+        REFRESH_COOKIE,
+        issued.refresh_token,
+        max_age=max_age,
+        path="/api/v1/auth",
+        secure=True,
+        httponly=True,
+        samesite="strict",
+    )
+    # SEC-005 double submit: readable by the app, echoed as X-CSRF-Token on refresh/logout.
+    response.set_cookie(
+        CSRF_COOKIE, issued.csrf_token, max_age=max_age, path="/", secure=True, httponly=False, samesite="strict"
+    )
+    response.headers["Cache-Control"] = "no-store"
+
+
 @router.post(
     "/login",
     response_model=LoginResponse,
@@ -87,20 +109,30 @@ async def resend_verification(payload: ResendVerificationRequest, session: Sessi
 )
 async def login(payload: LoginRequest, session: SessionDep, response: Response) -> LoginResponse:
     body, issued = await service.login(session, payload)
-    max_age = int((issued.refresh_expires_at - utcnow()).total_seconds())
-    # SEC-004: httpOnly; Secure; SameSite=Strict; Path=/api/v1/auth.
-    response.set_cookie(
-        REFRESH_COOKIE,
-        issued.refresh_token,
-        max_age=max_age,
-        path="/api/v1/auth",
-        secure=True,
-        httponly=True,
-        samesite="strict",
-    )
-    # SEC-005 double submit: readable by the app, echoed as X-CSRF-Token on refresh/logout.
-    response.set_cookie(
-        CSRF_COOKIE, issued.csrf_token, max_age=max_age, path="/", secure=True, httponly=False, samesite="strict"
-    )
-    response.headers["Cache-Control"] = "no-store"
+    _set_session_cookies(response, issued)
+    return body
+
+
+@router.post(
+    "/refresh",
+    response_model=RefreshResponse,
+    summary="Rotate the refresh cookie and get a new access token (IAM-006/007, SEC-004/005)",
+    responses={
+        200: {"description": "`{access_token, expires_in}`; the refresh cookie is replaced (same family)."},
+        401: {
+            "description": "`not_authenticated` (no cookie), `token_invalid`, `token_expired`, or "
+            "`refresh_token_reused` (the whole session family is revoked)."
+        },
+        403: {"description": "`permission_denied` (CSRF check failed) or `user_blocked`."},
+    },
+)
+async def refresh(
+    session: SessionDep,
+    response: Response,
+    refresh_token: Annotated[str | None, Cookie(alias=REFRESH_COOKIE)] = None,
+    csrf_cookie: Annotated[str | None, Cookie(alias=CSRF_COOKIE)] = None,
+    csrf_header: Annotated[str | None, Header(alias=CSRF_HEADER)] = None,
+) -> RefreshResponse:
+    body, issued = await service.refresh(session, refresh_token, csrf_cookie, csrf_header)
+    _set_session_cookies(response, issued)
     return body

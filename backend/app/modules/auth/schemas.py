@@ -76,3 +76,10 @@ class LoginResponse(BaseModel):
     access_token: str
     expires_in: int
     user: MeResponse
+
+
+class RefreshResponse(BaseModel):
+    """P01 §6 `POST /auth/refresh`: the new access token; the new refresh token travels only in its cookie."""
+
+    access_token: str
+    expires_in: int

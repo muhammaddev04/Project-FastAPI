@@ -1,4 +1,4 @@
-"""P01 registration, email verification, resend and login (IAM-001..004, IAM-016; CR-001).
+"""P01 registration, email verification, resend, login and refresh (IAM-001..007, IAM-016; CR-001).
 
 Registration only creates the user: the organization comes later from `/welcome` (ORG-001). The response never
 reveals whether an email is registered: a new address gets a verification link, a known one gets an
@@ -35,11 +35,12 @@ from app.modules.auth.password_policy import password_problems
 from app.modules.auth.schemas import (
     LoginRequest,
     LoginResponse,
+    RefreshResponse,
     RegisterRequest,
     ResendVerificationRequest,
     VerifyEmailRequest,
 )
-from app.modules.auth.sessions import IssuedSession, start_session
+from app.modules.auth.sessions import IssuedSession, require_csrf, rotate_session, start_session
 from app.modules.auth.tokens import TOKEN_LIFETIMES, consume_email_token, issue_email_token
 from app.modules.identity.models import User
 from app.modules.identity.service import build_me
@@ -198,3 +199,13 @@ async def login(session: AsyncSession, payload: LoginRequest) -> tuple[LoginResp
     return LoginResponse(
         access_token=issued.access_token, expires_in=issued.expires_in, user=await build_me(session, user)
     ), issued
+
+
+async def refresh(
+    session: AsyncSession, refresh_cookie: str | None, csrf_cookie: str | None, csrf_header: str | None
+) -> tuple[RefreshResponse, IssuedSession]:
+    """P01 §6 `auth/refresh` (cookie + CSRF): the CSRF check comes first, before any token or session is touched."""
+    require_csrf(csrf_cookie, csrf_header)
+    assert csrf_cookie is not None  # guaranteed by require_csrf
+    issued = await rotate_session(session, refresh_cookie, csrf_cookie)
+    return RefreshResponse(access_token=issued.access_token, expires_in=issued.expires_in), issued
