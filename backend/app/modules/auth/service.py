@@ -1,4 +1,5 @@
-"""P01 registration, email verification, resend, login, refresh and logout (IAM-001..008, IAM-016; CR-001).
+"""P01 registration, email verification, resend, login, refresh, logout and password reset (IAM-001..008,
+IAM-015, IAM-016; CR-001).
 
 Registration only creates the user: the organization comes later from `/welcome` (ORG-001). The response never
 reveals whether an email is registered: a new address gets a verification link, a known one gets an
@@ -24,6 +25,7 @@ from app.core.rate_limit import (
     AUTH_EMAIL_VERIFY,
     AUTH_LOGIN,
     EMAIL_RESEND_COOLDOWN,
+    PASSWORD_RESET,
     check,
     hit,
     record,
@@ -35,17 +37,27 @@ from app.modules.auth.password_policy import password_problems
 from app.modules.auth.schemas import (
     LoginRequest,
     LoginResponse,
+    PasswordResetCompleteRequest,
+    PasswordResetStartRequest,
     RefreshResponse,
     RegisterRequest,
     ResendVerificationRequest,
     VerifyEmailRequest,
 )
-from app.modules.auth.sessions import IssuedSession, end_session, require_csrf, rotate_session, start_session
+from app.modules.auth.sessions import (
+    IssuedSession,
+    end_session,
+    require_csrf,
+    revoke_all_sessions,
+    rotate_session,
+    start_session,
+)
 from app.modules.auth.tokens import TOKEN_LIFETIMES, consume_email_token, issue_email_token
 from app.modules.identity.models import User
 from app.modules.identity.service import build_me
 
 VERIFY_EMAIL = "VERIFY_EMAIL"
+RESET_PASSWORD = "RESET_PASSWORD"
 
 
 def _rate_key(email: str) -> str:
@@ -220,4 +232,55 @@ async def logout(
     """
     require_csrf(csrf_cookie, csrf_header)
     await end_session(session, refresh_cookie)
+    await session.commit()
+
+
+async def start_password_reset(session: AsyncSession, payload: PasswordResetStartRequest) -> None:
+    """IAM-015 `password/reset/start`: always `202`. A registered address gets a 30-minute RESET_PASSWORD link
+    (earlier unused links expire); an unknown one gets nothing. The `password_reset` limit counts every address
+    alike, so neither the answer nor a 429 reveals whether an account exists.
+    """
+    await hit(PASSWORD_RESET, _rate_key(payload.email))
+
+    user = await session.scalar(select(User).where(func.lower(User.email) == payload.email))
+    if user is None:
+        return
+    token = await issue_email_token(session, user.id, RESET_PASSWORD)
+    await _deliver(
+        render(
+            "password_reset",
+            user.language,
+            to=user.email,
+            name=user.full_name,
+            action_url=_link("/reset-password", token),
+            minutes=int(TOKEN_LIFETIMES[RESET_PASSWORD].total_seconds() // 60),
+        )
+    )
+
+
+async def complete_password_reset(session: AsyncSession, payload: PasswordResetCompleteRequest) -> None:
+    """IAM-015 `password/reset/complete`: a valid RESET_PASSWORD token sets the new password once.
+
+    `token_version++` ends every access token and all refresh families are revoked, so every device signs in again
+    (IAM-008 "password change"). The policy is checked before the token is touched, so a weak password does not
+    use up the link. Committed here, before the caller answers 204.
+    """
+    problems = password_problems(payload.new_password)
+    if problems:
+        raise AppError("weak_password", 422, {"fields": [{"field": "new_password", "code": code} for code in problems]})
+    password_hash = hash_password(payload.new_password)
+
+    # Single conditional UPDATE: of concurrent requests with one token, only one gets past this line.
+    user_id = await consume_email_token(session, payload.token, RESET_PASSWORD)
+    token_version = await session.scalar(
+        update(User)
+        .where(User.id == user_id)
+        .values(password_hash=password_hash, token_version=User.token_version + 1)
+        .returning(User.token_version)
+        .execution_options(synchronize_session=False)
+    )
+    await revoke_all_sessions(session, user_id)
+    await audit.record(
+        session, "auth.password_reset", "user", user_id, actor_id=user_id, new={"token_version": token_version}
+    )
     await session.commit()

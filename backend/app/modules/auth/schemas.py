@@ -57,6 +57,25 @@ class ResendVerificationRequest(BaseModel):
     email: NormalizedEmail
 
 
+class PasswordResetStartRequest(BaseModel):
+    """P01 §6 `POST /auth/password/reset/start`: `{email}` (IAM-015)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    email: NormalizedEmail
+
+
+class PasswordResetCompleteRequest(BaseModel):
+    """P01 §6 `POST /auth/password/reset/complete`: `{token, new_password}` (IAM-015)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    # Issued tokens are 43 URL-safe characters; anything malformed simply never matches a stored hash.
+    token: str = Field(min_length=1, max_length=512)
+    # The IAM-003 policy is applied by the service as `weak_password`; this bound only protects the hasher.
+    new_password: str = Field(max_length=1024)
+
+
 class LoginRequest(BaseModel):
     """P01 §6 `POST /auth/login`: `{email, password}` (F-1.2, CR-001)."""
 

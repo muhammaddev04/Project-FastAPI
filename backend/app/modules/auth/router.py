@@ -9,6 +9,8 @@ from app.modules.auth import service
 from app.modules.auth.schemas import (
     LoginRequest,
     LoginResponse,
+    PasswordResetCompleteRequest,
+    PasswordResetStartRequest,
     RefreshResponse,
     RegisterRequest,
     ResendVerificationRequest,
@@ -162,3 +164,38 @@ async def logout(
     response.delete_cookie(CSRF_COOKIE, path="/", secure=True, httponly=False, samesite="strict")
     response.headers["Cache-Control"] = "no-store"
     return response
+
+
+@router.post(
+    "/password/reset/start",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_class=Response,
+    summary="Email a one-time link for choosing a new password (IAM-015, CR-001)",
+    responses={
+        202: {"description": "Accepted. The same answer whether or not the email is registered."},
+        422: {"description": "`validation_error`."},
+        429: {"description": "`rate_limited` (password_reset, 3 per hour per email), with Retry-After."},
+        503: {"description": "`service_unavailable`: the email could not be sent; earlier links stay valid."},
+    },
+)
+async def start_password_reset(payload: PasswordResetStartRequest, session: SessionDep) -> Response:
+    await service.start_password_reset(session, payload)
+    return Response(status_code=status.HTTP_202_ACCEPTED)
+
+
+@router.post(
+    "/password/reset/complete",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+    summary="Set a new password with the token from the reset link; signs out every device (IAM-015)",
+    responses={
+        204: {"description": "Password changed; the link is used up, all sessions and access tokens are ended."},
+        422: {
+            "description": "`validation_error`, `weak_password` (IAM-003), `email_token_invalid` (unknown or "
+            "already used) or `email_token_expired`."
+        },
+    },
+)
+async def complete_password_reset(payload: PasswordResetCompleteRequest, session: SessionDep) -> Response:
+    await service.complete_password_reset(session, payload)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -104,6 +104,18 @@ async def _revoke_family(session: AsyncSession, family_id: UUID) -> int:
     return len(revoked.all())
 
 
+async def revoke_all_sessions(session: AsyncSession, user_id: UUID) -> int:
+    """IAM-008 / IAM-015: revoke every live refresh token of `user_id` (all devices); returns how many were live."""
+    revoked = await session.scalars(
+        update(RefreshToken)
+        .where(RefreshToken.user_id == user_id, RefreshToken.revoked_at.is_(None))
+        .values(revoked_at=utcnow())
+        .returning(RefreshToken.id)
+        .execution_options(synchronize_session=False)
+    )
+    return len(revoked.all())
+
+
 async def _authenticate(
     session: AsyncSession, refresh: str | None, *, allow_expired: bool = False
 ) -> tuple[UUID, UUID, UUID]:
