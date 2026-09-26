@@ -9,6 +9,7 @@ from app.modules.auth import service
 from app.modules.auth.schemas import (
     LoginRequest,
     LoginResponse,
+    PasswordChangeRequest,
     PasswordResetCompleteRequest,
     PasswordResetStartRequest,
     RefreshResponse,
@@ -17,7 +18,7 @@ from app.modules.auth.schemas import (
     VerifyEmailRequest,
 )
 from app.modules.auth.sessions import CSRF_COOKIE, CSRF_HEADER, REFRESH_COOKIE, IssuedSession
-from app.modules.identity.deps import SessionDep
+from app.modules.identity.deps import CurrentUser, SessionDep
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -198,4 +199,25 @@ async def start_password_reset(payload: PasswordResetStartRequest, session: Sess
 )
 async def complete_password_reset(payload: PasswordResetCompleteRequest, session: SessionDep) -> Response:
     await service.complete_password_reset(session, payload)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/password/change",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+    summary="Change the password with the current one; signs out every device (IAM-008, IAM-003)",
+    responses={
+        204: {"description": "Password changed; token_version++ and every refresh session is revoked."},
+        401: {
+            "description": "`not_authenticated`, `token_invalid`, `token_expired`, or `invalid_credentials` "
+            "(wrong current password)."
+        },
+        403: {"description": "`user_blocked`."},
+        422: {"description": "`validation_error` or `weak_password` (IAM-003)."},
+        429: {"description": "`rate_limited` (default_authenticated)."},
+    },
+)
+async def change_password(payload: PasswordChangeRequest, session: SessionDep, user: CurrentUser) -> Response:
+    await service.change_password(session, user, payload)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

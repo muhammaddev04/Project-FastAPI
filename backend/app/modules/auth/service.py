@@ -1,5 +1,5 @@
-"""P01 registration, email verification, resend, login, refresh, logout and password reset (IAM-001..008,
-IAM-015, IAM-016; CR-001).
+"""P01 registration, email verification, resend, login, refresh, logout, password reset and password change
+(IAM-001..008, IAM-015, IAM-016; CR-001).
 
 Registration only creates the user: the organization comes later from `/welcome` (ORG-001). The response never
 reveals whether an email is registered: a new address gets a verification link, a known one gets an
@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 from functools import cache
+from uuid import UUID
 
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
@@ -37,6 +38,7 @@ from app.modules.auth.password_policy import password_problems
 from app.modules.auth.schemas import (
     LoginRequest,
     LoginResponse,
+    PasswordChangeRequest,
     PasswordResetCompleteRequest,
     PasswordResetStartRequest,
     RefreshResponse,
@@ -272,6 +274,29 @@ async def complete_password_reset(session: AsyncSession, payload: PasswordResetC
 
     # Single conditional UPDATE: of concurrent requests with one token, only one gets past this line.
     user_id = await consume_email_token(session, payload.token, RESET_PASSWORD)
+    await _replace_password(session, user_id, password_hash, "auth.password_reset")
+
+
+async def change_password(session: AsyncSession, user: User, payload: PasswordChangeRequest) -> None:
+    """P01 §6 `password/change` (access): the current password, then the IAM-003 policy, then IAM-008 - the new
+    password, `token_version++` and every refresh family revoked, so all devices (this one included) sign in again.
+
+    The user row is locked first and the current password is checked against the locked row, so of concurrent
+    changes made with the same old password only one succeeds. Committed here, before the caller answers 204.
+    """
+    locked = await session.get(User, user.id, with_for_update=True, populate_existing=True)
+    if locked is None or not verify_password(payload.current_password, locked.password_hash):
+        # Same code as a wrong login password (IAM-004); nothing is changed or audited.
+        raise AppError("invalid_credentials", 401)
+    problems = password_problems(payload.new_password)
+    if problems:
+        raise AppError("weak_password", 422, {"fields": [{"field": "new_password", "code": code} for code in problems]})
+    await _replace_password(session, locked.id, hash_password(payload.new_password), "auth.password_changed")
+
+
+async def _replace_password(session: AsyncSession, user_id: UUID, password_hash: str, action: str) -> None:
+    """IAM-008 / IAM-015: store the new hash, `token_version++` (old access tokens die), revoke every refresh family
+    (old cookies cannot mint new ones), audit `action` with the new version only, and commit."""
     token_version = await session.scalar(
         update(User)
         .where(User.id == user_id)
@@ -280,7 +305,5 @@ async def complete_password_reset(session: AsyncSession, payload: PasswordResetC
         .execution_options(synchronize_session=False)
     )
     await revoke_all_sessions(session, user_id)
-    await audit.record(
-        session, "auth.password_reset", "user", user_id, actor_id=user_id, new={"token_version": token_version}
-    )
+    await audit.record(session, action, "user", user_id, actor_id=user_id, new={"token_version": token_version})
     await session.commit()

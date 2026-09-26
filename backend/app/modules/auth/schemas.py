@@ -76,6 +76,17 @@ class PasswordResetCompleteRequest(BaseModel):
     new_password: str = Field(max_length=1024)
 
 
+class PasswordChangeRequest(BaseModel):
+    """P01 §6 `POST /auth/password/change` (access): `{current_password, new_password}` (IAM-008)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    # Presence only: checked against the stored hash, never against the policy (like the login password).
+    current_password: str = Field(min_length=1, max_length=1024)
+    # The IAM-003 policy is applied by the service as `weak_password`; this bound only protects the hasher.
+    new_password: str = Field(max_length=1024)
+
+
 class LoginRequest(BaseModel):
     """P01 §6 `POST /auth/login`: `{email, password}` (F-1.2, CR-001)."""
 
