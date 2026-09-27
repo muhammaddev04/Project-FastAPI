@@ -20,7 +20,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+asyncpg://tezfarmo:tezfarmo@localhost:5433/tezfarmo"
     redis_url: str = "redis://localhost:6380/0"
-    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    cors_origins: str = "http://localhost:5174"
 
     # SEC-010: general application secret; keys the HMAC of one-time email tokens (P01 §2.2).
     app_secret_key: str = INSECURE_DEFAULT + "-app"
@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     # Optional "Continue with Google" (owner requirement, not in TZ v4). Secrets stay server-side.
     google_client_id: str = ""
     google_client_secret: str = ""
-    google_redirect_uri: str = "http://localhost:5173/auth/google/callback"
+    google_redirect_uri: str = "http://localhost:5174/auth/google/callback"
 
     default_language: Literal["tg", "ru", "en"] = "tg"
 

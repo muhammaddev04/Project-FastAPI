@@ -43,10 +43,10 @@ async def ready() -> JSONResponse:
 # Sign-in methods that are implemented and enabled. Deferred P01 features stay false until they are
 # actually implemented, so clients never offer a flow that cannot complete.
 AUTH_METHODS: dict[str, bool] = {
-    "password_login": False,
-    "registration": False,
-    "password_reset": False,
-    "email_verification": False,
+    "password_login": True,
+    "registration": True,
+    "password_reset": True,
+    "email_verification": True,
     "google": False,
 }
 
@@ -59,5 +59,6 @@ async def meta() -> dict[str, Any]:
         "languages": list(SUPPORTED_LANGUAGES),
         "default_language": DEFAULT_LANGUAGE,
         "currency": "TJS",
-        "auth": dict(AUTH_METHODS),
+        # Google is offered only when this server has its OAuth client configured (secrets stay server-side).
+        "auth": {**AUTH_METHODS, "google": settings.google_configured},
     }

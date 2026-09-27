@@ -35,7 +35,7 @@ from tests.auth.test_refresh import (
 )
 
 LOGOUT = "/api/v1/auth/logout"
-TOKEN_IN_LINK = re.compile(r"/verify-email\?token=([A-Za-z0-9_-]+)")
+CODE_IN_EMAIL = re.compile(r":\s*([0-9]{6})\s*$", re.M)
 
 
 @pytest.fixture
@@ -81,8 +81,8 @@ async def test_full_session_lifecycle(client: AsyncClient, outbox: list[Outgoing
         "/api/v1/auth/register",
         json={"email": email, "password": password, "full_name": "Nigina Karimova", "language": "en"},
     )
-    raw = TOKEN_IN_LINK.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
-    assert (await client.post("/api/v1/auth/email/verify", json={"token": raw})).status_code == 204
+    emailed = CODE_IN_EMAIL.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
+    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": emailed})).status_code == 204
     first = await login(client, email, password)
     assert (await client.get(ME, headers={"Authorization": f"Bearer {first.access}"})).status_code == 200
     second = session_from(await rotate(client, first), first.csrf)

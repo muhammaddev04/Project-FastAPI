@@ -22,6 +22,9 @@ class User(IdMixin, TimestampMixin, Base):
         CheckConstraint(r"phone IS NULL OR phone ~ '^\+[1-9][0-9]{7,14}$'", name="phone_e164"),
         CheckConstraint("language IN ('tg','ru','en')", name="language"),
         CheckConstraint("status IN ('ACTIVE','BLOCKED')", name="status"),
+        CheckConstraint(
+            "onboarding_org_type IS NULL OR onboarding_org_type IN ('COMPANY','STORE')", name="onboarding_org_type"
+        ),
         # CR-001: email is the login identifier, unique regardless of letter case.
         Index("uq_users_email_lower", func.lower(text("email")), unique=True),
     )
@@ -37,6 +40,10 @@ class User(IdMixin, TimestampMixin, Base):
     token_version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     phone_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # P01 §10: the Company/Store choice and organization name given at registration. An intent only - ownership is
+    # in memberships and nothing is ever created from these automatically.
+    onboarding_org_type: Mapped[str | None] = mapped_column(String(8))
+    onboarding_org_name: Mapped[str | None] = mapped_column(String(200))
 
 
 class Organization(IdMixin, TimestampMixin, Base):

@@ -9,8 +9,11 @@ from app.core.health import health_router, meta_router
 from app.core.logging import configure_logging
 from app.core.request_context import RequestContextMiddleware
 from app.modules.auth.router import router as auth_router
+from app.modules.files.router import router as files_router
 from app.modules.identity.router import router as identity_router
 from app.modules.organizations.router import router as organizations_router
+from app.modules.verification.router import admin_router as admin_verification_router
+from app.modules.verification.router import router as verification_router
 
 
 def create_app() -> FastAPI:
@@ -48,6 +51,9 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(identity_router)
     app.include_router(organizations_router)
+    app.include_router(files_router)
+    app.include_router(verification_router)
+    app.include_router(admin_verification_router)
     return app
 
 

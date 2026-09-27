@@ -28,7 +28,7 @@ from tests.factories import make_user
 
 LOGIN = "/api/v1/auth/login"
 PASSWORD = "Tezfarmo2026"  # tests.factories.make_user
-TOKEN_IN_LINK = re.compile(r"/verify-email\?token=([A-Za-z0-9_-]+)")
+CODE_IN_EMAIL = re.compile(r":\s*([0-9]{6})\s*$", re.M)
 
 
 @pytest.fixture
@@ -85,8 +85,8 @@ async def test_register_verify_login_chain(
     assert "access_token" not in early.text and cookies(early) == {}
     assert await refresh_rows(session) == []
 
-    raw = TOKEN_IN_LINK.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
-    assert (await client.post("/api/v1/auth/email/verify", json={"token": raw})).status_code == 204
+    emailed = CODE_IN_EMAIL.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
+    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": emailed})).status_code == 204
 
     response = await client.post(LOGIN, json={"email": "  Nigina@Example.TJ ", "password": password})
 

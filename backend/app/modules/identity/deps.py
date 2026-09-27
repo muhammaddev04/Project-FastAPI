@@ -47,6 +47,16 @@ async def get_current_user(
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+async def get_superadmin(user: CurrentUser) -> User:
+    """P02 §5 `require_superadmin`: platform administrators only (set via CLI, never via API); no `X-Org-Id`."""
+    if not user.is_superadmin:
+        raise AppError("permission_denied", 403)
+    return user
+
+
+SuperadminDep = Annotated[User, Depends(get_superadmin)]
+
+
 @dataclass(frozen=True)
 class OrgContext:
     user: User

@@ -5,6 +5,7 @@ from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
@@ -55,6 +56,13 @@ async def _ensure_tax_identifier_free(
         raise AppError("tax_identifier_taken", 409)
 
 
+def _integrity_error(exc: IntegrityError) -> AppError:
+    """A lost race on a unique column: the tax identifier is the only user-supplied one (ORG-004)."""
+    if "tax_identifier" in str(exc.orig):
+        return AppError("tax_identifier_taken", 409)
+    return AppError("internal_error", 500)
+
+
 def profile_out(organization: Organization, profile: Company | Store) -> OrganizationProfile:
     return OrganizationProfile(
         id=organization.id,
@@ -72,7 +80,7 @@ def profile_out(organization: Organization, profile: Company | Store) -> Organiz
         longitude=getattr(profile, "longitude", None),
         verification_status=profile.verification_status,  # type: ignore[arg-type]
         verified_at=profile.verified_at,
-        legal_locked=profile.verification_status == "APPROVED",
+        legal_locked=profile.verification_status in ("APPROVED", "PENDING"),
         version=profile.version,
     )
 
@@ -105,6 +113,9 @@ async def create_organization(
         raise AppError("invalid_coordinates", 422)
 
     organization = Organization(type=org_type, name=payload.name, created_by=user.id)
+    # Savepoint: if a concurrent request takes the same tax identifier first, the unique index (ORG-004) decides and
+    # this request answers 409 tax_identifier_taken instead of failing with a 500.
+    savepoint = await session.begin_nested()
     session.add(organization)
     await session.flush()
 
@@ -126,7 +137,12 @@ async def create_organization(
 
     membership = Membership(user_id=user.id, organization_id=organization.id, role="OWNER", joined_at=utcnow())
     session.add(membership)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError as exc:
+        await savepoint.rollback()
+        raise _integrity_error(exc) from exc
+    await savepoint.commit()
     membership.organization = organization
 
     await audit.record(
@@ -147,7 +163,10 @@ async def create_organization(
         org_id=organization.id,
         new={"role": "OWNER", "user_id": str(user.id)},
     )
-    return OrganizationCreated(organization=profile_out(organization, profile), membership=membership_out(membership))
+    return OrganizationCreated(
+        organization=profile_out(organization, profile),
+        membership=membership_out(membership, profile.verification_status),
+    )
 
 
 async def get_profile(session: AsyncSession, context: OrgContext) -> OrganizationProfile:
@@ -175,7 +194,9 @@ async def update_profile(
         raise AppError("permission_denied", 403)
     if touches_contacts and "org.edit_contacts" not in permissions:
         raise AppError("permission_denied", 403)
-    if any(field in changes for field in LEGAL_FIELDS) and profile.verification_status == "APPROVED":
+    if any(field in changes for field in LEGAL_FIELDS) and profile.verification_status in ("APPROVED", "PENDING"):
+        # ORG-005 locks legal fields after APPROVED; while a request is under review they are frozen too, so the
+        # reviewer's legal snapshot cannot silently stop matching the organization that gets approved.
         raise AppError("verification_not_editable", 409)
     if isinstance(profile, Company) and ("latitude" in changes or "longitude" in changes):
         raise AppError(
@@ -187,6 +208,7 @@ async def update_profile(
         )
     if "tax_identifier" in changes:
         await _ensure_tax_identifier_free(session, type(profile), changes["tax_identifier"], own_id=profile.id)
+    savepoint = await session.begin_nested()
     if isinstance(profile, Store):
         latitude = changes.get("latitude", profile.latitude)
         longitude = changes.get("longitude", profile.longitude)
@@ -201,7 +223,12 @@ async def update_profile(
         else:
             setattr(profile, field, str(value) if field == "email" and value else value)
     profile.version += 1
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError as exc:
+        await savepoint.rollback()
+        raise _integrity_error(exc) from exc
+    await savepoint.commit()
     await audit.record(
         session,
         "organization.updated",

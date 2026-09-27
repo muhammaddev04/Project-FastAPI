@@ -25,8 +25,10 @@ from app.core.rate_limit import (
     AUTH_EMAIL_SEND,
     AUTH_EMAIL_VERIFY,
     AUTH_LOGIN,
+    EMAIL_CODE_ATTEMPTS,
     EMAIL_RESEND_COOLDOWN,
     PASSWORD_RESET,
+    RESET_CODE_ATTEMPTS,
     check,
     hit,
     record,
@@ -41,6 +43,8 @@ from app.modules.auth.schemas import (
     PasswordChangeRequest,
     PasswordResetCompleteRequest,
     PasswordResetStartRequest,
+    PasswordResetVerifyRequest,
+    PasswordResetVerifyResponse,
     RefreshResponse,
     RegisterRequest,
     ResendVerificationRequest,
@@ -54,7 +58,14 @@ from app.modules.auth.sessions import (
     rotate_session,
     start_session,
 )
-from app.modules.auth.tokens import TOKEN_LIFETIMES, consume_email_token, issue_email_token
+from app.modules.auth.tokens import (
+    RESET_AUTHORIZATION_LIFETIME,
+    TOKEN_LIFETIMES,
+    consume_email_code,
+    consume_email_token,
+    issue_email_code,
+    issue_email_token,
+)
 from app.modules.identity.models import User
 from app.modules.identity.service import build_me
 
@@ -81,8 +92,9 @@ async def _deliver(email: OutgoingEmail) -> None:
 
 
 async def _send_verification(session: AsyncSession, user: User) -> None:
-    """New VERIFY_EMAIL token (earlier unused ones expire) and the localized link email, in the caller's transaction."""
-    token = await issue_email_token(session, user.id, VERIFY_EMAIL)
+    """New 6-digit VERIFY_EMAIL code (earlier unused ones expire) and the localized code email - no link - in the
+    caller's transaction."""
+    code = await issue_email_code(session, user.id, VERIFY_EMAIL)
     lifetime_minutes = int(TOKEN_LIFETIMES[VERIFY_EMAIL].total_seconds() // 60)
     await _deliver(
         render(
@@ -90,7 +102,7 @@ async def _send_verification(session: AsyncSession, user: User) -> None:
             user.language,
             to=user.email,
             name=user.full_name,
-            action_url=_link("/verify-email", token),
+            code=code,
             minutes=lifetime_minutes,
         )
     )
@@ -126,6 +138,9 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
         full_name=payload.full_name,
         password_hash=password_hash,
         language=payload.language,
+        # P01 §10 onboarding intent - only for a new user; an existing account is never changed from here.
+        onboarding_org_type=payload.org_type,
+        onboarding_org_name=payload.org_name if payload.org_type else None,
     )
     try:
         async with session.begin_nested():
@@ -141,15 +156,30 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
         "user",
         user.id,
         actor_id=user.id,
-        new={"language": user.language, "email_verified": False},
+        new={"language": user.language, "email_verified": False, "onboarding_org_type": user.onboarding_org_type},
     )
     await _send_verification(session, user)
 
 
 async def verify_email(session: AsyncSession, payload: VerifyEmailRequest) -> None:
-    """IAM-002: a valid, unused, unexpired VERIFY_EMAIL token confirms the address once; the caller answers 204."""
+    """IAM-002 with a 6-digit code: the current, unused, unexpired code of that email's account confirms the address
+    once; the caller answers 204.
+
+    A code has only a million values, so wrong guesses are capped per email (`auth_email_code`, 5 per 15 minutes,
+    whatever the IP) on top of the per-IP `auth_email_verify` limit. An unknown address and a wrong code give the
+    same `email_token_invalid` and count the same way, so the answer does not reveal which accounts exist.
+    """
     await hit(AUTH_EMAIL_VERIFY, get_client_ip() or "unknown")
-    user_id = await consume_email_token(session, payload.token, VERIFY_EMAIL)
+    attempts_key = _rate_key(payload.email)
+    await check(EMAIL_CODE_ATTEMPTS, attempts_key)
+    user_id = await session.scalar(select(User.id).where(func.lower(User.email) == payload.email))
+    try:
+        if user_id is None:
+            raise AppError("email_token_invalid", 422)
+        await consume_email_code(session, user_id, payload.code, VERIFY_EMAIL)
+    except AppError:
+        await record(EMAIL_CODE_ATTEMPTS, attempts_key)
+        raise
     # Keep the first confirmation time if the address was somehow confirmed already; consuming the token is enough.
     verified_at = await session.scalar(
         update(User)
@@ -238,30 +268,60 @@ async def logout(
 
 
 async def start_password_reset(session: AsyncSession, payload: PasswordResetStartRequest) -> None:
-    """IAM-015 `password/reset/start`: always `202`. A registered address gets a 30-minute RESET_PASSWORD link
-    (earlier unused links expire); an unknown one gets nothing. The `password_reset` limit counts every address
-    alike, so neither the answer nor a 429 reveals whether an account exists.
+    """IAM-015 `password/reset/start`: always `202`. A registered address gets a 30-minute 6-digit RESET_PASSWORD
+    code by email - no link (earlier unused codes and authorizations expire); an unknown one gets nothing. The
+    `password_reset` limit counts every address alike, so neither the answer nor a 429 reveals whether an account
+    exists.
     """
     await hit(PASSWORD_RESET, _rate_key(payload.email))
 
     user = await session.scalar(select(User).where(func.lower(User.email) == payload.email))
     if user is None:
         return
-    token = await issue_email_token(session, user.id, RESET_PASSWORD)
+    code = await issue_email_code(session, user.id, RESET_PASSWORD)
     await _deliver(
         render(
             "password_reset",
             user.language,
             to=user.email,
             name=user.full_name,
-            action_url=_link("/reset-password", token),
+            code=code,
             minutes=int(TOKEN_LIFETIMES[RESET_PASSWORD].total_seconds() // 60),
         )
     )
 
 
+async def verify_password_reset(
+    session: AsyncSession, payload: PasswordResetVerifyRequest
+) -> PasswordResetVerifyResponse:
+    """IAM-015 step 2: the current, unused, unexpired reset code of that email's account is spent once and exchanged
+    for a one-time reset authorization (256 bits, 10 minutes) that only `password/reset/complete` accepts.
+
+    Wrong guesses are capped per email (`password_reset_code`, 5 per 30 minutes, whatever the IP) on top of the
+    per-IP `auth_email_verify` limit shared by every email code. An unknown address and a wrong code give the same
+    `email_token_invalid` and count the same way, so the answer does not reveal which accounts exist.
+    """
+    await hit(AUTH_EMAIL_VERIFY, get_client_ip() or "unknown")
+    attempts_key = _rate_key(payload.email)
+    await check(RESET_CODE_ATTEMPTS, attempts_key)
+    user_id = await session.scalar(select(User.id).where(func.lower(User.email) == payload.email))
+    try:
+        if user_id is None:
+            raise AppError("email_token_invalid", 422)
+        await consume_email_code(session, user_id, payload.code, RESET_PASSWORD)
+    except AppError:
+        await record(RESET_CODE_ATTEMPTS, attempts_key)
+        raise
+    reset_token = await issue_email_token(session, user_id, RESET_PASSWORD, RESET_AUTHORIZATION_LIFETIME)
+    await session.commit()
+    return PasswordResetVerifyResponse(
+        reset_token=reset_token, expires_in=int(RESET_AUTHORIZATION_LIFETIME.total_seconds())
+    )
+
+
 async def complete_password_reset(session: AsyncSession, payload: PasswordResetCompleteRequest) -> None:
-    """IAM-015 `password/reset/complete`: a valid RESET_PASSWORD token sets the new password once.
+    """IAM-015 `password/reset/complete`: a valid reset authorization (from `password/reset/verify`) sets the new
+    password once.
 
     `token_version++` ends every access token and all refresh families are revoked, so every device signs in again
     (IAM-008 "password change"). The policy is checked before the token is touched, so a weak password does not

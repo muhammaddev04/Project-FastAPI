@@ -18,12 +18,12 @@ from app.core.security import verify_password
 from app.core.time import utcnow
 from app.modules.auth.models import EmailToken
 from app.modules.auth.password_policy import common_passwords
-from app.modules.auth.tokens import hash_token
+from app.modules.auth.tokens import hash_code
 from app.modules.identity.models import User
 
 URL = "/api/v1/auth/register"
 PASSWORD = "Dushanbe2026x"
-TOKEN_IN_LINK = re.compile(r"/verify-email\?token=([A-Za-z0-9_-]+)")
+CODE_IN_EMAIL = re.compile(r":\s*([0-9]{6})\s*$", re.M)
 
 
 def body(**overrides: object) -> dict[str, object]:
@@ -53,9 +53,9 @@ async def tokens(session: AsyncSession) -> list[EmailToken]:
     return list((await session.scalars(select(EmailToken))).all())
 
 
-def link_token(message: OutgoingEmail) -> str:
-    match = TOKEN_IN_LINK.search(message.text)
-    assert match, "the verification email carries a /verify-email?token=… link"
+def email_code(message: OutgoingEmail) -> str:
+    match = CODE_IN_EMAIL.search(message.text)
+    assert match, "the verification email carries a 6-digit code"
     return match.group(1)
 
 
@@ -113,7 +113,7 @@ async def test_iam_001_known_email_gets_the_same_answer_and_no_second_account(
     assert "/login" in notice.text
 
 
-async def test_verification_token_is_stored_hashed_for_24_hours(
+async def test_verification_code_is_stored_hashed_for_15_minutes(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     before = utcnow()
@@ -121,20 +121,18 @@ async def test_verification_token_is_stored_hashed_for_24_hours(
 
     [user] = await users(session)
     [token] = await tokens(session)
-    raw = link_token(outbox[0])
-    assert len(raw) >= 43  # 256 random bits
+    code = email_code(outbox[0])
+    assert re.fullmatch(r"[0-9]{6}", code)
     assert token.user_id == user.id
     assert token.purpose == "VERIFY_EMAIL"
     assert token.consumed_at is None
-    assert token.token_hash == hash_token(raw)
-    assert raw not in token.token_hash
+    assert token.token_hash == hash_code(user.id, "VERIFY_EMAIL", code)
+    assert code not in token.token_hash
     lifetime = token.expires_at - before
-    assert timedelta(hours=24) - timedelta(minutes=1) <= lifetime <= timedelta(hours=24) + timedelta(minutes=1)
+    assert timedelta(minutes=14) <= lifetime <= timedelta(minutes=16)
 
 
-@pytest.mark.parametrize(
-    ("language", "subject"), [("tg", "TezFarmo"), ("ru", "TezFarmo"), ("en", "Confirm your email")]
-)
+@pytest.mark.parametrize(("language", "subject"), [("tg", "TezFarmo"), ("ru", "TezFarmo"), ("en", "verification code")])
 async def test_iam_016_verification_email_is_sent_through_the_email_port(
     client: AsyncClient, outbox: list[OutgoingEmail], language: str, subject: str
 ) -> None:
@@ -145,9 +143,13 @@ async def test_iam_016_verification_email_is_sent_through_the_email_port(
     assert message.to == "nigina@example.tj"
     assert subject in message.subject
     assert "Nigina Karimova" in message.text
-    assert "http://localhost:5174/verify-email?token=" in message.text
+    assert re.fullmatch(r"[0-9]{6}", email_code(message))
+    # A code only: nothing to click, no URL anywhere in the email.
+    for part in (message.text, message.html):
+        assert "http" not in part and "verify-email" not in part and "token=" not in part
+    assert "<a " not in message.html and email_code(message) in message.html
     if language == "en":
-        assert "expires in 24 hours" in message.text
+        assert "expires in 15 minutes" in message.text
 
 
 @pytest.mark.parametrize(
@@ -250,7 +252,7 @@ async def test_secrets_never_reach_response_logs_or_audit(
     with caplog.at_level(logging.DEBUG):
         response = await client.post(URL, json=body())
 
-    raw = link_token(outbox[0])
+    raw = email_code(outbox[0])
     logs = caplog.text
     assert "email recorded (not sent): verification" in logs  # proves the capture sees the email logger
     assert PASSWORD not in logs and raw not in logs and "nigina@example.tj" not in logs
@@ -259,7 +261,7 @@ async def test_secrets_never_reach_response_logs_or_audit(
     [entry] = (await session.scalars(select(AuditLog).where(AuditLog.action == "user.registered"))).all()
     [user] = await users(session)
     assert entry.entity_id == user.id and entry.actor_id == user.id
-    assert entry.new_data == {"language": "en", "email_verified": False}
+    assert entry.new_data == {"language": "en", "email_verified": False, "onboarding_org_type": None}
     stored = str(entry.old_data) + str(entry.new_data)
     assert PASSWORD not in stored and raw not in stored and user.password_hash not in stored
 

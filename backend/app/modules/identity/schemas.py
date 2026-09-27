@@ -20,6 +20,15 @@ class MembershipOut(BaseModel):
     status: str
     joined_at: datetime
     permissions: list[str]
+    #: The organization's P02 verification status (NOT_SUBMITTED / PENDING / APPROVED / REJECTED).
+    verification_status: str | None = None
+
+
+class Onboarding(BaseModel):
+    """P01 §10: what the user chose at registration; `/welcome/company|store` opens with it when they own nothing."""
+
+    org_type: OrgType | None
+    org_name: str | None
 
 
 class MeResponse(BaseModel):
@@ -37,6 +46,7 @@ class MeResponse(BaseModel):
     last_login_at: datetime | None
     created_at: datetime
     memberships: list[MembershipOut]
+    onboarding: Onboarding
 
 
 class MeUpdateRequest(BaseModel):

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import audit
 from app.core.permissions import permissions_for
 from app.modules.identity.models import Membership, User
-from app.modules.identity.schemas import MemberOut, MemberPage, MembershipOut, MeResponse, MeUpdateRequest
+from app.modules.identity.schemas import MemberOut, MemberPage, MembershipOut, MeResponse, MeUpdateRequest, Onboarding
 
 
 async def visible_memberships(session: AsyncSession, user: User) -> list[Membership]:
@@ -19,7 +19,7 @@ async def visible_memberships(session: AsyncSession, user: User) -> list[Members
     return list(result.scalars().unique())
 
 
-def membership_out(membership: Membership) -> MembershipOut:
+def membership_out(membership: Membership, verification_status: str | None = None) -> MembershipOut:
     org = membership.organization
     usable = membership.status == "ACTIVE" and org.status != "BLOCKED"
     return MembershipOut(
@@ -32,11 +32,27 @@ def membership_out(membership: Membership) -> MembershipOut:
         status=membership.status,
         joined_at=membership.joined_at,
         permissions=sorted(permissions_for(org.type, membership.role)) if usable else [],
+        verification_status=verification_status,
     )
+
+
+async def _verification_statuses(session: AsyncSession, memberships: list[Membership]) -> dict[object, str]:
+    """P02 verification status per organization (one query per profile table)."""
+    from app.modules.organizations.models import Company, Store
+
+    ids = [membership.organization_id for membership in memberships]
+    if not ids:
+        return {}
+    statuses: dict[object, str] = {}
+    for model in (Company, Store):
+        rows = await session.execute(select(model.id, model.verification_status).where(model.id.in_(ids)))
+        statuses.update({org_id: status for org_id, status in rows})
+    return statuses
 
 
 async def build_me(session: AsyncSession, user: User) -> MeResponse:
     memberships = await visible_memberships(session, user)
+    statuses = await _verification_statuses(session, memberships)
     return MeResponse(
         id=user.id,
         phone=user.phone,
@@ -49,7 +65,8 @@ async def build_me(session: AsyncSession, user: User) -> MeResponse:
         phone_verified_at=user.phone_verified_at,
         last_login_at=user.last_login_at,
         created_at=user.created_at,
-        memberships=[membership_out(m) for m in memberships],
+        memberships=[membership_out(m, statuses.get(m.organization_id)) for m in memberships],
+        onboarding=Onboarding(org_type=user.onboarding_org_type, org_name=user.onboarding_org_name),  # type: ignore[arg-type]
     )
 
 

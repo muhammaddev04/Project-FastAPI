@@ -12,6 +12,8 @@ os.environ["DATABASE_URL"] = os.environ.get(
     "TEST_DATABASE_URL", "postgresql+asyncpg://tezfarmo:tezfarmo@localhost:5434/tezfarmo_test"
 )
 os.environ["REDIS_URL"] = os.environ.get("TEST_REDIS_URL", "redis://localhost:6381/15")
+os.environ["S3_ENDPOINT"] = os.environ.get("TEST_S3_ENDPOINT", "localhost:9010")
+os.environ["S3_BUCKET_PRIVATE"] = "tezfarmo-test"
 os.environ["GOOGLE_CLIENT_ID"] = ""
 os.environ["GOOGLE_CLIENT_SECRET"] = ""
 

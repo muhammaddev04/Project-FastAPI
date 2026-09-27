@@ -106,7 +106,9 @@ _override: EmailPort | None = None
 @lru_cache(maxsize=1)
 def _configured() -> EmailPort:
     settings = get_settings()
-    return SmtpEmailProvider(settings) if settings.email_provider == "smtp" else MemoryEmailProvider()
+    # The test suite also reads backend/.env; it must never deliver real mail, whatever EMAIL_PROVIDER says.
+    real = settings.email_provider == "smtp" and settings.app_env != "testing"
+    return SmtpEmailProvider(settings) if real else MemoryEmailProvider()
 
 
 def get_email() -> EmailPort:

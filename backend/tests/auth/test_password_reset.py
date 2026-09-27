@@ -1,4 +1,5 @@
-"""P01 password reset: IAM-015 (start always 202, RESET_PASSWORD 30 min single use, token_version++), IAM-008
+"""P01 password reset: IAM-015 (start always 202, a 6-digit RESET_PASSWORD code by email - 30 min, single use -
+exchanged at /verify for a one-time 10-minute authorization that /complete spends; token_version++), IAM-008
 (password change revokes every refresh family), IAM-003 policy, `password_reset` rate limit, IAM-016 delivery,
 `auth.password_reset` audit (CR-001)."""
 
@@ -19,16 +20,16 @@ from app.core.audit import AuditLog
 from app.core.email import EmailDeliveryError, MemoryEmailProvider, OutgoingEmail, set_email_provider
 from app.core.time import utcnow
 from app.modules.auth.models import EmailToken, RefreshToken
-from app.modules.auth.tokens import hash_token, issue_email_token
+from app.modules.auth.tokens import hash_code, hash_token, issue_email_code
 from app.modules.identity.models import User
 from tests.auth.test_refresh import LOGIN, ME, PASSWORD, login, make_account, rotate, session_from
 
 START = "/api/v1/auth/password/reset/start"
+VERIFY = "/api/v1/auth/password/reset/verify"
 COMPLETE = "/api/v1/auth/password/reset/complete"
 EMAIL = "dilshod@pamir.tj"
 NEW_PASSWORD = "Khujand2027new"
-RESET_LINK = re.compile(r"/reset-password\?token=([A-Za-z0-9_-]+)")
-VERIFY_LINK = re.compile(r"/verify-email\?token=([A-Za-z0-9_-]+)")
+CODE_IN_EMAIL = re.compile(r":\s*([0-9]{6})\s*$", re.M)
 
 
 @pytest.fixture
@@ -44,20 +45,30 @@ class _FailingEmail:
         raise EmailDeliveryError(email.template)
 
 
-def link_token(email: OutgoingEmail) -> str:
-    match = RESET_LINK.search(email.text)
-    assert match
+def email_code(email: OutgoingEmail) -> str:
+    match = CODE_IN_EMAIL.search(email.text)
+    assert match, "the reset email carries a 6-digit code"
     return match.group(1)
 
 
 async def request_link(client: AsyncClient, outbox: list[OutgoingEmail], email: str = EMAIL) -> str:
+    """Start a reset, verify the emailed code and return the one-time reset authorization for /complete."""
     response = await client.post(START, json={"email": email})
     assert response.status_code == 202
-    return link_token(outbox[-1])
+    verified = await client.post(VERIFY, json={"email": email, "code": email_code(outbox[-1])})
+    assert verified.status_code == 200, verified.text
+    return str(verified.json()["reset_token"])
 
 
 async def complete(client: AsyncClient, token: str, new_password: str = NEW_PASSWORD) -> Response:
     return await client.post(COMPLETE, json={"token": token, "new_password": new_password})
+
+
+async def authorization_row(session: AsyncSession, reset_token: str) -> EmailToken:
+    session.expire_all()
+    row = await session.scalar(select(EmailToken).where(EmailToken.token_hash == hash_token(reset_token)))
+    assert row is not None
+    return row
 
 
 async def reset_tokens(session: AsyncSession) -> list[EmailToken]:
@@ -97,8 +108,8 @@ async def test_iam_015_password_reset_flow(client: AsyncClient, outbox: list[Out
         "/api/v1/auth/register",
         json={"email": email, "password": old_password, "full_name": "Nigina Karimova", "language": "en"},
     )
-    verify = VERIFY_LINK.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
-    assert (await client.post("/api/v1/auth/email/verify", json={"token": verify})).status_code == 204
+    verify = CODE_IN_EMAIL.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
+    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": verify})).status_code == 204
     device = await login(client, email, old_password)
     device = session_from(await rotate(client, device), device.csrf)
     assert (await client.get(ME, headers={"Authorization": f"Bearer {device.access}"})).status_code == 200
@@ -121,7 +132,7 @@ async def test_iam_015_password_reset_flow(client: AsyncClient, outbox: list[Out
 # --- start ---------------------------------------------------------------------------------------------------------
 
 
-async def test_start_emails_a_30_minute_reset_link_and_stores_only_its_hmac(
+async def test_start_emails_a_30_minute_code_without_a_link_and_stores_only_its_hmac(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     user_id, _ = await make_account(session, EMAIL, full_name="Dilshod Rahimov", language="en")
@@ -132,13 +143,17 @@ async def test_start_emails_a_30_minute_reset_link_and_stores_only_its_hmac(
     assert response.status_code == 202 and response.content == b""
     [sent] = outbox
     assert sent.to == EMAIL and sent.template == "password_reset"
-    assert sent.subject == "Reset your TezFarmo password"
+    assert sent.subject == "Your TezFarmo password reset code"
     assert "Dilshod Rahimov" in sent.text and "30 minutes" in sent.text
-    raw = link_token(sent)
-    assert len(raw) >= 43  # 256 bits
+    raw = email_code(sent)
+    assert re.fullmatch(r"[0-9]{6}", raw) and raw in sent.html
+    # A code only: no URL, no anchor, no button, no token anywhere in the email.
+    for part in (sent.text, sent.html):
+        assert "http" not in part and "href" not in part and "reset-password" not in part and "token" not in part
+    assert "<a " not in sent.html
     [row] = await reset_tokens(session)
     assert row.user_id == user_id and row.purpose == "RESET_PASSWORD"
-    assert row.token_hash == hash_token(raw) and raw not in row.token_hash
+    assert row.token_hash == hash_code(user_id, "RESET_PASSWORD", raw) and raw not in row.token_hash
     assert row.consumed_at is None
     lifetime = row.expires_at - started
     assert timedelta(minutes=29, seconds=55) <= lifetime <= timedelta(minutes=30, seconds=5)
@@ -177,11 +192,12 @@ async def test_email_uses_the_accounts_language(
 
     await client.post(START, json={"email": EMAIL})
 
-    assert outbox[-1].subject == "Восстановление пароля TezFarmo"
+    assert outbox[-1].subject == "Код для восстановления пароля TezFarmo"
     assert "30 мин" in outbox[-1].text
+    assert "http" not in outbox[-1].text and "<a " not in outbox[-1].html
 
 
-async def test_a_new_link_supersedes_the_previous_one(
+async def test_a_new_code_supersedes_the_previous_authorization(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     await make_account(session, EMAIL)
@@ -217,7 +233,7 @@ async def test_login_and_reset_limits_are_independent(
     assert (await sign_in(client, PASSWORD)).status_code == 200
 
 
-async def test_delivery_failure_answers_503_and_keeps_the_previous_link_valid(
+async def test_delivery_failure_answers_503_and_keeps_the_previous_authorization_valid(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     await make_account(session, EMAIL)
@@ -230,8 +246,9 @@ async def test_delivery_failure_answers_503_and_keeps_the_previous_link_valid(
 
     assert response.status_code == 503 and code(response) == "service_unavailable"
     assert "smtp" not in response.text.lower()
-    [only] = await reset_tokens(session)
-    assert only.token_hash == hash_token(old_raw) and only.expires_at > utcnow()
+    # Rolled back: no new code, and the earlier authorization was not expired by the failed attempt.
+    assert len(await reset_tokens(session)) == 2  # the used code and its authorization
+    assert (await authorization_row(session, old_raw)).expires_at > utcnow()
     assert (await complete(client, old_raw)).status_code == 204
 
 
@@ -307,8 +324,8 @@ async def test_complete_changes_the_password_and_uses_up_the_link(
     assert user.password_hash.startswith("$argon2id$")
     assert user.token_version == old_version + 1
     assert (user.email, user.email_verified_at, user.status, user.full_name, user.language) == snapshot
-    [row] = await reset_tokens(session)
-    assert row.consumed_at is not None
+    assert (await authorization_row(session, raw)).consumed_at is not None
+    assert all(row.consumed_at is not None for row in await reset_tokens(session))
     assert code(await sign_in(client, PASSWORD)) == "invalid_credentials"
     assert (await sign_in(client, NEW_PASSWORD)).status_code == 200
 
@@ -380,7 +397,7 @@ async def test_weak_new_password_is_rejected_and_the_link_stays_usable(
     assert {f["field"] for f in fields} == {"new_password"}
     assert {f["code"] for f in fields} == problems
     assert (await the_user(session)).token_version == version
-    assert (await reset_tokens(session))[0].consumed_at is None
+    assert (await authorization_row(session, raw)).consumed_at is None
     assert (await complete(client, raw)).status_code == 204
 
 
@@ -398,19 +415,20 @@ async def test_unknown_token_is_invalid_and_changes_nothing(
     assert await audits(session, "auth.password_reset") == []
 
 
-async def test_verification_token_cannot_reset_a_password(
+async def test_verification_code_cannot_reset_a_password(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     user_id, _ = await make_account(session, EMAIL, email_verified_at=None)
-    verify_raw = await issue_email_token(session, user_id, "VERIFY_EMAIL")
+    verify_code = await issue_email_code(session, user_id, "VERIFY_EMAIL")
     await session.commit()
 
-    response = await complete(client, verify_raw)
+    response = await complete(client, verify_code)
 
     assert response.status_code == 422 and code(response) == "email_token_invalid"
     assert (await the_user(session)).token_version == 1
-    # The verification link itself is untouched and still works.
-    assert (await client.post("/api/v1/auth/email/verify", json={"token": verify_raw})).status_code == 204
+    # The verification code itself is untouched and still works.
+    verified = await client.post("/api/v1/auth/email/verify", json={"email": EMAIL, "code": verify_code})
+    assert verified.status_code == 204
 
 
 async def test_expired_token_is_rejected(
@@ -483,7 +501,9 @@ async def test_secrets_stay_out_of_responses_logs_and_audit(
 
     with caplog.at_level(logging.DEBUG):
         started = await client.post(START, json={"email": EMAIL})
-        raw = link_token(outbox[-1])
+        emailed = email_code(outbox[-1])
+        verified = await client.post(VERIFY, json={"email": EMAIL, "code": emailed})
+        raw = verified.json()["reset_token"]
         completed = await complete(client, raw)
 
     assert "email recorded (not sent): password_reset" in caplog.text  # the capture sees the email logger
@@ -492,6 +512,9 @@ async def test_secrets_stay_out_of_responses_logs_and_audit(
     for secret in secrets:
         assert secret not in caplog.text
         assert secret not in started.text + completed.text
+    # The code is never echoed; the verify answer carries only the authorization meant for this browser.
+    assert emailed not in caplog.text and emailed not in started.text + verified.text + completed.text
+    assert set(verified.json()) == {"reset_token", "expires_in"}
     assert EMAIL not in caplog.text
     count = await session.scalar(select(func.count()).select_from(AuditLog))
     assert count

@@ -96,8 +96,10 @@ def test_sec_011_logs_mask_phone_numbers() -> None:
 
 def test_fnd_002_production_refuses_insecure_defaults() -> None:
     with pytest.raises(ValueError):
-        Settings(app_env="production")
+        # _env_file=None: judge only these values, not a developer's local backend/.env.
+        Settings(app_env="production", _env_file=None)
     production = Settings(
+        _env_file=None,
         app_env="production",
         app_secret_key="a" * 40,
         jwt_access_secret="s" * 40,

@@ -27,7 +27,8 @@ services:
   storage-test:
     image: chrislusf/seaweedfs:latest
     container_name: tezfarmo-storage-test
-    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -ip.bind=0.0.0.0
+    # One node grows 7 volumes per new bucket; small volumes and a higher cap keep that possible locally.
+    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -ip.bind=0.0.0.0 -volume.max=100 -master.volumeSizeLimitMB=64
     ports:
       - "9010:8333"
     volumes:

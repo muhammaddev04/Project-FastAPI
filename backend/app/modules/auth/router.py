@@ -2,16 +2,23 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Header, Response, status
+from fastapi import APIRouter, Cookie, Header, Request, Response, status
+from fastapi.responses import RedirectResponse
 
+from app.core.i18n import resolve_language
 from app.core.time import utcnow
-from app.modules.auth import service
+from app.modules.auth import google, service
 from app.modules.auth.schemas import (
+    GoogleCallbackRequest,
+    GoogleLinkOut,
+    GoogleLinkStartResponse,
     LoginRequest,
     LoginResponse,
     PasswordChangeRequest,
     PasswordResetCompleteRequest,
     PasswordResetStartRequest,
+    PasswordResetVerifyRequest,
+    PasswordResetVerifyResponse,
     RefreshResponse,
     RegisterRequest,
     ResendVerificationRequest,
@@ -19,6 +26,7 @@ from app.modules.auth.schemas import (
 )
 from app.modules.auth.sessions import CSRF_COOKIE, CSRF_HEADER, REFRESH_COOKIE, IssuedSession
 from app.modules.identity.deps import CurrentUser, SessionDep
+from app.modules.identity.service import build_me
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -44,11 +52,17 @@ async def register(payload: RegisterRequest, session: SessionDep) -> Response:
     "/email/verify",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Confirm the email address with the token from the email link (IAM-002, CR-001)",
+    summary="Confirm the email address with the 6-digit code from the verification email (IAM-002, CR-001)",
     responses={
-        204: {"description": "The email is confirmed; the token can no longer be used."},
-        422: {"description": "`email_token_invalid` (unknown or already used) or `email_token_expired`."},
-        429: {"description": "`rate_limited` (auth_email_verify, 10 per hour per IP)."},
+        204: {"description": "The email is confirmed; the code can no longer be used."},
+        422: {
+            "description": "`validation_error` (email, or a code that is not exactly 6 digits), `email_token_invalid` "
+            "(wrong, already used, or unknown address - indistinguishable) or `email_token_expired`."
+        },
+        429: {
+            "description": "`rate_limited`: auth_email_verify (10 per hour per IP) or auth_email_code (5 wrong codes "
+            "per 15 minutes per email); with Retry-After."
+        },
     },
 )
 async def verify_email(payload: VerifyEmailRequest, session: SessionDep) -> Response:
@@ -60,7 +74,7 @@ async def verify_email(payload: VerifyEmailRequest, session: SessionDep) -> Resp
     "/email/resend",
     status_code=status.HTTP_202_ACCEPTED,
     response_class=Response,
-    summary="Send a new confirmation link to an unverified address (P01 §6, CR-001)",
+    summary="Send a new 6-digit confirmation code to an unverified address (P01 §6, CR-001)",
     responses={
         202: {"description": "Accepted. The same answer for unknown, verified and unverified addresses."},
         422: {"description": "`validation_error`."},
@@ -68,7 +82,7 @@ async def verify_email(payload: VerifyEmailRequest, session: SessionDep) -> Resp
             "description": "`email_resend_too_early` (60 s after the previous email) or `rate_limited` "
             "(auth_email_send, 5 per hour per email); both with Retry-After."
         },
-        503: {"description": "`service_unavailable`: the email could not be sent; earlier links stay valid."},
+        503: {"description": "`service_unavailable`: the email could not be sent; the earlier code stays valid."},
     },
 )
 async def resend_verification(payload: ResendVerificationRequest, session: SessionDep) -> Response:
@@ -171,12 +185,12 @@ async def logout(
     "/password/reset/start",
     status_code=status.HTTP_202_ACCEPTED,
     response_class=Response,
-    summary="Email a one-time link for choosing a new password (IAM-015, CR-001)",
+    summary="Email a 6-digit code for choosing a new password (IAM-015, CR-001)",
     responses={
         202: {"description": "Accepted. The same answer whether or not the email is registered."},
         422: {"description": "`validation_error`."},
         429: {"description": "`rate_limited` (password_reset, 3 per hour per email), with Retry-After."},
-        503: {"description": "`service_unavailable`: the email could not be sent; earlier links stay valid."},
+        503: {"description": "`service_unavailable`: the email could not be sent; the earlier code stays valid."},
     },
 )
 async def start_password_reset(payload: PasswordResetStartRequest, session: SessionDep) -> Response:
@@ -185,12 +199,36 @@ async def start_password_reset(payload: PasswordResetStartRequest, session: Sess
 
 
 @router.post(
+    "/password/reset/verify",
+    response_model=PasswordResetVerifyResponse,
+    summary="Check the 6-digit reset code and get a one-time reset authorization (IAM-015)",
+    responses={
+        200: {"description": "`{reset_token, expires_in}`: single use, 10 minutes, only for password/reset/complete."},
+        422: {
+            "description": "`validation_error` (email, or a code that is not exactly 6 digits), `email_token_invalid` "
+            "(wrong, already used, or unknown address - indistinguishable) or `email_token_expired`."
+        },
+        429: {
+            "description": "`rate_limited`: auth_email_verify (10 per hour per IP) or password_reset_code (5 wrong "
+            "codes per 30 minutes per email); with Retry-After."
+        },
+    },
+)
+async def verify_password_reset(
+    payload: PasswordResetVerifyRequest, session: SessionDep, response: Response
+) -> PasswordResetVerifyResponse:
+    body = await service.verify_password_reset(session, payload)
+    response.headers["Cache-Control"] = "no-store"
+    return body
+
+
+@router.post(
     "/password/reset/complete",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Set a new password with the token from the reset link; signs out every device (IAM-015)",
+    summary="Set a new password with the reset authorization from /verify; signs out every device (IAM-015)",
     responses={
-        204: {"description": "Password changed; the link is used up, all sessions and access tokens are ended."},
+        204: {"description": "Password changed; the authorization is used up, all sessions and access tokens end."},
         422: {
             "description": "`validation_error`, `weak_password` (IAM-003), `email_token_invalid` (unknown or "
             "already used) or `email_token_expired`."
@@ -221,3 +259,127 @@ async def complete_password_reset(payload: PasswordResetCompleteRequest, session
 async def change_password(payload: PasswordChangeRequest, session: SessionDep, user: CurrentUser) -> Response:
     await service.change_password(session, user, payload)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "/google/start",
+    status_code=status.HTTP_302_FOUND,
+    response_class=RedirectResponse,
+    summary="Continue with Google: redirect to Google's consent screen (F-1.9, optional)",
+    responses={
+        302: {"description": "To Google, with state, nonce and a PKCE challenge; sets the httpOnly binding cookie."},
+        422: {"description": "`not_supported`: Google sign-in is not configured on this server."},
+    },
+)
+async def google_start() -> RedirectResponse:
+    started = await google.start()
+    response = RedirectResponse(started.authorization_url, status_code=status.HTTP_302_FOUND)
+    # Lax: the cookie must survive the top-level return from Google; scoped to the Google endpoints only.
+    response.set_cookie(
+        google.BINDING_COOKIE,
+        started.binding,
+        max_age=google.TRANSACTION_SECONDS,
+        path=google.COOKIE_PATH,
+        secure=True,
+        httponly=True,
+        samesite="lax",
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@router.post(
+    "/google/callback",
+    response_model=LoginResponse,
+    summary="Finish Continue with Google: exchange the code server-side and sign in (F-1.9, optional)",
+    responses={
+        200: {"description": "Same as login: `{access_token, expires_in, user}` plus the refresh and CSRF cookies."},
+        400: {"description": "`oauth_state_invalid` (expired, reused or from another browser) or `oauth_failed`."},
+        403: {"description": "`oauth_email_not_verified` or `user_blocked`."},
+        409: {"description": "`oauth_account_exists`: the email belongs to an account not linked to this Google user."},
+        422: {"description": "`validation_error` or `not_supported`."},
+        503: {"description": "`service_unavailable`: Google could not be reached."},
+    },
+)
+async def google_callback(
+    payload: GoogleCallbackRequest,
+    request: Request,
+    session: SessionDep,
+    response: Response,
+    binding: Annotated[str | None, Cookie(alias=google.BINDING_COOKIE)] = None,
+) -> LoginResponse:
+    language = resolve_language(request.headers.get("accept-language"))
+    user, issued = await google.complete(session, payload.code, payload.state, binding, language)
+    body = LoginResponse(
+        access_token=issued.access_token, expires_in=issued.expires_in, user=await build_me(session, user)
+    )
+    _set_session_cookies(response, issued)
+    response.delete_cookie(google.BINDING_COOKIE, path=google.COOKIE_PATH, secure=True, httponly=True, samesite="lax")
+    return body
+
+
+def _link_out(link: google.GoogleLink | None) -> GoogleLinkOut:
+    if link is None:
+        return GoogleLinkOut(connected=False)
+    return GoogleLinkOut(connected=True, status=link.status, email=link.email, linked_at=link.linked_at)  # type: ignore[arg-type]
+
+
+@router.get(
+    "/google/link",
+    response_model=GoogleLinkOut,
+    summary="Is a Google account connected to the signed-in user? (access)",
+)
+async def google_link_status(session: SessionDep, user: CurrentUser) -> GoogleLinkOut:
+    return _link_out(await google.link_status(session, user))
+
+
+@router.post(
+    "/google/link/start",
+    response_model=GoogleLinkStartResponse,
+    summary="Start linking a Google account to the signed-in user (access); returns Google's consent URL",
+    responses={
+        409: {"description": "`oauth_provider_already_linked`: this user already has a Google account connected."},
+        422: {"description": "`not_supported`: Google sign-in is not configured on this server."},
+    },
+)
+async def google_link_start(session: SessionDep, user: CurrentUser, response: Response) -> GoogleLinkStartResponse:
+    started = await google.link_start(session, user)
+    response.set_cookie(
+        google.BINDING_COOKIE,
+        started.binding,
+        max_age=google.TRANSACTION_SECONDS,
+        path=google.COOKIE_PATH,
+        secure=True,
+        httponly=True,
+        samesite="lax",
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return GoogleLinkStartResponse(authorization_url=started.authorization_url)
+
+
+@router.post(
+    "/google/link/callback",
+    response_model=GoogleLinkOut,
+    summary="Finish linking: exchange the code server-side and link that Google account to the signed-in user",
+    responses={
+        400: {
+            "description": "`oauth_state_invalid` (expired, reused, another browser or user, or not a link flow) "
+            "or `oauth_failed`."
+        },
+        409: {
+            "description": "`oauth_identity_already_linked` (that Google account belongs to another TezFarmo "
+            "account) or `oauth_provider_already_linked`."
+        },
+        503: {"description": "`service_unavailable`: Google could not be reached."},
+    },
+)
+async def google_link_callback(
+    payload: GoogleCallbackRequest,
+    session: SessionDep,
+    user: CurrentUser,
+    response: Response,
+    binding: Annotated[str | None, Cookie(alias=google.BINDING_COOKIE)] = None,
+) -> GoogleLinkOut:
+    link = await google.link_complete(session, user, payload.code, payload.state, binding)
+    response.delete_cookie(google.BINDING_COOKIE, path=google.COOKIE_PATH, secure=True, httponly=True, samesite="lax")
+    return _link_out(link)

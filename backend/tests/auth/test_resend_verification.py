@@ -18,14 +18,14 @@ from app.core.email import EmailDeliveryError, MemoryEmailProvider, OutgoingEmai
 from app.core.redis import get_redis
 from app.core.time import utcnow
 from app.modules.auth.models import EmailToken
-from app.modules.auth.tokens import hash_token
+from app.modules.auth.tokens import hash_code
 from app.modules.identity.models import User
 
 REGISTER = "/api/v1/auth/register"
 RESEND = "/api/v1/auth/email/resend"
 VERIFY = "/api/v1/auth/email/verify"
 EMAIL = "nigina@example.tj"
-TOKEN_IN_LINK = re.compile(r"/verify-email\?token=([A-Za-z0-9_-]+)")
+CODE_IN_EMAIL = re.compile(r":\s*([0-9]{6})\s*$", re.M)
 
 
 @pytest.fixture
@@ -42,12 +42,12 @@ async def register(client: AsyncClient, outbox: list[OutgoingEmail], language: s
         json={"email": EMAIL, "password": "Dushanbe2026x", "full_name": "Nigina Karimova", "language": language},
     )
     assert response.status_code == 202
-    return link_token(outbox[-1])
+    return email_code(outbox[-1])
 
 
-def link_token(message: OutgoingEmail) -> str:
-    match = TOKEN_IN_LINK.search(message.text)
-    assert match, "a verification email carries a /verify-email?token=… link"
+def email_code(message: OutgoingEmail) -> str:
+    match = CODE_IN_EMAIL.search(message.text)
+    assert match, "a verification email carries a 6-digit code"
     return match.group(1)
 
 
@@ -74,7 +74,7 @@ def visible(response: Response) -> tuple[int, bytes]:
     return response.status_code, response.content
 
 
-async def test_unverified_account_gets_a_new_working_link_and_the_old_one_stops_working(
+async def test_unverified_account_gets_a_new_working_code_and_the_old_one_stops_working(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     old_raw = await register(client, outbox)
@@ -84,28 +84,30 @@ async def test_unverified_account_gets_a_new_working_link_and_the_old_one_stops_
     response = await client.post(RESEND, json={"email": EMAIL})
 
     assert visible(response) == (202, b"")
+    user_id = (await the_user(session)).id
     old, new = await tokens(session)
-    new_raw = link_token(outbox[-1])
+    new_raw = email_code(outbox[-1])
     assert outbox[-1].template == "verification" and outbox[-1].to == EMAIL
-    # Same token system: VERIFY_EMAIL, HMAC only, 24 hours.
+    # Same code system: VERIFY_EMAIL, user-bound HMAC only, 15 minutes.
     assert new.purpose == "VERIFY_EMAIL" and new.consumed_at is None
-    assert new.token_hash == hash_token(new_raw) and new_raw not in new.token_hash
-    assert timedelta(hours=24) - timedelta(minutes=1) <= new.expires_at - before <= timedelta(hours=24, minutes=1)
-    assert old.token_hash == hash_token(old_raw)
+    assert new.token_hash == hash_code(user_id, "VERIFY_EMAIL", new_raw) and new_raw not in new.token_hash
+    assert timedelta(minutes=14) <= new.expires_at - before <= timedelta(minutes=16)
+    assert old.token_hash == hash_code(user_id, "VERIFY_EMAIL", old_raw)
     assert old.expires_at <= utcnow() and old.consumed_at is None
 
-    stale = await client.post(VERIFY, json={"token": old_raw})
-    assert stale.status_code == 422 and stale.json()["error"]["code"] == "email_token_expired"
-    assert (await client.post(VERIFY, json={"token": new_raw})).status_code == 204
+    if old_raw != new_raw:  # the same random code twice is a one-in-a-million event
+        stale = await client.post(VERIFY, json={"email": EMAIL, "code": old_raw})
+        assert stale.status_code == 422 and stale.json()["error"]["code"] == "email_token_expired"
+    assert (await client.post(VERIFY, json={"email": EMAIL, "code": new_raw})).status_code == 204
     assert (await the_user(session)).email_verified_at is not None
 
 
 @pytest.mark.parametrize(
     ("language", "subject"),
     [
-        ("tg", "Почтаи худро барои TezFarmo тасдиқ кунед"),
-        ("ru", "Подтвердите email для TezFarmo"),
-        ("en", "Confirm your email for TezFarmo"),
+        ("tg", "Рамзи тасдиқи TezFarmo-и шумо"),
+        ("ru", "Ваш код подтверждения TezFarmo"),
+        ("en", "Your TezFarmo verification code"),
     ],
 )
 async def test_resend_uses_the_accounts_language(
@@ -119,7 +121,8 @@ async def test_resend_uses_the_accounts_language(
     message = outbox[-1]
     assert message.template == "verification"
     assert message.subject == subject
-    assert "http://localhost:5174/verify-email?token=" in message.text
+    assert re.fullmatch(r"[0-9]{6}", email_code(message))
+    assert "http" not in message.text and "<a " not in message.html
 
 
 async def test_email_is_trimmed_and_lowercased(
@@ -142,7 +145,7 @@ async def test_unknown_and_verified_addresses_get_the_same_answer_and_nothing_el
     await cooldown_passes()
     unverified = await client.post(RESEND, json={"email": EMAIL})
     await cooldown_passes()
-    assert (await client.post(VERIFY, json={"token": link_token(outbox[-1])})).status_code == 204
+    assert (await client.post(VERIFY, json={"email": EMAIL, "code": email_code(outbox[-1])})).status_code == 204
     verified_at = (await the_user(session)).email_verified_at
     sent, token_count = len(outbox), len(await tokens(session))
     audit_count = await session.scalar(select(func.count()).select_from(AuditLog))
@@ -217,7 +220,7 @@ class _FailingEmail:
         raise EmailDeliveryError(email.template)
 
 
-async def test_delivery_failure_answers_503_and_keeps_the_previous_link_valid(
+async def test_delivery_failure_answers_503_and_keeps_the_previous_code_valid(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     old_raw = await register(client, outbox)
@@ -231,10 +234,11 @@ async def test_delivery_failure_answers_503_and_keeps_the_previous_link_valid(
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "service_unavailable"
     assert "smtp" not in response.text.lower()
-    # Rolled back: no new token, and the earlier link was not expired by the failed attempt.
+    # Rolled back: no new code, and the earlier code was not expired by the failed attempt.
+    user_id = (await the_user(session)).id
     [only] = await tokens(session)
-    assert only.token_hash == hash_token(old_raw) and only.expires_at > utcnow()
-    assert (await client.post(VERIFY, json={"token": old_raw})).status_code == 204
+    assert only.token_hash == hash_code(user_id, "VERIFY_EMAIL", old_raw) and only.expires_at > utcnow()
+    assert (await client.post(VERIFY, json={"email": EMAIL, "code": old_raw})).status_code == 204
 
 
 async def test_raw_token_and_address_stay_out_of_logs_and_audit(
@@ -247,7 +251,7 @@ async def test_raw_token_and_address_stay_out_of_logs_and_audit(
     with caplog.at_level(logging.DEBUG):
         response = await client.post(RESEND, json={"email": EMAIL})
 
-    raw = link_token(outbox[-1])
+    raw = email_code(outbox[-1])
     assert "email recorded (not sent): verification" in caplog.text  # the capture sees the email logger
     assert raw not in caplog.text and EMAIL not in caplog.text
     assert raw not in response.text

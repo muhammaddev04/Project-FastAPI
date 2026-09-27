@@ -25,6 +25,10 @@ AUTH_EMAIL_VERIFY = RateLimit("auth_email_verify", 10, 60 * 60)
 # P01 §2.2: another verification email only 60 s after the previous one (per email).
 EMAIL_RESEND_COOLDOWN = RateLimit("auth_email_resend", 1, 60, error_code="email_resend_too_early")
 PASSWORD_RESET = RateLimit("password_reset", 3, 60 * 60)
+# 6-digit verification codes: at most 5 wrong guesses per email per 15 minutes (the code's lifetime), whatever the IP.
+EMAIL_CODE_ATTEMPTS = RateLimit("auth_email_code", 5, 15 * 60)
+# 6-digit password reset codes: at most 5 wrong guesses per email per 30 minutes (the code's lifetime), any IP.
+RESET_CODE_ATTEMPTS = RateLimit("password_reset_code", 5, 30 * 60)
 DEFAULT_AUTHENTICATED = RateLimit("default_authenticated", 300, 60)
 
 

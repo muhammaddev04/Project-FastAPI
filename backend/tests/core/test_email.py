@@ -19,38 +19,49 @@ from app.core.email import (
 )
 from app.core.email_templates import render
 
-SECRET_LINK = "https://app.tezfarmo.tj/verify-email?token=SECRET-ONE-TIME-VALUE"
+SECRET_LINK = "https://app.tezfarmo.tj/login?token=SECRET-ONE-TIME-VALUE"
+CODE = "482913"
 
 
 @pytest.mark.parametrize(
-    ("language", "subject"),
+    ("language", "subject", "expiry"),
     [
-        ("en", "Confirm your email for TezFarmo"),
-        ("ru", "Подтвердите email для TezFarmo"),
-        ("tg", "Почтаи худро барои TezFarmo тасдиқ кунед"),
+        ("en", "Your TezFarmo verification code", "expires in 15 minutes"),
+        ("ru", "Ваш код подтверждения TezFarmo", "через 15 мин"),
+        ("tg", "Рамзи тасдиқи TezFarmo-и шумо", "баъди 15 дақиқа"),
     ],
 )
-def test_verification_email_is_localized(language: str, subject: str) -> None:
-    message = render(
-        "verification", language, to="nigina@example.tj", name="Nigina", action_url=SECRET_LINK, minutes=24 * 60
-    )
-    assert message.subject == subject
-    # P01 §2.2: the verification link lives 24 hours, stated in hours in every language.
-    assert "Nigina" in message.text and "24" in message.text
-    assert SECRET_LINK in message.text
-    assert f'href="{SECRET_LINK}"' in message.html
-    assert message.template == "verification"
+def test_verification_email_carries_only_a_code(language: str, subject: str, expiry: str) -> None:
+    message = render("verification", language, to="nigina@example.tj", name="Nigina", code=CODE, minutes=15)
+
+    assert message.subject == subject and message.template == "verification"
+    assert "Nigina" in message.text and CODE in message.text and CODE in message.html
+    assert expiry in message.text
+    # No link to click: no URL, no anchor, no button.
+    for part in (message.text, message.html):
+        assert "http" not in part and "href" not in part and "token" not in part
+    assert "<a " not in message.html
 
 
-def test_password_reset_email_mentions_single_use_and_sign_out() -> None:
-    message = render("password_reset", "en", to="a@example.tj", name="Ali", action_url=SECRET_LINK, minutes=15)
-    assert message.subject == "Reset your TezFarmo password"
-    assert "expires in 15 minutes" in message.text and "signed out of all devices" in message.text
+def test_verification_email_needs_a_code() -> None:
+    with pytest.raises(ValueError, match="needs a code"):
+        render("verification", "en", to="a@example.tj", name="A", action_url=SECRET_LINK, minutes=15)
+
+
+def test_password_reset_email_carries_only_a_code_and_mentions_sign_out() -> None:
+    message = render("password_reset", "en", to="a@example.tj", name="Ali", code=CODE, minutes=30)
+    assert message.subject == "Your TezFarmo password reset code"
+    assert CODE in message.text and CODE in message.html
+    assert "expires in 30 minutes" in message.text and "signed out of all devices" in message.text
+    for part in (message.text, message.html):
+        assert "http" not in part and "href" not in part
+    with pytest.raises(ValueError, match="needs a code"):
+        render("password_reset", "en", to="a@example.tj", name="Ali", action_url=SECRET_LINK, minutes=30)
 
 
 def test_email_templates_escape_user_controlled_values() -> None:
     message = render(
-        "verification",
+        "account_exists",
         "en",
         to="a@example.tj",
         name="<script>alert(1)</script>",
@@ -59,11 +70,13 @@ def test_email_templates_escape_user_controlled_values() -> None:
     )
     assert "<script>" not in message.html and "&lt;script&gt;" in message.html
     assert 'href="https://x.tj/?a=&quot;b&quot;"' in message.html
+    code_message = render("verification", "en", to="a@example.tj", name="<b>x</b>", code=CODE, minutes=5)
+    assert "<b>x</b>" not in code_message.html and "&lt;b&gt;x&lt;/b&gt;" in code_message.html
 
 
 def test_unknown_language_falls_back_to_tajik() -> None:
-    message = render("verification", "de", to="a@example.tj", name="A", action_url=SECRET_LINK, minutes=5)
-    assert message.subject == "Почтаи худро барои TezFarmo тасдиқ кунед"
+    message = render("verification", "de", to="a@example.tj", name="A", code=CODE, minutes=5)
+    assert message.subject == "Рамзи тасдиқи TezFarmo-и шумо"
 
 
 def test_mask_email_keeps_only_first_character_and_domain() -> None:
@@ -109,11 +122,11 @@ def _smtp_settings(**overrides: Any) -> Settings:
         "from_email": "noreply@tezfarmo.tj",
     }
     values.update(overrides)
-    return Settings(**values)
+    return Settings(**values, _env_file=None)
 
 
 def _message() -> OutgoingEmail:
-    return render("password_reset", "en", to="ali@example.tj", name="Ali", action_url=SECRET_LINK, minutes=15)
+    return render("password_reset", "en", to="ali@example.tj", name="Ali", code=CODE, minutes=30)
 
 
 async def test_smtp_provider_uses_starttls_login_and_multipart_message(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -126,7 +139,7 @@ async def test_smtp_provider_uses_starttls_login_and_multipart_message(monkeypat
     assert smtp.login_args == ("noreply@tezfarmo.tj", "app-password-value")
     sent = smtp.sent[0]
     assert sent["To"] == "ali@example.tj" and "noreply@tezfarmo.tj" in sent["From"]
-    assert sent["Subject"] == "Reset your TezFarmo password"
+    assert sent["Subject"] == "Your TezFarmo password reset code"
     assert [part.get_content_type() for part in sent.iter_parts()] == ["text/plain", "text/html"]
 
 
@@ -142,7 +155,7 @@ async def test_smtp_failure_raises_delivery_error_without_leaking(
     with pytest.raises(EmailDeliveryError):
         await SmtpEmailProvider(_smtp_settings()).send(_message())
     logged = caplog.text
-    assert "app-password-value" not in logged and "SECRET-ONE-TIME-VALUE" not in logged
+    assert "app-password-value" not in logged and CODE not in logged
     assert "a***@example.tj" in logged and "SMTPAuthenticationError" in logged
 
 
@@ -151,7 +164,7 @@ async def test_memory_provider_records_but_never_logs_content(caplog: pytest.Log
     caplog.set_level(logging.INFO, logger="tezfarmo.email")
     await provider.send(_message())
     assert provider.outbox[0].to == "ali@example.tj"
-    assert "SECRET-ONE-TIME-VALUE" not in caplog.text and "ali@example.tj" not in caplog.text
+    assert CODE not in caplog.text and "ali@example.tj" not in caplog.text
 
 
 def test_provider_is_replaceable() -> None:
@@ -164,6 +177,23 @@ def test_provider_is_replaceable() -> None:
     assert isinstance(email_module._configured(), MemoryEmailProvider)  # testing settings use the memory provider
 
 
+def test_testing_never_delivers_real_mail_even_with_smtp_configured(monkeypatch: pytest.MonkeyPatch) -> None:
+    # backend/.env may say EMAIL_PROVIDER=smtp (e.g. Gmail); the test suite reads it too and must stay offline.
+    monkeypatch.setattr(
+        email_module, "get_settings", lambda: _smtp_settings().model_copy(update={"app_env": "testing"})
+    )
+    email_module._configured.cache_clear()
+    try:
+        assert isinstance(email_module._configured(), MemoryEmailProvider)
+        monkeypatch.setattr(
+            email_module, "get_settings", lambda: _smtp_settings().model_copy(update={"app_env": "development"})
+        )
+        email_module._configured.cache_clear()
+        assert isinstance(email_module._configured(), email_module.SmtpEmailProvider)
+    finally:
+        email_module._configured.cache_clear()
+
+
 def test_smtp_password_is_never_rendered() -> None:
     settings = _smtp_settings()
     assert "app-password-value" not in repr(settings) and "app-password-value" not in str(settings.model_dump())
@@ -172,8 +202,15 @@ def test_smtp_password_is_never_rendered() -> None:
 def test_production_requires_smtp_delivery() -> None:
     strong = "s" * 40
     with pytest.raises(ValueError, match="EMAIL_PROVIDER=smtp"):
-        Settings(app_env="production", app_secret_key=strong, jwt_access_secret=strong, jwt_refresh_secret=strong)
+        Settings(
+            _env_file=None,
+            app_env="production",
+            app_secret_key=strong,
+            jwt_access_secret=strong,
+            jwt_refresh_secret=strong,
+        )
     Settings(
+        _env_file=None,
         app_env="production",
         app_secret_key=strong,
         jwt_access_secret=strong,

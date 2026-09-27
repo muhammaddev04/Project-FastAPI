@@ -31,7 +31,7 @@ LOGIN = "/api/v1/auth/login"
 REFRESH = "/api/v1/auth/refresh"
 ME = "/api/v1/me"
 PASSWORD = "Tezfarmo2026"  # tests.factories.make_user
-TOKEN_IN_LINK = re.compile(r"/verify-email\?token=([A-Za-z0-9_-]+)")
+CODE_IN_EMAIL = re.compile(r":\s*([0-9]{6})\s*$", re.M)
 
 
 @dataclass(frozen=True)
@@ -114,8 +114,8 @@ async def test_register_verify_login_refresh_chain(client: AsyncClient, outbox: 
         "/api/v1/auth/register",
         json={"email": email, "password": password, "full_name": "Nigina Karimova", "language": "tg"},
     )
-    raw = TOKEN_IN_LINK.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
-    assert (await client.post("/api/v1/auth/email/verify", json={"token": raw})).status_code == 204
+    emailed = CODE_IN_EMAIL.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
+    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": emailed})).status_code == 204
     first = await login(client, email, password)
     assert (await client.get(ME, headers={"Authorization": f"Bearer {first.access}"})).status_code == 200
 
