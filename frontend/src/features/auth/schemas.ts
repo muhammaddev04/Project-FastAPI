@@ -23,6 +23,14 @@ export function passwordRules(password: string): Record<PasswordRule, boolean> {
   };
 }
 
+/** IAM-003 `weak_password` detail codes (backend password_policy.py) → our `validation.*` messages. */
+export const PASSWORD_PROBLEMS: Record<string, string> = {
+  password_too_short: 'validation.passwordTooShort',
+  password_too_long: 'validation.passwordTooLong',
+  password_needs_letter_and_digit: 'validation.passwordLetterDigit',
+  password_too_common: 'validation.passwordTooCommon',
+};
+
 /** The same rule for registration, password reset and password change. */
 export const newPasswordSchema = z
   .string()
@@ -51,7 +59,16 @@ export const registerSchema = z.object({
 });
 export type RegisterValues = z.input<typeof registerSchema>;
 
+/** The 6-digit email verification code (backend: exactly six ASCII digits). */
+export const verificationCodeSchema = z.string().regex(/^[0-9]{6}$/, 'validation.codeSixDigits');
+
+export const verifyEmailSchema = z.object({ email: emailSchema, code: verificationCodeSchema });
+export type VerifyEmailValues = z.input<typeof verifyEmailSchema>;
+
 export const forgotPasswordSchema = z.object({ email: emailSchema });
+
+export const resetCodeSchema = z.object({ code: verificationCodeSchema });
+export type ResetCodeValues = z.input<typeof resetCodeSchema>;
 export type ForgotPasswordValues = z.input<typeof forgotPasswordSchema>;
 
 export const resetPasswordSchema = z

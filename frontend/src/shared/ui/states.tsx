@@ -17,15 +17,17 @@ function StateFrame({ icon: Icon = Inbox, title, description, action, className,
     <div className={cn('flex animate-fade-in flex-col items-center px-6 py-10 text-center', className)}>
       <span
         className={cn(
-          'mb-4 flex size-10 items-center justify-center rounded-lg border',
-          tone === 'danger' ? 'border-danger/20 bg-danger-soft text-danger' : 'bg-subtle text-muted-foreground',
+          'relative mb-4 flex size-14 items-center justify-center rounded-2xl border',
+          tone === 'danger'
+            ? 'border-danger/20 bg-danger-soft text-danger'
+            : 'border-primary/20 bg-primary/10 text-primary shadow-[0_14px_30px_-18px_hsl(var(--primary)/0.8)]',
         )}
       >
-        <Icon className="size-5" aria-hidden="true" />
+        <Icon className="size-6" aria-hidden="true" />
       </span>
-      <p className="text-sm font-semibold text-foreground">{title}</p>
-      {description ? <p className="mt-1 max-w-sm text-[0.8125rem] text-muted-foreground">{description}</p> : null}
-      {action ? <div className="mt-4">{action}</div> : null}
+      <p className="font-display text-base font-bold text-foreground">{title}</p>
+      {description ? <p className="mt-1.5 max-w-sm text-[0.8125rem] leading-relaxed text-muted-foreground">{description}</p> : null}
+      {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );
 }

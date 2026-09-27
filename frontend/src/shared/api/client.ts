@@ -67,6 +67,13 @@ export type RequestOptions = {
   idempotencyKey?: string;
   signal?: AbortSignal;
   timeoutMs?: number;
+  /** Extra request headers, e.g. `X-CSRF-Token` for the cookie-based auth endpoints (SEC-005). */
+  headers?: Record<string, string>;
+  /**
+   * P01 login/refresh: their 401 is an answer about the credentials, not a lost session, so it neither triggers
+   * the FE-008 refresh retry nor ends the current session.
+   */
+  authEndpoint?: boolean;
 };
 
 async function parseError(response: Response): Promise<ApiError> {
@@ -94,9 +101,12 @@ async function send(path: string, options: RequestOptions, accessToken: string |
     'Accept-Language': currentLanguage(),
     'X-Request-Id': newRequestId(),
   };
-  if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+  const multipart = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  // JSON by default; a FormData body (file upload) lets the browser set the multipart boundary itself.
+  if (options.body !== undefined && !multipart) headers['Content-Type'] = 'application/json';
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   if (options.idempotencyKey) headers['Idempotency-Key'] = options.idempotencyKey;
+  Object.assign(headers, options.headers);
   if (options.orgScoped) {
     const orgId = hooks.getOrgId();
     if (orgId) headers['X-Org-Id'] = orgId;
@@ -109,7 +119,7 @@ async function send(path: string, options: RequestOptions, accessToken: string |
     return await fetch(`${API_BASE}${path}`, {
       method: options.method ?? 'GET',
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: options.body === undefined ? undefined : multipart ? (options.body as FormData) : JSON.stringify(options.body),
       credentials: 'same-origin',
       signal: controller.signal,
     });
@@ -126,18 +136,22 @@ async function send(path: string, options: RequestOptions, accessToken: string |
 
 /** Typed JSON request against /api/v1 (FND-034). */
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  let response = await send(path, options, hooks.getAccessToken());
+  let response = await send(path, options, options.authEndpoint ? null : hooks.getAccessToken());
 
-  if (response.status === 401 && hooks.refreshAccessToken && hooks.getAccessToken()) {
+  // A 401 `invalid_credentials` (wrong current password on password change) is an answer, not a lost session.
+  const sessionLost = async (res: Response) => res.status === 401 && (await parseError(res.clone())).code !== 'invalid_credentials';
+
+  if (!options.authEndpoint && hooks.refreshAccessToken && hooks.getAccessToken() && (await sessionLost(response))) {
     const renewed = await hooks.refreshAccessToken();
     if (renewed) response = await send(path, options, renewed);
   }
 
   if (!response.ok) {
     const error = await parseError(response);
-    if (error.status === 401) hooks.onUnauthorized(error);
+    if (error.status === 401 && !options.authEndpoint && error.code !== 'invalid_credentials') hooks.onUnauthorized(error);
     throw error;
   }
-  if (response.status === 204) return undefined as T;
-  return (await response.json()) as T;
+  // 204, and the 202 of the P01 email endpoints, carry no body.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }

@@ -12,6 +12,7 @@ export function membershipFixture(overrides: Partial<Membership> = {}): Membersh
     status: 'ACTIVE',
     joined_at: '2026-09-01T08:00:00Z',
     permissions: ['members.change_role', 'members.invite', 'members.revoke', 'members.suspend', 'members.view'],
+    verification_status: 'APPROVED',
     ...overrides,
   };
 }
@@ -30,6 +31,7 @@ export function meFixture(memberships: Membership[] = [membershipFixture()], ove
     last_login_at: null,
     created_at: '2026-09-01T08:00:00Z',
     memberships,
+    onboarding: { org_type: null, org_name: null },
     ...overrides,
   };
 }

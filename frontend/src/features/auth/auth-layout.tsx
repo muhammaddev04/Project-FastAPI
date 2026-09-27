@@ -110,7 +110,7 @@ function Hero() {
     <motion.section variants={stagger} initial="hidden" animate="shown" className="hidden lg:block" aria-label={t('auth.shell.heroBadge')}>
       <motion.p
         variants={rise}
-        className="inline-flex h-10 items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-4 text-[0.875rem] font-semibold text-primary"
+        className="inline-flex h-10 items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-4 text-[0.875rem] font-semibold text-primary-ink"
       >
         <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
         {t('auth.shell.heroBadge')}

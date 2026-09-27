@@ -31,10 +31,26 @@ export function areaHome(area: Area): string {
   return `/${area}`;
 }
 
-/** Where an authenticated user lands: their active area, or onboarding when they have no organization. */
+/** The onboarding page for a user without an organization: the type chosen at registration, else the choice. */
+export function onboardingPath(me: Me): string {
+  const type = me.onboarding?.org_type;
+  return type ? `/welcome/${type.toLowerCase()}` : '/welcome';
+}
+
+/**
+ * Where an authenticated user lands, from server state only (`/me`), after login, Google sign-in, session restore
+ * and on `/`: an OWNER whose organization is not yet APPROVED goes to its verification page; everyone else to their
+ * area; without an organization, to onboarding for the type chosen at registration (never asked twice).
+ */
 export function homePath(me: Me, activeOrgId: string | null): string {
   const membership = resolveActiveMembership(me, activeOrgId);
-  return membership ? areaHome(areaFor(membership)) : '/welcome';
+  if (!membership) return onboardingPath(me);
+  const area = areaFor(membership);
+  const status = membership.verification_status;
+  if (membership.role === 'OWNER' && area !== 'courier' && status && status !== 'APPROVED') {
+    return `${areaHome(area)}/settings/verification`;
+  }
+  return areaHome(area);
 }
 
 /** Only same-app relative paths are accepted as post-login destinations (no open redirects). */

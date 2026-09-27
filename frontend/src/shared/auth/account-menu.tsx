@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut, UserRound } from 'lucide-react';
+import { ChevronsUpDown, LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
@@ -22,12 +22,12 @@ export function AccountMenu({ me, compact = false, className }: { me: Me; compac
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'flex items-center gap-2 rounded-md p-1 text-left transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
+          'flex items-center gap-2 rounded-full p-0.5 text-left transition-shadow hover:shadow-[0_0_0_3px_hsl(var(--primary)/0.25)] focus-visible:ring-2 focus-visible:ring-ring',
           className,
         )}
         aria-label={t('account.menu')}
       >
-        <Avatar name={me.full_name} />
+        <Avatar name={me.full_name} size="md" />
         {compact ? null : (
           <>
             <span className="hidden min-w-0 sm:block">
@@ -48,7 +48,12 @@ export function AccountMenu({ me, compact = false, className }: { me: Me; compac
         <DropdownMenuItem onSelect={() => navigate('/profile')}>
           <UserRound /> {t('account.profile')}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={signOut}>
+        {me.is_superadmin ? (
+          <DropdownMenuItem onSelect={() => navigate('/admin/verifications')}>
+            <ShieldCheck /> {t('account.verificationQueue')}
+          </DropdownMenuItem>
+        ) : null}
+        <DropdownMenuItem onSelect={() => void signOut()}>
           <LogOut /> {t('account.signOut')}
         </DropdownMenuItem>
       </DropdownMenuContent>

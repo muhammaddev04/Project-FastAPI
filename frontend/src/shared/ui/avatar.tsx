@@ -1,0 +1,63 @@
+import { Building2, ShieldCheck, Store, type LucideIcon } from 'lucide-react';
+import { cn } from '@/shared/lib/cn';
+import { initialsOf } from '@/shared/lib/initials';
+
+/**
+ * Identity marks, one per entity kind (DESIGN.md): a **person** is a round initials badge on the teal→blue gradient;
+ * a **company** is the rounded teal tile of the TezFarmo mark with a building; a **store** is the same tile on the
+ * sky→blue gradient with a storefront. The shapes and hues keep User / Company / Store apart at a glance.
+ */
+export type AvatarKind = 'person' | 'company' | 'store';
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+const SIZES: Record<Size, { box: string; text: string; icon: string; badge: string }> = {
+  xs: { box: 'size-7', text: 'text-[0.625rem]', icon: 'size-3.5', badge: 'hidden' },
+  sm: { box: 'size-8', text: 'text-[0.6875rem]', icon: 'size-4', badge: 'hidden' },
+  md: { box: 'size-10', text: 'text-xs', icon: 'size-5', badge: 'size-4 [&_svg]:size-2.5' },
+  lg: { box: 'size-14', text: 'text-base', icon: 'size-7', badge: 'size-5 [&_svg]:size-3' },
+  xl: { box: 'size-16 sm:size-20', text: 'text-xl sm:text-2xl', icon: 'size-8 sm:size-9', badge: 'size-6 [&_svg]:size-3.5' },
+};
+
+const KIND: Record<AvatarKind, { shape: string; fill: string; icon?: LucideIcon }> = {
+  person: { shape: 'rounded-full', fill: 'from-brand to-brand-blue shadow-[0_8px_22px_-10px_rgba(29,78,216,0.7)]' },
+  company: { shape: 'rounded-2xl', fill: 'from-brand-light to-brand shadow-[0_8px_24px_-8px_rgba(45,212,191,0.65)]', icon: Building2 },
+  store: { shape: 'rounded-2xl', fill: 'from-brand-sky to-brand-blue shadow-[0_8px_24px_-8px_rgba(14,165,233,0.6)]', icon: Store },
+};
+
+export function Avatar({
+  name,
+  kind = 'person',
+  size = 'sm',
+  verified = false,
+  className,
+}: {
+  /** Person initials come from the name; organizations show their kind's icon. */
+  name?: string;
+  kind?: AvatarKind;
+  size?: Size;
+  verified?: boolean;
+  className?: string;
+}) {
+  const s = SIZES[size];
+  const k = KIND[kind];
+  const Icon = k.icon;
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        'relative inline-flex shrink-0 items-center justify-center bg-gradient-to-br font-display font-bold text-white',
+        s.box,
+        k.shape,
+        k.fill,
+        className,
+      )}
+    >
+      {Icon ? <Icon className={s.icon} /> : <span className={s.text}>{initialsOf(name ?? '')}</span>}
+      {verified ? (
+        <span className={cn('absolute -bottom-1 -right-1 flex items-center justify-center rounded-full border-2 border-surface bg-success text-white', s.badge)}>
+          <ShieldCheck />
+        </span>
+      ) : null}
+    </span>
+  );
+}

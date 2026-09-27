@@ -59,7 +59,7 @@ const COMPANY: NavSection[] = [
     items: [
       { key: 'team', path: 'team', icon: Users, permission: 'members.view' },
       { key: 'subscription', path: 'subscription', icon: CreditCard, roles: ['OWNER'], phase: 'P03' },
-      { key: 'settings', path: 'settings', icon: Settings, roles: ['OWNER', 'MANAGER'], phase: 'P02' },
+      { key: 'settings', path: 'settings', icon: Settings, roles: ['OWNER', 'MANAGER'] },
     ],
   },
 ];
@@ -81,7 +81,7 @@ const STORE: NavSection[] = [
     key: 'organization',
     items: [
       { key: 'team', path: 'team', icon: Users, permission: 'members.view' },
-      { key: 'settings', path: 'settings', icon: Settings, roles: ['OWNER'], phase: 'P02' },
+      { key: 'settings', path: 'settings', icon: Settings, roles: ['OWNER'] },
     ],
   },
 ];

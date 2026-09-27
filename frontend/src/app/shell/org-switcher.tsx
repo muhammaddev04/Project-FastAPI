@@ -6,6 +6,7 @@ import { useSessionStore } from '@/shared/auth/session-store';
 import type { Me, Membership } from '@/shared/auth/types';
 import { cn } from '@/shared/lib/cn';
 import {
+  Avatar,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -14,23 +15,12 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui';
 
-function OrgGlyph({ membership, className }: { membership: Membership; className?: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'flex size-8 shrink-0 items-center justify-center rounded-md text-xs font-semibold',
-        membership.org_type === 'COMPANY' ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground',
-        className,
-      )}
-    >
-      {membership.org_name.charAt(0).toUpperCase()}
-    </span>
-  );
+function OrgGlyph({ membership, size = 'md' }: { membership: Membership; size?: 'xs' | 'md' }) {
+  return <Avatar kind={membership.org_type === 'STORE' ? 'store' : 'company'} size={size} className={size === 'md' ? 'rounded-xl' : 'rounded-lg'} />;
 }
 
 /** P01 §10 org switcher: pick a membership -> X-Org-Id changes and the matching area opens. */
-export function OrgSwitcher({ me, active, tone = 'default' }: { me: Me; active: Membership; tone?: 'default' | 'inverted' }) {
+export function OrgSwitcher({ me, active }: { me: Me; active: Membership }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const setActiveOrg = useSessionStore((state) => state.setActiveOrg);
@@ -40,15 +30,14 @@ export function OrgSwitcher({ me, active, tone = 'default' }: { me: Me; active: 
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'flex w-full items-center gap-2.5 rounded-md p-1.5 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring',
-          tone === 'inverted' ? 'hover:bg-sidebar-active' : 'hover:bg-muted',
+          'flex w-full items-center gap-3 rounded-2xl border bg-surface/60 p-2.5 text-left transition-[border-color,box-shadow] hover:border-primary/40 hover:shadow-[0_12px_28px_-20px_hsl(var(--primary)/0.8)] focus-visible:ring-2 focus-visible:ring-ring dark:bg-subtle/50',
         )}
         aria-label={t('shell.switchOrganization')}
       >
         <OrgGlyph membership={active} />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[0.8125rem] font-semibold leading-4">{active.org_name}</span>
-          <span className={cn('block truncate text-2xs', tone === 'inverted' ? 'text-sidebar-muted' : 'text-muted-foreground')}>
+          <span className="block truncate text-[0.8125rem] font-bold leading-4">{active.org_name}</span>
+          <span className="mt-0.5 block truncate text-2xs text-sidebar-muted">
             {t(`orgTypes.${active.org_type}`)} · {t(`roles.${active.role}`)}
           </span>
         </span>
@@ -64,7 +53,7 @@ export function OrgSwitcher({ me, active, tone = 'default' }: { me: Me; active: 
               navigate(areaHome(areaFor(membership)));
             }}
           >
-            <OrgGlyph membership={membership} className="size-6 text-2xs" />
+            <OrgGlyph membership={membership} size="xs" />
             <span className="min-w-0 flex-1">
               <span className="block truncate font-medium text-foreground">{membership.org_name}</span>
               <span className="block truncate text-2xs text-muted-foreground">

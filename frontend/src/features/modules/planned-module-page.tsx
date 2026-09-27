@@ -4,7 +4,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { useAreaContext } from '@/app/shell/use-area-context';
 import { canSee, findItem } from '@/app/shell/nav-config';
 import { areaFor } from '@/shared/auth/context';
-import { Badge, Card, EmptyState, ForbiddenState, PageHeader } from '@/shared/ui';
+import { Card, EmptyState, ForbiddenState, PageHeader, PhaseBadge } from '@/shared/ui';
 
 /**
  * Placeholder for a navigation entry whose TZ phase has not been built yet. It states what the module will do
@@ -27,20 +27,21 @@ export function PlannedModulePage() {
         eyebrow={t(`shell.areas.${area}`)}
         title={t(`nav.${area}.${item.key}`)}
         description={t(`planned.${area}.${item.key}`)}
-        actions={<Badge tone="neutral">{t('planned.badge', { phase: item.phase })}</Badge>}
+        actions={<PhaseBadge phase={item.phase} />}
       />
-      <Card>
+      <Card className="relative overflow-hidden">
+        <div aria-hidden="true" className="brand-glow-soft pointer-events-none absolute inset-0" />
         <EmptyState
           icon={Icon}
           title={t('planned.title', { phase: item.phase })}
           description={t('planned.description')}
           action={
-            <span className="inline-flex items-center gap-1.5 text-[0.8125rem] text-muted-foreground">
-              <CalendarClock className="size-4" aria-hidden="true" />
+            <span className="inline-flex items-center gap-2 rounded-full border bg-surface/70 px-3.5 py-1.5 text-[0.8125rem] font-medium text-muted-foreground">
+              <CalendarClock className="size-4 text-primary" aria-hidden="true" />
               {t(`planned.phases.${item.phase}`)}
             </span>
           }
-          className="py-16"
+          className="relative py-16 sm:py-20"
         />
       </Card>
     </div>

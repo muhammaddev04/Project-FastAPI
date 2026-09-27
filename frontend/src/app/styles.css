@@ -3,75 +3,98 @@
 @tailwind utilities;
 
 /*
- * TezFarmo design tokens (DESIGN.md "Modern Precision Commerce").
- * Canvas slate-50, white Tier-1 surfaces with hairline borders, deep teal as the single action color,
- * deep slate for structural chrome, warm ochre for pending/interim states.
+ * TezFarmo design tokens (DESIGN.md, CR-002). The whole product uses the language of the sign-in screens:
+ * pale-blue canvas / navy night canvas, white or navy glass surfaces, deep teal action color with a teal→blue
+ * brand gradient, Montserrat display type, rounded surfaces and a soft teal glow on the active element.
  */
 @layer base {
   :root {
-    /* Screenshot palette (DESIGN.md frontmatter): bluish-white canvas, tinted containers, deep teal actions. */
-    --background: 228 100% 99%; /* #F8F9FF */
-    --foreground: 213 63% 12%; /* #0B1C30 */
+    --background: 214 45% 97%; /* #F3F7FC */
+    --foreground: 222 55% 14%; /* #0F1B3A */
     --surface: 0 0% 100%;
-    --subtle: 218 100% 97%; /* #EFF4FF surface-container-low: inputs, info rows */
-    --container: 219 100% 95%; /* #E5EEFF */
-    --muted: 216 100% 93%; /* #DCE9FF */
-    --muted-foreground: 206 11% 36%; /* secondary text */
-    --border: 220 45% 91%; /* hairline on white */
-    --input: 219 60% 88%;
-    --ring: 175 77% 26%;
+    --subtle: 214 45% 96%; /* fields, table heads, info rows */
+    --container: 214 50% 93%;
+    --muted: 214 45% 91%;
+    --muted-foreground: 219 16% 38%;
+    --border: 216 32% 89%;
+    --input: 216 28% 84%;
+    --ring: 174 72% 32%;
 
-    --primary: 175 77% 26%; /* #0F766E */
-    --primary-hover: 176 100% 18%; /* #005C55 */
+    --primary: 174 84% 26%; /* #0B7D72: white text passes AA */
+    --primary-hover: 174 88% 21%;
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 172 73% 93%; /* mint tint for chips */
+    --primary-soft: 170 60% 92%;
+    /* Solid teal plate behind an active tab / nav item (always white text). */
+    --primary-strong: 174 84% 26%;
+    /* Teal for small text on teal-tinted chips and pills (AA on primary/10 over the page glow). */
+    --primary-ink: 174 88% 21%;
+    --brand-from: 174 84% 30%;
+    --brand-to: 221 83% 48%;
 
-    --slate: 213 35% 20%; /* #213145 inverse surface / HUD */
-    --warning: 32 95% 44%; /* #D97706 ochre */
-    --warning-soft: 30 100% 92%; /* #FFE6D5 */
-    --danger: 0 75% 42%; /* #BA1A1A */
-    --danger-soft: 6 100% 92%; /* #FFDAD6 */
+    --slate: 222 55% 14%;
+    --warning: 32 95% 44%; /* ochre: pending / interim */
+    --warning-soft: 30 100% 92%;
+    --danger: 0 75% 42%;
+    --danger-soft: 6 100% 92%;
     --success: 161 94% 30%;
     --success-soft: 152 81% 96%;
     --info: 221 83% 53%;
     --info-soft: 214 100% 97%;
+    /* Status text on the matching soft chip (AA at chip size). */
+    --success-ink: 161 94% 22%;
+    --warning-ink: 26 90% 30%;
+    --danger-ink: 0 75% 36%;
+    --info-ink: 221 83% 40%;
+
+    /* DESIGN.md order pipeline (P07): NEW → CONFIRMED → ASSEMBLING → IN_TRANSIT → DELIVERED, DISPUTED. */
+    --status-new: 221 83% 53%;
+    --status-new-soft: 214 100% 97%;
+    --status-confirmed: 200 98% 39%;
+    --status-confirmed-soft: 204 100% 97%;
+    --status-assembling: 32 95% 44%;
+    --status-assembling-soft: 48 100% 96%;
+    --status-transit: 262 83% 58%;
+    --status-transit-soft: 250 100% 98%;
+    --status-delivered: 161 94% 30%;
+    --status-delivered-soft: 152 81% 96%;
+    --status-disputed: 0 72% 51%;
+    --status-disputed-soft: 0 86% 97%;
 
     --accent: var(--primary);
     --accent-foreground: 0 0% 100%;
     --accent-soft: var(--primary-soft);
-    --sidebar: 213 35% 20%;
-    --sidebar-foreground: 218 100% 96%;
-    --sidebar-muted: 215 25% 70%;
-    --sidebar-active: 213 30% 27%;
-    --sidebar-border: 213 28% 28%;
-  }
 
-  [data-area='store'] {
+    /* Shell chrome: white glass in light, navy glass at night (same for every area). */
     --sidebar: 0 0% 100%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-muted: 215 16% 40%;
-    --sidebar-active: 218 100% 97%;
-    --sidebar-border: 220 45% 91%;
+    --sidebar-foreground: 222 55% 14%;
+    --sidebar-muted: 219 16% 38%;
+    --sidebar-active: 170 60% 92%;
+    --sidebar-border: 216 32% 89%;
   }
 
-  /* Dark theme: layered navy-slate surfaces (not an inversion); accents lifted for contrast on dark. */
+  /* Night theme of the sign-in screens: navy canvas, navy cards, bright teal with navy text on it. */
   .dark {
-    --background: 222 47% 7%; /* #0A0F1C */
-    --foreground: 214 40% 93%;
-    --surface: 222 38% 11%; /* #111827-ish card */
-    --subtle: 222 33% 14%;
-    --container: 222 30% 17%;
-    --muted: 221 26% 21%;
-    --muted-foreground: 216 18% 66%;
-    --border: 221 25% 20%;
-    --input: 220 22% 28%;
-    --ring: 172 66% 45%;
+    --background: 224 72% 8%; /* #061129 */
+    --foreground: 210 40% 97%;
+    --surface: 223 50% 13%; /* #111C38 */
+    --subtle: 222 42% 17%; /* #18244A fields */
+    --container: 222 40% 19%;
+    --muted: 222 36% 21%;
+    --muted-foreground: 218 25% 72%;
+    --border: 221 35% 21%;
+    --input: 220 30% 27%;
+    --ring: 172 66% 50%;
 
-    --primary: 174 72% 38%; /* brighter teal on dark */
-    --primary-hover: 173 70% 44%;
-    --primary-foreground: 0 0% 100%;
-    --primary-soft: 176 45% 15%;
+    --primary: 172 66% 50%; /* #2DD4BF */
+    --primary-hover: 172 70% 60%;
+    --primary-foreground: 224 72% 8%;
+    --primary-soft: 176 50% 16%;
+    --primary-strong: 174 82% 28%; /* #0D8276 */
+    --primary-ink: 172 70% 60%;
+    --brand-from: 172 66% 50%;
+    --brand-to: 199 89% 60%;
 
+    --slate: 223 50% 13%;
     --warning: 38 92% 56%;
     --warning-soft: 32 55% 15%;
     --danger: 0 84% 64%;
@@ -80,24 +103,41 @@
     --success-soft: 160 45% 14%;
     --info: 217 91% 64%;
     --info-soft: 220 50% 17%;
+    --success-ink: 158 64% 52%;
+    --warning-ink: 38 92% 60%;
+    --danger-ink: 0 84% 70%;
+    --info-ink: 217 91% 70%;
 
-    --sidebar: 222 45% 9%;
-    --sidebar-foreground: 214 40% 93%;
-    --sidebar-muted: 216 18% 62%;
-    --sidebar-active: 222 30% 16%;
-    --sidebar-border: 221 25% 17%;
+    --status-new: 217 91% 64%;
+    --status-new-soft: 220 50% 17%;
+    --status-confirmed: 199 89% 60%;
+    --status-confirmed-soft: 204 60% 16%;
+    --status-assembling: 38 92% 56%;
+    --status-assembling-soft: 32 55% 15%;
+    --status-transit: 258 90% 72%;
+    --status-transit-soft: 260 40% 20%;
+    --status-delivered: 158 64% 48%;
+    --status-delivered-soft: 160 45% 14%;
+    --status-disputed: 0 84% 64%;
+    --status-disputed-soft: 0 50% 16%;
+
+    --sidebar: 224 64% 10%;
+    --sidebar-foreground: 210 40% 97%;
+    --sidebar-muted: 218 25% 72%;
+    --sidebar-active: 222 42% 17%;
+    --sidebar-border: 221 35% 18%;
   }
 
-  .dark [data-area='store'] {
-    --sidebar: 222 38% 11%;
-    --sidebar-foreground: 214 40% 93%;
-    --sidebar-muted: 216 18% 66%;
-    --sidebar-active: 176 45% 15%;
-    --sidebar-border: 221 25% 20%;
+  /* Display type of the sign-in screens (Montserrat covers Tajik Cyrillic: ҳ ҷ ӣ ӯ қ ғ). */
+  .font-display {
+    font-family: 'Montserrat Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
 
   /*
-   * Auth pages (navy/teal screenshots). Dark is the reference look; light keeps the same identity on a pale
+   * Sign-in screens (restored b2c8b71 layout). Scoped to `.auth-theme`, so nothing else is affected; the
+   * values equal the global palette.
+   * Dark is the reference look; light keeps the same identity on a pale
    * blue canvas. Headings use Montserrat (covers Tajik Cyrillic), body text Inter.
    */
   .auth-theme {
@@ -170,12 +210,6 @@
     font-feature-settings: 'cv11', 'ss01';
   }
 
-  /* Display headings use a serif (screenshots); Noto Serif covers Tajik Cyrillic (ҳ ҷ ӣ ӯ қ ғ). */
-  .font-display {
-    font-family: 'Noto Serif Variable', 'Noto Serif', Georgia, serif;
-    letter-spacing: -0.01em;
-  }
-
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
@@ -187,6 +221,51 @@
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
+  }
+}
+
+@layer components {
+  /* Teal→blue text for the brand word ("Farmo") and brand accents in headings. */
+  .brand-text {
+    background-image: linear-gradient(90deg, hsl(var(--brand-from)), hsl(var(--brand-to)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Page glow of the sign-in screens: blue top-left, teal bottom-right. `.brand-glow-soft` is the calmer app version. */
+  .brand-glow {
+    background-image: radial-gradient(90% 70% at 12% 18%, rgb(37 99 235 / 0.12), transparent 60%),
+      radial-gradient(60% 60% at 95% 90%, rgb(13 148 136 / 0.1), transparent 60%);
+  }
+  .dark .brand-glow {
+    background-image: radial-gradient(90% 70% at 12% 18%, rgb(29 78 216 / 0.42), transparent 60%),
+      radial-gradient(60% 60% at 95% 90%, rgb(8 145 178 / 0.2), transparent 60%);
+  }
+  .brand-glow-soft {
+    background-image: radial-gradient(70% 45% at 8% 0%, rgb(37 99 235 / 0.07), transparent 65%),
+      radial-gradient(50% 40% at 100% 100%, rgb(13 148 136 / 0.06), transparent 65%);
+  }
+  .dark .brand-glow-soft {
+    background-image: radial-gradient(70% 45% at 8% 0%, rgb(29 78 216 / 0.22), transparent 65%),
+      radial-gradient(50% 40% at 100% 100%, rgb(8 145 178 / 0.1), transparent 65%);
+  }
+
+  /* Frosted surface (sign-in card, shell header/sidebar): translucent surface + blur, hairline edge. */
+  .glass {
+    @apply border-border bg-surface/85 backdrop-blur-xl;
+  }
+  .dark .glass {
+    @apply border-white/10 bg-surface/75;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  }
+
+  /* Card depth of the design language: soft navy shadow in light, deep shadow + top highlight at night. */
+  .surface-card {
+    @apply rounded-2xl border bg-surface shadow-card;
+  }
+  .dark .surface-card {
+    box-shadow: 0 24px 60px -32px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.04);
   }
 }
 

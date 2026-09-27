@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
 import { cloneElement, isValidElement, useEffect, useId, type ReactElement, type ReactNode } from 'react';
+import { cn } from '@/shared/lib/cn';
 import { Label } from './label';
 
 type FieldControlProps = { id?: string; invalid?: boolean; 'aria-describedby'?: string };
@@ -14,6 +15,7 @@ export function FormField({
   error,
   action,
   labelClassName,
+  size = 'md',
   children,
 }: {
   label: ReactNode;
@@ -21,6 +23,8 @@ export function FormField({
   error?: string;
   action?: ReactNode;
   labelClassName?: string;
+  /** `lg`: the larger label of the sign-in forms. */
+  size?: 'md' | 'lg';
   children: ReactElement<FieldControlProps>;
 }) {
   const generated = useId();
@@ -33,9 +37,9 @@ export function FormField({
   }, [error, controls]);
 
   return (
-    <div className="space-y-2">
+    <div className={cn('space-y-2', size === 'lg' && '2xl:space-y-3')}>
       <div className="flex items-center justify-between gap-3">
-        <Label htmlFor={id} className={labelClassName}>
+        <Label htmlFor={id} className={cn(size === 'lg' && 'text-[0.9375rem] font-medium 2xl:text-[1.125rem]', labelClassName)}>
           {label}
         </Label>
         {action}
@@ -47,7 +51,7 @@ export function FormField({
             key="error"
             id={`${id}-error`}
             role="alert"
-            className="text-[0.8125rem] text-danger"
+            className={cn('text-[0.8125rem] text-danger', size === 'lg' && '2xl:text-[0.9375rem]')}
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
@@ -59,7 +63,7 @@ export function FormField({
           <motion.p
             key="hint"
             id={`${id}-hint`}
-            className="px-0.5 text-[0.8125rem] text-muted-foreground"
+            className={cn('px-0.5 text-[0.8125rem] text-muted-foreground', size === 'lg' && '2xl:text-[0.9375rem]')}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

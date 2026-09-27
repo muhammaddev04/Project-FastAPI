@@ -1,20 +1,21 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router-dom';
 import { errorMessage } from '@/shared/api/errors';
 import { BrandMark, ErrorState, ForbiddenState, Spinner } from '@/shared/ui';
 import { useMe } from './api';
-import { areaFor, homePath, resolveActiveMembership, type Area } from './context';
+import { areaFor, homePath, resolveActiveMembership, safeNextPath, type Area } from './context';
+import { GOOGLE_CALLBACK_PATH, isGoogleLinkReturn } from './google-intent';
 import { useSessionStore } from './session-store';
 import type { Me, Membership } from './types';
 
 function FullPageLoader() {
   const { t } = useTranslation();
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
-      <BrandMark />
-      <Spinner className="size-5 text-muted-foreground" label={t('common.loading')} />
+    <div className="brand-glow-soft flex min-h-screen flex-col items-center justify-center gap-5 bg-background">
+      <BrandMark size="md" />
+      <Spinner className="size-5 text-primary" label={t('common.loading')} />
     </div>
   );
 }
@@ -23,14 +24,17 @@ function FullPageLoader() {
 export function RequireAuth({ children }: { children?: (me: Me) => ReactNode }) {
   const location = useLocation();
   const accessToken = useSessionStore((state) => state.accessToken);
+  const restoring = useSessionStore((state) => state.restoring);
   const me = useMe();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (!accessToken) queryClient.removeQueries({ queryKey: ['me'] });
-  }, [accessToken, queryClient]);
+    if (!accessToken && !restoring) queryClient.removeQueries({ queryKey: ['me'] });
+  }, [accessToken, restoring, queryClient]);
 
+  // After a reload the session may still come back from the refresh cookie: wait before calling this a guest.
+  if (!accessToken && restoring) return <FullPageLoader />;
   if (!accessToken) {
     const next = `${location.pathname}${location.search}`;
     return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
@@ -46,14 +50,30 @@ export function RequireAuth({ children }: { children?: (me: Me) => ReactNode }) 
   return <>{children ? children(me.data) : <Outlet />}</>;
 }
 
-/** Login/registration pages: a signed-in user is sent to their application instead. */
+/**
+ * Login/registration pages: a signed-in user is sent on, to the page that sent them to /login (`?next=`, same-app
+ * paths only) or else to their application. This is also how a successful login leaves /login.
+ */
 export function RequireGuest({ children }: { children: ReactNode }) {
   const accessToken = useSessionStore((state) => state.accessToken);
   const activeOrgId = useSessionStore((state) => state.activeOrgId);
+  const restoring = useSessionStore((state) => state.restoring);
+  const [params] = useSearchParams();
+  const location = useLocation();
   const me = useMe();
-  if (accessToken && me.data) return <Navigate to={homePath(me.data, activeOrgId)} replace />;
+  if (restoring) return <FullPageLoader />;
+  // A signed-in user returning from "Connect Google" must reach the callback page to finish the link.
+  const linkReturn = location.pathname === GOOGLE_CALLBACK_PATH && isGoogleLinkReturn();
+  if (accessToken && me.data && !linkReturn) {
+    return <Navigate to={safeNextPath(params.get('next')) ?? homePath(me.data, activeOrgId)} replace />;
+  }
   if (accessToken && me.isPending) return <FullPageLoader />;
   return <>{children}</>;
+}
+
+/** P02 §5 admin pages: SUPERADMIN only (the backend's `require_superadmin` decides; this only avoids a dead page). */
+export function RequireSuperadmin({ children }: { children: (me: Me) => ReactNode }) {
+  return <RequireAuth>{(me) => (me.is_superadmin ? children(me) : <Navigate to="/403" replace />)}</RequireAuth>;
 }
 
 export type AreaContext = { me: Me; membership: Membership };

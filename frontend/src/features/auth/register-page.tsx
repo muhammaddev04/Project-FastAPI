@@ -3,13 +3,27 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Building2, Check, Mail, Store, UserRound } from 'lucide-react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { ApiError } from '@/shared/api/client';
+import { errorMessage } from '@/shared/api/errors';
+import { currentLanguage } from '@/shared/i18n';
 import { cn } from '@/shared/lib/cn';
-import { Button, FormField, Input, PasswordInput } from '@/shared/ui';
+import { Alert, Button, FormField, Input, PasswordInput } from '@/shared/ui';
+import { useRegister } from './api';
+import { GoogleButton, OrDivider } from './google-button';
 import { AuthCard, BrandTitle, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
 import { MethodUnavailable } from './availability';
 import { PasswordChecklist } from './password-checklist';
-import { registerSchema, type RegisterValues } from './schemas';
+import { PASSWORD_PROBLEMS, registerSchema, type RegisterValues } from './schemas';
 import { useAuthMethod } from './use-auth-method';
+import type { VerifyEmailState } from './verify-email-page';
+
+/** Server field names of RegisterRequest → form fields. */
+const SERVER_FIELDS: Record<string, 'email' | 'password' | 'fullName'> = {
+  email: 'email',
+  password: 'password',
+  full_name: 'fullName',
+};
 
 /** Store / Company choice as two compact tiles with their TZ commercial terms (Store free, Company trial). */
 function RoleChoice({ selected, field }: { selected: RegisterValues['orgType']; field: UseFormRegisterReturn }) {
@@ -21,7 +35,7 @@ function RoleChoice({ selected, field }: { selected: RegisterValues['orgType']; 
   return (
     <fieldset>
       <legend className={cn(authLabel, 'mb-2')}>{t('auth.register.typeLegend')}</legend>
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-1 gap-2.5 min-[360px]:grid-cols-2">
         {options.map(({ type, icon: Icon, badge }) => {
           const active = selected === type;
           return (
@@ -63,10 +77,10 @@ function NextSteps() {
       <p className="shrink-0 text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground short:hidden short:sm:block short:sm:max-w-[6.5rem] short:sm:leading-tight">
         {t('auth.shell.flowTitle')}
       </p>
-      <ol className="mt-1.5 grid flex-1 grid-cols-3 short:mt-0 gap-2 text-[0.75rem] font-medium leading-tight sm:text-[0.8125rem]">
+      <ol className="mt-1.5 grid flex-1 grid-cols-1 gap-1.5 min-[420px]:grid-cols-3 min-[420px]:gap-2 short:mt-0 text-[0.75rem] font-medium leading-tight sm:text-[0.8125rem]">
         {steps.map((step, index) => (
           <li key={step} className="flex items-start gap-1.5">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[0.6875rem] font-bold text-primary">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[0.6875rem] font-bold text-primary-ink">
               {index + 1}
             </span>
             <span>{step}</span>
@@ -83,7 +97,9 @@ function NextSteps() {
  */
 export function RegisterPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { available, meta } = useAuthMethod('registration');
+  const registration = useRegister();
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
@@ -99,7 +115,41 @@ export function RegisterPage() {
   const errors = form.formState.errors;
   const orgType = form.watch('orgType');
   const password = form.watch('password');
-  const message = (key?: string) => (key ? t(key) : undefined);
+  // Client rules are translation keys; server validation messages arrive already translated (Accept-Language).
+  const message = (key?: string) => (key ? (key.startsWith('validation.') ? t(key) : key) : undefined);
+  // Field problems are shown on the fields; anything else (rate limit, email delivery, network) in one alert.
+  const formError =
+    registration.error instanceof ApiError && ['weak_password', 'validation_error'].includes(registration.error.code) ? null : registration.error;
+
+  const onSubmit = form.handleSubmit(async (values) => {
+    // P01 §10: the Company/Store choice and organization name are remembered by the server as the onboarding intent;
+    // registration itself creates only the user (IAM-001).
+    const payload = {
+      email: values.email,
+      password: values.password,
+      full_name: values.fullName.trim(),
+      language: currentLanguage(),
+      org_type: values.orgType,
+      org_name: values.orgName.trim(),
+    };
+    try {
+      await registration.mutateAsync(payload);
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'weak_password') {
+        const problem = error.fieldErrors.map((field) => PASSWORD_PROBLEMS[field.code]).find(Boolean);
+        form.setError('password', { message: problem ?? 'validation.passwordLetterDigit' }, { shouldFocus: true });
+      } else if (error instanceof ApiError && error.code === 'validation_error') {
+        error.fieldErrors.forEach((field) => {
+          const name = SERVER_FIELDS[field.field];
+          if (name) form.setError(name, { message: field.message });
+        });
+      }
+      return;
+    }
+    // 202 says nothing about whether the address was new (IAM-001); the next screen only needs it to resend.
+    const state: VerifyEmailState = { email: payload.email, justRegistered: true };
+    navigate('/verify-email', { state });
+  });
 
   return (
     <AuthCard title={<BrandTitle i18nKey="auth.shell.registerTitle" />} subtitle={t('auth.shell.registerSubtitle')} tabs>
@@ -109,8 +159,7 @@ export function RegisterPage() {
         </div>
       ) : null}
 
-      {/* Account creation (email verification, then organization review) is wired by the deferred P01 flow. */}
-      <form className="space-y-4 short:space-y-2.5" noValidate onSubmit={form.handleSubmit(() => undefined)}>
+      <form className="space-y-4 short:space-y-2.5" noValidate onSubmit={onSubmit}>
         <RoleChoice selected={orgType} field={form.register('orgType')} />
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-3 short:gap-2.5">
           <FormField
@@ -157,12 +206,19 @@ export function RegisterPage() {
           ) : null}
         </div>
         <NextSteps />
-        <Button type="submit" block className={authPrimaryButton} disabled={!available} loading={meta.isPending}>
+        {formError ? (
+          <Alert tone="danger" title={t('auth.register.failed')}>
+            {errorMessage(formError, t)}
+          </Alert>
+        ) : null}
+        <Button type="submit" block className={authPrimaryButton} disabled={!available} loading={meta.isPending || registration.isPending}>
           {t('auth.register.submit')}
           <ArrowRight className="transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
         </Button>
       </form>
 
+      <OrDivider />
+      <GoogleButton />
       <CardSwitch question={t('auth.register.haveAccount')} to="/login" link={t('auth.register.signIn')} />
     </AuthCard>
   );

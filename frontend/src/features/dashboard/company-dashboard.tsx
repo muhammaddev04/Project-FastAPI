@@ -1,8 +1,9 @@
-import { Bell, ClipboardList, Wallet } from 'lucide-react';
+import { Bell, ClipboardList, PackageSearch, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAreaContext } from '@/app/shell/use-area-context';
-import { Badge, PageHeader } from '@/shared/ui';
-import { AccessCard, PendingPanel, ReadinessChecklist, TeamCard } from './widgets';
+import { OrgHero } from './org-hero';
+import { AccessCard, ReadinessChecklist, TeamCard } from './widgets';
+import { PlannedPanel } from '@/shared/ui';
 
 /** TZ §23 onboarding checklist: documents, catalog, price list, delivery zones, first client. */
 const READINESS = [
@@ -27,16 +28,12 @@ export function CompanyDashboard() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow={t('shell.areas.company')}
-        title={membership.org_name}
-        description={t('dashboard.company.greeting', { name: me.full_name.split(' ')[0] })}
-        actions={<Badge tone="accent">{t(`roles.${membership.role}`)}</Badge>}
-      />
+      <OrgHero greeting={t('dashboard.company.greeting', { name: me.full_name.split(' ')[0] })} />
 
       <div className="grid gap-4 lg:grid-cols-3">
         {ORDER_ROLES.includes(membership.role) ? (
-          <PendingPanel
+          <PlannedPanel
+            emptyTitle={t('dashboard.pending.title')}
             icon={ClipboardList}
             title={t('dashboard.company.newOrders')}
             description={t('dashboard.company.newOrdersEmpty')}
@@ -44,14 +41,16 @@ export function CompanyDashboard() {
           />
         ) : null}
         {isOwnerOrManager ? (
-          <PendingPanel
+          <PlannedPanel
+            emptyTitle={t('dashboard.pending.title')}
             icon={Wallet}
             title={t('dashboard.company.receivables')}
             description={t('dashboard.company.receivablesEmpty')}
             phase="P09"
           />
         ) : null}
-        <PendingPanel
+        <PlannedPanel
+            emptyTitle={t('dashboard.pending.title')}
           icon={Bell}
           title={t('dashboard.notifications.title')}
           description={t('dashboard.notifications.empty')}
@@ -59,12 +58,17 @@ export function CompanyDashboard() {
         />
       </div>
 
+      {isOwnerOrManager ? (
+        <PlannedPanel icon={PackageSearch} title={t('home.company.catalog')} description={t('home.company.catalogText')} phase="P04" ghostTiles={3} />
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {isOwnerOrManager ? (
             <ReadinessChecklist membership={membership} steps={READINESS} />
           ) : (
-            <PendingPanel
+            <PlannedPanel
+            emptyTitle={t('dashboard.pending.title')}
               icon={ClipboardList}
               title={t(`dashboard.company.roleFocus.${membership.role}.title`)}
               description={t(`dashboard.company.roleFocus.${membership.role}.text`)}

@@ -1,24 +1,18 @@
-import { ChevronLeft, ChevronRight, Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAreaContext } from '@/app/shell/use-area-context';
 import { errorMessage } from '@/shared/api/errors';
 import { useMembers } from '@/shared/auth/api';
 import { RequirePermission } from '@/shared/auth/guards';
-import type { MembershipStatus, Role } from '@/shared/auth/types';
-import { Avatar, Badge, Button, Card, EmptyState, ErrorState, Input, PageHeader, Select, SkeletonRows } from '@/shared/ui';
+import type { Member, MembershipStatus, Role } from '@/shared/auth/types';
+import { Avatar, Badge, Button, DataTable, Input, PageHeader, Select, StatusBadge } from '@/shared/ui';
 
 const PAGE_SIZE = 20;
 const ROLES: Record<'COMPANY' | 'STORE', Role[]> = {
   COMPANY: ['OWNER', 'MANAGER', 'OPERATOR', 'WAREHOUSE', 'COURIER'],
   STORE: ['OWNER', 'SELLER'],
 };
-const STATUS_TONE: Record<MembershipStatus, 'success' | 'warning' | 'neutral'> = {
-  ACTIVE: 'success',
-  SUSPENDED: 'warning',
-  REVOKED: 'neutral',
-};
-
 function useDebounced<T>(value: T, delay = 300): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -71,113 +65,72 @@ export function TeamPage() {
           }
         />
 
-        <Card>
-          <div className="flex flex-col gap-3 border-b p-4 sm:flex-row">
-            <Input
-              className="sm:max-w-xs"
-              leading={<Search />}
-              placeholder={t('team.searchPlaceholder')}
-              aria-label={t('team.search')}
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-            <Select aria-label={t('team.roleFilter')} value={role} onChange={(event) => setRole(event.target.value as Role | '')} className="sm:w-44">
-              <option value="">{t('team.allRoles')}</option>
-              {ROLES[membership.org_type].map((value) => (
-                <option key={value} value={value}>
-                  {t(`roles.${value}`)}
-                </option>
-              ))}
-            </Select>
-            <Select
-              aria-label={t('team.statusFilter')}
-              value={status}
-              onChange={(event) => setStatus(event.target.value as MembershipStatus | '')}
-              className="sm:w-44"
-            >
-              <option value="">{t('team.allStatuses')}</option>
-              {(['ACTIVE', 'SUSPENDED', 'REVOKED'] as const).map((value) => (
-                <option key={value} value={value}>
-                  {t(`team.statuses.${value}`)}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {members.isPending ? (
-            <div className="p-5">
-              <SkeletonRows rows={4} label={t('common.loading')} />
-            </div>
-          ) : members.isError ? (
-            <ErrorState message={errorMessage(members.error, t)} onRetry={() => void members.refetch()} />
-          ) : page && page.results.length === 0 ? (
-            <EmptyState title={t('team.emptyTitle')} description={t('team.emptyText')} />
-          ) : page ? (
+        <DataTable<Member>
+          caption={t('team.title')}
+          rowKey={(member) => member.id}
+          rows={page?.results}
+          loading={members.isPending}
+          error={members.isError ? errorMessage(members.error, t) : undefined}
+          onRetry={() => void members.refetch()}
+          empty={{ title: t('team.emptyTitle'), description: t('team.emptyText') }}
+          pagination={page ? { offset, limit: PAGE_SIZE, count: page.count, onChange: setOffset } : undefined}
+          toolbar={
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[40rem] text-left text-[0.8125rem]">
-                  <thead className="border-b bg-subtle text-2xs uppercase tracking-wide text-muted-foreground">
-                    <tr>
-                      <th scope="col" className="px-5 py-2.5 font-semibold">{t('team.columns.member')}</th>
-                      <th scope="col" className="px-5 py-2.5 font-semibold">{t('team.columns.role')}</th>
-                      <th scope="col" className="px-5 py-2.5 font-semibold">{t('team.columns.status')}</th>
-                      <th scope="col" className="px-5 py-2.5 font-semibold">{t('team.columns.joined')}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {page.results.map((member) => (
-                      <tr key={member.id} className="transition-colors hover:bg-subtle/60">
-                        <td className="px-5 py-3">
-                          <div className="flex items-center gap-3">
-                            <Avatar name={member.full_name} />
-                            <div className="min-w-0">
-                              <p className="truncate font-medium">{member.full_name}</p>
-                              <p className="text-muted-foreground">{member.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3">{t(`roles.${member.role}`)}</td>
-                        <td className="px-5 py-3">
-                          <Badge tone={STATUS_TONE[member.status]}>{t(`team.statuses.${member.status}`)}</Badge>
-                        </td>
-                        <td className="px-5 py-3 text-muted-foreground">{formatDate(member.joined_at, i18n.language)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="flex items-center justify-between border-t px-5 py-3 text-[0.8125rem] text-muted-foreground">
-                <span>
-                  {t('team.range', {
-                    from: page.count ? page.offset + 1 : 0,
-                    to: page.offset + page.results.length,
-                    total: page.count,
-                  })}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={offset === 0}
-                    onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
-                    aria-label={t('team.previous')}
-                  >
-                    <ChevronLeft />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={offset + PAGE_SIZE >= page.count}
-                    onClick={() => setOffset(offset + PAGE_SIZE)}
-                    aria-label={t('team.next')}
-                  >
-                    <ChevronRight />
-                  </Button>
-                </div>
-              </div>
+              <Input
+                className="sm:min-w-0 sm:max-w-xs sm:flex-1"
+                leading={<Search />}
+                placeholder={t('team.searchPlaceholder')}
+                aria-label={t('team.search')}
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+              <Select aria-label={t('team.roleFilter')} value={role} onChange={(event) => setRole(event.target.value as Role | '')} className="sm:w-40">
+                <option value="">{t('team.allRoles')}</option>
+                {ROLES[membership.org_type].map((value) => (
+                  <option key={value} value={value}>
+                    {t(`roles.${value}`)}
+                  </option>
+                ))}
+              </Select>
+              <Select
+                aria-label={t('team.statusFilter')}
+                value={status}
+                onChange={(event) => setStatus(event.target.value as MembershipStatus | '')}
+                className="sm:w-40"
+              >
+                <option value="">{t('team.allStatuses')}</option>
+                {(['ACTIVE', 'SUSPENDED', 'REVOKED'] as const).map((value) => (
+                  <option key={value} value={value}>
+                    {t(`team.statuses.${value}`)}
+                  </option>
+                ))}
+              </Select>
             </>
-          ) : null}
-        </Card>
+          }
+          columns={[
+            {
+              key: 'member',
+              header: t('team.columns.member'),
+              primary: true,
+              cell: (member) => (
+                <div className="flex items-center gap-3">
+                  <Avatar name={member.full_name} size="md" />
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">{member.full_name}</p>
+                    <p className="truncate text-muted-foreground">{member.email}</p>
+                  </div>
+                </div>
+              ),
+            },
+            { key: 'role', header: t('team.columns.role'), cell: (member) => <Badge tone="accent">{t(`roles.${member.role}`)}</Badge> },
+            { key: 'status', header: t('team.columns.status'), cell: (member) => <StatusBadge kind="member" value={member.status} /> },
+            {
+              key: 'joined',
+              header: t('team.columns.joined'),
+              cell: (member) => <span className="text-muted-foreground">{formatDate(member.joined_at, i18n.language)}</span>,
+            },
+          ]}
+        />
       </div>
     </RequirePermission>
   );

@@ -151,6 +151,30 @@ describe('organization switcher and profile', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     expect(await screen.findByText('Your profile was saved.')).toBeInTheDocument();
     await waitFor(() => expect(calls.find((call) => call.method === 'PATCH')?.body).toEqual({ full_name: 'Dilshod R.', language: 'en' }));
-    expect(screen.getByRole('button', { name: /change password/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /change password/i })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: /sign out everywhere/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('application shell (FND-032, CR-002)', () => {
+  it('shows breadcrumbs down to the settings sub-page and names the page in the header', async () => {
+    mockApi([{ path: '/me', body: meFixture([membershipFixture({ permissions: ['org.view', 'verification.view'] })]) }]);
+    signIn();
+    renderRoutes(routes, '/company/settings/verification');
+    const crumbs = await screen.findByRole('navigation', { name: 'Breadcrumb' });
+    expect(within(crumbs).getByRole('link', { name: 'Pamir Distribution' })).toHaveAttribute('href', '/company');
+    expect(within(crumbs).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/company/settings');
+    expect(within(crumbs).getByText('Verification')).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('opens the mobile menu as a dialog and closes it with Escape', async () => {
+    mockApi([{ path: '/me', body: meFixture([membershipFixture()]) }, { path: '/members', body: MEMBERS }]);
+    signIn();
+    renderRoutes(routes, '/company');
+    await userEvent.click(await screen.findByRole('button', { name: 'Open menu' }));
+    const drawer = await screen.findByRole('dialog', { name: 'Main navigation' });
+    expect(within(drawer).getByRole('link', { name: /team/i })).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 });

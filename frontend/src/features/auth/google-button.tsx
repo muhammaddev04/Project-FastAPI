@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui';
+import { goToGoogle } from './api';
 import { useAuthMethod } from './use-auth-method';
 
 /** Google's standard "G" mark, as required by its sign-in branding guidelines. */
-function GoogleMark() {
+export function GoogleMark() {
   return (
     <svg viewBox="0 0 48 48" aria-hidden="true">
       <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
@@ -15,12 +17,21 @@ function GoogleMark() {
 }
 
 /**
- * "Continue with Google". The OAuth flow (authorization code + state + PKCE, server-side exchange)
+ * "Continue with Google". The OAuth flow (authorization code + state + PKCE + nonce, server-side exchange)
  * is owned by the backend; until /meta reports it as enabled the button stays disabled and explains why.
  */
 export function GoogleButton() {
   const { t } = useTranslation();
   const { available, meta } = useAuthMethod('google');
+  const [leaving, setLeaving] = useState(false);
+  // Back from Google's page: the browser may restore this page from its cache with the spinner still on.
+  useEffect(() => {
+    const reset = (event: PageTransitionEvent) => {
+      if (event.persisted) setLeaving(false);
+    };
+    window.addEventListener('pageshow', reset);
+    return () => window.removeEventListener('pageshow', reset);
+  }, []);
   return (
     <div className="space-y-1.5">
       <Button
@@ -29,7 +40,12 @@ export function GoogleButton() {
         block
         className="h-[3.25rem] gap-3 rounded-2xl border border-slate-200 bg-white text-[0.9375rem] font-semibold text-slate-800 shadow-[0_6px_18px_-10px_rgba(15,27,58,0.35)] hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_12px_26px_-12px_rgba(15,27,58,0.45)] active:translate-y-0 disabled:hover:translate-y-0 sm:h-14 short:h-12 short:sm:h-12 [&_svg]:!size-5"
         disabled={!available}
+        loading={leaving}
         aria-describedby="google-status"
+        onClick={() => {
+          setLeaving(true);
+          goToGoogle();
+        }}
       >
         <GoogleMark />
         {t('auth.google.button')}

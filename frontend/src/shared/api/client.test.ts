@@ -21,6 +21,15 @@ describe('API client (FND-034)', () => {
     expect(headers['X-Org-Id']).toBe('org-1');
   });
 
+  it('accepts empty 202 and 204 answers', async () => {
+    mockApi([
+      { method: 'POST', path: '/auth/register', status: 202 },
+      { method: 'POST', path: '/auth/email/verify', status: 204 },
+    ]);
+    await expect(apiRequest('/auth/register', { method: 'POST', body: {} })).resolves.toBeUndefined();
+    await expect(apiRequest('/auth/email/verify', { method: 'POST', body: {} })).resolves.toBeUndefined();
+  });
+
   it('does not send X-Org-Id for unscoped requests', async () => {
     const { calls } = mockApi([{ path: '/meta', body: {} }]);
     configureApiSession({ getOrgId: () => 'org-1' });

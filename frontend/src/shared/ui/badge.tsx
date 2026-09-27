@@ -2,23 +2,34 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/shared/lib/cn';
 
-/** DESIGN.md status chip: the only pill shape in the system, uppercase label-sm with an optional beacon dot. */
+/**
+ * Status chip (DESIGN.md): the only pill shape in the system — uppercase caption type with an optional beacon dot.
+ * Order-status tones (P07) come from the `status-*` tokens.
+ */
 const badgeVariants = cva(
-  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-0.5 text-[0.625rem] font-semibold uppercase leading-[0.875rem] tracking-[0.03em]',
+  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[0.625rem] font-bold uppercase leading-[0.875rem] tracking-[0.06em] [&_svg]:size-3',
   {
     variants: {
       tone: {
         neutral: 'border-border bg-subtle text-muted-foreground',
-        accent: 'border-primary/20 bg-primary-soft text-primary',
-        success: 'border-success/20 bg-success-soft text-success',
-        warning: 'border-warning/25 bg-warning-soft text-warning',
-        danger: 'border-danger/20 bg-danger-soft text-danger',
-        info: 'border-info/20 bg-info-soft text-info',
+        accent: 'border-primary/30 bg-primary/10 text-primary-ink',
+        success: 'border-success/25 bg-success-soft text-success-ink',
+        warning: 'border-warning/30 bg-warning-soft text-warning-ink',
+        danger: 'border-danger/25 bg-danger-soft text-danger-ink',
+        info: 'border-info/25 bg-info-soft text-info-ink',
+        new: 'border-status-new/25 bg-status-new-soft text-status-new',
+        confirmed: 'border-status-confirmed/25 bg-status-confirmed-soft text-status-confirmed',
+        assembling: 'border-status-assembling/30 bg-status-assembling-soft text-status-assembling',
+        transit: 'border-status-transit/25 bg-status-transit-soft text-status-transit',
+        delivered: 'border-status-delivered/25 bg-status-delivered-soft text-status-delivered',
+        disputed: 'border-status-disputed/25 bg-status-disputed-soft text-status-disputed',
       },
     },
     defaultVariants: { tone: 'neutral' },
   },
 );
+
+export type BadgeTone = NonNullable<VariantProps<typeof badgeVariants>['tone']>;
 
 export function Badge({
   className,

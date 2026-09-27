@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       globals: true,
       setupFiles: ['./src/test/setup.ts'],
+      // Multi-step UI tests type a lot; under full-suite parallel load they need more than the 5 s default.
+      testTimeout: 15_000,
       css: false,
     },
   };

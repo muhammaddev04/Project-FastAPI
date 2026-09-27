@@ -2,8 +2,8 @@ import { cn } from '@/shared/lib/cn';
 
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <div aria-hidden="true" className={cn('relative overflow-hidden rounded-md bg-muted', className)}>
-      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+    <div aria-hidden="true" className={cn('relative overflow-hidden rounded-lg bg-muted/70', className)}>
+      <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/[0.06]" />
     </div>
   );
 }

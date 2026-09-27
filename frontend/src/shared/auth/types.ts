@@ -16,7 +16,12 @@ export type Membership = {
   status: MembershipStatus;
   joined_at: string;
   permissions: string[];
+  /** P02 verification status of the organization. */
+  verification_status?: 'NOT_SUBMITTED' | 'PENDING' | 'APPROVED' | 'REJECTED' | null;
 };
+
+/** P01 §10: the Company/Store choice (and organization name) given at registration; null when none was given. */
+export type Onboarding = { org_type: OrgType | null; org_name: string | null };
 
 export type Me = {
   id: string;
@@ -32,6 +37,7 @@ export type Me = {
   last_login_at: string | null;
   created_at: string;
   memberships: Membership[];
+  onboarding: Onboarding;
 };
 
 export type Member = {

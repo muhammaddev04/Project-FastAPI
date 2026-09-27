@@ -50,7 +50,7 @@
     "token_expired": "Your session has expired. Please sign in again.",
     "token_invalid": "Your session is no longer valid. Please sign in again.",
     "refresh_token_reused": "Your session was ended for security reasons. Please sign in again.",
-    "invalid_credentials": "Phone number or password is incorrect.",
+    "invalid_credentials": "Email or password is incorrect.",
     "user_blocked": "This account is blocked. Contact TezFarmo support.",
     "phone_already_registered": "This phone number already has an account.",
     "otp_invalid": "The verification code is incorrect.",
@@ -66,7 +66,26 @@
     "self_role_change_forbidden": "You can't change your own role.",
     "membership_already_exists": "You're already a member of this organization.",
     "organization_blocked": "This organization is blocked.",
-    "organization_limit_reached": "You already own the maximum number of organizations (5)."
+    "organization_limit_reached": "You already own the maximum number of organizations (5).",
+    "email_not_verified": "Confirm your email before signing in.",
+    "email_token_invalid": "This link is invalid or has already been used.",
+    "email_token_expired": "This link has expired. Request a new one.",
+    "email_resend_too_early": "Please wait a moment before requesting another email.",
+    "oauth_state_invalid": "This Google sign-in has expired. Please try again.",
+    "oauth_failed": "Google sign-in didn't complete. Please try again.",
+    "oauth_email_not_verified": "Your Google account's email isn't verified.",
+    "oauth_account_exists": "An account with this email already exists. Sign in with your email and password.",
+    "file_too_large": "The file is larger than 10 MB.",
+    "file_type_not_allowed": "Upload a PDF, JPEG or PNG file.",
+    "verification_documents_missing": "Required verification documents are missing.",
+    "verification_not_editable": "This can't be changed in the current verification state.",
+    "rejection_reason_required": "Give a rejection reason of at least 10 characters.",
+    "organization_not_verified": "The organization must be verified first.",
+    "invalid_coordinates": "Enter both latitude and longitude, or neither.",
+    "tax_identifier_taken": "This tax identifier is already registered.",
+    "oauth_identity_already_linked": "This Google account is already connected to another TezFarmo account.",
+    "oauth_provider_already_linked": "A Google account is already connected to your TezFarmo account.",
+    "password_changed": "Your password was changed. Sign in with the new password."
   },
   "validation": {
     "required": "This field is required.",
@@ -77,7 +96,14 @@
     "nameTooShort": "Enter at least 2 characters.",
     "tooLong": "This value is too long.",
     "email": "Enter a valid email address.",
-    "acceptTerms": "Accept the terms to continue."
+    "acceptTerms": "Accept the terms to continue.",
+    "passwordTooCommon": "This password is too common. Choose another one.",
+    "codeSixDigits": "Enter the 6-digit code.",
+    "taxIdentifier": "Enter 9 to 12 digits.",
+    "phone": "Enter a phone number in international format, e.g. +992 90 123 4567.",
+    "addressTooShort": "Enter at least 3 characters.",
+    "coordinate": "Enter a valid coordinate (up to 6 decimals).",
+    "coordinatesBoth": "Enter both latitude and longitude, or neither."
   },
   "roles": {
     "OWNER": "Owner",
@@ -95,7 +121,8 @@
     "menu": "Account menu",
     "signedInAs": "Signed in as",
     "profile": "Profile",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "verificationQueue": "Verification queue"
   },
   "onboarding": {
     "eyebrow": "Workspace setup",
@@ -123,10 +150,33 @@
     },
     "companyName": "Company name",
     "storeName": "Store name",
-    "nameHint": "Shown to your partners. You'll add the legal details during verification.",
+    "nameHint": "The name your partners see.",
     "ownerNote": "You'll be the owner of this organization.",
     "createCompany": "Create company",
-    "createStore": "Create store"
+    "createStore": "Create store",
+    "verifyTitle": "Your business will be verified",
+    "verifyText": "This information is used to check that the business is real before it can form partnerships on TezFarmo. After creating it, you upload your registration documents; a TezFarmo administrator reviews them. Review is not instant.",
+    "fields": {
+      "legalName": "Legal name",
+      "legalNameHint": "Exactly as in the registration certificate.",
+      "taxIdentifier": "Tax identifier (INN)",
+      "taxIdentifierHint": "9–12 digits, as issued by the tax authority.",
+      "phone": "Business phone",
+      "email": "Business email",
+      "city": "City",
+      "address": "Address",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "coordinates": "Location"
+    },
+    "optional": "optional",
+    "notProvided": "Not provided",
+    "myLocation": "Use my location",
+    "review": "Review",
+    "reviewTitle": "Check your details",
+    "edit": "Edit",
+    "setupCompany": "Set up your company",
+    "setupStore": "Set up your store"
   },
   "auth": {
     "or": "or",
@@ -181,7 +231,15 @@
       "callbackTitle": "Google sign-in",
       "cancelledTitle": "Google sign-in was cancelled",
       "cancelledText": "No account was connected. You can try again or sign in with your email.",
-      "callbackSubtitle": "Returning from Google."
+      "callbackSubtitle": "Returning from Google.",
+      "signingIn": "Signing you in with Google…",
+      "failedTitle": "Couldn't sign in with Google",
+      "tryAgain": "Try Google again",
+      "linkTitle": "Connect Google",
+      "linking": "Connecting your Google account…",
+      "linkFailedTitle": "Couldn't connect Google",
+      "linkSignedOut": "Your session ended during the connection. Sign in and try again from your profile.",
+      "backToProfile": "Back to profile"
     },
     "login": {
       "sessionEnded": "You were signed out",
@@ -190,7 +248,11 @@
       "noAccount": "Don't have an account?",
       "createAccount": "Sign up",
       "lockoutHint": "5 attempts per 15 minutes (brute-force protection)",
-      "passwordPlaceholder": "Enter your password"
+      "passwordPlaceholder": "Enter your password",
+      "failed": "Couldn't sign in",
+      "notVerifiedTitle": "Confirm your email first",
+      "goVerify": "Enter your code or get a new one",
+      "retryIn": "Try again in {{seconds}} s"
     },
     "register": {
       "typeLegend": "Choose your role in the system",
@@ -211,7 +273,8 @@
         }
       },
       "namePlaceholder": "e.g. Jamshed Karimov",
-      "terms": "I agree to the TezFarmo Terms of Use and Privacy Policy (electronic offer of the Republic of Tajikistan) and confirm my business identity."
+      "terms": "I agree to the TezFarmo Terms of Use and Privacy Policy (electronic offer of the Republic of Tajikistan) and confirm my business identity.",
+      "failed": "Couldn't create the account"
     },
     "reset": {
       "back": "Back to sign in",
@@ -219,27 +282,49 @@
     },
     "forgot": {
       "title": "Forgot your password?",
-      "subtitle": "Enter the email you sign in with. If an account exists for it, we'll send a link to choose a new password.",
-      "emailHint": "The link works once and expires soon.",
-      "submit": "Send reset link"
+      "subtitle": "Enter the email you sign in with. If an account exists for it, we'll send a 6-digit code to choose a new password.",
+      "emailHint": "The code works once and expires in 30 minutes.",
+      "submit": "Send code",
+      "failed": "Couldn't send the code",
+      "retryIn": "Try again in {{seconds}} s",
+      "codeSent": "If an account exists for {{email}}, we've sent a 6-digit code. Enter it below. Check spam if you don't see it.",
+      "verifyCode": "Continue",
+      "codeFailed": "Couldn't check the code",
+      "codeResent": "If this address has an account, a new code is on its way.",
+      "changeEmail": "Use a different email"
     },
     "resetPassword": {
       "title": "Choose a new password",
       "subtitle": "Use a strong password you don't use anywhere else.",
       "signOutNote": "After the change you'll be signed out of all devices.",
       "submit": "Save new password",
-      "invalidTitle": "This reset link isn't valid",
-      "invalidText": "The link is incomplete. Request a new one; each link works once and expires.",
-      "requestNew": "Request a new link"
+      "requestNew": "Request a new code",
+      "successTitle": "Password changed",
+      "successText": "You've been signed out on all devices. Sign in with your new password.",
+      "goToLogin": "Sign in",
+      "failedTitle": "Couldn't change the password",
+      "expiredText": "This reset step has expired or was already used. Request a new code to try again."
     },
     "verify": {
       "title": "Confirm your email",
-      "checkInbox": "We sent a confirmation link to your email. Open it on this device to activate your account. Check spam if you don't see it.",
-      "withLink": "Confirm your email address to activate your TezFarmo account.",
-      "confirm": "Confirm email",
-      "resend": "Send the link again",
+      "checkInbox": "We sent a 6-digit code to your email. Enter it below to activate your account. Check spam if you don't see it.",
+      "resend": "Send a new code",
       "wrongEmail": "Used the wrong email? Register again",
-      "alreadyVerified": "Already confirmed?"
+      "alreadyVerified": "Already confirmed?",
+      "sentTo": "We sent a 6-digit code to {{email}}. Enter it below to activate your account. Check spam if you don't see it.",
+      "successTitle": "Email confirmed",
+      "successText": "You can sign in now. Taking you to the sign-in page…",
+      "goToLogin": "Sign in",
+      "failedTitle": "Couldn't confirm your email",
+      "resendSent": "If this address is waiting for confirmation, a new code is on its way.",
+      "resendIn": "Send a new code in {{seconds}} s",
+      "codeLabel": "Verification code",
+      "codeHint": "The 6 digits from the email",
+      "codePlaceholder": "000000",
+      "submit": "Verify email",
+      "verifyIn": "Try again in {{seconds}} s",
+      "codeInvalid": "That code isn't right or was already used. Check the email or send a new code.",
+      "codeExpired": "This code has expired. Send a new code."
     },
     "shell": {
       "network": "B2B NETWORK",
@@ -276,7 +361,8 @@
     "areas": {
       "company": "Company",
       "store": "Store",
-      "courier": "Courier"
+      "courier": "Courier",
+      "admin": "Admin"
     },
     "mainNavigation": "Main navigation",
     "quickNavigation": "Quick navigation",
@@ -285,14 +371,17 @@
     "switchOrganization": "Switch organization",
     "organizations": "Organizations",
     "current": "Current",
-    "newOrganization": "New organization"
+    "newOrganization": "New organization",
+    "breadcrumb": "Breadcrumb"
   },
   "nav": {
     "sections": {
       "operations": "Operations",
       "organization": "Organization",
       "buying": "Purchasing",
-      "runs": "Runs"
+      "runs": "Runs",
+      "review": "Review",
+      "platform": "Platform"
     },
     "company": {
       "dashboard": "Dashboard",
@@ -322,6 +411,14 @@
     "courier": {
       "today": "Today",
       "history": "History"
+    },
+    "admin": {
+      "verifications": "Verification queue",
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "organizations": "Organizations",
+      "audit": "Audit log",
+      "ops": "Operations"
     }
   },
   "planned": {
@@ -364,6 +461,13 @@
     },
     "courier": {
       "history": "Completed delivery runs."
+    },
+    "admin": {
+      "dashboard": "Platform overview for administrators.",
+      "users": "Search users, open their details and act with a recorded reason.",
+      "organizations": "Search companies and stores, open their details and act with a recorded reason.",
+      "audit": "Filter the audit log and compare old and new values.",
+      "ops": "Outbox, notification delivery and reconciliation checks."
     }
   },
   "dashboard": {
@@ -507,15 +611,214 @@
     "contacts": "Contact",
     "verified": "Verified",
     "unverified": "Not verified",
-    "security": "Security",
-    "securityPending": "Changing your password and signing out of all devices will be available soon.",
     "changePassword": "Change password",
-    "logoutAll": "Sign out everywhere"
+    "connected": {
+      "title": "Connected accounts",
+      "description": "Sign-in methods linked to this account.",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "hint": "Connect Google to sign in with \"Continue with Google\".",
+      "connect": "Connect Google",
+      "since": "connected {{date}}",
+      "noDisconnect": "To disconnect Google, contact TezFarmo support: removing it without another sign-in method could lock you out.",
+      "result": {
+        "linked": "Your Google account is now connected. You can use \"Continue with Google\" to sign in.",
+        "already_linked": "This Google account was already connected to your account.",
+        "cancelled": "Connecting Google was cancelled. Nothing was changed."
+      }
+    },
+    "eyebrow": "Personal account",
+    "detailsHint": "Your name and interface language.",
+    "emailHint": "Email is your sign-in and cannot be changed here.",
+    "stats": {
+      "organizations": "Organizations",
+      "memberSince": "Member since",
+      "lastSignIn": "Last sign-in",
+      "google": "Google",
+      "googleLinked": "Linked",
+      "googleNotLinked": "Not linked"
+    },
+    "memberships": {
+      "title": "My organizations",
+      "subtitle": "Companies and stores you work in.",
+      "empty": "You don't belong to any organization yet.",
+      "create": "Set up an organization",
+      "open": "Open",
+      "openNamed": "Open {{name}}",
+      "current": "Current"
+    },
+    "password": {
+      "title": "Password",
+      "subtitle": "Changing it signs you out on every device.",
+      "current": "Current password",
+      "confirm": "Repeat new password",
+      "signOutNote": "After the change you will sign in again with the new password.",
+      "wrongCurrent": "The current password is incorrect."
+    }
   },
   "theme": {
     "label": "Theme",
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "verification": {
+    "eyebrow": "Settings",
+    "title": "Verification",
+    "why": "TezFarmo checks that every business is real before it can form partnerships. A TezFarmo administrator reviews your documents against your legal details.",
+    "statusLabel": "Status",
+    "status": {
+      "NOT_SUBMITTED": "Not submitted",
+      "PENDING": "Pending review",
+      "APPROVED": "Verified",
+      "REJECTED": "Rejected"
+    },
+    "explain": {
+      "NOT_SUBMITTED": "Upload the required documents and submit them. Until then partnerships cannot be activated; you can already set up your catalog, prices and stock.",
+      "PENDING": "Your documents are waiting for review by a TezFarmo administrator. This is not instant. Meanwhile you can keep working on your catalog, prices and stock; partnerships are activated after approval.",
+      "APPROVED": "Your organization is verified. Its legal name and tax identifier are now locked.",
+      "REJECTED": "Verification was rejected. Read the reason, correct your details or documents and submit again."
+    },
+    "verifiedAt": "Verified on {{date}}",
+    "submittedAt": "Last submitted on {{date}}",
+    "rejectedTitle": "Reason for rejection",
+    "rejectedNext": "Fix what is described above, then submit new documents below.",
+    "documentsTitle": "Documents",
+    "resubmitTitle": "Submit again",
+    "documentsHelp": "PDF, JPEG or PNG, up to 10 MB each. Files are private: only your organization owner and TezFarmo administrators can open them.",
+    "docTypes": {
+      "REGISTRATION_CERTIFICATE": "Registration certificate",
+      "TAX_CERTIFICATE": "Tax registration certificate",
+      "OTHER": "Other supporting document"
+    },
+    "optional": "(optional)",
+    "fileHint": "No file chosen",
+    "chooseFile": "Choose file",
+    "replaceFile": "Replace",
+    "uploading": "Uploading…",
+    "submit": "Submit for verification",
+    "confirmTitle": "Submit for verification?",
+    "confirmText": "Your legal name, tax identifier and address are sent with the documents and locked while the review runs.",
+    "confirmSubmit": "Submit",
+    "ownerOnly": "Only the organization owner can submit documents for verification.",
+    "submittedDocuments": "Submitted documents",
+    "banner": {
+      "NOT_SUBMITTED": "Verification required",
+      "PENDING": "Verification pending",
+      "REJECTED": "Verification rejected",
+      "text": "Verification is required to activate partnerships.",
+      "open": "Open verification"
+    },
+    "steps": {
+      "label": "Verification progress",
+      "submit": "Documents submitted",
+      "review": "Review by TezFarmo",
+      "decision": "Decision"
+    }
+  },
+  "admin": {
+    "eyebrow": "Administration",
+    "verifications": {
+      "title": "Verification queue",
+      "description": "Check each submission against the documents and official sources before deciding. Every decision and every document opened is recorded.",
+      "filterStatus": "Status",
+      "filterType": "Type",
+      "all": "All",
+      "empty": "No requests match these filters.",
+      "columns": {
+        "organization": "Organization",
+        "type": "Type",
+        "status": "Status",
+        "submitted": "Submitted"
+      },
+      "requestStatus": {
+        "SUBMITTED": "Submitted",
+        "UNDER_REVIEW": "Under review",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      },
+      "detailTitle": "Verification request",
+      "submittedAt": "submitted {{date}}",
+      "manualNote": "TezFarmo has no automatic registry check. Compare the legal snapshot with the documents and, where possible, with the official tax/registration register before approving.",
+      "snapshotTitle": "Legal details at submission",
+      "profileTitle": "Current profile",
+      "documentsTitle": "Documents",
+      "openDocument": "Open {{name}}",
+      "historyTitle": "Earlier requests",
+      "rejectionReason": "Rejection reason",
+      "fields": {
+        "name": "Name",
+        "legal_name": "Legal name",
+        "tax_identifier": "Tax identifier",
+        "phone": "Phone",
+        "email": "Email",
+        "city": "City",
+        "address": "Address",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "public_code": "Public code"
+      },
+      "startReview": "Start review",
+      "approve": "Approve",
+      "reject": "Reject",
+      "otherReviewer": "Another administrator is reviewing this request; only they can approve it.",
+      "reasonLabel": "Reason for rejection",
+      "reasonHint": "At least 10 characters. The organization sees this text.",
+      "confirmReject": "Reject request"
+    }
+  },
+  "orgProfile": {
+    "tabs": {
+      "label": "Settings sections",
+      "profile": "Profile",
+      "verification": "Verification"
+    },
+    "companyTitle": "Company profile",
+    "storeTitle": "Store profile",
+    "manage": "Profile & settings",
+    "responsible": "Responsible person",
+    "publicCode": "Public code",
+    "publicCodeHint": "Stores use this code to find your company and send a partnership request.",
+    "requisites": "Requisites",
+    "requisitesHint": "Legal details checked during verification.",
+    "locked": "Locked",
+    "lockedApproved": "Legal details are verified. To change them, contact TezFarmo support.",
+    "lockedPending": "Legal details are locked while your documents are under review.",
+    "legalOwnerOnly": "Only the owner can change legal details.",
+    "contacts": "Contacts",
+    "contactsHint": "Phone, email and address partners see.",
+    "readOnly": "Your role can view these details only.",
+    "save": "Save profile",
+    "saved": "Organization profile saved.",
+    "conflict": "Someone else changed this profile. We loaded the latest version — review it and save again.",
+    "documents": "Documents",
+    "documentsEmpty": "No documents submitted yet.",
+    "openVerification": "Open verification",
+    "location": "Location",
+    "openMap": "Open in maps",
+    "partners": "Partners",
+    "partnersText": "Partnerships between stores and companies arrive with the partnerships module."
+  },
+  "entity": {
+    "yourRole": "Your role",
+    "team": "Team",
+    "verification": "Verification"
+  },
+  "home": {
+    "company": {
+      "catalog": "Catalog",
+      "catalogText": "Your products, units and prices will appear here once the catalog module is live."
+    },
+    "store": {
+      "catalog": "Supplier catalog",
+      "catalogText": "Products of your partner suppliers will appear here once catalogs and partnerships are live.",
+      "cart": "Cart",
+      "cartText": "Your cart and checkout arrive with ordering."
+    }
+  },
+  "table": {
+    "range": "{{from}}–{{to}} of {{total}}",
+    "previous": "Previous page",
+    "next": "Next page"
   }
 }
