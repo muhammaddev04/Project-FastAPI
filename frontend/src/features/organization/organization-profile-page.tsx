@@ -12,7 +12,8 @@ import { errorMessage } from '@/shared/api/errors';
 import { useMembers } from '@/shared/auth/api';
 import { areaFor } from '@/shared/auth/context';
 import { Alert, Avatar, Badge, Button, Card, ErrorState, FormField, InfoRow, Input, MetaChip, Pill, PlannedPanel, ProfileHeader, SectionHeader, Skeleton, StatCard, StatusBadge } from '@/shared/ui';
-import { useUpdateOrganization, type OrganizationChanges } from './api';
+import { ImagePicker } from '@/shared/images/image-picker';
+import { useRemoveOrganizationImage, useUpdateOrganization, useUploadOrganizationImage, type OrganizationChanges } from './api';
 import { SettingsTabs } from './settings-tabs';
 
 const coordinate = (min: number, max: number) =>
@@ -120,6 +121,8 @@ export function OrganizationProfilePage() {
   const canViewVerification = membership.permissions.includes('verification.view');
   const verification = useVerification(canViewVerification ? orgId : null);
   const update = useUpdateOrganization(orgId);
+  const uploadImage = useUploadOrganizationImage(orgId);
+  const removeImage = useRemoveOrganizationImage(orgId);
   const [saved, setSaved] = useState(false);
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: profile.data ? toValues(profile.data) : undefined });
   const errors = form.formState.errors;
@@ -189,7 +192,15 @@ export function OrganizationProfilePage() {
   return (
     <div className="space-y-6">
       <ProfileHeader
-        mark={<Avatar kind={isStore ? 'store' : 'company'} size="xl" verified={data.verification_status === 'APPROVED'} />}
+        mark={
+          <Avatar
+            kind={isStore ? 'store' : 'company'}
+            size="xl"
+            verified={data.verification_status === 'APPROVED'}
+            src={data.logo_url}
+            alt={t(isStore ? 'images.storeImage.alt' : 'images.companyLogo.alt', { name: data.name })}
+          />
+        }
         eyebrow={
           <>
             <Pill>{t(`orgTypes.${data.type}`)}</Pill>
@@ -284,6 +295,16 @@ export function OrganizationProfilePage() {
         </form>
 
         <div className="space-y-6">
+          {/* CR-003: company logo / store image - one endpoint; editing needs org.edit_branding (OWNER), viewing org.view. */}
+          <ImagePicker
+            subject={isStore ? 'storeImage' : 'companyLogo'}
+            name={data.name}
+            src={data.logo_url}
+            canEdit={perms.includes('org.edit_branding')}
+            onUpload={(file) => uploadImage.mutateAsync(file)}
+            onRemove={() => removeImage.mutateAsync()}
+          />
+
           {canViewVerification ? (
             <Card className="p-5 sm:p-6">
               <SectionHeader icon={FileText} title={t('orgProfile.documents')} chip={<StatusBadge kind="verification" value={data.verification_status} />} />

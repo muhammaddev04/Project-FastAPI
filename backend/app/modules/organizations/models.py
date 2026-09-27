@@ -45,6 +45,10 @@ class Company(_Profile, Base):
     id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), primary_key=True)
     tax_identifier: Mapped[str] = mapped_column(String(32), unique=True)
     public_code: Mapped[str] = mapped_column(String(8), unique=True)
+    # TZ data dictionary `companies.logo` (CR-003): the company's own ORG_LOGO file.
+    logo_file_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("stored_files.id", ondelete="SET NULL"), index=True, nullable=True
+    )
 
 
 class Store(_Profile, Base):
@@ -70,3 +74,7 @@ class Store(_Profile, Base):
     tax_identifier: Mapped[str | None] = mapped_column(String(32))
     latitude: Mapped[Decimal | None] = mapped_column(Numeric(9, 6))
     longitude: Mapped[Decimal | None] = mapped_column(Numeric(9, 6))
+    # CR-003: the store's own image (ORG_LOGO file); independent of any company logo or user avatar.
+    logo_file_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("stored_files.id", ondelete="SET NULL"), index=True, nullable=True
+    )

@@ -4,24 +4,33 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
 import { StandaloneLayout } from '@/app/shell/standalone-layout';
-import { useUpdateMe } from '@/shared/auth/api';
+import { useRemoveAvatar, useUpdateMe, useUploadAvatar } from '@/shared/auth/api';
 import { AccountMenu } from '@/shared/auth/account-menu';
 import { areaFor, areaHome, homePath, usableMemberships } from '@/shared/auth/context';
 import { useSessionStore } from '@/shared/auth/session-store';
 import type { Me, Membership } from '@/shared/auth/types';
 import { setLanguage } from '@/shared/i18n';
+import { ImagePicker } from '@/shared/images/image-picker';
 import { Alert, Avatar, Badge, Button, Card, FormField, Input, MetaChip, Pill, ProfileHeader, SectionHeader, Select, StatCard, StatusBadge } from '@/shared/ui';
 import { ConnectedAccounts } from './connected-accounts';
 import { useGoogleLinkState } from './google-link-api';
 import { PasswordChangeCard } from './password-change-card';
 
+/** Spaces, dashes, dots and brackets are dropped; the server normalises the same way and stays authoritative. */
+const normalizePhone = (value: string) => value.replace(/[\s().-]/g, '');
+
 const schema = z.object({
   full_name: z.string().trim().min(2, 'validation.nameTooShort').max(150, 'validation.tooLong'),
   language: z.enum(['tg', 'ru', 'en']),
+  // CR-003: optional contact phone in E.164; empty clears it. Never a sign-in identifier (CR-001).
+  phone: z.string().refine((value) => !normalizePhone(value) || /^\+[1-9]\d{7,14}$/.test(normalizePhone(value)), 'validation.phone'),
 });
 type Values = z.infer<typeof schema>;
+
+const valuesOf = (me: Me): Values => ({ full_name: me.full_name, language: me.language, phone: me.phone ?? '' });
 
 const AREA_ICON = { company: Building2, store: Store, courier: Truck } as const;
 
@@ -56,7 +65,7 @@ function MembershipsCard({ me }: { me: Me }) {
               >
                 <div className="flex min-w-0 items-center gap-3">
                   {membership.org_type === 'STORE' || membership.org_type === 'COMPANY' ? (
-                    <Avatar kind={membership.org_type === 'STORE' ? 'store' : 'company'} size="md" className="rounded-xl" />
+                    <Avatar kind={membership.org_type === 'STORE' ? 'store' : 'company'} size="md" src={membership.logo_url} className="rounded-xl" />
                   ) : (
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                       <Icon className="size-5" aria-hidden="true" />
@@ -92,23 +101,47 @@ export function ProfilePage({ me }: { me: Me }) {
   const { t, i18n } = useTranslation();
   const activeOrgId = useSessionStore((state) => state.activeOrgId);
   const update = useUpdateMe();
+  const uploadAvatar = useUploadAvatar();
+  const removeAvatar = useRemoveAvatar();
   const google = useGoogleLinkState();
-  const form = useForm<Values>({ resolver: zodResolver(schema), values: { full_name: me.full_name, language: me.language } });
+  const form = useForm<Values>({ resolver: zodResolver(schema), values: valuesOf(me) });
   const errors = form.formState.errors;
   const date = (value: string | null) => (value ? new Date(value).toLocaleDateString(i18n.language) : '—');
+  // A phone problem the server reports (taken, or not E.164) belongs to the field, not to a generic alert.
+  const phoneFailure =
+    update.error instanceof ApiError &&
+    (update.error.code === 'phone_taken' || (update.error.code === 'validation_error' && update.error.fieldErrors.some((f) => f.field === 'phone')));
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const saved = await update.mutateAsync(values).catch(() => null);
+    const phone = normalizePhone(values.phone);
+    const payload = {
+      full_name: values.full_name,
+      language: values.language,
+      // Only sent when changed: "" clears the phone (null), anything else is the normalised number.
+      ...(phone !== (me.phone ?? '') ? { phone: phone || null } : {}),
+    };
+    const saved = await update.mutateAsync(payload).catch((error: unknown) => {
+      if (error instanceof ApiError && error.code === 'phone_taken') {
+        form.setError('phone', { message: 'errors.phone_taken' }, { shouldFocus: true });
+      } else if (error instanceof ApiError && error.fieldErrors.some((field) => field.field === 'phone')) {
+        form.setError('phone', { message: 'validation.phone' }, { shouldFocus: true });
+      }
+      return null;
+    });
     if (!saved) return;
     setLanguage(saved.language);
-    form.reset({ full_name: saved.full_name, language: saved.language });
+    form.reset(valuesOf(saved));
   });
+
+  const phoneStatus = me.phone ? (
+    <Badge tone={me.phone_verified_at ? 'success' : 'neutral'}>{me.phone_verified_at ? t('profile.verified') : t('profile.unverified')}</Badge>
+  ) : null;
 
   return (
     <StandaloneLayout back={homePath(me, activeOrgId)} actions={<AccountMenu me={me} compact />}>
       <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
         <ProfileHeader
-          mark={<Avatar name={me.full_name} size="xl" verified={me.email_verified} />}
+          mark={<Avatar name={me.full_name} size="xl" verified={me.email_verified} src={me.avatar_url} alt={t('images.avatar.alt', { name: me.full_name })} />}
           eyebrow={<Pill>{t('profile.eyebrow')}</Pill>}
           title={me.full_name}
           subtitle={t('profile.subtitle')}
@@ -118,9 +151,12 @@ export function ProfilePage({ me }: { me: Me }) {
                 <MetaChip icon={Mail}>{me.email}</MetaChip>
                 <Badge tone={me.email_verified ? 'success' : 'warning'}>{me.email_verified ? t('profile.verified') : t('profile.unverified')}</Badge>
               </span>
-              <MetaChip icon={Phone}>
-                <span className="font-data">{me.phone ?? '—'}</span>
-              </MetaChip>
+              <span className="inline-flex min-w-0 items-center gap-2">
+                <MetaChip icon={Phone}>
+                  <span className="font-data">{me.phone ?? '—'}</span>
+                </MetaChip>
+                {phoneStatus}
+              </span>
             </>
           }
           stats={
@@ -156,11 +192,16 @@ export function ProfilePage({ me }: { me: Me }) {
                   <FormField label={t('auth.fields.email')} hint={t('profile.emailHint')}>
                     <Input value={me.email} readOnly aria-readonly />
                   </FormField>
-                  <FormField label={t('auth.fields.phone')}>
-                    <Input value={me.phone ?? '—'} readOnly aria-readonly />
+                  <FormField
+                    label={t('auth.fields.phone')}
+                    hint={t('profile.phone.hint')}
+                    error={errors.phone?.message && t(errors.phone.message)}
+                    action={phoneStatus}
+                  >
+                    <Input type="tel" inputMode="tel" autoComplete="tel" placeholder="+992 90 123 4567" maxLength={24} {...form.register('phone')} />
                   </FormField>
                 </div>
-                {update.isError ? <Alert tone="danger">{errorMessage(update.error, t)}</Alert> : null}
+                {update.isError && !phoneFailure ? <Alert tone="danger">{errorMessage(update.error, t)}</Alert> : null}
                 {update.isSuccess && !form.formState.isDirty ? <Alert tone="success">{t('profile.saved')}</Alert> : null}
                 <div className="flex justify-end">
                   <Button type="submit" loading={update.isPending} disabled={!form.formState.isDirty}>
@@ -174,6 +215,14 @@ export function ProfilePage({ me }: { me: Me }) {
           </div>
 
           <div className="space-y-6">
+            <ImagePicker
+              subject="avatar"
+              name={me.full_name}
+              src={me.avatar_url}
+              canEdit
+              onUpload={(file) => uploadAvatar.mutateAsync(file)}
+              onRemove={() => removeAvatar.mutateAsync()}
+            />
             <PasswordChangeCard />
             <ConnectedAccounts />
           </div>

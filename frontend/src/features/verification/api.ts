@@ -50,6 +50,8 @@ export type OrganizationProfile = {
   verified_at: string | null;
   legal_locked: boolean;
   version: number;
+  /** CR-003: 5-minute signed URL of the company logo (COMPANY) or store image (STORE); null when there is none. */
+  logo_url?: string | null;
 };
 
 export const verificationQueryKey = (orgId: string | null) => ['verification', orgId] as const;

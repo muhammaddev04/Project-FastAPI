@@ -9050,8 +9050,9 @@ CHECK: `(latitude IS NULL) = (longitude IS NULL)` — ё ҳарду, ё ҳеҷ.
 | Field | Type | Constraints |
 |---|---|---|
 | id | UUID | PK |
-| organization_id | UUID | FK |
-| category | VARCHAR(32) | CHECK IN (`VERIFICATION`,`IMPORT`,`EXPORT`,`PRODUCT_IMAGE`) |
+| organization_id | UUID | NULL FK organizations (CR-003) |
+| owner_user_id | UUID | NULL FK users — танҳо барои `USER_AVATAR` (CR-003) |
+| category | VARCHAR(32) | CHECK IN (`VERIFICATION`,`IMPORT`,`EXPORT`,`PRODUCT_IMAGE`,`USER_AVATAR`,`ORG_LOGO`) |
 | storage_key | VARCHAR(512) | UNIQUE |
 | content_type | VARCHAR(100) | NOT NULL |
 | size_bytes | BIGINT | CHECK > 0 |
@@ -9059,6 +9060,9 @@ CHECK: `(latitude IS NULL) = (longitude IS NULL)` — ё ҳарду, ё ҳеҷ.
 | display_name | VARCHAR(255) | санитизатсияшуда; танҳо барои намоиш |
 | uploaded_by | UUID | FK users |
 | created_at | timestamptz | |
+| deleted_at | timestamptz | NULL; танҳо `USER_AVATAR`/`ORG_LOGO` (CR-003) |
+
+CHECK: маҳз яке аз `organization_id` ва `owner_user_id` (CR-003). Сатрҳо delete намешаванд (VER-005); тасвири профили иваз ё хориҷшуда бо `deleted_at` ғайрифаъол мешавад ва объекти он аз storage нест карда мешавад (CR-003).
 
 #### 1.4. `verification_requests`
 

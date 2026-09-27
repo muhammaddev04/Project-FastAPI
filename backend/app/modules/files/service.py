@@ -77,10 +77,15 @@ async def upload(session: AsyncSession, context: OrgContext, upload_file: Upload
 
 
 async def get_owned(session: AsyncSession, organization_id: UUID, file_id: UUID) -> StoredFile:
-    """SEC-007: a file of another organization is indistinguishable from a missing one."""
+    """SEC-007: a file of another organization is indistinguishable from a missing one - and so is a retired one
+    (CR-003 `deleted_at`: a replaced or removed profile image is never signed or attached again)."""
     stored = (
         await session.execute(
-            select(StoredFile).where(StoredFile.id == file_id, StoredFile.organization_id == organization_id)
+            select(StoredFile).where(
+                StoredFile.id == file_id,
+                StoredFile.organization_id == organization_id,
+                StoredFile.deleted_at.is_(None),
+            )
         )
     ).scalar_one_or_none()
     if stored is None:

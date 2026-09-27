@@ -18,8 +18,34 @@ export function useMe() {
 export function useUpdateMe() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { full_name?: string; language?: Language }) =>
+    /** CR-003 `phone`: E.164 contact (never a sign-in identifier); `null` clears it. */
+    mutationFn: (payload: { full_name?: string; language?: Language; phone?: string | null }) =>
       apiRequest<Me>('/me', { method: 'PATCH', body: payload }),
+    onSuccess: (me) => queryClient.setQueryData(meQueryKey, me),
+  });
+}
+
+/**
+ * CR-003 `PUT /me/avatar` (multipart `file`): always the caller's own avatar - no user id is ever sent. The answer is
+ * the fresh /me (with the new 5-minute `avatar_url`), written straight into the cache so every avatar updates.
+ */
+export function useUploadAvatar() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => {
+      const form = new FormData();
+      form.append('file', file);
+      return apiRequest<Me>('/me/avatar', { method: 'PUT', body: form, timeoutMs: 120_000 });
+    },
+    onSuccess: (me) => queryClient.setQueryData(meQueryKey, me),
+  });
+}
+
+/** CR-003 `DELETE /me/avatar`: idempotent; the answer is the fresh /me with `avatar_url: null`. */
+export function useRemoveAvatar() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiRequest<Me>('/me/avatar', { method: 'DELETE' }),
     onSuccess: (me) => queryClient.setQueryData(meQueryKey, me),
   });
 }

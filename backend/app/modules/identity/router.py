@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, File, Query, UploadFile
 
 from app.modules.identity import service
 from app.modules.identity.deps import CurrentUser, SessionDep, require_permission
@@ -21,6 +21,20 @@ async def get_me(session: SessionDep, user: CurrentUser) -> MeResponse:
 @router.patch("/me", response_model=MeResponse, summary="Update own name or language")
 async def patch_me(payload: MeUpdateRequest, session: SessionDep, user: CurrentUser) -> MeResponse:
     return await service.update_me(session, user, payload)
+
+
+@router.put(
+    "/me/avatar",
+    response_model=MeResponse,
+    summary="Upload or replace own avatar (JPEG/PNG/WebP <= 5 MB; stored as WebP <= 512x512, CR-003)",
+)
+async def put_avatar(file: Annotated[UploadFile, File()], session: SessionDep, user: CurrentUser) -> MeResponse:
+    return await service.set_avatar(session, user, file)
+
+
+@router.delete("/me/avatar", response_model=MeResponse, summary="Remove own avatar (idempotent, CR-003)")
+async def delete_avatar(session: SessionDep, user: CurrentUser) -> MeResponse:
+    return await service.remove_avatar(session, user)
 
 
 @router.get("/members", response_model=MemberPage, summary="Members of the active organization (members.view)")

@@ -43,6 +43,7 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
         "members.revoke",
         "members.suspend",
         "members.view",
+        "org.edit_branding",
         "org.edit_contacts",
         "org.edit_legal",
         "org.view",
@@ -139,9 +140,96 @@ async def test_patch_me_updates_name_and_language_with_audit(client: AsyncClient
     assert audit_row.action == "user.updated" and audit_row.actor_id == user.id
 
 
+async def test_patch_me_without_phone_keeps_existing_phone(client: AsyncClient, session: AsyncSession) -> None:
+    user = await make_user(session, phone="+992900000001")
+    await session.commit()
+    response = await client.patch("/api/v1/me", json={"language": "en"}, headers=auth(user))
+    assert response.status_code == 200
+    assert response.json()["phone"] == "+992900000001"
+    await session.refresh(user)
+    assert user.phone == "+992900000001"
+
+
+async def test_patch_me_sets_contact_phone_without_verification(client: AsyncClient, session: AsyncSession) -> None:
+    """CR-003: phone is an editable contact (normalised to E.164); CR-001: it never becomes a login identifier."""
+    user = await make_user(session, phone=None)
+    await session.commit()
+    response = await client.patch("/api/v1/me", json={"phone": "+992 (90) 000-00-00"}, headers=auth(user))
+    assert response.status_code == 200
+    assert response.json()["phone"] == "+992900000000"
+    assert response.json()["phone_verified_at"] is None
+    await session.refresh(user)
+    assert user.phone == "+992900000000" and user.phone_verified_at is None
+    audit_row = (await session.execute(select(AuditLog).where(AuditLog.entity_id == user.id))).scalar_one()
+    assert audit_row.action == "user.updated" and audit_row.new_data == {"phone": "+992900000000"}
+
+    login = await client.post("/api/v1/auth/login", json={"phone": "+992900000000", "password": "Tezfarmo2026"})
+    assert login.status_code == 422
+    assert login.json()["error"]["code"] == "validation_error"
+
+
+@pytest.mark.parametrize("cleared", [None, "", "   "])
+async def test_patch_me_clears_phone(client: AsyncClient, session: AsyncSession, cleared: str | None) -> None:
+    user = await make_user(session, phone="+992900000002")
+    await session.commit()
+    response = await client.patch("/api/v1/me", json={"phone": cleared}, headers=auth(user))
+    assert response.status_code == 200
+    assert response.json()["phone"] is None and response.json()["phone_verified_at"] is None
+    await session.refresh(user)
+    assert user.phone is None and user.phone_verified_at is None
+    audit_row = (await session.execute(select(AuditLog).where(AuditLog.entity_id == user.id))).scalar_one()
+    assert audit_row.old_data == {"phone": "+992900000002"} and audit_row.new_data == {"phone": None}
+
+
+async def test_patch_me_rejects_phone_of_another_user(client: AsyncClient, session: AsyncSession) -> None:
+    await make_user(session, phone="+992900000003")
+    user = await make_user(session, phone="+992900000004")
+    await session.commit()
+    response = await client.patch("/api/v1/me", json={"phone": "+992 900 000 003"}, headers=auth(user))
+    assert response.status_code == 409
+    error = response.json()["error"]
+    assert error["code"] == "phone_taken" and error["message"] != "errors.phone_taken"
+    assert set(error) == {"code", "message", "details", "request_id"}
+    await session.refresh(user)
+    assert user.phone == "+992900000004"
+
+    # Re-submitting one's own number is not a conflict.
+    own = await client.patch("/api/v1/me", json={"phone": "+992900000004"}, headers=auth(user))
+    assert own.status_code == 200
+
+
+async def test_patch_me_phone_race_lost_on_unique_constraint_is_409(
+    client: AsyncClient, session: AsyncSession, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A concurrent request that takes the phone after the pre-check still ends in 409, not a 500."""
+
+    async def _no_precheck(*_args: object) -> None:
+        return None
+
+    monkeypatch.setattr("app.modules.identity.service._ensure_phone_free", _no_precheck)
+    await make_user(session, phone="+992900000005")
+    user = await make_user(session, phone="+992900000006")
+    await session.commit()
+    response = await client.patch("/api/v1/me", json={"phone": "+992900000005", "language": "ru"}, headers=auth(user))
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "phone_taken"
+    assert "uq_users_phone" not in response.text
+    await session.refresh(user)
+    assert user.phone == "+992900000006" and user.language == "tg"
+
+
 @pytest.mark.parametrize(
     "payload",
-    [{"language": "de"}, {"full_name": "A"}, {"phone": "+992900000000"}, {"is_superadmin": True}],
+    [
+        {"language": "de"},
+        {"full_name": "A"},
+        {"phone": "992900000000"},
+        {"phone": "+0123456789"},
+        {"phone": 992900000000},
+        {"phone_verified_at": "2026-09-27T00:00:00Z"},
+        {"email": "other@example.tj"},
+        {"is_superadmin": True},
+    ],
 )
 async def test_patch_me_rejects_invalid_or_protected_fields(
     client: AsyncClient, session: AsyncSession, payload: dict[str, object]

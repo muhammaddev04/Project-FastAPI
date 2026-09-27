@@ -27,7 +27,7 @@ export function AccountMenu({ me, compact = false, className }: { me: Me; compac
         )}
         aria-label={t('account.menu')}
       >
-        <Avatar name={me.full_name} size="md" />
+        <Avatar name={me.full_name} size="md" src={me.avatar_url} />
         {compact ? null : (
           <>
             <span className="hidden min-w-0 sm:block">

@@ -85,7 +85,12 @@
     "tax_identifier_taken": "This tax identifier is already registered.",
     "oauth_identity_already_linked": "This Google account is already connected to another TezFarmo account.",
     "oauth_provider_already_linked": "A Google account is already connected to your TezFarmo account.",
-    "password_changed": "Your password was changed. Sign in with the new password."
+    "password_changed": "Your password was changed. Sign in with the new password.",
+    "image_type_not_allowed": "Only JPEG, PNG or WebP images are accepted.",
+    "image_invalid": "This image is damaged or can't be read. Try another file.",
+    "image_too_large": "The image is larger than 5 MB.",
+    "image_dimensions_invalid": "The image must be at least 64×64 pixels and at most 8000 pixels per side.",
+    "phone_taken": "This phone number is already used by another account."
   },
   "validation": {
     "required": "This field is required.",
@@ -654,6 +659,9 @@
       "confirm": "Repeat new password",
       "signOutNote": "After the change you will sign in again with the new password.",
       "wrongCurrent": "The current password is incorrect."
+    },
+    "phone": {
+      "hint": "A contact number only — you always sign in with your email. Leave empty to remove it."
     }
   },
   "theme": {
@@ -820,5 +828,59 @@
     "range": "{{from}}–{{to}} of {{total}}",
     "previous": "Previous page",
     "next": "Next page"
+  },
+  "images": {
+    "current": "This picture is shown to people you work with.",
+    "requirements": "JPEG, PNG or WebP, up to 5 MB and at least 64×64 px. Saved at up to 512 px.",
+    "previewHint": "Check the preview. Location and camera details are removed when the image is saved.",
+    "previewAlt": "Preview of the selected image",
+    "avatar": {
+      "title": "Profile photo",
+      "subtitle": "Your personal photo, separate from any organization.",
+      "alt": "Profile photo of {{name}}",
+      "empty": "No photo yet — your initials are shown instead.",
+      "upload": "Upload photo",
+      "change": "Change photo",
+      "remove": "Remove photo",
+      "removeTitle": "Remove your profile photo?",
+      "removeHint": "Your initials will be shown instead.",
+      "previewTitle": "Use this profile photo?",
+      "confirmUpload": "Save photo",
+      "uploaded": "Profile photo updated.",
+      "removed": "Profile photo removed.",
+      "readOnly": "Only you can change your profile photo."
+    },
+    "companyLogo": {
+      "title": "Company logo",
+      "subtitle": "Shown to your team and to partner stores.",
+      "alt": "Logo of {{name}}",
+      "empty": "No logo yet — the company mark is shown instead.",
+      "upload": "Upload logo",
+      "change": "Change logo",
+      "remove": "Remove logo",
+      "removeTitle": "Remove the company logo?",
+      "removeHint": "The company mark will be shown instead.",
+      "previewTitle": "Use this company logo?",
+      "confirmUpload": "Save logo",
+      "uploaded": "Company logo updated.",
+      "removed": "Company logo removed.",
+      "readOnly": "Only the owner can change the company logo."
+    },
+    "storeImage": {
+      "title": "Store image",
+      "subtitle": "Shown to your team and to partner companies.",
+      "alt": "Image of {{name}}",
+      "empty": "No image yet — the store mark is shown instead.",
+      "upload": "Upload image",
+      "change": "Change image",
+      "remove": "Remove image",
+      "removeTitle": "Remove the store image?",
+      "removeHint": "The store mark will be shown instead.",
+      "previewTitle": "Use this store image?",
+      "confirmUpload": "Save image",
+      "uploaded": "Store image updated.",
+      "removed": "Store image removed.",
+      "readOnly": "Only the owner can change the store image."
+    }
   }
 }

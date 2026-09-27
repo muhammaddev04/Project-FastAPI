@@ -60,7 +60,7 @@ function newRequestId(): string {
 }
 
 export type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   /** Send X-Org-Id for organization-scoped endpoints (IAM-010). */
   orgScoped?: boolean;

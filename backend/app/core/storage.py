@@ -32,6 +32,11 @@ def object_key(org_id: UUID, category: str, extension: str) -> str:
     return f"{org_id}/{category.lower()}/{new_id()}.{extension}"
 
 
+def user_object_key(user_id: UUID, category: str, extension: str) -> str:
+    """CR-003: key of a file owned by a user (USER_AVATAR); same rule, never the original filename."""
+    return f"users/{user_id}/{category.lower()}/{new_id()}.{extension}"
+
+
 class Storage:
     def __init__(self, client: Minio, bucket: str) -> None:
         self._client = client
@@ -69,6 +74,10 @@ class Storage:
                 response.release_conn()
 
         return await asyncio.to_thread(fetch)
+
+    async def delete(self, key: str) -> None:
+        """FND-017 `delete()`: removes one object (a replaced or removed profile image)."""
+        await asyncio.to_thread(self._client.remove_object, self._bucket, key)
 
 
 @lru_cache(maxsize=1)

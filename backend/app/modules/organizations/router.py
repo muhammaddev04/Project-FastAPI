@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, status
+from typing import Annotated
+
+from fastapi import APIRouter, File, UploadFile, status
 
 from app.modules.identity.deps import CurrentUser, SessionDep, require_permission
 from app.modules.organizations import service
@@ -15,6 +17,8 @@ from app.modules.organizations.schemas import (
 router = APIRouter(prefix="/api/v1", tags=["organizations"])
 
 OrgViewer = require_permission("org.view")
+# CR-003: company logo / store image - OWNER only (ORG-006 does not list it among the MANAGER-editable fields).
+BrandingEditor = require_permission("org.edit_branding")
 
 
 @router.post(
@@ -51,3 +55,23 @@ async def patch_organization(
     context: OrgViewer,  # type: ignore[valid-type]
 ) -> OrganizationProfile:
     return await service.update_profile(session, context, payload)
+
+
+@router.put(
+    "/organization/logo",
+    response_model=OrganizationProfile,
+    summary="Upload or replace the active organization's logo (JPEG/PNG/WebP <= 5 MB; WebP <= 512x512, CR-003)",
+)
+async def put_logo(
+    file: Annotated[UploadFile, File()],
+    session: SessionDep,
+    context: BrandingEditor,  # type: ignore[valid-type]
+) -> OrganizationProfile:
+    return await service.set_logo(session, context, file)
+
+
+@router.delete(
+    "/organization/logo", response_model=OrganizationProfile, summary="Remove the active organization's logo (CR-003)"
+)
+async def delete_logo(session: SessionDep, context: BrandingEditor) -> OrganizationProfile:  # type: ignore[valid-type]
+    return await service.remove_logo(session, context)

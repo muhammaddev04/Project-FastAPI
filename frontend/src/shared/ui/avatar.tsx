@@ -1,4 +1,5 @@
 import { Building2, ShieldCheck, Store, type LucideIcon } from 'lucide-react';
+import { useState } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { initialsOf } from '@/shared/lib/initials';
 
@@ -6,6 +7,9 @@ import { initialsOf } from '@/shared/lib/initials';
  * Identity marks, one per entity kind (DESIGN.md): a **person** is a round initials badge on the teal→blue gradient;
  * a **company** is the rounded teal tile of the TezFarmo mark with a building; a **store** is the same tile on the
  * sky→blue gradient with a storefront. The shapes and hues keep User / Company / Store apart at a glance.
+ *
+ * CR-003: with `src` (a signed avatar / logo / store image URL) the picture fills the same shape. Signed URLs expire
+ * after 5 minutes, so a picture that fails to load falls back to the mark instead of a broken image.
  */
 export type AvatarKind = 'person' | 'company' | 'store';
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -29,6 +33,8 @@ export function Avatar({
   kind = 'person',
   size = 'sm',
   verified = false,
+  src,
+  alt,
   className,
 }: {
   /** Person initials come from the name; organizations show their kind's icon. */
@@ -36,14 +42,20 @@ export function Avatar({
   kind?: AvatarKind;
   size?: Size;
   verified?: boolean;
+  /** CR-003 signed image URL; null/undefined shows the mark. */
+  src?: string | null;
+  /** Accessible text for the picture. Without it the mark is decorative (the name is shown next to it). */
+  alt?: string;
   className?: string;
 }) {
   const s = SIZES[size];
   const k = KIND[kind];
   const Icon = k.icon;
+  const [failed, setFailed] = useState<string | null>(null);
+  const picture = src && failed !== src ? src : null;
   return (
     <span
-      aria-hidden="true"
+      aria-hidden={picture && alt ? undefined : true}
       className={cn(
         'relative inline-flex shrink-0 items-center justify-center bg-gradient-to-br font-display font-bold text-white',
         s.box,
@@ -52,7 +64,22 @@ export function Avatar({
         className,
       )}
     >
-      {Icon ? <Icon className={s.icon} /> : <span className={s.text}>{initialsOf(name ?? '')}</span>}
+      {picture ? (
+        <img
+          src={picture}
+          alt={alt ?? ''}
+          // rounded-[inherit]: the picture takes the mark's shape, including a caller's override (e.g. rounded-xl).
+          className="size-full rounded-[inherit] bg-surface object-cover"
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(picture)}
+        />
+      ) : Icon ? (
+        <Icon className={s.icon} />
+      ) : (
+        <span className={s.text}>{initialsOf(name ?? '')}</span>
+      )}
       {verified ? (
         <span className={cn('absolute -bottom-1 -right-1 flex items-center justify-center rounded-full border-2 border-surface bg-success text-white', s.badge)}>
           <ShieldCheck />

@@ -23,7 +23,15 @@ export function OrgHero({ greeting }: { greeting: string }) {
 
   return (
     <ProfileHeader
-      mark={<Avatar kind={isStore ? 'store' : 'company'} size="xl" verified={status === 'APPROVED'} />}
+      mark={
+        <Avatar
+          kind={isStore ? 'store' : 'company'}
+          size="xl"
+          verified={status === 'APPROVED'}
+          src={profile ? profile.logo_url : membership.logo_url}
+          alt={t(isStore ? 'images.storeImage.alt' : 'images.companyLogo.alt', { name: membership.org_name })}
+        />
+      }
       eyebrow={
         <>
           <Pill>{t(`shell.areas.${area}`)}</Pill>

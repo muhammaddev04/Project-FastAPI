@@ -97,6 +97,8 @@ describe('organization profile (P02 §8 settings/profile)', () => {
     expect(screen.getByLabelText('Tax identifier (INN)')).toHaveAttribute('readonly');
 
     const phone = screen.getByLabelText('Business phone');
+    // The form is filled from the loaded profile right after the first render; edit only once it holds the data.
+    await waitFor(() => expect(phone).toHaveValue('+992900000001'));
     await userEvent.clear(phone);
     await userEvent.click(phone);
     await userEvent.paste('+992 90 000 0099');
@@ -112,6 +114,7 @@ describe('organization profile (P02 §8 settings/profile)', () => {
     ]);
     const inn = await screen.findByLabelText('Tax identifier (INN)');
     expect(inn).not.toHaveAttribute('readonly');
+    await waitFor(() => expect(inn).toHaveValue('510012345'));
     await userEvent.clear(inn);
     await userEvent.type(inn, '510099999');
     await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
@@ -121,6 +124,7 @@ describe('organization profile (P02 §8 settings/profile)', () => {
   it('explains a version conflict and reloads the latest profile', async () => {
     const { calls } = open('/company/settings/profile', owner, company(), [{ method: 'PATCH', path: '/organization', ...apiError('version_conflict', 409) }]);
     const city = await screen.findByLabelText('City');
+    await waitFor(() => expect(city).toHaveValue('Dushanbe'));
     await userEvent.clear(city);
     await userEvent.type(city, 'Khujand');
     await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
@@ -132,6 +136,7 @@ describe('organization profile (P02 §8 settings/profile)', () => {
     const draft = company({ verification_status: 'NOT_SUBMITTED', legal_locked: false });
     open('/company/settings/profile', owner, draft, [{ method: 'PATCH', path: '/organization', ...apiError('tax_identifier_taken', 409) }]);
     const inn = await screen.findByLabelText('Tax identifier (INN)');
+    await waitFor(() => expect(inn).toHaveValue('510012345'));
     await userEvent.clear(inn);
     await userEvent.type(inn, '510077777');
     await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
@@ -157,7 +162,7 @@ describe('organization profile (P02 §8 settings/profile)', () => {
       company({ id: 'org-store', type: 'STORE', name: 'Corner Market', public_code: null, latitude: '38.559800', longitude: '68.787000' }),
     );
     expect(await screen.findByText('Store profile')).toBeInTheDocument();
-    expect(screen.getByLabelText('Latitude')).toHaveValue('38.559800');
+    await waitFor(() => expect(screen.getByLabelText('Latitude')).toHaveValue('38.559800'));
     expect(screen.getByRole('link', { name: 'Open in maps' })).toHaveAttribute('href', expect.stringContaining('38.559800,68.787000'));
   });
 });

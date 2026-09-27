@@ -4,7 +4,11 @@ from __future__ import annotations
 _MEMBER_ADMIN = frozenset(
     {"members.view", "members.invite", "members.change_role", "members.suspend", "members.revoke"}
 )
-_ORG_OWNER = frozenset({"org.view", "org.edit_contacts", "org.edit_legal", "verification.submit", "verification.view"})
+# CR-003 `org.edit_branding` (company logo / store image): OWNER only - the image is not among the fields ORG-006 lets
+# a MANAGER edit.
+_ORG_OWNER = frozenset(
+    {"org.view", "org.edit_contacts", "org.edit_legal", "org.edit_branding", "verification.submit", "verification.view"}
+)
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     ("COMPANY", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER,

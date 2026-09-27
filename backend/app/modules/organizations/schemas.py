@@ -99,6 +99,8 @@ class OrganizationProfile(BaseModel):
     verified_at: datetime | None
     legal_locked: bool
     version: int
+    #: CR-003: 5-minute signed URL of the company logo / store image (SEC-008), null when there is none.
+    logo_url: str | None = None
 
 
 class OrganizationCreated(BaseModel):

@@ -4,6 +4,7 @@ import secrets
 from typing import Any
 from uuid import UUID
 
+from fastapi import UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import audit
 from app.core.errors import AppError
 from app.core.time import utcnow
+from app.modules.files import images
 from app.modules.identity.deps import OrgContext
 from app.modules.identity.models import Membership, Organization, User
 from app.modules.identity.service import membership_out
@@ -169,8 +171,51 @@ async def create_organization(
     )
 
 
+async def profile_response(
+    session: AsyncSession, organization: Organization, profile: Company | Store
+) -> OrganizationProfile:
+    """`profile_out` plus the CR-003 logo: a 5-minute signed URL, only while the logo file is active."""
+    out = profile_out(organization, profile)
+    out.logo_url = await images.image_url(session, profile.logo_file_id)
+    return out
+
+
 async def get_profile(session: AsyncSession, context: OrgContext) -> OrganizationProfile:
-    return profile_out(context.organization, await load_profile(session, context.organization))
+    return await profile_response(session, context.organization, await load_profile(session, context.organization))
+
+
+async def _change_logo(
+    session: AsyncSession, context: OrgContext, upload_file: UploadFile | None
+) -> OrganizationProfile:
+    """CR-003 `PUT|DELETE /organization/logo` (`org.edit_branding`, checked by the router): always the active
+    organization from X-Org-Id - never an id from the request body."""
+    organization = context.organization
+    if organization.status != "ACTIVE":
+        raise AppError("organization_blocked", 403)
+    profile = await load_profile(session, organization)
+    image = None
+    if upload_file is not None:
+        content_type, raw = await images.read_upload(upload_file)
+        image = images.normalize_image(content_type, raw)
+    await images.swap_profile_image(
+        session,
+        holder_model=type(profile),
+        holder_id=profile.id,
+        category="ORG_LOGO",
+        image=image,
+        filename=upload_file.filename if upload_file is not None else None,
+        actor_id=context.user.id,
+    )
+    return await profile_response(session, organization, profile)
+
+
+async def set_logo(session: AsyncSession, context: OrgContext, upload_file: UploadFile) -> OrganizationProfile:
+    return await _change_logo(session, context, upload_file)
+
+
+async def remove_logo(session: AsyncSession, context: OrgContext) -> OrganizationProfile:
+    """Idempotent: without a logo nothing changes and the profile is returned."""
+    return await _change_logo(session, context, None)
 
 
 async def update_profile(
@@ -183,7 +228,7 @@ async def update_profile(
     profile = await load_profile(session, organization)
     changes = payload.model_dump(exclude_unset=True, exclude={"version"})
     if not changes:
-        return profile_out(organization, profile)
+        return await profile_response(session, organization, profile)
     if payload.version != profile.version:
         raise AppError("version_conflict", 409, {"current_version": profile.version})
 
@@ -239,4 +284,4 @@ async def update_profile(
         old=old,
         new={field: str(value) for field, value in changes.items()},
     )
-    return profile_out(organization, profile)
+    return await profile_response(session, organization, profile)

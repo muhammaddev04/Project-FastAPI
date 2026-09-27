@@ -39,6 +39,14 @@ class User(IdMixin, TimestampMixin, Base):
     is_superadmin: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
     token_version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     phone_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # CR-003: the user's own profile photo (USER_AVATAR file); never shared with an organization.
+    # users <-> stored_files reference each other (uploaded_by / owner_user_id), so this key is added after both
+    # tables exist (`use_alter`).
+    avatar_file_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("stored_files.id", ondelete="SET NULL", use_alter=True, name="fk_users_avatar_file_id_stored_files"),
+        index=True,
+        nullable=True,
+    )
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # P01 §10: the Company/Store choice and organization name given at registration. An intent only - ownership is
     # in memberships and nothing is ever created from these automatically.

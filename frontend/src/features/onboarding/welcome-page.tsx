@@ -186,7 +186,7 @@ export function WelcomePage({ me, fixedType }: { me: Me; fixedType?: OrgType }) 
                     }}
                   >
                     <span className="flex min-w-0 items-center gap-3">
-                      <Avatar kind={membership.org_type === 'STORE' ? 'store' : 'company'} size="md" className="rounded-xl" />
+                      <Avatar kind={membership.org_type === 'STORE' ? 'store' : 'company'} size="md" src={membership.logo_url} className="rounded-xl" />
                       <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold">{membership.org_name}</span>
                       <span className="text-[0.8125rem] text-muted-foreground">{t(`roles.${membership.role}`)}</span>

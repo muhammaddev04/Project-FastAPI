@@ -21,3 +21,36 @@ export function useUpdateOrganization(orgId: string | null) {
     },
   });
 }
+
+/**
+ * CR-003 `PUT|DELETE /organization/logo`: the company logo or store image of the *active* organization (X-Org-Id),
+ * `org.edit_branding` (OWNER). One endpoint for both organization types; the server enforces the permission.
+ */
+function useImageCacheUpdate(orgId: string | null) {
+  const queryClient = useQueryClient();
+  return (profile: OrganizationProfile) => {
+    queryClient.setQueryData(organizationQueryKey(orgId), profile);
+    // The picture also appears in /me memberships (switcher, profile list) as `logo_url`.
+    void queryClient.invalidateQueries({ queryKey: meQueryKey });
+  };
+}
+
+export function useUploadOrganizationImage(orgId: string | null) {
+  const onSuccess = useImageCacheUpdate(orgId);
+  return useMutation({
+    mutationFn: (file: File) => {
+      const form = new FormData();
+      form.append('file', file);
+      return apiRequest<OrganizationProfile>('/organization/logo', { method: 'PUT', body: form, orgScoped: true, timeoutMs: 120_000 });
+    },
+    onSuccess,
+  });
+}
+
+export function useRemoveOrganizationImage(orgId: string | null) {
+  const onSuccess = useImageCacheUpdate(orgId);
+  return useMutation({
+    mutationFn: () => apiRequest<OrganizationProfile>('/organization/logo', { method: 'DELETE', orgScoped: true }),
+    onSuccess,
+  });
+}

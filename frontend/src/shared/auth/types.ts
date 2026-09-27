@@ -18,6 +18,8 @@ export type Membership = {
   permissions: string[];
   /** P02 verification status of the organization. */
   verification_status?: 'NOT_SUBMITTED' | 'PENDING' | 'APPROVED' | 'REJECTED' | null;
+  /** CR-003: 5-minute signed URL of the company logo / store image; null when there is none. Never stored. */
+  logo_url?: string | null;
 };
 
 /** P01 §10: the Company/Store choice (and organization name) given at registration; null when none was given. */
@@ -33,7 +35,10 @@ export type Me = {
   language: Language;
   status: 'ACTIVE' | 'BLOCKED';
   is_superadmin: boolean;
+  /** CR-001/CR-003: phone verification is not part of the product yet, so this stays null. */
   phone_verified_at: string | null;
+  /** CR-003: 5-minute signed URL of the user's own avatar; null when there is none. Never stored. */
+  avatar_url?: string | null;
   last_login_at: string | null;
   created_at: string;
   memberships: Membership[];

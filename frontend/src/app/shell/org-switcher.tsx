@@ -16,7 +16,15 @@ import {
 } from '@/shared/ui';
 
 function OrgGlyph({ membership, size = 'md' }: { membership: Membership; size?: 'xs' | 'md' }) {
-  return <Avatar kind={membership.org_type === 'STORE' ? 'store' : 'company'} size={size} className={size === 'md' ? 'rounded-xl' : 'rounded-lg'} />;
+  // CR-003: the signed company logo / store image when there is one; the kind's mark otherwise. Decorative - the name is next to it.
+  return (
+    <Avatar
+      kind={membership.org_type === 'STORE' ? 'store' : 'company'}
+      size={size}
+      src={membership.logo_url}
+      className={size === 'md' ? 'rounded-xl' : 'rounded-lg'}
+    />
+  );
 }
 
 /** P01 §10 org switcher: pick a membership -> X-Org-Id changes and the matching area opens. */

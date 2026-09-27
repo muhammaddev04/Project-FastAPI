@@ -7,6 +7,7 @@ redis>=5.0.8
 argon2-cffi>=23.1.0
 minio>=7.2.0
 python-multipart>=0.0.9
+pillow>=10.4.0
 PyJWT[crypto]>=2.9.0
 uuid-utils>=0.9.0
 email-validator>=2.2.0
