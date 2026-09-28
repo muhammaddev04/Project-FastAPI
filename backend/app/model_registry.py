@@ -2,6 +2,7 @@
 
 from app.core.audit import AuditLog
 from app.core.db import Base
+from app.core.idempotency import IdempotencyRecord
 from app.core.sequences import NumberSequence
 from app.modules.auth.models import EmailToken, RefreshToken
 from app.modules.files.models import StoredFile
@@ -14,6 +15,7 @@ __all__ = [
     "Base",
     "Company",
     "EmailToken",
+    "IdempotencyRecord",
     "Membership",
     "NumberSequence",
     "OAuthIdentity",
