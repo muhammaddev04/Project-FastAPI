@@ -72,11 +72,19 @@ async def _download_status(url: str) -> int:
 # --- migration 0009 -----------------------------------------------------------------------------------------------
 
 
-async def test_migration_0009_is_head_and_models_match_the_database(session: AsyncSession) -> None:
+def _head() -> str:
     config = Config(str(BACKEND_DIR / "alembic.ini"))
     config.set_main_option("script_location", str(BACKEND_DIR / "migrations"))
-    assert ScriptDirectory.from_config(config).get_heads() == ["0009"]
-    assert (await session.execute(text("SELECT version_num FROM alembic_version"))).scalar_one() == "0009"
+    heads = ScriptDirectory.from_config(config).get_heads()
+    assert len(heads) == 1
+    return heads[0]
+
+
+async def test_migration_0009_is_applied_and_models_match_the_database(session: AsyncSession) -> None:
+    config = Config(str(BACKEND_DIR / "alembic.ini"))
+    config.set_main_option("script_location", str(BACKEND_DIR / "migrations"))
+    assert ScriptDirectory.from_config(config).get_revision("0009") is not None
+    assert (await session.execute(text("SELECT version_num FROM alembic_version"))).scalar_one() == _head()
 
     def _diff(connection: object) -> list[object]:
         context = MigrationContext.configure(connection, opts={"compare_type": True})  # type: ignore[arg-type]
@@ -129,7 +137,7 @@ def test_downgrade_refuses_while_retired_rows_exist_and_round_trips_when_clean()
     asyncio.run(_seed_retired_avatar())
     with pytest.raises(RuntimeError, match="cannot downgrade 0009: 1 retired profile image row"):
         command.downgrade(config, "0008")
-    assert asyncio.run(_sql("SELECT version_num FROM alembic_version")) == "0009"
+    assert asyncio.run(_sql("SELECT version_num FROM alembic_version")) == _head()  # refused: nothing changed
 
     asyncio.run(_sql("TRUNCATE users, stored_files CASCADE"))
     command.downgrade(config, "0008")
@@ -140,7 +148,7 @@ def test_downgrade_refuses_while_retired_rows_exist_and_round_trips_when_clean()
     assert asyncio.run(_sql(column)) == 0
     command.upgrade(config, "head")
     assert asyncio.run(_sql(column)) == 1
-    assert asyncio.run(_sql("SELECT version_num FROM alembic_version")) == "0009"
+    assert asyncio.run(_sql("SELECT version_num FROM alembic_version")) == _head()
 
 
 # --- retire -------------------------------------------------------------------------------------------------------
