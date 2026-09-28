@@ -13,6 +13,7 @@ import { areaFor, areaHome, homePath, usableMemberships } from '@/shared/auth/co
 import { useSessionStore } from '@/shared/auth/session-store';
 import type { Me, Membership } from '@/shared/auth/types';
 import { setLanguage } from '@/shared/i18n';
+import { formatDate } from '@/shared/lib/datetime';
 import { ImagePicker } from '@/shared/images/image-picker';
 import { Alert, Avatar, Badge, Button, Card, FormField, Input, MetaChip, Pill, ProfileHeader, SectionHeader, Select, StatCard, StatusBadge } from '@/shared/ui';
 import { ConnectedAccounts } from './connected-accounts';
@@ -98,7 +99,7 @@ function MembershipsCard({ me }: { me: Me }) {
  * connected Google account and the organizations this user belongs to.
  */
 export function ProfilePage({ me }: { me: Me }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const activeOrgId = useSessionStore((state) => state.activeOrgId);
   const update = useUpdateMe();
   const uploadAvatar = useUploadAvatar();
@@ -106,7 +107,7 @@ export function ProfilePage({ me }: { me: Me }) {
   const google = useGoogleLinkState();
   const form = useForm<Values>({ resolver: zodResolver(schema), values: valuesOf(me) });
   const errors = form.formState.errors;
-  const date = (value: string | null) => (value ? new Date(value).toLocaleDateString(i18n.language) : '—');
+  const date = (value: string | null) => formatDate(value) ?? '—';
   // A phone problem the server reports (taken, or not E.164) belongs to the field, not to a generic alert.
   const phoneFailure =
     update.error instanceof ApiError &&

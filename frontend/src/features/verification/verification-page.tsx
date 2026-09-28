@@ -6,6 +6,7 @@ import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
 import { SettingsTabs } from '@/features/organization/settings-tabs';
 import { cn } from '@/shared/lib/cn';
+import { formatDateTime } from '@/shared/lib/datetime';
 import { Alert, Button, Card, ConfirmDialog, ErrorState, PageHeader, SectionHeader, Skeleton, Spinner, StatusBadge } from '@/shared/ui';
 import {
   ALLOWED_TYPES,
@@ -116,7 +117,7 @@ function DocumentSlot({
  * approve; nothing on this page marks the organization verified.
  */
 export function VerificationPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { membership } = useAreaContext();
   const orgId = membership.organization_id;
   const state = useVerification(orgId);
@@ -124,7 +125,7 @@ export function VerificationPage() {
   const [files, setFiles] = useState<Partial<Record<DocType, StoredFileOut>>>({});
   const [confirming, setConfirming] = useState(false);
   const canSubmitRole = membership.permissions.includes('verification.submit');
-  const date = (value: string | null) => (value ? new Date(value).toLocaleString(i18n.language) : '—');
+  const date = (value: string | null) => formatDateTime(value) ?? '—';
 
   if (state.isPending) {
     return (

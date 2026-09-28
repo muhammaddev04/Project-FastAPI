@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAdminContext } from '@/app/shell/use-admin-context';
 import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
+import { formatDateTime } from '@/shared/lib/datetime';
 import {
   Alert,
   Avatar,
@@ -28,8 +29,7 @@ const PROFILE_FIELDS = ['name', 'legal_name', 'tax_identifier', 'phone', 'email'
 const MIN_REASON = 10;
 
 function useDate() {
-  const { i18n } = useTranslation();
-  return (value: string | null) => (value ? new Date(value).toLocaleString(i18n.language) : '—');
+  return (value: string | null) => formatDateTime(value) ?? '—';
 }
 
 /** One document: the signed URL is fetched on demand (5 minutes, audited as verification.document_viewed). */

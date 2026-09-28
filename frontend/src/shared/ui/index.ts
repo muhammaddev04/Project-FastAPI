@@ -31,3 +31,4 @@ export * from './toast';
 export { toast } from './toast-store';
 export * from './support-link';
 export * from './textarea';
+export * from './value-text';

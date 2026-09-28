@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { useMeta } from '@/shared/api/meta';
 import { errorMessage } from '@/shared/api/errors';
 import { clearGoogleIntent } from '@/shared/auth/google-intent';
+import { formatDate } from '@/shared/lib/datetime';
 import { Alert, Badge, Button, Card, CardBody, CardHeader, Skeleton } from '@/shared/ui';
 import { GoogleMark } from '@/features/auth/google-button';
 import { useGoogleLinkState, useStartGoogleLink } from './google-link-api';
@@ -18,7 +19,7 @@ export type GoogleLinkResult = { googleLink?: 'linked' | 'already_linked' | 'can
  * link could lock its owner out (it needs a password-reset/recovery step first).
  */
 export function ConnectedAccounts() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const result = (useLocation().state ?? {}) as GoogleLinkResult;
   const meta = useMeta();
   const state = useGoogleLinkState();
@@ -58,7 +59,7 @@ export function ConnectedAccounts() {
               {state.data.connected ? (
                 <p className="mt-0.5 truncate text-[0.8125rem] text-muted-foreground">
                   {state.data.email ?? '—'}
-                  {state.data.linked_at ? ` · ${t('profile.connected.since', { date: new Date(state.data.linked_at).toLocaleDateString(i18n.language) })}` : null}
+                  {state.data.linked_at ? ` · ${t('profile.connected.since', { date: formatDate(state.data.linked_at) })}` : null}
                 </p>
               ) : (
                 <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">{t('profile.connected.hint')}</p>

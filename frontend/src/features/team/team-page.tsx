@@ -6,7 +6,7 @@ import { errorMessage } from '@/shared/api/errors';
 import { useMembers } from '@/shared/auth/api';
 import { RequirePermission } from '@/shared/auth/guards';
 import type { Member, MembershipStatus, Role } from '@/shared/auth/types';
-import { Avatar, Badge, Button, DataTable, Input, PageHeader, Select, StatusBadge } from '@/shared/ui';
+import { Avatar, Badge, Button, DataTable, DateText, Input, PageHeader, Select, StatusBadge } from '@/shared/ui';
 
 const PAGE_SIZE = 20;
 const ROLES: Record<'COMPANY' | 'STORE', Role[]> = {
@@ -22,15 +22,9 @@ function useDebounced<T>(value: T, delay = 300): T {
   return debounced;
 }
 
-function formatDate(value: string, language: string) {
-  return new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : 'ru-RU', { dateStyle: 'medium', timeZone: 'Asia/Dushanbe' }).format(
-    new Date(value),
-  );
-}
-
 /** P01 §10 Team page: members of the active organization (members.view). Invitations and role changes come later. */
 export function TeamPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { membership } = useAreaContext();
   const [search, setSearch] = useState('');
   const [role, setRole] = useState<Role | ''>('');
@@ -127,7 +121,7 @@ export function TeamPage() {
             {
               key: 'joined',
               header: t('team.columns.joined'),
-              cell: (member) => <span className="text-muted-foreground">{formatDate(member.joined_at, i18n.language)}</span>,
+              cell: (member) => <DateText value={member.joined_at} dateOnly className="text-muted-foreground" />,
             },
           ]}
         />

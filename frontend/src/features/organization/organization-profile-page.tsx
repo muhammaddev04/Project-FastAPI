@@ -9,6 +9,7 @@ import { useAreaContext } from '@/app/shell/use-area-context';
 import { useOrganizationProfile, useVerification, type OrganizationProfile } from '@/features/verification/api';
 import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
+import { formatDate } from '@/shared/lib/datetime';
 import { useMembers } from '@/shared/auth/api';
 import { areaFor } from '@/shared/auth/context';
 import { Alert, Avatar, Badge, Button, Card, ErrorState, FormField, InfoRow, Input, MetaChip, Pill, PlannedPanel, ProfileHeader, SectionHeader, Skeleton, StatCard, StatusBadge } from '@/shared/ui';
@@ -113,7 +114,7 @@ function TeamSize() {
  * The server enforces every rule; this page only mirrors them.
  */
 export function OrganizationProfilePage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { membership } = useAreaContext();
   const orgId = membership.organization_id;
   const area = areaFor(membership);
@@ -150,7 +151,7 @@ export function OrganizationProfilePage() {
   const editable = new Set<Field>([
     ...(perms.includes('org.edit_legal') ? (['name'] as Field[]) : []),
     ...(canLegal ? LEGAL : []), ...(canContacts ? CONTACTS.filter((f) => isStore || (f !== 'latitude' && f !== 'longitude')) : [])]);
-  const date = (value: string | null) => (value ? new Date(value).toLocaleDateString(i18n.language) : '—');
+  const date = (value: string | null) => formatDate(value) ?? '—';
   const message = (field: Field) => {
     const key = errors[field]?.message;
     return key ? (key.startsWith('validation.') ? t(key) : key) : undefined;
