@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.pagination import Page
 from app.modules.files.schemas import FileOut
 
 DocType = Literal["REGISTRATION_CERTIFICATE", "TAX_CERTIFICATE", "OTHER"]
@@ -78,13 +79,8 @@ class AdminRequestSummary(BaseModel):
     reviewed_at: datetime | None
 
 
-class AdminRequestPage(BaseModel):
-    """API-002 pagination envelope."""
-
-    count: int
-    limit: int
-    offset: int
-    results: list[AdminRequestSummary]
+class AdminRequestPage(Page[AdminRequestSummary]):
+    """API-002 pagination envelope (FND-009)."""
 
 
 class HistoryItem(BaseModel):

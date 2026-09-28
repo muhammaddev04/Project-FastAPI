@@ -827,7 +827,12 @@
   "table": {
     "range": "{{from}}–{{to}} of {{total}}",
     "previous": "Previous page",
-    "next": "Next page"
+    "next": "Next page",
+    "page": "Page {{page}} of {{pages}}",
+    "sort": "Sort order",
+    "sortOption": "{{column}}: {{direction}}",
+    "asc": "ascending",
+    "desc": "descending"
   },
   "images": {
     "current": "This picture is shown to people you work with.",

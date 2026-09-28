@@ -11,12 +11,13 @@ from __future__ import annotations
 from typing import Any, Literal
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
 from app.core.errors import AppError
+from app.core.pagination import PageParams, fetch_page
 from app.core.storage import SignedUrl, get_storage
 from app.core.time import utcnow
 from app.modules.files.models import StoredFile
@@ -219,10 +220,9 @@ async def list_requests(
     status: str | None,
     org_type: str | None,
     ordering: str,
-    limit: int,
-    offset: int,
+    page: PageParams,
 ) -> AdminRequestPage:
-    """`GET /admin/verifications`: filter by `status`, `org_type`; ordered by `submitted_at`."""
+    """`GET /admin/verifications`: filter by `status`, `org_type`; ordered by `submitted_at` (FND-009 page)."""
     query = select(VerificationRequest, Organization).join(
         Organization, Organization.id == VerificationRequest.organization_id
     )
@@ -230,14 +230,12 @@ async def list_requests(
         query = query.where(VerificationRequest.status == status)
     if org_type:
         query = query.where(Organization.type == org_type)
-    count = (await session.execute(select(func.count()).select_from(query.subquery()))).scalar_one()
     order = VerificationRequest.submitted_at.desc() if ordering == "-submitted_at" else VerificationRequest.submitted_at
-    rows = (await session.execute(query.order_by(order, VerificationRequest.id).limit(limit).offset(offset))).all()
-    return AdminRequestPage(
-        count=count,
-        limit=limit,
-        offset=offset,
-        results=[
+    count, rows = await fetch_page(session, query, page, order_by=[order], tie_breaker=VerificationRequest.id)
+    return AdminRequestPage.of(
+        page,
+        count,
+        [
             AdminRequestSummary(
                 id=request.id,
                 organization_id=organization.id,
@@ -248,7 +246,7 @@ async def list_requests(
                 reviewer_id=request.reviewer_id,
                 reviewed_at=request.reviewed_at,
             )
-            for request, organization in rows
+            for request, organization in rows.all()
         ],
     )
 

@@ -3,12 +3,13 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import UploadFile
-from sqlalchemy import func, or_, select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
 from app.core.errors import AppError
+from app.core.pagination import PageParams, fetch_page
 from app.core.permissions import permissions_for
 from app.modules.files import images
 from app.modules.files.images import active_image_urls
@@ -162,8 +163,7 @@ async def list_members(
     role: str | None,
     status: str | None,
     search: str | None,
-    limit: int,
-    offset: int,
+    page: PageParams,
 ) -> MemberPage:
     """GET /members (P01 §6, CR-001): filter role/status, search full_name/email/phone, API-002 pagination."""
     query = (
@@ -178,13 +178,12 @@ async def list_members(
     if search:
         pattern = f"%{search.strip()}%"
         query = query.where(or_(User.full_name.ilike(pattern), User.email.ilike(pattern), User.phone.ilike(pattern)))
-    total = (await session.execute(select(func.count()).select_from(query.subquery()))).scalar_one()
-    rows = (await session.execute(query.order_by(Membership.joined_at).limit(limit).offset(offset))).scalars().unique()
-    return MemberPage(
-        count=total,
-        limit=limit,
-        offset=offset,
-        results=[
+    # FND-009: the membership id breaks ties, so members who joined at the same moment keep one order across pages.
+    total, rows = await fetch_page(session, query, page, order_by=[Membership.joined_at], tie_breaker=Membership.id)
+    return MemberPage.of(
+        page,
+        total,
+        [
             MemberOut(
                 id=m.id,
                 user_id=m.user_id,
@@ -195,6 +194,6 @@ async def list_members(
                 status=m.status,
                 joined_at=m.joined_at,
             )
-            for m in rows
+            for m in rows.scalars().unique()
         ],
     )

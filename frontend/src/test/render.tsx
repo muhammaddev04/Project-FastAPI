@@ -10,12 +10,12 @@ export type MockRoute = { method?: string; path: string; status?: number; body?:
 
 /** Minimal fetch double that answers by method + path and records requests. Test fixtures only. */
 export function mockApi(routes: MockRoute[]) {
-  const calls: { method: string; path: string; headers: Record<string, string>; body: unknown }[] = [];
+  const calls: { method: string; path: string; query?: URLSearchParams; headers: Record<string, string>; body: unknown }[] = [];
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(String(input), 'http://localhost');
     const method = init?.method ?? 'GET';
     const headers = Object.fromEntries(Object.entries((init?.headers as Record<string, string>) ?? {}));
-    calls.push({ method, path: url.pathname, headers, body: typeof init?.body === 'string' ? JSON.parse(init.body) : init?.body ?? undefined });
+    calls.push({ method, path: url.pathname, query: url.searchParams, headers, body: typeof init?.body === 'string' ? JSON.parse(init.body) : init?.body ?? undefined });
     const match = routes.find((route) => (route.method ?? 'GET') === method && `/api/v1${route.path}` === url.pathname);
     const status = match?.status ?? (match ? 200 : 404);
     const body = match?.body ?? (match ? {} : { error: { code: 'not_found', message: 'Not found', details: {}, request_id: 'test' } });

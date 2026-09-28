@@ -67,6 +67,50 @@ describe('admin verification queue (P02 §5/§8)', () => {
     expect((await screen.findAllByText('Approved')).length).toBeGreaterThan(0);
   });
 
+  it('FND-009/035: pages and sorts through the API (limit/offset, ordering=±submitted_at)', async () => {
+    const results = Array.from({ length: 20 }, (_, index) => ({ ...QUEUE.results[0]!, id: `req-${index}`, org_name: `Org ${index}` }));
+    const { calls } = mockApi([
+      { path: '/me', body: ADMIN },
+      { path: '/admin/verifications', body: { count: 45, limit: 20, offset: 0, results } },
+    ]);
+    renderRoutes(routes, '/admin/verifications');
+    const queueCalls = () => calls.filter((call) => call.path === '/api/v1/admin/verifications').map((call) => Object.fromEntries(new URLSearchParams(call.query)));
+    const last = () => queueCalls().at(-1);
+
+    await screen.findByRole('button', { name: 'Org 0' });
+    expect(last()).toEqual({ status: 'SUBMITTED', ordering: 'submitted_at', limit: '20', offset: '0' });
+    expect(screen.getByRole('columnheader', { name: 'Submitted' })).toHaveAttribute('aria-sort', 'ascending');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => expect(last()).toMatchObject({ offset: '20', ordering: 'submitted_at' }));
+
+    // changing the order starts again at the first page
+    await userEvent.click(screen.getByRole('button', { name: 'Submitted' }));
+    await waitFor(() => expect(last()).toMatchObject({ ordering: '-submitted_at', offset: '0' }));
+    expect(screen.getByRole('columnheader', { name: 'Submitted' })).toHaveAttribute('aria-sort', 'descending');
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Next page' }));
+    await waitFor(() => expect(last()).toMatchObject({ ordering: '-submitted_at', offset: '20' }));
+
+    // so does changing a filter; the chosen order stays
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Type' }), 'STORE');
+    await waitFor(() => expect(last()).toEqual({ status: 'SUBMITTED', org_type: 'STORE', ordering: '-submitted_at', limit: '20', offset: '0' }));
+  });
+
+  it('shows an API validation error with a retry instead of the table', async () => {
+    mockApi([
+      { path: '/me', body: ADMIN },
+      {
+        path: '/admin/verifications',
+        status: 422,
+        body: { error: { code: 'validation_error', message: 'Some fields are invalid.', details: { fields: [{ field: 'limit', code: 'less_than_equal', message: 'This value is too large.' }] }, request_id: 'r' } },
+      },
+    ]);
+    renderRoutes(routes, '/admin/verifications');
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
   it('needs a reason of at least 10 characters to reject', async () => {
     const { calls } = mockApi([
       { path: '/me', body: ADMIN },

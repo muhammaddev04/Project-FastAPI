@@ -7,6 +7,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.core.pagination import Page
+
 _PHONE_SEPARATORS = re.compile(r"[\s\-().]")
 _E164 = re.compile(r"\+[1-9][0-9]{7,14}")
 
@@ -92,10 +94,5 @@ class MemberOut(BaseModel):
     joined_at: datetime
 
 
-class MemberPage(BaseModel):
-    """API-002 pagination envelope."""
-
-    count: int
-    limit: int
-    offset: int
-    results: list[MemberOut]
+class MemberPage(Page[MemberOut]):
+    """API-002 pagination envelope (FND-009)."""

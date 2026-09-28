@@ -1,9 +1,10 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/cn';
 import { Button } from './button';
 import { Card } from './card';
+import { Select } from './select';
 import { SkeletonRows } from './skeleton';
 import { EmptyState, ErrorState } from './states';
 
@@ -14,14 +15,26 @@ export type Column<T> = {
   className?: string;
   /** Shown as the card title on phones (no label in front). */
   primary?: boolean;
+  /** The column can be ordered by the server (the endpoint's API-003 `ordering` whitelist). */
+  sortable?: boolean;
 };
 
 export type Pagination = { offset: number; limit: number; count: number; onChange: (offset: number) => void };
 
+export type SortDirection = 'asc' | 'desc';
+export type SortState = { key: string; direction: SortDirection };
+/** Server-side ordering: the table shows and changes the state; the caller requests the rows. */
+export type Sorting = SortState & { onChange: (sort: SortState) => void };
+
+const ARIA_SORT = { asc: 'ascending', desc: 'descending' } as const;
+
 /**
  * FND-035 DataTable: dense business table in the product's language (subtle caption header, hairline rows, hover
- * tint, status chips) inside a card, with toolbar, FE-001 states and pagination. One DOM for every width: below
- * 768px each row becomes a stacked card whose cells carry their column label.
+ * tint, status chips) inside a card, with toolbar, FE-001 states, pagination (API-002 limit/offset) and sorting
+ * (API-003 `ordering`). Paging and sorting are server-side: the table reports the change and the caller fetches.
+ * One DOM for every width: below 768px each row becomes a stacked card whose cells carry their column label, and the
+ * order is chosen with a select there (the column headers are visually hidden).
+ * `busy` (the next page is loading while the previous rows stay visible) disables paging and sorting.
  */
 export function DataTable<T>({
   columns,
@@ -34,6 +47,8 @@ export function DataTable<T>({
   onRetry,
   empty,
   pagination,
+  sort,
+  busy = false,
   onRowClick,
   selectedKey,
   className,
@@ -48,11 +63,20 @@ export function DataTable<T>({
   onRetry?: () => void;
   empty: { title: ReactNode; description?: ReactNode };
   pagination?: Pagination;
+  sort?: Sorting;
+  busy?: boolean;
   onRowClick?: (row: T) => void;
   selectedKey?: string | null;
   className?: string;
 }) {
   const { t } = useTranslation();
+  const sortable = sort ? columns.filter((column) => column.sortable) : [];
+  const pageCount = pagination ? Math.max(1, Math.ceil(pagination.count / pagination.limit)) : 1;
+  const currentPage = pagination ? Math.floor(pagination.offset / pagination.limit) + 1 : 1;
+  const toggle = (key: string) => {
+    if (!sort) return;
+    sort.onChange({ key, direction: sort.key === key && sort.direction === 'asc' ? 'desc' : 'asc' });
+  };
   return (
     <Card className={cn('overflow-hidden', className)}>
       {toolbar ? <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:flex-wrap sm:items-center">{toolbar}</div> : null}
@@ -65,15 +89,61 @@ export function DataTable<T>({
       ) : !rows || rows.length === 0 ? (
         <EmptyState title={empty.title} description={empty.description} />
       ) : (
-        <table className="w-full text-left text-[0.8125rem] max-md:block">
+        <>
+        {sort && sortable.length > 0 ? (
+          <div className="border-b p-3 md:hidden">
+            <Select
+              aria-label={t('table.sort')}
+              value={`${sort.key}:${sort.direction}`}
+              disabled={busy}
+              onChange={(event) => {
+                const [key = '', direction] = event.target.value.split(':');
+                sort.onChange({ key, direction: direction === 'desc' ? 'desc' : 'asc' });
+              }}
+            >
+              {sortable.flatMap((column) =>
+                (['asc', 'desc'] as const).map((direction) => (
+                  <option key={`${column.key}:${direction}`} value={`${column.key}:${direction}`}>
+                    {t('table.sortOption', { column: column.header, direction: t(`table.${direction}`) })}
+                  </option>
+                )),
+              )}
+            </Select>
+          </div>
+        ) : null}
+        <table aria-busy={busy || undefined} className="w-full text-left text-[0.8125rem] max-md:block">
           {caption ? <caption className="sr-only">{caption}</caption> : null}
           <thead className="border-b bg-subtle/70 text-[0.625rem] uppercase tracking-[0.1em] text-muted-foreground max-md:sr-only">
             <tr>
-              {columns.map((column) => (
-                <th key={column.key} scope="col" className={cn('px-5 py-3 font-bold', column.className)}>
-                  {column.header}
-                </th>
-              ))}
+              {columns.map((column) => {
+                const active = sort && column.sortable && sort.key === column.key ? sort.direction : null;
+                const Icon = active === 'asc' ? ArrowUp : active === 'desc' ? ArrowDown : ArrowUpDown;
+                return (
+                  <th
+                    key={column.key}
+                    scope="col"
+                    aria-sort={sort && column.sortable ? (active ? ARIA_SORT[active] : 'none') : undefined}
+                    className={cn('px-5 py-3 font-bold', column.className)}
+                  >
+                    {sort && column.sortable ? (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => toggle(column.key)}
+                        className={cn(
+                          '-mx-1 inline-flex items-center gap-1 rounded px-1 uppercase tracking-[0.1em] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60',
+                          active && 'text-foreground',
+                        )}
+                      >
+                        {column.header}
+                        <Icon className="size-3.5" aria-hidden="true" />
+                      </button>
+                    ) : (
+                      column.header
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className="divide-y max-md:block max-md:space-y-3 max-md:divide-y-0 max-md:p-3">
@@ -110,6 +180,7 @@ export function DataTable<T>({
             })}
           </tbody>
         </table>
+        </>
       )}
       {pagination && rows && rows.length > 0 && !loading && !error ? (
         <div className="flex items-center justify-between gap-3 border-t px-5 py-3 text-[0.8125rem] text-muted-foreground">
@@ -120,12 +191,15 @@ export function DataTable<T>({
               total: pagination.count,
             })}
           </span>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <span className="whitespace-nowrap tabular-nums" aria-live="polite">
+              {t('table.page', { page: currentPage, pages: pageCount })}
+            </span>
             <Button
               variant="secondary"
               size="icon"
               className="size-9"
-              disabled={pagination.offset === 0}
+              disabled={busy || pagination.offset === 0}
               onClick={() => pagination.onChange(Math.max(0, pagination.offset - pagination.limit))}
               aria-label={t('table.previous')}
             >
@@ -135,7 +209,7 @@ export function DataTable<T>({
               variant="secondary"
               size="icon"
               className="size-9"
-              disabled={pagination.offset + pagination.limit >= pagination.count}
+              disabled={busy || pagination.offset + pagination.limit >= pagination.count}
               onClick={() => pagination.onChange(pagination.offset + pagination.limit)}
               aria-label={t('table.next')}
             >

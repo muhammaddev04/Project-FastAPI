@@ -1,6 +1,6 @@
 import { Title as DialogPrimitiveTitle } from '@radix-ui/react-dialog';
 import { Building2, ExternalLink, FileText, History, Landmark, ShieldCheck } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAdminContext } from '@/app/shell/use-admin-context';
 import { ApiError } from '@/shared/api/client';
@@ -22,7 +22,16 @@ import {
   StatusBadge,
   Textarea,
 } from '@/shared/ui';
-import { fetchDocumentUrl, useReviewAction, useVerificationQueue, useVerificationRequest, type AdminRequestSummary, type QueueFilter } from './api';
+import {
+  QUEUE_PAGE_SIZE,
+  fetchDocumentUrl,
+  useReviewAction,
+  useVerificationQueue,
+  useVerificationRequest,
+  type AdminRequestSummary,
+  type QueueFilter,
+  type QueuePage,
+} from './api';
 
 const SNAPSHOT_FIELDS = ['legal_name', 'tax_identifier', 'address'] as const;
 const PROFILE_FIELDS = ['name', 'legal_name', 'tax_identifier', 'phone', 'email', 'city', 'address', 'latitude', 'longitude', 'public_code'] as const;
@@ -228,9 +237,21 @@ export function VerificationsPage() {
   const { t } = useTranslation();
   const { me } = useAdminContext();
   const date = useDate();
-  const [filter, setFilter] = useState<QueueFilter>({ status: 'SUBMITTED', org_type: '' });
+  const [filter, setFilterState] = useState<QueueFilter>({ status: 'SUBMITTED', org_type: '' });
+  const [page, setPage] = useState<QueuePage>({ ordering: 'submitted_at', offset: 0 });
   const [openId, setOpenId] = useState<string | null>(null);
-  const queue = useVerificationQueue(filter);
+  const queue = useVerificationQueue(filter, page);
+  const setFilter = (update: (current: QueueFilter) => QueueFilter) => {
+    setFilterState(update);
+    setPage((current) => ({ ...current, offset: 0 }));
+  };
+  // A page that became empty (its last request was decided meanwhile) steps back to the last page that has rows.
+  const data = queue.data;
+  useEffect(() => {
+    if (data && data.offset === page.offset && data.results.length === 0 && data.count > 0 && page.offset > 0) {
+      setPage((current) => ({ ...current, offset: Math.floor((data.count - 1) / QUEUE_PAGE_SIZE) * QUEUE_PAGE_SIZE }));
+    }
+  }, [data, page.offset]);
 
   return (
     <div className="space-y-6">
@@ -244,6 +265,15 @@ export function VerificationsPage() {
         error={queue.isError ? errorMessage(queue.error, t) : undefined}
         onRetry={() => void queue.refetch()}
         empty={{ title: t('admin.verifications.empty') }}
+        busy={queue.isFetching && !queue.isPending}
+        pagination={
+          data ? { offset: page.offset, limit: QUEUE_PAGE_SIZE, count: data.count, onChange: (offset) => setPage((current) => ({ ...current, offset })) } : undefined
+        }
+        sort={{
+          key: 'submitted',
+          direction: page.ordering === '-submitted_at' ? 'desc' : 'asc',
+          onChange: (next) => setPage({ ordering: next.direction === 'desc' ? '-submitted_at' : 'submitted_at', offset: 0 }),
+        }}
         selectedKey={openId}
         toolbar={
           <>
@@ -291,6 +321,7 @@ export function VerificationsPage() {
           {
             key: 'submitted',
             header: t('admin.verifications.columns.submitted'),
+            sortable: true,
             cell: (item) => <span className="text-muted-foreground">{date(item.submitted_at)}</span>,
           },
         ]}

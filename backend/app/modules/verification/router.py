@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, status
 
+from app.core.pagination import PageParamsDep
 from app.modules.files.schemas import SignedUrlOut
 from app.modules.identity.deps import SessionDep, SuperadminDep, require_permission
 from app.modules.verification import service
@@ -66,17 +67,14 @@ async def submit_verification(
 async def list_verifications(
     session: SessionDep,
     _admin: SuperadminDep,
+    page: PageParamsDep,
     status_filter: Annotated[
         Literal["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"] | None, Query(alias="status")
     ] = None,
     org_type: Annotated[Literal["COMPANY", "STORE"] | None, Query()] = None,
     ordering: Annotated[Literal["submitted_at", "-submitted_at"], Query()] = "submitted_at",
-    limit: Annotated[int, Query(ge=1, le=100)] = 20,
-    offset: Annotated[int, Query(ge=0)] = 0,
 ) -> AdminRequestPage:
-    return await service.list_requests(
-        session, status=status_filter, org_type=org_type, ordering=ordering, limit=limit, offset=offset
-    )
+    return await service.list_requests(session, status=status_filter, org_type=org_type, ordering=ordering, page=page)
 
 
 @admin_router.get(

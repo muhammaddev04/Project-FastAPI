@@ -26,14 +26,21 @@ export type AdminRequestDetail = AdminRequestSummary & {
   version: number;
 };
 export type QueueFilter = { status?: RequestStatus | ''; org_type?: 'COMPANY' | 'STORE' | '' };
+/** P02 §6: the queue's only ordering (API-003 whitelist); `submitted_at` (oldest first) is the server default. */
+export type QueueOrdering = 'submitted_at' | '-submitted_at';
+/** API-002 page: `limit` 1..100, `offset` >= 0. */
+export type QueuePage = { ordering: QueueOrdering; offset: number };
+export const QUEUE_PAGE_SIZE = 20;
 
 const BASE = '/admin/verifications';
 
-export function useVerificationQueue(filter: QueueFilter) {
+export function useVerificationQueue(filter: QueueFilter, page: QueuePage) {
   const params = new URLSearchParams();
   if (filter.status) params.set('status', filter.status);
   if (filter.org_type) params.set('org_type', filter.org_type);
-  params.set('limit', '100');
+  params.set('ordering', page.ordering);
+  params.set('limit', String(QUEUE_PAGE_SIZE));
+  params.set('offset', String(page.offset));
   const query = params.toString();
   return useQuery({
     queryKey: ['admin-verifications', query],
