@@ -22,6 +22,7 @@ from httpx import ASGITransport, AsyncClient, Response
 from sqlalchemy import select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import idempotency
 from app.core.db import get_sessionmaker
 from app.core.errors import AppError, register_error_handlers
 from app.core.idempotency import (
@@ -318,6 +319,31 @@ async def test_fnd_014_commit_failure_leaves_no_false_completed_result(
     probe.fail = None
     retried = await _send(api, user, key, body)
     assert (retried.status_code, retried.json()) == (201, {"number": 1, "echo": body})
+    assert [row[2] for row in await _records()] == ["COMPLETED"]
+
+
+async def test_fnd_014_route_commits_business_change_only_with_completed_result(
+    api: AsyncClient, probe: Probe, user: User, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """IdempotentRoute path: the COMPLETED update runs, then completion fails before the commit. The business change
+    must roll back with it, so it can never be committed before (or apart from) the stored result."""
+    real_mark_completed = idempotency.mark_completed
+
+    async def completed_then_failure(*args: Any) -> None:
+        await real_mark_completed(*args)
+        raise RuntimeError("failure after COMPLETED, before commit")
+
+    key, body = uuid4(), {"name": "completion-fails"}
+    monkeypatch.setattr(idempotency, "mark_completed", completed_then_failure)
+    failed = await _send(api, user, key, body)
+    assert failed.status_code == 500
+    assert await _records() == []
+    assert await _counter() is None
+
+    monkeypatch.setattr(idempotency, "mark_completed", real_mark_completed)
+    retried = await _send(api, user, key, body)
+    assert (retried.status_code, retried.json()) == (201, {"number": 1, "echo": body})
+    assert probe.executions == 2
     assert [row[2] for row in await _records()] == ["COMPLETED"]
 
 
