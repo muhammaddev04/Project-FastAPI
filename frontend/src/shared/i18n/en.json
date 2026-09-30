@@ -832,7 +832,10 @@
     "sort": "Sort order",
     "sortOption": "{{column}}: {{direction}}",
     "asc": "ascending",
-    "desc": "descending"
+    "desc": "descending",
+    "resetFilters": "Reset filters",
+    "noMatches": "Nothing matches these filters",
+    "noMatchesHint": "Change or reset the filters to see more."
   },
   "images": {
     "current": "This picture is shown to people you work with.",

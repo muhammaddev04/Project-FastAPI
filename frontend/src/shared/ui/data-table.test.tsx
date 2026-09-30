@@ -110,6 +110,26 @@ describe('FND-035 DataTable: server-side sorting and pagination', () => {
     expect(screen.queryByRole('combobox', { name: 'Sort order' })).not.toBeInTheDocument();
   });
 
+  it('offers "Reset filters" only while filters differ from the default, in the toolbar and the empty state', async () => {
+    const onReset = vi.fn();
+    const { rerender } = render(
+      <DataTable<Row> columns={COLUMNS} rows={ROWS} rowKey={(row) => row.id} toolbar={<span>tools</span>} empty={{ title: 'Nothing to review' }} filters={{ changed: false, onReset }} />,
+    );
+    expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
+
+    rerender(<DataTable<Row> columns={COLUMNS} rows={ROWS} rowKey={(row) => row.id} toolbar={<span>tools</span>} empty={{ title: 'Nothing to review' }} filters={{ changed: true, onReset }} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Reset filters' }));
+    expect(onReset).toHaveBeenCalledTimes(1);
+
+    rerender(<DataTable<Row> columns={COLUMNS} rows={[]} rowKey={(row) => row.id} toolbar={<span>tools</span>} empty={{ title: 'Nothing to review' }} filters={{ changed: true, onReset }} />);
+    expect(screen.getByText('Nothing matches these filters')).toBeInTheDocument();
+    expect(screen.queryByText('Nothing to review')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Reset filters' })).toHaveLength(2);
+
+    rerender(<DataTable<Row> columns={COLUMNS} rows={[]} rowKey={(row) => row.id} toolbar={<span>tools</span>} empty={{ title: 'Nothing to review' }} filters={{ changed: false, onReset }} />);
+    expect(screen.getByText('Nothing to review')).toBeInTheDocument();
+  });
+
   it('has no sort UI when the table is not given a sort state', () => {
     renderTable();
     expect(screen.getByRole('columnheader', { name: 'Submitted' })).not.toHaveAttribute('aria-sort');

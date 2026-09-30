@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, FilterX } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/cn';
@@ -26,6 +26,9 @@ export type SortState = { key: string; direction: SortDirection };
 /** Server-side ordering: the table shows and changes the state; the caller requests the rows. */
 export type Sorting = SortState & { onChange: (sort: SortState) => void };
 
+/** API-003 filters of the list: whether any differs from the screen's default, and how to go back to it. */
+export type Filtering = { changed: boolean; onReset: () => void };
+
 const ARIA_SORT = { asc: 'ascending', desc: 'descending' } as const;
 
 /**
@@ -35,6 +38,7 @@ const ARIA_SORT = { asc: 'ascending', desc: 'descending' } as const;
  * One DOM for every width: below 768px each row becomes a stacked card whose cells carry their column label, and the
  * order is chosen with a select there (the column headers are visually hidden).
  * `busy` (the next page is loading while the previous rows stay visible) disables paging and sorting.
+ * `filters` adds "Reset filters" to the toolbar and to the empty state when filters hide every row.
  */
 export function DataTable<T>({
   columns,
@@ -48,6 +52,7 @@ export function DataTable<T>({
   empty,
   pagination,
   sort,
+  filters,
   busy = false,
   onRowClick,
   selectedKey,
@@ -64,6 +69,7 @@ export function DataTable<T>({
   empty: { title: ReactNode; description?: ReactNode };
   pagination?: Pagination;
   sort?: Sorting;
+  filters?: Filtering;
   busy?: boolean;
   onRowClick?: (row: T) => void;
   selectedKey?: string | null;
@@ -77,9 +83,19 @@ export function DataTable<T>({
     if (!sort) return;
     sort.onChange({ key, direction: sort.key === key && sort.direction === 'asc' ? 'desc' : 'asc' });
   };
+  const resetButton = filters?.changed ? (
+    <Button variant="ghost" size="sm" onClick={filters.onReset} className="sm:ml-auto">
+      <FilterX /> {t('table.resetFilters')}
+    </Button>
+  ) : null;
   return (
     <Card className={cn('overflow-hidden', className)}>
-      {toolbar ? <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:flex-wrap sm:items-center">{toolbar}</div> : null}
+      {toolbar ? (
+        <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:flex-wrap sm:items-center">
+          {toolbar}
+          {resetButton}
+        </div>
+      ) : null}
       {loading ? (
         <div className="p-5">
           <SkeletonRows rows={4} label={t('common.loading')} />
@@ -87,7 +103,11 @@ export function DataTable<T>({
       ) : error ? (
         <ErrorState message={error} onRetry={onRetry} />
       ) : !rows || rows.length === 0 ? (
-        <EmptyState title={empty.title} description={empty.description} />
+        <EmptyState
+          title={filters?.changed ? t('table.noMatches') : empty.title}
+          description={filters?.changed ? t('table.noMatchesHint') : empty.description}
+          action={resetButton}
+        />
       ) : (
         <>
         {sort && sortable.length > 0 ? (

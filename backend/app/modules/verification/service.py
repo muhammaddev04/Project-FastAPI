@@ -17,7 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
 from app.core.errors import AppError
-from app.core.pagination import PageParams, fetch_page
 from app.core.storage import SignedUrl, get_storage
 from app.core.time import utcnow
 from app.modules.files.models import StoredFile
@@ -26,6 +25,7 @@ from app.modules.identity.deps import OrgContext
 from app.modules.identity.models import Organization, User
 from app.modules.organizations.models import Company, Store
 from app.modules.organizations.service import load_profile, profile_out
+from app.modules.verification.filters import QueueQuery
 from app.modules.verification.models import VerificationDocument, VerificationRequest
 from app.modules.verification.schemas import (
     AdminRequestDetail,
@@ -214,26 +214,15 @@ async def _organization(session: AsyncSession, organization_id: UUID) -> Organiz
     return organization
 
 
-async def list_requests(
-    session: AsyncSession,
-    *,
-    status: str | None,
-    org_type: str | None,
-    ordering: str,
-    page: PageParams,
-) -> AdminRequestPage:
-    """`GET /admin/verifications`: filter by `status`, `org_type`; ordered by `submitted_at` (FND-009 page)."""
-    query = select(VerificationRequest, Organization).join(
+async def list_requests(session: AsyncSession, query: QueueQuery) -> AdminRequestPage:
+    """`GET /admin/verifications` through `QueueQuery`: filter `status`, `org_type`; ordering `submitted_at` (FND-011),
+    FND-009 page with the request id as tie-breaker."""
+    base = select(VerificationRequest, Organization).join(
         Organization, Organization.id == VerificationRequest.organization_id
     )
-    if status:
-        query = query.where(VerificationRequest.status == status)
-    if org_type:
-        query = query.where(Organization.type == org_type)
-    order = VerificationRequest.submitted_at.desc() if ordering == "-submitted_at" else VerificationRequest.submitted_at
-    count, rows = await fetch_page(session, query, page, order_by=[order], tie_breaker=VerificationRequest.id)
+    count, rows = await query.fetch(session, base, tie_breaker=VerificationRequest.id)
     return AdminRequestPage.of(
-        page,
+        query.page,
         count,
         [
             AdminRequestSummary(

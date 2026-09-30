@@ -3,16 +3,16 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import UploadFile
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
 from app.core.errors import AppError
-from app.core.pagination import PageParams, fetch_page
 from app.core.permissions import permissions_for
 from app.modules.files import images
 from app.modules.files.images import active_image_urls
+from app.modules.identity.filters import MemberQuery
 from app.modules.identity.models import Membership, User
 from app.modules.identity.schemas import MemberOut, MemberPage, MembershipOut, MeResponse, MeUpdateRequest, Onboarding
 
@@ -159,29 +159,18 @@ async def remove_avatar(session: AsyncSession, user: User) -> MeResponse:
 async def list_members(
     session: AsyncSession,
     organization_id: object,
-    *,
-    role: str | None,
-    status: str | None,
-    search: str | None,
-    page: PageParams,
+    query: MemberQuery,
 ) -> MemberPage:
-    """GET /members (P01 §6, CR-001): filter role/status, search full_name/email/phone, API-002 pagination."""
-    query = (
+    """GET /members (P01 §6): the organization's memberships through `MemberQuery` (FND-011 filters and search,
+    FND-009 page). The membership id breaks ties, so members who joined at the same moment keep one order."""
+    base = (
         select(Membership)
         .join(User, Membership.user_id == User.id)
         .where(Membership.organization_id == organization_id)
     )
-    if role:
-        query = query.where(Membership.role == role)
-    if status:
-        query = query.where(Membership.status == status)
-    if search:
-        pattern = f"%{search.strip()}%"
-        query = query.where(or_(User.full_name.ilike(pattern), User.email.ilike(pattern), User.phone.ilike(pattern)))
-    # FND-009: the membership id breaks ties, so members who joined at the same moment keep one order across pages.
-    total, rows = await fetch_page(session, query, page, order_by=[Membership.joined_at], tie_breaker=Membership.id)
+    total, rows = await query.fetch(session, base, tie_breaker=Membership.id)
     return MemberPage.of(
-        page,
+        query.page,
         total,
         [
             MemberOut(

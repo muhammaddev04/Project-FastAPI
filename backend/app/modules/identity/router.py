@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated
 
 from fastapi import APIRouter, File, Query, UploadFile
 
-from app.core.pagination import PageParamsDep
 from app.modules.identity import service
 from app.modules.identity.deps import CurrentUser, SessionDep, require_permission
+from app.modules.identity.filters import MemberQuery
 from app.modules.identity.schemas import MemberPage, MeResponse, MeUpdateRequest
 
 router = APIRouter(prefix="/api/v1", tags=["identity"])
@@ -42,11 +42,6 @@ async def delete_avatar(session: SessionDep, user: CurrentUser) -> MeResponse:
 async def get_members(
     session: SessionDep,
     context: MembersViewer,  # type: ignore[valid-type]
-    page: PageParamsDep,
-    role: Annotated[Literal["OWNER", "MANAGER", "OPERATOR", "WAREHOUSE", "COURIER", "SELLER"] | None, Query()] = None,
-    status: Annotated[Literal["ACTIVE", "SUSPENDED", "REVOKED"] | None, Query()] = None,
-    search: Annotated[str | None, Query(max_length=100)] = None,
+    query: Annotated[MemberQuery, Query()],
 ) -> MemberPage:
-    return await service.list_members(
-        session, context.organization.id, role=role, status=status, search=search, page=page
-    )
+    return await service.list_members(session, context.organization.id, query)

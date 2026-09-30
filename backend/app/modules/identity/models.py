@@ -27,6 +27,11 @@ class User(IdMixin, TimestampMixin, Base):
         ),
         # CR-001: email is the login identifier, unique regardless of letter case.
         Index("uq_users_email_lower", func.lower(text("email")), unique=True),
+        # GLOBAL §7.6: `GET /members?search=` matches full_name and phone with ILIKE, backed by pg_trgm (FND-011).
+        Index(
+            "ix_users_full_name_trgm", "full_name", postgresql_using="gin", postgresql_ops={"full_name": "gin_trgm_ops"}
+        ),
+        Index("ix_users_phone_trgm", "phone", postgresql_using="gin", postgresql_ops={"phone": "gin_trgm_ops"}),
     )
 
     phone: Mapped[str | None] = mapped_column(String(16), unique=True)

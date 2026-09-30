@@ -153,10 +153,11 @@ async def test_cr_001_email_required_and_phone_optional(session: AsyncSession) -
         await session.flush()
 
 
-async def test_members_search_by_email(client: AsyncClient, session: AsyncSession) -> None:
+async def test_members_search_does_not_match_email(client: AsyncClient, session: AsyncSession) -> None:
+    """P01 §6 / GLOBAL §7.6: search covers only full_name and phone; email is shown but not searched."""
     owner = await make_user(session)
     org = await make_org(session, owner)
     await add_member(session, org, await make_user(session, email="sitora@warehouse.tj"), "WAREHOUSE")
     await session.commit()
     found = (await client.get("/api/v1/members", params={"search": "warehouse.tj"}, headers=auth(owner, org))).json()
-    assert [m["email"] for m in found["results"]] == ["sitora@warehouse.tj"]
+    assert (found["count"], found["results"]) == (0, [])

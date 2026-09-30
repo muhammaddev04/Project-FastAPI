@@ -36,6 +36,8 @@ import {
 const SNAPSHOT_FIELDS = ['legal_name', 'tax_identifier', 'address'] as const;
 const PROFILE_FIELDS = ['name', 'legal_name', 'tax_identifier', 'phone', 'email', 'city', 'address', 'latitude', 'longitude', 'public_code'] as const;
 const MIN_REASON = 10;
+/** The working queue: requests waiting for a decision, any organization type. "Reset filters" returns here. */
+const DEFAULT_FILTER: QueueFilter = { status: 'SUBMITTED', org_type: '' };
 
 function useDate() {
   return (value: string | null) => formatDateTime(value) ?? '—';
@@ -237,7 +239,7 @@ export function VerificationsPage() {
   const { t } = useTranslation();
   const { me } = useAdminContext();
   const date = useDate();
-  const [filter, setFilterState] = useState<QueueFilter>({ status: 'SUBMITTED', org_type: '' });
+  const [filter, setFilterState] = useState<QueueFilter>(DEFAULT_FILTER);
   const [page, setPage] = useState<QueuePage>({ ordering: 'submitted_at', offset: 0 });
   const [openId, setOpenId] = useState<string | null>(null);
   const queue = useVerificationQueue(filter, page);
@@ -266,6 +268,10 @@ export function VerificationsPage() {
         onRetry={() => void queue.refetch()}
         empty={{ title: t('admin.verifications.empty') }}
         busy={queue.isFetching && !queue.isPending}
+        filters={{
+          changed: filter.status !== DEFAULT_FILTER.status || filter.org_type !== DEFAULT_FILTER.org_type,
+          onReset: () => setFilter(() => DEFAULT_FILTER),
+        }}
         pagination={
           data ? { offset: page.offset, limit: QUEUE_PAGE_SIZE, count: data.count, onChange: (offset) => setPage((current) => ({ ...current, offset })) } : undefined
         }

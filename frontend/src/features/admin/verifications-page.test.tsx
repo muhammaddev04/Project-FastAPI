@@ -95,6 +95,13 @@ describe('admin verification queue (P02 §5/§8)', () => {
     // so does changing a filter; the chosen order stays
     await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Type' }), 'STORE');
     await waitFor(() => expect(last()).toEqual({ status: 'SUBMITTED', org_type: 'STORE', ordering: '-submitted_at', limit: '20', offset: '0' }));
+
+    // FND-011: "Reset filters" returns to the working queue (SUBMITTED, any type), keeps the order, first page
+    await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => expect(last()).toMatchObject({ offset: '20' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Reset filters' }));
+    await waitFor(() => expect(last()).toEqual({ status: 'SUBMITTED', ordering: '-submitted_at', limit: '20', offset: '0' }));
+    expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
   });
 
   it('shows an API validation error with a retry instead of the table', async () => {

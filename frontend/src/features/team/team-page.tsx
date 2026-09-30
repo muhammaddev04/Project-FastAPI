@@ -29,12 +29,18 @@ export function TeamPage() {
   const [search, setSearch] = useState('');
   const [role, setRole] = useState<Role | ''>('');
   const [status, setStatus] = useState<MembershipStatus | ''>('');
-  const [offset, setOffset] = useState(0);
   const debouncedSearch = useDebounced(search.trim());
+  // The offset belongs to one combination of filters: when they change it reads as 0 in the same render, so no request
+  // is ever sent with the previous filters' page (which could be past the end of the new result).
+  const filterKey = JSON.stringify([debouncedSearch, role, status]);
+  const [paging, setPaging] = useState({ filterKey, offset: 0 });
+  if (paging.filterKey !== filterKey) setPaging({ filterKey, offset: 0 }); // adjusted during render, before any effect
+  const offset = paging.filterKey === filterKey ? paging.offset : 0;
+  const setOffset = (next: number) => setPaging({ filterKey, offset: next });
 
-  useEffect(() => setOffset(0), [debouncedSearch, role, status]);
-
-  const members = useMembers(membership.organization_id, {
+  // Without members.view the page shows "no access" and must not ask the API (which would answer 403).
+  const canView = membership.permissions.includes('members.view');
+  const members = useMembers(canView ? membership.organization_id : null, {
     search: debouncedSearch || undefined,
     role: role || undefined,
     status: status || undefined,
@@ -68,6 +74,15 @@ export function TeamPage() {
           onRetry={() => void members.refetch()}
           empty={{ title: t('team.emptyTitle'), description: t('team.emptyText') }}
           pagination={page ? { offset, limit: PAGE_SIZE, count: page.count, onChange: setOffset } : undefined}
+          busy={members.isFetching && !members.isPending}
+          filters={{
+            changed: search !== '' || role !== '' || status !== '',
+            onReset: () => {
+              setSearch('');
+              setRole('');
+              setStatus('');
+            },
+          }}
           toolbar={
             <>
               <Input
@@ -75,6 +90,7 @@ export function TeamPage() {
                 leading={<Search />}
                 placeholder={t('team.searchPlaceholder')}
                 aria-label={t('team.search')}
+                maxLength={100}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />

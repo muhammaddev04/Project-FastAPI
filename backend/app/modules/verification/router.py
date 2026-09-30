@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, status
 
-from app.core.pagination import PageParamsDep
 from app.modules.files.schemas import SignedUrlOut
 from app.modules.identity.deps import SessionDep, SuperadminDep, require_permission
 from app.modules.verification import service
+from app.modules.verification.filters import QueueQuery
 from app.modules.verification.schemas import (
     AdminRequestDetail,
     AdminRequestPage,
@@ -67,14 +67,9 @@ async def submit_verification(
 async def list_verifications(
     session: SessionDep,
     _admin: SuperadminDep,
-    page: PageParamsDep,
-    status_filter: Annotated[
-        Literal["SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED"] | None, Query(alias="status")
-    ] = None,
-    org_type: Annotated[Literal["COMPANY", "STORE"] | None, Query()] = None,
-    ordering: Annotated[Literal["submitted_at", "-submitted_at"], Query()] = "submitted_at",
+    query: Annotated[QueueQuery, Query()],
 ) -> AdminRequestPage:
-    return await service.list_requests(session, status=status_filter, org_type=org_type, ordering=ordering, page=page)
+    return await service.list_requests(session, query)
 
 
 @admin_router.get(
