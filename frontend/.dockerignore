@@ -1,0 +1,14 @@
+# `COPY . .` runs after `npm ci`, so a local node_modules/ must not be in the context: it would overwrite
+# the freshly installed (linux/amd64) dependencies with the host's and break the build.
+node_modules/
+dist/
+.vite/
+coverage/
+
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+Thumbs.db

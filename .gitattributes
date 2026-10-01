@@ -1,0 +1,20 @@
+# Normalise text files to LF in the repository regardless of the contributor's platform.
+* text=auto
+
+# Files that Linux consumes verbatim must stay LF even in a Windows working copy: a CRLF shebang
+# makes bash fail with "bad interpreter", and the deployment script is piped straight into `bash -s`
+# on the production server.
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.dockerignore text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+
+# Lockfiles and binaries are left alone.
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary

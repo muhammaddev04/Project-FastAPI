@@ -9,13 +9,33 @@ __pycache__/
 venv/
 .mypy_cache/
 .ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 
 # Environment
+# Covers every level: backend/.env (app settings) and the Compose .env with POSTGRES_* on the server.
 .env
 .env.*
 !.env.example
 
+# Server-side production config and key material (SEC-010: never commit a real credential).
+# The committed template is infra/seaweedfs/s3.prod.json.example; the real file lives only on the server.
+infra/seaweedfs/s3.prod.json
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ecdsa
+id_ed25519
+
 # Node
+# The only real lockfile is frontend/package-lock.json; one at the repo root (there is no root
+# package.json) is always an artifact of running npm from the wrong directory.
+/package-lock.json
 node_modules/
 frontend/dist/
 frontend/.vite/

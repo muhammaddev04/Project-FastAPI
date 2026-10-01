@@ -1,0 +1,22 @@
+# Keep the build context free of local state and of anything secret. `.env` in particular must never
+# reach an image layer (SEC-010): the production container receives its settings through `env_file`.
+.env
+.env.*
+!.env.example
+
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+tests/
+*.egg-info/
+build/
+dist/
+
+*.log
+*.sqlite3

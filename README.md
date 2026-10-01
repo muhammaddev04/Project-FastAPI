@@ -35,4 +35,12 @@ cd backend && ../.venv/Scripts/python -m pytest && ../.venv/Scripts/python -m ru
 cd frontend && npm test && npm run lint && npm run build
 ```
 
+## Deployment
+
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every push to `main` and every pull
+request; a green run on `main` triggers
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml), which deploys that exact commit to
+production. The runbook — one-time server setup, manual deployment, rollback and safety rules — is
+[docs/deployment.md](docs/deployment.md).
+
 Git rules (TZ 00_README §5): small Conventional Commits, no `git push` by tooling — the owner pushes.

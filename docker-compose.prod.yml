@@ -1,0 +1,101 @@
+# TezFarmo production stack (server 37.27.245.216, /home/dev/Project-FastAPI, https://tezfarmo.qobus.tj).
+#
+# The host nginx terminates TLS and proxies:  /api/ -> 127.0.0.1:8211 (backend)   / -> 127.0.0.1:8212 (frontend)
+# Every published port is bound to 127.0.0.1, and postgres / redis / storage publish no port at all:
+# they are reachable only over the tezfarmo-prod bridge network, never from the internet.
+#
+# Deployment never recreates postgres, redis or storage, and never runs `docker compose down`.
+# See docs/deployment.md for the full runbook (including the required .env files) and for rollback.
+#
+# The Compose project name is derived from the directory, so this file must stay in
+# /home/dev/Project-FastAPI: a different directory would mean different (empty) volume names.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tezfarmo-prod-postgres
+    restart: unless-stopped
+    environment:
+      # Read from the Compose env file (/home/dev/Project-FastAPI/.env) — never committed.
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - tezfarmo_prod_postgres:/var/lib/postgresql/data
+    networks:
+      - tezfarmo-prod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: tezfarmo-prod-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - tezfarmo_prod_redis:/data
+    networks:
+      - tezfarmo-prod
+    # Required: backend waits for `service_healthy`, which Compose can only satisfy with a healthcheck.
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # S3-compatible private file storage. Buckets are never public (SEC-008); credentials live in
+  # infra/seaweedfs/s3.prod.json on the server (gitignored) and must match backend/.env.
+  storage:
+    image: chrislusf/seaweedfs:latest
+    container_name: tezfarmo-prod-storage
+    restart: unless-stopped
+    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -ip.bind=0.0.0.0 -volume.max=100 -master.volumeSizeLimitMB=64
+    volumes:
+      - tezfarmo_prod_storage:/data
+      - ./infra/seaweedfs/s3.prod.json:/etc/seaweedfs/s3.json:ro
+    networks:
+      - tezfarmo-prod
+
+  backend:
+    build:
+      context: ./backend
+    container_name: tezfarmo-prod-backend
+    restart: unless-stopped
+    env_file:
+      # Created once on the server, never committed and never modified by a deployment.
+      - ./backend/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      storage:
+        condition: service_started
+    ports:
+      - "127.0.0.1:8211:8000"
+    networks:
+      - tezfarmo-prod
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: tezfarmo-prod-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:8212:80"
+    networks:
+      - tezfarmo-prod
+
+networks:
+  tezfarmo-prod:
+    name: tezfarmo-prod
+    driver: bridge
+
+volumes:
+  tezfarmo_prod_postgres:
+  tezfarmo_prod_redis:
+  tezfarmo_prod_storage:
