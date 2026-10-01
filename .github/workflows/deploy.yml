@@ -1,0 +1,176 @@
+# TezFarmo production deployment (server 37.27.245.216, /home/dev/Project-FastAPI, https://tezfarmo.qobus.tj).
+#
+# Runs only for a commit whose CI run succeeded, and deploys that exact SHA — never "whatever is at
+# origin/main when SSH connects". The work itself is infra/deploy/remote-deploy.sh, piped to the server
+# over SSH, so the deployment steps are reviewable in Git and identical for a manual run or a rollback.
+#
+# Triggers
+#   * automatically: the CI workflow finished successfully for a push to main;
+#   * manually (workflow_dispatch): any SHA that has a successful CI run — this is how a rollback works.
+#
+# Required repository configuration (docs/deployment.md):
+#   secrets   DEPLOY_SSH_KEY, DEPLOY_SSH_KNOWN_HOSTS
+#   variables DEPLOY_HOST, DEPLOY_USER, DEPLOY_PATH, DEPLOY_SSH_PORT (all optional; defaults below)
+name: Deploy (production)
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Full 40-character commit SHA to deploy (rollback: a previous known-good SHA)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  # Needed only to read CI run conclusions when verifying the deployment gate below. Nothing is written.
+  actions: read
+
+concurrency:
+  # One production deployment at a time, and never cancel one midway: a cancelled deploy could leave
+  # the stack between a build and its migrations.
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Gate on the automatic trigger here; the manual trigger verifies CI inside the job.
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    environment:
+      name: production
+      url: https://tezfarmo.qobus.tj
+    steps:
+      - name: Resolve and validate the commit to deploy
+        id: target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_SHA: ${{ inputs.sha }}
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            sha="$INPUT_SHA"
+          else
+            sha="$RUN_SHA"
+          fi
+          sha="$(printf '%s' "$sha" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+          if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::'$sha' is not a full 40-character commit SHA. Use the full SHA (git rev-parse <ref>)." >&2
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Deploying $sha" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Require a successful CI run for this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ steps.target.outputs.sha }}
+        run: |
+          set -euo pipefail
+          # Deployment gate: a successful CI run must exist for THIS commit — not for the latest commit
+          # on main. The query filters on head_sha, and the result is re-checked below, so a green run
+          # on a newer (or older) commit can never authorise this deployment. Applies to the manual
+          # trigger too, where the SHA comes from a human.
+          run="$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&status=success&per_page=1" \
+                   --jq '.workflow_runs[0] // empty')"
+          if [[ -z "$run" ]]; then
+            echo "::error::no successful CI run found for $SHA — refusing to deploy an unvalidated commit." >&2
+            exit 1
+          fi
+          run_sha="$(printf '%s' "$run" | jq -r '.head_sha')"
+          if [[ "$run_sha" != "$SHA" ]]; then
+            echo "::error::CI run is for $run_sha, not $SHA — refusing to deploy." >&2
+            exit 1
+          fi
+          echo "CI passed for $SHA"
+          echo "  branch: $(printf '%s' "$run" | jq -r '.head_branch')"
+          echo "  run:    $(printf '%s' "$run" | jq -r '.html_url')"
+
+      - name: Checkout the deployment script
+        uses: actions/checkout@v4
+        with:
+          # The script is taken from the commit being deployed, so it matches what lands on the server.
+          ref: ${{ steps.target.outputs.sha }}
+          persist-credentials: false
+
+      - name: The deployment script is present in this commit
+        run: |
+          set -euo pipefail
+          test -r infra/deploy/remote-deploy.sh \
+            || { echo "::error::infra/deploy/remote-deploy.sh is missing from ${{ steps.target.outputs.sha }}" >&2; exit 1; }
+          bash -n infra/deploy/remote-deploy.sh
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$SSH_KEY" || { echo "::error::secret DEPLOY_SSH_KEY is not set" >&2; exit 1; }
+          test -n "$SSH_KNOWN_HOSTS" || { echo "::error::secret DEPLOY_SSH_KNOWN_HOSTS is not set (ssh-keyscan the server, see docs/deployment.md)" >&2; exit 1; }
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # Pinned host keys: the host is verified, so a redirected DNS/IP cannot receive the deployment.
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST || '37.27.245.216' }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER || 'dev' }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/home/dev/Project-FastAPI' }}
+          DEPLOY_SSH_PORT: ${{ vars.DEPLOY_SSH_PORT || '22' }}
+          SHA: ${{ steps.target.outputs.sha }}
+          EXPECTED_REMOTE: https://github.com/${{ github.repository }}.git
+        run: |
+          set -euo pipefail
+          # The remote script does the rest: preflight (including the required production settings),
+          # fetch, checkout $SHA, build+start backend and frontend only, migrations, container state,
+          # then the local, readiness and public health checks. It prints no secrets either way.
+          # StrictHostKeyChecking=yes with the pinned known_hosts: never StrictHostKeyChecking=no.
+          ssh -i ~/.ssh/deploy_key \
+              -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+              -o PasswordAuthentication=no \
+              -o ConnectTimeout=20 \
+              -o BatchMode=yes \
+              -p "$DEPLOY_SSH_PORT" \
+              "$DEPLOY_USER@$DEPLOY_HOST" \
+              "DEPLOY_SHA='$SHA' EXPECTED_REMOTE='$EXPECTED_REMOTE' PROJECT_DIR='$DEPLOY_PATH' bash -s" \
+              < infra/deploy/remote-deploy.sh
+
+      - name: Record the result
+        if: always()
+        env:
+          SHA: ${{ steps.target.outputs.sha }}
+        run: |
+          set -euo pipefail
+          {
+            echo "### Production deployment"
+            echo ""
+            echo "- commit: \`$SHA\`"
+            echo "- result: ${{ job.status }}"
+            echo "- site: https://tezfarmo.qobus.tj"
+            if [[ "${{ job.status }}" != "success" ]]; then
+              echo ""
+              echo "No automatic rollback was performed. The deploy log prints the previous known-good"
+              echo "SHA and the exact rollback command; re-run this workflow manually with that SHA."
+              echo "Database migrations are forward-only and are **not** downgraded by a rollback —"
+              echo "see [docs/deployment.md](../blob/main/docs/deployment.md)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the SSH key from the runner
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

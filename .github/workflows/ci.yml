@@ -1,0 +1,199 @@
+# TezFarmo CI (P00 FND-040): backend, frontend and deployment-config checks on every push to main and every
+# pull request into main. No secrets are used: the backend runs against throwaway PostgreSQL / Redis / SeaweedFS
+# containers with the same dev-only settings as docker-compose.test.yml. A green run on main is what triggers
+# deploy.yml, so the production images and Compose file are validated here rather than on the server.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  # One run per branch / pull request; a newer push cancels the older run (deploy only follows a successful run).
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (ruff, migrations, pytest)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: tezfarmo_test
+          POSTGRES_USER: tezfarmo
+          POSTGRES_PASSWORD: tezfarmo
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U tezfarmo -d tezfarmo_test"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6381:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      # Test-only values (the same as tests/conftest.py and docker-compose.test.yml); nothing here is a secret.
+      APP_ENV: testing
+      DATABASE_URL: postgresql+asyncpg://tezfarmo:tezfarmo@localhost:5434/tezfarmo_test
+      TEST_DATABASE_URL: postgresql+asyncpg://tezfarmo:tezfarmo@localhost:5434/tezfarmo_test
+      TEST_REDIS_URL: redis://localhost:6381/15
+      TEST_S3_ENDPOINT: localhost:9010
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Start SeaweedFS (S3 for the file tests)
+        # Service containers cannot take a start command, so the S3 store is started like docker-compose.test.yml.
+        working-directory: .
+        run: |
+          set -euo pipefail
+          docker run -d --name tezfarmo-storage-test -p 9010:8333 \
+            -v "$GITHUB_WORKSPACE/infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro" --tmpfs /data \
+            chrislusf/seaweedfs:latest \
+            server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -ip.bind=0.0.0.0 \
+            -volume.max=100 -master.volumeSizeLimitMB=64
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Ruff (lint)
+        run: ruff check .
+
+      - name: Ruff (format)
+        run: ruff format --check .
+
+      - name: Wait for SeaweedFS
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 60); do
+            if curl -s -o /dev/null http://localhost:9010/; then echo "SeaweedFS is up"; exit 0; fi
+            sleep 2
+          done
+          docker logs tezfarmo-storage-test || true
+          echo "SeaweedFS did not start" >&2
+          exit 1
+
+      - name: Migrations apply and match the models
+        run: |
+          alembic upgrade head
+          alembic check
+
+      - name: Tests
+        run: pytest -q --cov=app --cov-report=term
+
+  frontend:
+    name: Frontend (eslint, tsc, vitest, build)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+  deployment-config:
+    name: Deployment config (compose, images, deploy script)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      # Placeholders for the Compose variables that the server reads from /home/dev/Project-FastAPI/.env.
+      # Nothing here is a secret; only the Compose syntax and references are being validated.
+      POSTGRES_DB: ci
+      POSTGRES_USER: ci
+      POSTGRES_PASSWORD: ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy script (bash syntax, shellcheck)
+        run: |
+          set -euo pipefail
+          bash -n infra/deploy/remote-deploy.sh
+          shellcheck infra/deploy/remote-deploy.sh
+
+      - name: Compose files are valid
+        run: |
+          set -euo pipefail
+          docker compose -f docker-compose.yml config --quiet
+          docker compose -f docker-compose.test.yml config --quiet
+          # docker-compose.prod.yml reads ./backend/.env, which exists only on the server (SEC-010).
+          # Stand in for it with the committed example so the file can be parsed here.
+          cp .env.example backend/.env
+          docker compose -f docker-compose.prod.yml config --quiet
+
+      - name: Production compose keeps the data services off the public internet
+        run: |
+          set -euo pipefail
+          docker compose -f docker-compose.prod.yml config --format json > /tmp/prod-compose.json
+          # postgres / redis / storage must publish no host port at all.
+          for service in postgres redis storage; do
+            published="$(jq -r --arg s "$service" '(.services[$s].ports // []) | length' /tmp/prod-compose.json)"
+            if [[ "$published" != "0" ]]; then
+              echo "::error file=docker-compose.prod.yml::service '$service' publishes $published host port(s); it must stay internal to the tezfarmo-prod network" >&2
+              exit 1
+            fi
+          done
+          # Everything that does publish a port (backend, frontend) must bind to loopback only, so the
+          # host nginx stays the single entry point.
+          exposed="$(jq -r '[.services | to_entries[] | .key as $s | (.value.ports // [])[] | select((.host_ip // "") != "127.0.0.1") | $s] | unique | join(", ")' /tmp/prod-compose.json)"
+          if [[ -n "$exposed" ]]; then
+            echo "::error file=docker-compose.prod.yml::these services publish a port on a non-loopback address: $exposed" >&2
+            exit 1
+          fi
+          echo "No data service is published; every published port is bound to 127.0.0.1."
+
+      - name: Build the production backend image
+        run: docker build -t tezfarmo-backend:ci backend
+
+      - name: Build the production frontend image
+        run: docker build -t tezfarmo-frontend:ci frontend
+
+      - name: Images can run the deployment commands
+        run: |
+          set -euo pipefail
+          # The backend image must be able to run migrations (deployment runs `alembic upgrade head`),
+          # and the frontend image must serve a valid nginx configuration.
+          docker run --rm tezfarmo-backend:ci alembic --help > /dev/null
+          docker run --rm tezfarmo-frontend:ci nginx -t
