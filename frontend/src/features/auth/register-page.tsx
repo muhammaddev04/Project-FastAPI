@@ -56,8 +56,8 @@ function RoleChoice({ selected, field }: { selected: RegisterValues['orgType']; 
                 <Icon className="size-[1.125rem]" aria-hidden="true" />
               </span>
               <span className="min-w-0">
-                <span className="block break-words text-[0.8125rem] font-semibold leading-tight sm:text-[0.875rem]">{t(`auth.register.roles.${type}.title`)}</span>
-                <span className="block text-[0.6875rem] font-medium text-muted-foreground">{badge}</span>
+                <span className="block break-words text-label font-semibold leading-tight sm:text-body">{t(`auth.register.roles.${type}.title`)}</span>
+                <span className="block text-micro font-medium text-muted-foreground">{badge}</span>
               </span>
               {active ? <Check className="absolute right-2.5 top-2.5 size-3.5 text-primary" aria-hidden="true" /> : null}
             </label>
@@ -74,13 +74,13 @@ function NextSteps() {
   const steps = [t('auth.shell.flowEmail'), t('auth.shell.flowReview'), t('auth.shell.flowAccess')];
   return (
     <div className="rounded-2xl bg-subtle/60 px-3.5 py-2.5 short:flex short:items-center short:gap-3 short:py-2">
-      <p className="shrink-0 text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground short:hidden short:sm:block short:sm:max-w-[6.5rem] short:sm:leading-tight">
+      <p className="shrink-0 text-caption font-semibold uppercase tracking-[0.08em] text-muted-foreground short:hidden short:sm:block short:sm:max-w-[6.5rem] short:sm:leading-tight">
         {t('auth.shell.flowTitle')}
       </p>
-      <ol className="mt-1.5 grid flex-1 grid-cols-1 gap-1.5 min-[420px]:grid-cols-3 min-[420px]:gap-2 short:mt-0 text-[0.75rem] font-medium leading-tight sm:text-[0.8125rem]">
+      <ol className="mt-1.5 grid flex-1 grid-cols-1 gap-1.5 min-[420px]:grid-cols-3 min-[420px]:gap-2 short:mt-0 text-caption font-medium leading-tight sm:text-label">
         {steps.map((step, index) => (
           <li key={step} className="flex items-start gap-1.5">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[0.6875rem] font-bold text-primary-ink">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-micro font-bold text-primary-ink">
               {index + 1}
             </span>
             <span>{step}</span>
@@ -195,12 +195,12 @@ export function RegisterPage() {
           </AnimatePresence>
         </div>
         <div className="space-y-1">
-          <label className="flex cursor-pointer items-start gap-2.5 text-[0.75rem] leading-[1.125rem] text-muted-foreground sm:text-[0.8125rem] sm:leading-5 short:sm:text-[0.75rem] short:sm:leading-[1.125rem]">
+          <label className="flex cursor-pointer items-start gap-2.5 text-caption leading-[1.125rem] text-muted-foreground sm:text-label sm:leading-5 short:sm:text-caption short:sm:leading-[1.125rem]">
             <input type="checkbox" className="mt-0.5 size-4 shrink-0 cursor-pointer rounded accent-[hsl(var(--primary))]" {...form.register('acceptTerms')} />
             <span>{t('auth.register.terms')}</span>
           </label>
           {errors.acceptTerms?.message ? (
-            <p role="alert" className="pl-6 text-[0.8125rem] text-danger">
+            <p role="alert" className="pl-6 text-label text-danger">
               {t(errors.acceptTerms.message)}
             </p>
           ) : null}

@@ -39,7 +39,7 @@ export function FormField({
   return (
     <div className={cn('space-y-2', size === 'lg' && '2xl:space-y-3')}>
       <div className="flex items-center justify-between gap-3">
-        <Label htmlFor={id} className={cn(size === 'lg' && 'text-[0.9375rem] font-medium 2xl:text-[1.125rem]', labelClassName)}>
+        <Label htmlFor={id} className={cn(size === 'lg' && 'text-body-lg font-medium 2xl:text-lg', labelClassName)}>
           {label}
         </Label>
         {action}
@@ -51,7 +51,7 @@ export function FormField({
             key="error"
             id={`${id}-error`}
             role="alert"
-            className={cn('text-[0.8125rem] text-danger', size === 'lg' && '2xl:text-[0.9375rem]')}
+            className={cn('text-label text-danger', size === 'lg' && '2xl:text-body-lg')}
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
@@ -63,7 +63,7 @@ export function FormField({
           <motion.p
             key="hint"
             id={`${id}-hint`}
-            className={cn('px-0.5 text-[0.8125rem] text-muted-foreground', size === 'lg' && '2xl:text-[0.9375rem]')}
+            className={cn('px-0.5 text-label text-muted-foreground', size === 'lg' && '2xl:text-body-lg')}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

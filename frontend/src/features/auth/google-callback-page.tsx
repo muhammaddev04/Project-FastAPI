@@ -15,7 +15,7 @@ type Returned = { code: string | null; state: string | null; error: string | nul
 
 function Waiting({ text }: { text: string }) {
   return (
-    <div role="status" className="flex items-center gap-3 rounded-2xl bg-primary/10 px-4 py-3.5 text-[0.9375rem] text-foreground/85">
+    <div role="status" className="flex items-center gap-3 rounded-2xl bg-primary/10 px-4 py-3.5 text-body-lg text-foreground/85">
       <Spinner className="size-5 text-primary" />
       {text}
     </div>
@@ -83,7 +83,7 @@ function SignInCallback({ returned }: { returned: Returned }) {
               {t('auth.google.tryAgain')}
             </Button>
           ) : null}
-          <Button asChild variant="ghost" block className="h-11 rounded-2xl text-[0.875rem] text-muted-foreground">
+          <Button asChild variant="ghost" block className="h-11 rounded-2xl text-body text-muted-foreground">
             <Link to="/login">{t('auth.reset.back')}</Link>
           </Button>
         </div>

@@ -43,7 +43,7 @@ export const CodeInput = forwardRef<HTMLInputElement, Props>(({ length = 6, inva
             <div
               key={index}
               className={cn(
-                'relative flex h-12 items-center justify-center rounded-xl border bg-subtle font-data text-[1.25rem] font-bold text-foreground transition-[border-color,box-shadow,background-color] duration-200 min-[360px]:h-[3.25rem] sm:h-14 sm:text-[1.375rem] short:sm:h-12',
+                'relative flex h-12 items-center justify-center rounded-xl border bg-subtle font-data text-title font-bold text-foreground transition-[border-color,box-shadow,background-color] duration-200 min-[360px]:h-[3.25rem] sm:h-14 sm:text-[1.375rem] short:sm:h-12',
                 invalid
                   ? 'border-danger'
                   : current || (focused && value.length === length && index === length - 1)

@@ -36,7 +36,7 @@ export function OrgTypeChoice({
           description={t(`onboarding.${key}.description`)}
         >
           {compact ? null : (
-            <ul className="space-y-1.5 border-t pt-3 text-[0.8125rem] text-muted-foreground">
+            <ul className="space-y-1.5 border-t pt-3 text-label text-muted-foreground">
               {(t(`onboarding.${key}.points`, { returnObjects: true }) as string[]).map((point) => (
                 <li key={point} className="flex gap-2">
                   <Check className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />

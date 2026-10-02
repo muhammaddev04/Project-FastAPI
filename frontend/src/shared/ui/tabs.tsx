@@ -10,14 +10,14 @@ function Plate({ layoutId }: { layoutId: string }) {
     <motion.span
       layoutId={layoutId}
       aria-hidden="true"
-      className="absolute inset-0 rounded-xl bg-primary-strong shadow-glow-teal"
+      className="absolute inset-0 rounded-xl bg-primary-strong"
       transition={{ type: 'spring', stiffness: 420, damping: 36 }}
     />
   );
 }
 
 const frame = 'flex gap-1 overflow-x-auto rounded-2xl border bg-subtle/60 p-1.5 [scrollbar-width:none]';
-const tab = 'relative flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-[0.875rem] font-semibold transition-colors';
+const tab = 'relative flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-body font-semibold transition-colors';
 
 export type LinkTab = { to: string; label: string; icon?: LucideIcon };
 
@@ -62,7 +62,7 @@ export function LinkTabs({
             replace={replace}
             className={cn(
               tab,
-              size === 'lg' ? 'h-11 text-[0.9375rem] sm:h-12 sm:text-base 2xl:h-[3.75rem] 2xl:rounded-[0.875rem] 2xl:text-[1.25rem] short:h-10 short:sm:h-10 short:2xl:h-12' : '',
+              size === 'lg' ? 'h-11 text-body-lg sm:h-12 sm:text-base 2xl:h-[3.75rem] 2xl:rounded-2xl 2xl:text-title short:h-10 short:sm:h-10 short:2xl:h-12' : '',
               !fill && 'flex-1 sm:flex-none',
               isActive ? 'text-white' : 'text-muted-foreground hover:bg-surface/70 hover:text-foreground',
             )}
@@ -70,7 +70,7 @@ export function LinkTabs({
             {isActive ? (
               <motion.span
                 aria-hidden="true"
-                className={cn('absolute inset-0 rounded-xl bg-primary-strong shadow-glow-teal', size === 'lg' && '2xl:rounded-[0.875rem]')}
+                className={cn('absolute inset-0 rounded-xl bg-primary-strong', size === 'lg' && '2xl:rounded-2xl')}
                 initial={{ x: offset }}
                 animate={{ x: 0 }}
                 transition={{ type: 'spring', stiffness: 420, damping: 36 }}

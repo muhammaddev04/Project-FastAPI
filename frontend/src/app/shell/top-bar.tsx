@@ -5,14 +5,14 @@ import { ThemeSwitcher } from '@/shared/theme/theme-switcher';
 import { SupportButton } from '@/shared/ui';
 
 /**
- * The glass top bar of every page outside an organization area (sign-in screens, account, onboarding, status
+ * The chrome top bar of every page outside an organization area (sign-in screens, account, onboarding, status
  * pages): brand on the left, optional center content, then support, theme and language on the right.
  */
 export function TopBar({
   start,
   center,
   end,
-  tone = 'glass',
+  tone = 'chrome',
   wide = false,
   className,
 }: {
@@ -20,7 +20,7 @@ export function TopBar({
   center?: ReactNode;
   end?: ReactNode;
   /** `clear`: translucent bar of the sign-in screens, the page glow shows through. */
-  tone?: 'glass' | 'clear';
+  tone?: 'chrome' | 'clear';
   /** Full-width bar with the larger large-screen proportions of the sign-in reference. */
   wide?: boolean;
   className?: string;
@@ -29,7 +29,7 @@ export function TopBar({
     <header
       className={cn(
         'sticky top-0 z-20 border-x-0 border-t-0 border-b',
-        tone === 'clear' ? 'border-border/60 bg-surface/50 backdrop-blur-md dark:border-white/[0.06] dark:bg-brand-night/60' : 'glass',
+        tone === 'clear' ? 'border-border/60 bg-surface/50 backdrop-blur-md dark:border-white/[0.06] dark:bg-brand-night/60' : 'chrome',
         className,
       )}
     >

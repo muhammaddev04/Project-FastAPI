@@ -17,8 +17,34 @@ export default {
         display: ['"Montserrat Variable"', '"Inter Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono Variable"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
+      /*
+       * Named type scale (CR-002 revision). Before this there were 23 distinct `text-[…rem]` values used 202
+       * times with no line-height, so every heading had to re-state `leading-tight` by hand. Each step below
+       * carries its own line-height and is named for the role it plays, not for its size, so hierarchy is a
+       * choice rather than an arithmetic accident. Sizes match what the product already rendered; only the
+       * naming, the line-heights and the tracking are new.
+       */
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],
+        /* Chips, badges, counters. */
+        micro: ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.01em' }],
+        /* Hints, metadata, table captions. */
+        caption: ['0.75rem', { lineHeight: '1.125rem' }],
+        /* The dominant UI text: field labels, table cells, secondary copy. */
+        label: ['0.8125rem', { lineHeight: '1.125rem' }],
+        /* Body copy; equals the global body size. */
+        body: ['0.875rem', { lineHeight: '1.25rem' }],
+        /* Card titles and the larger labels of the sign-in forms. */
+        'body-lg': ['0.9375rem', { lineHeight: '1.375rem' }],
+        /* Primary action labels, choice-tile titles. */
+        'title-sm': ['1.0625rem', { lineHeight: '1.5rem' }],
+        title: ['1.25rem', { lineHeight: '1.625rem', letterSpacing: '-0.01em' }],
+        /* Page h1 on phones. */
+        'title-lg': ['1.5rem', { lineHeight: '1.875rem', letterSpacing: '-0.015em' }],
+        'display-sm': ['1.75rem', { lineHeight: '2rem', letterSpacing: '-0.02em' }],
+        /* Page h1 from sm upwards. */
+        display: ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.02em' }],
+        'display-lg': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '-0.025em' }],
       },
       colors: {
         background: token('background'),
@@ -73,33 +99,52 @@ export default {
           border: token('sidebar-border'),
         },
       },
-      borderRadius: { DEFAULT: '0.25rem', sm: '0.125rem', md: '0.375rem', lg: '0.5rem', xl: '0.75rem' },
+      /*
+       * Two radii carry the whole product: 10px for anything you click or type into, 12px for the surface
+       * that holds them. `rounded-full` stays for avatars, status dots and counters. The 1.75rem/2rem panel
+       * radii are gone: at that size a corner reads as decoration rather than as a container edge.
+       */
+      borderRadius: {
+        DEFAULT: '0.25rem',
+        sm: '0.125rem',
+        md: '0.375rem',
+        lg: '0.5rem',
+        /* Controls: inputs, buttons, menu items, nav rows. */
+        xl: '0.625rem',
+        /* Surfaces: cards, dialogs, drawers, tables. */
+        '2xl': '0.75rem',
+      },
+      /*
+       * Elevation is for things that genuinely float above the page, and nothing else. The teal `glow` /
+       * `glow-teal` lifts and the deep `panel` shadow were decoration: an active nav item is already marked
+       * by a solid plate, so a coloured shadow added nothing but render cost. `float` had no call sites.
+       */
       boxShadow: {
-        /* Soft navy depth of the sign-in cards; `glow` is the teal/blue lift of primary actions and active plates. */
-        card: '0 18px 40px -28px rgb(15 27 58 / 0.28), 0 1px 2px 0 rgb(15 27 58 / 0.04)',
-        panel: '0 30px 80px -30px rgb(15 27 58 / 0.28)',
+        /* Resting surface: a hairline of depth so a card separates from the canvas without a hard edge. */
+        card: '0 1px 2px 0 rgb(15 27 58 / 0.05), 0 1px 3px -1px rgb(15 27 58 / 0.04)',
         raised: '0 1px 3px 0 rgb(15 27 58 / 0.06), 0 1px 2px -1px rgb(15 27 58 / 0.04)',
-        glow: '0 12px 30px -12px rgb(29 78 216 / 0.6)',
-        'glow-teal': '0 10px 24px -12px rgb(20 184 166 / 0.9)',
-        float: '0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06)',
-        pop: '0 20px 25px -5px rgb(15 23 42 / 0.1), 0 8px 10px -6px rgb(15 23 42 / 0.06)',
+        /* Overlays only: dialog, drawer, dropdown, toast. */
+        pop: '0 16px 32px -12px rgb(15 23 42 / 0.18), 0 4px 8px -4px rgb(15 23 42 / 0.1)',
+      },
+      transitionDuration: {
+        /* Two speeds: `fast` for state on a control, `base` for something entering or leaving. */
+        fast: '120ms',
+        base: '180ms',
       },
       keyframes: {
         'fade-in': { from: { opacity: '0', transform: 'translateY(4px)' }, to: { opacity: '1', transform: 'none' } },
         /* Opacity only: safe on elements positioned with transforms (centered dialogs, drawers). */
         fade: { from: { opacity: '0' }, to: { opacity: '1' } },
         caret: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0' } },
-        'toast-in': { from: { opacity: '0', transform: 'translateY(12px) scale(0.98)' }, to: { opacity: '1', transform: 'none' } },
+        'toast-in': { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'none' } },
         shimmer: { '100%': { transform: 'translateX(100%)' } },
-        pulse_ring: { '0%': { boxShadow: '0 0 0 0 rgb(15 118 110 / 0.35)' }, '100%': { boxShadow: '0 0 0 6px rgb(15 118 110 / 0)' } },
       },
       animation: {
         'fade-in': 'fade-in 180ms ease-out both',
-        fade: 'fade 180ms ease-out both',
+        fade: 'fade 120ms ease-out both',
         caret: 'caret 1.1s step-end infinite',
-        'toast-in': 'toast-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both',
+        'toast-in': 'toast-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both',
         shimmer: 'shimmer 1.4s infinite',
-        'pulse-ring': 'pulse_ring 1.6s ease-out infinite',
       },
     },
   },

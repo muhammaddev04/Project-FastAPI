@@ -13,7 +13,7 @@ import type { Me, Membership } from './types';
 function FullPageLoader() {
   const { t } = useTranslation();
   return (
-    <div className="brand-glow-soft flex min-h-screen flex-col items-center justify-center gap-5 bg-background">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-background">
       <BrandMark size="md" />
       <Spinner className="size-5 text-primary" label={t('common.loading')} />
     </div>

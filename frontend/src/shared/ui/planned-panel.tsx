@@ -58,15 +58,15 @@ export function PlannedPanel({
             ))}
           </div>
           {emptyTitle ? <p className="mt-4 text-sm font-semibold">{emptyTitle}</p> : null}
-          <p className={cn('text-[0.8125rem] text-muted-foreground', emptyTitle ? 'mt-1' : 'mt-4')}>{description}</p>
+          <p className={cn('text-label text-muted-foreground', emptyTitle ? 'mt-1' : 'mt-4')}>{description}</p>
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center px-6 pb-7 pt-5 text-center">
           <span className="mb-3 flex size-11 items-center justify-center rounded-2xl border border-dashed border-primary/30 bg-primary/5 text-primary/80">
             <Icon className="size-5" aria-hidden="true" />
           </span>
-          {emptyTitle ? <p className="font-display text-[0.9375rem] font-bold">{emptyTitle}</p> : null}
-          <p className="mt-1 max-w-xs text-[0.8125rem] leading-relaxed text-muted-foreground">{description}</p>
+          {emptyTitle ? <p className="font-display text-body-lg font-bold">{emptyTitle}</p> : null}
+          <p className="mt-1 max-w-xs text-label leading-relaxed text-muted-foreground">{description}</p>
         </div>
       )}
     </Card>

@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/cn';
 export function ChoiceGroup({ legend, children, size = 'md', className }: { legend: ReactNode; children: ReactNode; size?: 'md' | 'lg'; className?: string }) {
   return (
     <fieldset>
-      <legend className={cn('mb-2.5 text-foreground/90', size === 'lg' ? 'text-[0.9375rem] font-medium 2xl:mb-3 2xl:text-[1.125rem]' : 'text-[0.875rem] font-semibold')}>{legend}</legend>
+      <legend className={cn('mb-2.5 text-foreground/90', size === 'lg' ? 'text-body-lg font-medium 2xl:mb-3 2xl:text-lg' : 'text-body font-semibold')}>{legend}</legend>
       <div className={cn('grid gap-3', className)}>{children}</div>
     </fieldset>
   );
@@ -46,7 +46,7 @@ export function ChoiceCard({
     <label
       className={cn(
         'relative flex cursor-pointer rounded-2xl border transition-[border-color,background-color,box-shadow,transform] duration-200 focus-within:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)] active:scale-[0.99]',
-        compact ? 'items-center gap-2.5 px-2.5 py-3 sm:gap-3 sm:px-3.5 2xl:gap-4 2xl:rounded-[1.125rem] 2xl:px-5 2xl:py-4 short:py-1.5 short:2xl:py-3' : 'flex-col gap-3 p-4 sm:p-5',
+        compact ? 'items-center gap-2.5 px-2.5 py-3 sm:gap-3 sm:px-3.5 2xl:gap-4 2xl:rounded-2xl 2xl:px-5 2xl:py-4 short:py-1.5 short:2xl:py-3' : 'flex-col gap-3 p-4 sm:p-5',
         selected
           ? 'border-primary/70 bg-primary/[0.07] shadow-[0_16px_34px_-24px_hsl(var(--primary)/0.9)]'
           : 'border-input bg-subtle/50 hover:-translate-y-0.5 hover:border-primary/40',
@@ -58,7 +58,7 @@ export function ChoiceCard({
           className={cn(
             'flex shrink-0 items-center justify-center rounded-xl transition-colors',
             compact ? 'size-8 sm:size-9 2xl:size-11' : 'size-11',
-            selected ? cn('bg-gradient-to-br text-white shadow-glow-teal', fill) : 'border bg-surface text-muted-foreground',
+            selected ? cn('bg-gradient-to-br text-white', fill) : 'border bg-surface text-muted-foreground',
           )}
         >
           <Icon className="size-[1.125rem]" aria-hidden="true" />
@@ -76,11 +76,11 @@ export function ChoiceCard({
         )}
       </span>
       <span className="min-w-0">
-        <span className={cn('block break-words font-semibold leading-tight', compact ? 'text-[0.8125rem] sm:text-[0.875rem] 2xl:text-[1.0625rem]' : 'font-display text-base font-bold')}>
+        <span className={cn('block break-words font-semibold leading-tight', compact ? 'text-label sm:text-body 2xl:text-title-sm' : 'font-display text-base font-bold')}>
           {title}
         </span>
-        {badge ? <span className="block text-[0.6875rem] font-medium text-muted-foreground 2xl:text-[0.875rem]">{badge}</span> : null}
-        {description ? <span className="mt-1 block text-[0.8125rem] leading-relaxed text-muted-foreground">{description}</span> : null}
+        {badge ? <span className="block text-micro font-medium text-muted-foreground 2xl:text-body">{badge}</span> : null}
+        {description ? <span className="mt-1 block text-label leading-relaxed text-muted-foreground">{description}</span> : null}
       </span>
       {children}
       {compact && selected ? <Check className="absolute right-2.5 top-2.5 size-3.5 text-primary" aria-hidden="true" /> : null}

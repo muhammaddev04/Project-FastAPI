@@ -50,7 +50,7 @@ function MembershipsCard({ me }: { me: Me }) {
       <SectionHeader icon={Building2} title={t('profile.memberships.title')} subtitle={t('profile.memberships.subtitle')} />
       {memberships.length === 0 ? (
         <div className="mt-4 space-y-3">
-          <p className="text-[0.8125rem] text-muted-foreground">{t('profile.memberships.empty')}</p>
+          <p className="text-label text-muted-foreground">{t('profile.memberships.empty')}</p>
           <Button asChild variant="secondary">
             <Link to={homePath(me, activeOrgId)}>{t('profile.memberships.create')}</Link>
           </Button>

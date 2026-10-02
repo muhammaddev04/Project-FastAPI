@@ -28,14 +28,14 @@ export function PasswordChecklist({ password }: { password: string }) {
   ];
   return (
     <div className="space-y-2 rounded bg-subtle px-3 py-2.5" aria-live="polite">
-      <div className="flex items-center justify-between text-[0.8125rem] font-semibold">
+      <div className="flex items-center justify-between text-label font-semibold">
         <span>{t('auth.password.strengthTitle')}</span>
         <span className={TEXT[level]}>{verdict}</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
         <div className={cn('h-full rounded-full transition-[width,background-color] duration-300', BAR[level])} />
       </div>
-      <ul className="grid grid-cols-2 gap-2 pt-0.5 text-[0.875rem]">
+      <ul className="grid grid-cols-2 gap-2 pt-0.5 text-body">
         {items.map((item) => (
           <li key={item.key} className={cn('flex items-center gap-2', item.met ? 'text-primary' : 'text-muted-foreground')}>
             {item.met ? <CheckCircle2 className="size-4" aria-hidden="true" /> : <Circle className="size-4" aria-hidden="true" />}

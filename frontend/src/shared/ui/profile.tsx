@@ -8,7 +8,7 @@ import { cn } from '@/shared/lib/cn';
  */
 
 /**
- * Hero of entity pages: the sign-in card's rounded glass panel with the brand glow; identity on the left
+ * Hero of entity pages: the sign-in card's rounded chrome panel with the brand glow; identity on the left
  * (mark, eyebrow chips, Montserrat name, subtitle, meta chips), actions on the right, stat cards beneath and an
  * optional side panel (e.g. the responsible person).
  */
@@ -32,8 +32,7 @@ export function ProfileHeader({
   aside?: ReactNode;
 }) {
   return (
-    <section className="glass relative overflow-hidden rounded-[1.75rem] border p-5 shadow-panel sm:p-6 lg:p-7">
-      <div className="brand-glow pointer-events-none absolute inset-0 opacity-70" aria-hidden="true" />
+    <section className="chrome relative overflow-hidden rounded-2xl border p-5 shadow-card sm:p-6 lg:p-7">
       <div
         className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full border border-primary/15 bg-primary/[0.04]"
         aria-hidden="true"
@@ -45,8 +44,8 @@ export function ProfileHeader({
               {mark}
               <div className="min-w-0">
                 {eyebrow ? <div className="mb-2 flex flex-wrap items-center gap-2">{eyebrow}</div> : null}
-                <h1 className="break-words font-display text-[1.5rem] font-extrabold leading-tight text-foreground sm:text-[2rem]">{title}</h1>
-                {subtitle ? <p className="mt-1 text-[0.875rem] text-muted-foreground">{subtitle}</p> : null}
+                <h1 className="break-words font-display text-title-lg font-extrabold leading-tight text-foreground sm:text-[2rem]">{title}</h1>
+                {subtitle ? <p className="mt-1 text-body text-muted-foreground">{subtitle}</p> : null}
                 {chips ? <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">{chips}</div> : null}
               </div>
             </div>
@@ -63,7 +62,7 @@ export function ProfileHeader({
 /** Meta chip under an entity name: icon + text (city, phone, email…). */
 export function MetaChip({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode }) {
   return (
-    <span className="inline-flex min-w-0 items-center gap-1.5 text-[0.8125rem] text-muted-foreground">
+    <span className="inline-flex min-w-0 items-center gap-1.5 text-label text-muted-foreground">
       <Icon className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
       <span className="min-w-0 truncate">{children}</span>
     </span>
@@ -78,9 +77,9 @@ export function StatCard({ icon: Icon, label, value, hint, className }: { icon: 
         <Icon className="size-[1.125rem]" aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-[0.625rem] font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
-        <p className="truncate font-display text-[1.0625rem] font-bold text-foreground">{value}</p>
-        {hint ? <p className="truncate text-[0.75rem] text-muted-foreground">{hint}</p> : null}
+        <p className="text-micro font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
+        <p className="truncate font-display text-title-sm font-bold text-foreground">{value}</p>
+        {hint ? <p className="truncate text-caption text-muted-foreground">{hint}</p> : null}
       </div>
     </div>
   );
@@ -108,7 +107,7 @@ export function SectionHeader({
         </span>
         <div className="min-w-0">
           <Heading className="font-display text-base font-bold text-foreground">{title}</Heading>
-          {subtitle ? <p className="text-[0.8125rem] text-muted-foreground">{subtitle}</p> : null}
+          {subtitle ? <p className="text-label text-muted-foreground">{subtitle}</p> : null}
         </div>
       </div>
       {chip ? <div className="shrink-0">{chip}</div> : null}
@@ -119,8 +118,8 @@ export function SectionHeader({
 export function InfoRow({ label, value, className }: { label: ReactNode; value: ReactNode; className?: string }) {
   return (
     <div className={cn('grid gap-1 py-2.5 sm:grid-cols-3', className)}>
-      <dt className="text-[0.8125rem] text-muted-foreground">{label}</dt>
-      <dd className="break-words text-[0.875rem] font-medium sm:col-span-2">{value}</dd>
+      <dt className="text-label text-muted-foreground">{label}</dt>
+      <dd className="break-words text-body font-medium sm:col-span-2">{value}</dd>
     </div>
   );
 }

@@ -41,7 +41,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <span
           className={cn(
             'flex shrink-0 items-center gap-2 border-r border-input px-3.5 font-data text-foreground [&_svg]:size-4 [&_svg]:text-primary',
-            variant === 'auth' ? 'bg-muted/70 text-[0.9375rem]' : 'bg-muted/50 text-[0.875rem]',
+            variant === 'auth' ? 'bg-muted/70 text-body-lg' : 'bg-muted/50 text-body',
           )}
         >
           {addon}
@@ -54,7 +54,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={invalid || undefined}
           className={cn(
             'h-full w-full min-w-0 bg-transparent text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed',
-            variant === 'auth' ? 'text-[1rem]' : 'text-[0.875rem]',
+            variant === 'auth' ? 'text-base' : 'text-body',
             data && 'font-data tracking-[0.02em]',
           )}
           {...props}

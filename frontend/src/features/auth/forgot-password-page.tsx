@@ -193,7 +193,7 @@ function CodeStep({ email, onVerified, onChangeEmail }: { email: string; onVerif
           type="button"
           variant="ghost"
           block
-          className="h-11 rounded-2xl text-[0.875rem] font-semibold text-primary"
+          className="h-11 rounded-2xl text-body font-semibold text-primary"
           disabled={resendIn > 0}
           loading={resend.isPending}
           onClick={() => void onResend()}
@@ -201,7 +201,7 @@ function CodeStep({ email, onVerified, onChangeEmail }: { email: string; onVerif
           {resendIn > 0 ? t('auth.verify.resendIn', { seconds: resendIn }) : t('auth.verify.resend')}
         </Button>
       </form>
-      <Button type="button" variant="ghost" block className="mt-1 h-11 rounded-2xl text-[0.875rem] text-muted-foreground" onClick={onChangeEmail}>
+      <Button type="button" variant="ghost" block className="mt-1 h-11 rounded-2xl text-body text-muted-foreground" onClick={onChangeEmail}>
         {t('auth.forgot.changeEmail')}
       </Button>
       <CardSwitch question={t('auth.reset.remembered')} to="/login" link={t('auth.register.signIn')} />
@@ -254,7 +254,7 @@ function NewPasswordStep({ token, onDone, onRestart }: { token: string; onDone: 
         <FormField labelClassName={authLabel} label={t('auth.fields.confirmPassword')} error={message(errors.confirmPassword?.message)}>
           <PasswordInput variant="auth" autoComplete="new-password" {...form.register('confirmPassword')} />
         </FormField>
-        <p className="text-[0.75rem] text-muted-foreground">{t('auth.resetPassword.signOutNote')}</p>
+        <p className="text-caption text-muted-foreground">{t('auth.resetPassword.signOutNote')}</p>
         {failure ? (
           <Alert
             tone="danger"

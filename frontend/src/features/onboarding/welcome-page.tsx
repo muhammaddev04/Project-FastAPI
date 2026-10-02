@@ -189,7 +189,7 @@ export function WelcomePage({ me, fixedType }: { me: Me; fixedType?: OrgType }) 
                       <Avatar kind={membership.org_type === 'STORE' ? 'store' : 'company'} size="md" src={membership.logo_url} className="rounded-xl" />
                       <span className="min-w-0">
                       <span className="block truncate text-sm font-semibold">{membership.org_name}</span>
-                      <span className="text-[0.8125rem] text-muted-foreground">{t(`roles.${membership.role}`)}</span>
+                      <span className="text-label text-muted-foreground">{t(`roles.${membership.role}`)}</span>
                       </span>
                     </span>
                     <span className="flex items-center gap-2">
@@ -272,7 +272,7 @@ export function WelcomePage({ me, fixedType }: { me: Me; fixedType?: OrgType }) 
               ) : null}
               {showGeneralError ? <Alert tone="danger">{errorMessage(create.error, t)}</Alert> : null}
               <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-[0.8125rem] text-muted-foreground">{t('onboarding.ownerNote')}</p>
+                <p className="text-label text-muted-foreground">{t('onboarding.ownerNote')}</p>
                 <Button type="submit" className="sm:min-w-44">
                   {t('onboarding.review')}
                   <ArrowRight aria-hidden="true" />

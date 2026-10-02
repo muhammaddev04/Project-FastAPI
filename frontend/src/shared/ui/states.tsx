@@ -26,7 +26,7 @@ function StateFrame({ icon: Icon = Inbox, title, description, action, className,
         <Icon className="size-6" aria-hidden="true" />
       </span>
       <p className="font-display text-base font-bold text-foreground">{title}</p>
-      {description ? <p className="mt-1.5 max-w-sm text-[0.8125rem] leading-relaxed text-muted-foreground">{description}</p> : null}
+      {description ? <p className="mt-1.5 max-w-sm text-label leading-relaxed text-muted-foreground">{description}</p> : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );

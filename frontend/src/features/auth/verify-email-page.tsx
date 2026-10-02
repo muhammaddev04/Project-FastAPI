@@ -110,7 +110,7 @@ export function VerifyEmailPage() {
     <AuthCard title={t('auth.verify.title')}>
       <div className="flex items-start gap-3 rounded-2xl bg-primary/10 px-4 py-3.5">
         <MailCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-        <p className="min-w-0 break-words text-[0.9375rem] leading-relaxed text-foreground/85">
+        <p className="min-w-0 break-words text-body-lg leading-relaxed text-foreground/85">
           {state?.email ? t('auth.verify.sentTo', { email: state.email }) : t('auth.verify.checkInbox')}
         </p>
       </div>
@@ -141,7 +141,7 @@ export function VerifyEmailPage() {
           type="button"
           variant="ghost"
           block
-          className="h-11 rounded-2xl text-[0.875rem] font-semibold text-primary"
+          className="h-11 rounded-2xl text-body font-semibold text-primary"
           disabled={!available || resendIn > 0}
           loading={resend.isPending}
           onClick={() => void onResend()}
@@ -150,7 +150,7 @@ export function VerifyEmailPage() {
         </Button>
       </form>
 
-      <Button asChild variant="ghost" block className="mt-1 h-11 rounded-2xl text-[0.875rem] text-muted-foreground">
+      <Button asChild variant="ghost" block className="mt-1 h-11 rounded-2xl text-body text-muted-foreground">
         <Link to="/register">{t('auth.verify.wrongEmail')}</Link>
       </Button>
       <CardSwitch question={t('auth.verify.alreadyVerified')} to="/login" link={t('auth.register.signIn')} />

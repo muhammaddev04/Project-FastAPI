@@ -31,7 +31,7 @@ export function AccountMenu({ me, compact = false, className }: { me: Me; compac
         {compact ? null : (
           <>
             <span className="hidden min-w-0 sm:block">
-              <span className="block truncate text-[0.8125rem] font-medium leading-4">{me.full_name}</span>
+              <span className="block truncate text-label font-medium leading-4">{me.full_name}</span>
               <span className="block truncate text-2xs text-muted-foreground">{me.email}</span>
             </span>
             <ChevronsUpDown className="hidden size-3.5 text-muted-foreground sm:block" aria-hidden="true" />
@@ -40,7 +40,7 @@ export function AccountMenu({ me, compact = false, className }: { me: Me; compac
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>{t('account.signedInAs')}</DropdownMenuLabel>
-        <div className="px-2.5 pb-2 text-[0.8125rem]">
+        <div className="px-2.5 pb-2 text-label">
           <p className="truncate font-medium">{me.full_name}</p>
           <p className="truncate text-muted-foreground">{me.email}</p>
         </div>

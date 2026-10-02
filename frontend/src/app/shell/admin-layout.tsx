@@ -41,7 +41,7 @@ export function AdminLayout({ me }: { me: Me }) {
             <Activity className="size-5" aria-hidden="true" />
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-[0.8125rem] font-bold leading-4">{t('admin.eyebrow')}</span>
+            <span className="block truncate text-label font-bold leading-4">{t('admin.eyebrow')}</span>
             <span className="mt-0.5 block truncate text-2xs text-sidebar-muted">SUPERADMIN</span>
           </span>
         </div>
@@ -71,7 +71,6 @@ export function AdminPlannedPage() {
         actions={<PhaseBadge phase={item.phase} />}
       />
       <Card className="relative overflow-hidden">
-        <div aria-hidden="true" className="brand-glow-soft pointer-events-none absolute inset-0" />
         <EmptyState icon={item.icon} title={t('planned.title', { phase: item.phase })} description={t('planned.description')} className="relative py-16 sm:py-20" />
       </Card>
     </div>

@@ -57,12 +57,12 @@ export function ConnectedAccounts() {
                 </Badge>
               </p>
               {state.data.connected ? (
-                <p className="mt-0.5 truncate text-[0.8125rem] text-muted-foreground">
+                <p className="mt-0.5 truncate text-label text-muted-foreground">
                   {state.data.email ?? '—'}
                   {state.data.linked_at ? ` · ${t('profile.connected.since', { date: formatDate(state.data.linked_at) })}` : null}
                 </p>
               ) : (
-                <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">{t('profile.connected.hint')}</p>
+                <p className="mt-0.5 text-label text-muted-foreground">{t('profile.connected.hint')}</p>
               )}
               </div>
             </div>
@@ -74,7 +74,7 @@ export function ConnectedAccounts() {
           </div>
         )}
         {connect.isError ? <Alert tone="danger">{errorMessage(connect.error, t)}</Alert> : null}
-        {state.data?.connected ? <p className="text-[0.75rem] text-muted-foreground">{t('profile.connected.noDisconnect')}</p> : null}
+        {state.data?.connected ? <p className="text-caption text-muted-foreground">{t('profile.connected.noDisconnect')}</p> : null}
       </CardBody>
     </Card>
   );

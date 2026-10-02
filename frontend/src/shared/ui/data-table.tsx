@@ -131,9 +131,9 @@ export function DataTable<T>({
             </Select>
           </div>
         ) : null}
-        <table aria-busy={busy || undefined} className="w-full text-left text-[0.8125rem] max-md:block">
+        <table aria-busy={busy || undefined} className="w-full text-left text-label max-md:block">
           {caption ? <caption className="sr-only">{caption}</caption> : null}
-          <thead className="border-b bg-subtle/70 text-[0.625rem] uppercase tracking-[0.1em] text-muted-foreground max-md:sr-only">
+          <thead className="border-b bg-subtle/70 text-micro uppercase tracking-[0.1em] text-muted-foreground max-md:sr-only">
             <tr>
               {columns.map((column) => {
                 const active = sort && column.sortable && sort.key === column.key ? sort.direction : null;
@@ -188,7 +188,7 @@ export function DataTable<T>({
                         'px-5 py-3.5 align-middle max-md:px-0',
                         column.primary
                           ? 'max-md:block max-md:pb-2 max-md:pt-0'
-                          : 'max-md:flex max-md:items-center max-md:justify-between max-md:gap-3 max-md:py-1.5 max-md:before:text-[0.75rem] max-md:before:text-muted-foreground max-md:before:content-[attr(data-label)]',
+                          : 'max-md:flex max-md:items-center max-md:justify-between max-md:gap-3 max-md:py-1.5 max-md:before:text-caption max-md:before:text-muted-foreground max-md:before:content-[attr(data-label)]',
                         column.className,
                       )}
                     >
@@ -203,7 +203,7 @@ export function DataTable<T>({
         </>
       )}
       {pagination && rows && rows.length > 0 && !loading && !error ? (
-        <div className="flex items-center justify-between gap-3 border-t px-5 py-3 text-[0.8125rem] text-muted-foreground">
+        <div className="flex items-center justify-between gap-3 border-t px-5 py-3 text-label text-muted-foreground">
           <span>
             {t('table.range', {
               from: pagination.count ? pagination.offset + 1 : 0,

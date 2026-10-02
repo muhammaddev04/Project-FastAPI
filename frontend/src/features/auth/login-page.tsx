@@ -103,14 +103,14 @@ export function LoginPage() {
           label={t('auth.fields.password')}
           error={message(errors.password?.message)}
           action={
-            <Link to="/forgot-password" className="link-grow text-[0.875rem] font-semibold text-primary hover:text-primary-hover">
+            <Link to="/forgot-password" className="link-grow text-body font-semibold text-primary hover:text-primary-hover">
               {t('auth.login.forgot')}
             </Link>
           }
         >
           <PasswordInput variant="auth" placeholder={t('auth.login.passwordPlaceholder')} autoComplete="current-password" {...form.register('password')} />
         </FormField>
-        <p className="flex items-center gap-2 text-[0.8125rem] text-muted-foreground">
+        <p className="flex items-center gap-2 text-label text-muted-foreground">
           <ShieldCheck className="size-4 shrink-0 text-primary" aria-hidden="true" />
           {t('auth.login.lockoutHint')}
         </p>

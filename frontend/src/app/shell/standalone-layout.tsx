@@ -7,7 +7,7 @@ import { BrandMark } from '@/shared/ui';
 import { TopBar } from './top-bar';
 
 /**
- * Frame for pages outside an organization area (account, onboarding, status pages): the shared glass top bar over
+ * Frame for pages outside an organization area (account, onboarding, status pages): the shared chrome top bar over
  * the soft brand glow — the same chrome as the sign-in screens, without their hero.
  */
 export function StandaloneLayout({
@@ -26,7 +26,6 @@ export function StandaloneLayout({
   const brand = <BrandMark />;
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background">
-      <div aria-hidden="true" className="brand-glow-soft pointer-events-none fixed inset-0" />
       <TopBar
         start={
           back ? (

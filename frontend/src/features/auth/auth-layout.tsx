@@ -48,10 +48,10 @@ function Brand() {
       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] shadow-[0_8px_24px_-8px_rgba(45,212,191,0.65)] transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105 lg:size-12 lg:rounded-2xl">
         <LogoMark inverted className="h-5 lg:h-6" />
       </span>
-      <span className="auth-display text-[1.375rem] font-extrabold leading-none lg:text-[1.75rem]">
-        Tez<span className="auth-brand-text">Farmo</span>
+      <span className="font-display text-[1.375rem] font-extrabold leading-none lg:text-display-sm">
+        Tez<span className="text-primary">Farmo</span>
       </span>
-      <span className="hidden rounded-full border border-primary/40 bg-primary/5 px-2.5 py-1 text-[0.625rem] font-bold leading-none tracking-[0.12em] text-primary sm:inline-block">
+      <span className="hidden rounded-full border border-primary/40 bg-primary/5 px-2.5 py-1 text-micro font-bold leading-none tracking-[0.12em] text-primary sm:inline-block">
         {t('auth.shell.network')}
       </span>
     </Link>
@@ -64,7 +64,7 @@ function Header() {
     <header className="relative z-10 border-b border-border/60 bg-surface/50 backdrop-blur-md dark:border-white/[0.06] dark:bg-[#050D22]/60">
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-4 sm:px-6 lg:h-[4.75rem] lg:px-10 short:lg:h-16">
         <Brand />
-        <div className="hidden h-11 items-center gap-4 rounded-full border border-border/80 bg-surface/40 px-5 text-[0.8125rem] font-medium text-foreground/85 xl:flex">
+        <div className="hidden h-11 items-center gap-4 rounded-full border border-border/80 bg-surface/40 px-5 text-label font-medium text-foreground/85 xl:flex">
           <span className="flex items-center gap-2">
             <span className="relative flex size-2.5">
               <span className="absolute inset-0 animate-ping rounded-full bg-primary/60 motion-reduce:animate-none" />
@@ -84,7 +84,7 @@ function Header() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`${t('common.support')} @${SUPPORT_TELEGRAM}`}
-            className="group hidden items-center gap-2.5 rounded-full text-[0.875rem] font-medium text-foreground/85 transition-colors hover:text-foreground sm:flex"
+            className="group hidden items-center gap-2.5 rounded-full text-body font-medium text-foreground/85 transition-colors hover:text-foreground sm:flex"
           >
             <span className="flex size-9 items-center justify-center rounded-full border border-border bg-surface/50 text-primary transition-[transform,border-color] duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/50 lg:size-10">
               <Send className="size-4" aria-hidden="true" />
@@ -110,20 +110,20 @@ function Hero() {
     <motion.section variants={stagger} initial="hidden" animate="shown" className="hidden lg:block" aria-label={t('auth.shell.heroBadge')}>
       <motion.p
         variants={rise}
-        className="inline-flex h-10 items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-4 text-[0.875rem] font-semibold text-primary-ink"
+        className="inline-flex h-10 items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-4 text-body font-semibold text-primary-ink"
       >
         <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
         {t('auth.shell.heroBadge')}
       </motion.p>
       <motion.h2
         variants={rise}
-        className="auth-display mt-7 text-[2.5rem] font-black leading-[1.06] xl:text-[3.25rem] 2xl:text-[3.75rem]"
+        className="font-display mt-7 text-[2.5rem] font-black leading-[1.06] xl:text-[3.25rem] 2xl:text-[3.75rem]"
       >
         <span className="block">{t('auth.shell.heroLine1')}</span>
         <span className="block">{t('auth.shell.heroLine2')}</span>
-        <span className="auth-brand-text block pb-1">{t('auth.shell.heroAccent')}</span>
+        <span className="text-primary block pb-1">{t('auth.shell.heroAccent')}</span>
       </motion.h2>
-      <motion.p variants={rise} className="mt-6 max-w-[36rem] text-[1.0625rem] leading-relaxed text-muted-foreground xl:text-[1.1875rem]">
+      <motion.p variants={rise} className="mt-6 max-w-[36rem] text-title-sm leading-relaxed text-muted-foreground xl:text-[1.1875rem]">
         {t('auth.shell.heroText')}
       </motion.p>
       <motion.ul variants={rise} className="mt-10 grid max-w-[48rem] grid-cols-2 gap-4 xl:gap-5">
@@ -135,20 +135,20 @@ function Hero() {
             <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <Icon className="size-5" aria-hidden="true" />
             </span>
-            <p className="mt-4 text-[1.0625rem] font-bold">{title}</p>
-            <p className="mt-1.5 text-[0.875rem] leading-snug text-muted-foreground">{text}</p>
+            <p className="mt-4 text-title-sm font-bold">{title}</p>
+            <p className="mt-1.5 text-body leading-snug text-muted-foreground">{text}</p>
           </li>
         ))}
       </motion.ul>
       <motion.div variants={rise} className="mt-10 flex items-center gap-4">
         <span className="flex -space-x-2.5" aria-hidden="true">
-          <span className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-[#0D9488] text-[0.75rem] font-bold text-white">TF</span>
-          <span className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-[#1D4ED8] text-[0.6875rem] font-bold text-white">B2B</span>
+          <span className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-[#0D9488] text-caption font-bold text-white">TF</span>
+          <span className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-[#1D4ED8] text-micro font-bold text-white">B2B</span>
           <span className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-[#6D28D9] text-white">
             <Store className="size-4" />
           </span>
         </span>
-        <p className="max-w-[30rem] text-[0.9375rem] text-muted-foreground">{t('auth.shell.joinText')}</p>
+        <p className="max-w-[30rem] text-body-lg text-muted-foreground">{t('auth.shell.joinText')}</p>
       </motion.div>
     </motion.section>
   );
@@ -159,7 +159,7 @@ function Footer() {
   const meta = useMeta();
   return (
     <footer className="relative z-10 border-t border-border/60 bg-surface/40 dark:border-white/[0.06] dark:bg-[#040A1C]/70">
-      <div className="mx-auto flex max-w-[90rem] flex-col items-center gap-1.5 px-4 py-4 text-center text-[0.75rem] text-muted-foreground sm:px-6 lg:flex-row lg:justify-between lg:px-10 lg:py-5 lg:text-[0.8125rem]">
+      <div className="mx-auto flex max-w-[90rem] flex-col items-center gap-1.5 px-4 py-4 text-center text-caption text-muted-foreground sm:px-6 lg:flex-row lg:justify-between lg:px-10 lg:py-5 lg:text-label">
         {/* On phones the theme switch lives here so the header keeps logo + language on one row. */}
         <ThemeSwitcher className="mb-1.5 bg-surface/50 sm:hidden" />
         <p className="font-data">TezFarmo · v{meta.data?.version ?? '—'}</p>
@@ -178,7 +178,7 @@ export function AuthShell() {
   const outlet = useOutlet();
   return (
     <MotionConfig reducedMotion="user">
-      <div className="auth-theme relative flex min-h-screen flex-col overflow-x-hidden bg-background font-sans text-foreground">
+      <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background font-sans text-foreground">
         <Backdrop />
         <Header />
         <main className="relative z-10 mx-auto grid w-full max-w-[90rem] flex-1 items-center gap-10 px-4 py-5 sm:px-6 sm:py-8 lg:grid-cols-[minmax(0,1fr)_31rem] lg:gap-12 lg:px-10 lg:py-6 short:py-3 short:sm:py-4 short:lg:py-2 xl:grid-cols-[minmax(0,1fr)_34rem] xl:gap-16">
@@ -187,7 +187,7 @@ export function AuthShell() {
             initial={{ opacity: 0, y: 20, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, ease: EASE }}
-            className="mx-auto w-full max-w-[31rem] rounded-[2rem] border border-border bg-surface/90 px-5 py-6 shadow-[0_30px_80px_-30px_rgba(15,27,58,0.28)] backdrop-blur-xl dark:border-white/10 dark:bg-surface/80 dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-9 sm:py-8 lg:max-w-none lg:rounded-[1.75rem] xl:px-10 short:py-5 short:sm:py-5"
+            className="mx-auto w-full max-w-[31rem] rounded-2xl border border-border bg-surface/90 px-5 py-6 shadow-[0_30px_80px_-30px_rgba(15,27,58,0.28)] backdrop-blur-xl dark:border-white/10 dark:bg-surface/80 dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-9 sm:py-8 lg:max-w-none lg:rounded-2xl xl:px-10 short:py-5 short:sm:py-5"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -210,7 +210,7 @@ export function AuthShell() {
 
 /** Heading copy with the brand word in the teal→blue gradient, e.g. "Welcome to <b>TezFarmo</b>". */
 export function BrandTitle({ i18nKey }: { i18nKey: string }) {
-  return <Trans i18nKey={i18nKey} components={{ b: <span className="auth-brand-text" /> }} />;
+  return <Trans i18nKey={i18nKey} components={{ b: <span className="text-primary" /> }} />;
 }
 
 /** Remembers the last tab route so the selection plate slides in from the tab the user came from. */
@@ -237,7 +237,7 @@ export function AuthTabs() {
             to={to}
             replace
             className={cn(
-              'relative flex h-11 items-center justify-center gap-2 rounded-xl text-[0.9375rem] font-semibold transition-colors sm:h-12 sm:text-[1rem] short:h-10 short:sm:h-10',
+              'relative flex h-11 items-center justify-center gap-2 rounded-xl text-body-lg font-semibold transition-colors sm:h-12 sm:text-base short:h-10 short:sm:h-10',
               active ? 'text-white' : 'text-muted-foreground hover:bg-surface/60 hover:text-foreground',
             )}
           >
@@ -275,33 +275,33 @@ export function AuthCard({
   return (
     <div>
       <div className="text-center">
-        <p className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-1.5 short:hidden text-[0.6875rem] font-bold tracking-[0.12em] text-primary sm:text-[0.75rem]">
+        <p className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-1.5 short:hidden text-micro font-bold tracking-[0.12em] text-primary sm:text-caption">
           <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
           {t('auth.shell.cardBadge')}
         </p>
-        <h1 className="auth-display mt-4 text-[1.625rem] short:mt-0 font-extrabold leading-tight sm:text-[1.875rem] xl:text-[2rem] short:sm:text-[1.75rem] short:xl:text-[1.875rem]">{title}</h1>
-        {subtitle ? <p className="mx-auto mt-2 max-w-[24rem] text-[0.9375rem] leading-relaxed text-muted-foreground sm:text-[1rem] short:mt-1.5 short:leading-snug">{subtitle}</p> : null}
+        <h1 className="font-display mt-4 text-[1.625rem] short:mt-0 font-extrabold leading-tight sm:text-display xl:text-[2rem] short:sm:text-display-sm short:xl:text-display">{title}</h1>
+        {subtitle ? <p className="mx-auto mt-2 max-w-[24rem] text-body-lg leading-relaxed text-muted-foreground sm:text-base short:mt-1.5 short:leading-snug">{subtitle}</p> : null}
       </div>
       {tabs ? <AuthTabs /> : null}
-      <div className="stagger-in mt-5 short:mt-4">{children}</div>
+      <div className="mt-5 short:mt-4">{children}</div>
     </div>
   );
 }
 
 /** Field label inside auth cards. */
-export const authLabel = 'text-[0.9375rem] font-medium text-foreground/90';
+export const authLabel = 'text-body-lg font-medium text-foreground/90';
 
 /**
  * Primary action: teal→blue gradient with white text (mobile screenshot, light mode); on dark desktop the
  * sky→cyan gradient with navy text from the laptop screenshot. Lifts on hover, presses on click.
  */
 export const authPrimaryButton =
-  'group h-[3.25rem] short:h-12 rounded-2xl bg-gradient-to-r from-[#0B7D72] to-[#1D4ED8] text-[1rem] font-bold text-white shadow-[0_12px_30px_-12px_rgba(29,78,216,0.6)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-12px_rgba(29,78,216,0.7)] hover:brightness-110 active:translate-y-0 active:scale-[0.99] disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:shadow-none sm:h-14 sm:text-[1.0625rem] short:sm:h-12 dark:lg:from-[#0EA5E9] dark:lg:to-[#06B6D4] dark:lg:text-[#06122B] dark:lg:shadow-[0_12px_30px_-12px_rgba(6,182,212,0.7)]';
+  'group h-[3.25rem] short:h-12 rounded-2xl bg-gradient-to-r from-[#0B7D72] to-[#1D4ED8] text-base font-bold text-white shadow-[0_12px_30px_-12px_rgba(29,78,216,0.6)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-12px_rgba(29,78,216,0.7)] hover:brightness-110 active:translate-y-0 active:scale-[0.99] disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:shadow-none sm:h-14 sm:text-title-sm short:sm:h-12 dark:lg:from-[#0EA5E9] dark:lg:to-[#06B6D4] dark:lg:text-[#06122B] dark:lg:shadow-[0_12px_30px_-12px_rgba(6,182,212,0.7)]';
 
 /** Bottom line of a card: muted question + teal link with a growing underline. */
 export function CardSwitch({ question, to, link }: { question: string; to: string; link: string }) {
   return (
-    <p className="mt-5 border-t border-border pt-4 text-center text-[0.9375rem] text-muted-foreground short:mt-3 short:pt-2.5">
+    <p className="mt-5 border-t border-border pt-4 text-center text-body-lg text-muted-foreground short:mt-3 short:pt-2.5">
       {question}{' '}
       <Link to={to} className="link-grow font-semibold text-primary hover:text-primary-hover">
         {link}

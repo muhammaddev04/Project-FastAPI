@@ -11,8 +11,8 @@ export function Pill({ children, size = 'sm', live = false, className }: { child
       className={cn(
         'inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 font-bold text-primary-ink',
         size === 'md' || size === 'hero'
-          ? cn('h-10 px-4 text-[0.875rem] font-semibold', size === 'hero' && '2xl:h-[2.625rem] 2xl:px-5 2xl:text-[1.0625rem] 2xl:font-bold')
-          : cn('px-3 py-1 text-[0.625rem] uppercase tracking-[0.12em] sm:text-[0.6875rem]', size === 'card' && '2xl:h-[2.625rem] 2xl:px-6 2xl:py-0 2xl:text-[1.0625rem] 2xl:tracking-[0.06em]'),
+          ? cn('h-10 px-4 text-body font-semibold', size === 'hero' && '2xl:h-[2.625rem] 2xl:px-5 2xl:text-title-sm 2xl:font-bold')
+          : cn('px-3 py-1 text-micro uppercase tracking-[0.12em] sm:text-micro', size === 'card' && '2xl:h-[2.625rem] 2xl:px-6 2xl:py-0 2xl:text-title-sm 2xl:tracking-[0.06em]'),
         className,
       )}
     >

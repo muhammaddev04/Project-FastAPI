@@ -31,11 +31,11 @@ const buttonVariants = cva(
         link: 'h-auto rounded-none px-0 text-primary underline-offset-4 hover:underline active:translate-y-0',
       },
       size: {
-        sm: 'h-9 px-3.5 text-[0.8125rem]',
+        sm: 'h-9 px-3.5 text-label',
         md: 'h-11 px-4 text-sm',
-        lg: 'h-12 px-5 text-[0.9375rem]',
+        lg: 'h-12 px-5 text-body-lg',
         /* Tall touch target of the sign-in screens (shorter on short viewports so forms fit). */
-        xl: 'h-[3.25rem] rounded-2xl px-6 text-base font-bold sm:h-14 sm:text-[1.0625rem] 2xl:h-[4.5rem] 2xl:rounded-[1.125rem] 2xl:text-[1.375rem] 2xl:[&_svg]:size-5 short:h-12 short:sm:h-12 short:2xl:h-14',
+        xl: 'h-[3.25rem] rounded-2xl px-6 text-base font-bold sm:h-14 sm:text-title-sm 2xl:h-[4.5rem] 2xl:rounded-2xl 2xl:text-[1.375rem] 2xl:[&_svg]:size-5 short:h-12 short:sm:h-12 short:2xl:h-14',
         icon: 'h-10 w-10',
       },
       block: { true: 'w-full' },

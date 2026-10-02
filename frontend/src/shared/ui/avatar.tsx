@@ -15,8 +15,8 @@ export type AvatarKind = 'person' | 'company' | 'store';
 type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 const SIZES: Record<Size, { box: string; text: string; icon: string; badge: string }> = {
-  xs: { box: 'size-7', text: 'text-[0.625rem]', icon: 'size-3.5', badge: 'hidden' },
-  sm: { box: 'size-8', text: 'text-[0.6875rem]', icon: 'size-4', badge: 'hidden' },
+  xs: { box: 'size-7', text: 'text-micro', icon: 'size-3.5', badge: 'hidden' },
+  sm: { box: 'size-8', text: 'text-micro', icon: 'size-4', badge: 'hidden' },
   md: { box: 'size-10', text: 'text-xs', icon: 'size-5', badge: 'size-4 [&_svg]:size-2.5' },
   lg: { box: 'size-14', text: 'text-base', icon: 'size-7', badge: 'size-5 [&_svg]:size-3' },
   xl: { box: 'size-16 sm:size-20', text: 'text-xl sm:text-2xl', icon: 'size-8 sm:size-9', badge: 'size-6 [&_svg]:size-3.5' },

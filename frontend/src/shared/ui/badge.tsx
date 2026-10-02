@@ -7,7 +7,7 @@ import { cn } from '@/shared/lib/cn';
  * Order-status tones (P07) come from the `status-*` tokens.
  */
 const badgeVariants = cva(
-  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[0.625rem] font-bold uppercase leading-[0.875rem] tracking-[0.06em] [&_svg]:size-3',
+  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-micro font-bold uppercase leading-[0.875rem] tracking-[0.06em] [&_svg]:size-3',
   {
     variants: {
       tone: {

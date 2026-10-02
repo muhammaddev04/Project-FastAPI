@@ -25,7 +25,7 @@ export function MethodUnavailable({ method, meta }: { method: keyof AuthMethods;
           key="loading"
           {...fade}
           role="status"
-          className="flex items-center gap-2.5 rounded border border-dashed border-input px-3.5 py-3 text-[0.8125rem] text-muted-foreground"
+          className="flex items-center gap-2.5 rounded border border-dashed border-input px-3.5 py-3 text-label text-muted-foreground"
         >
           <Spinner className="size-4 text-primary" />
           {t('auth.unavailable.checking')}

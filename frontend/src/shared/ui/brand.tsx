@@ -32,7 +32,7 @@ export function BrandMark({ className, size = 'sm' }: { className?: string; size
           size === 'lg' || size === 'hero'
             ? cn(
                 'size-10 rounded-xl transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105 lg:size-12 lg:rounded-2xl',
-                size === 'hero' && '2xl:size-16 2xl:rounded-[1.125rem]',
+                size === 'hero' && '2xl:size-16 2xl:rounded-2xl',
               )
             : size === 'md'
               ? 'size-10 rounded-xl'
@@ -44,10 +44,10 @@ export function BrandMark({ className, size = 'sm' }: { className?: string; size
       <span
         className={cn(
           'font-display font-extrabold leading-none text-foreground',
-          size === 'hero' ? 'text-[1.375rem] lg:text-[1.75rem] 2xl:text-[2.25rem]' : size === 'lg' ? 'text-[1.375rem] lg:text-[1.75rem]' : size === 'md' ? 'text-[1.375rem]' : 'text-[1.1875rem]',
+          size === 'hero' ? 'text-[1.375rem] lg:text-display-sm 2xl:text-display-lg' : size === 'lg' ? 'text-[1.375rem] lg:text-display-sm' : size === 'md' ? 'text-[1.375rem]' : 'text-[1.1875rem]',
         )}
       >
-        Tez<span className="brand-text">Farmo</span>
+        Tez<span className="text-primary">Farmo</span>
       </span>
     </span>
   );

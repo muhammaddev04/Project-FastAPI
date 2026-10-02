@@ -30,7 +30,7 @@ function SidebarLink({ link, plateId, onNavigate }: { link: ShellLink; plateId: 
       onClick={onNavigate}
       className={({ isActive }) =>
         cn(
-          'relative flex h-10 items-center gap-3 rounded-xl px-3 text-[0.8125rem] font-semibold transition-colors',
+          'relative flex h-10 items-center gap-3 rounded-xl px-3 text-label font-semibold transition-colors',
           isActive ? 'text-white' : 'text-sidebar-muted hover:bg-sidebar-active hover:text-sidebar-foreground',
         )
       }
@@ -41,7 +41,7 @@ function SidebarLink({ link, plateId, onNavigate }: { link: ShellLink; plateId: 
             <motion.span
               layoutId={plateId}
               aria-hidden="true"
-              className="absolute inset-0 rounded-xl bg-primary-strong shadow-glow-teal"
+              className="absolute inset-0 rounded-xl bg-primary-strong"
               transition={{ type: 'spring', stiffness: 420, damping: 36 }}
             />
           ) : null}
@@ -50,7 +50,7 @@ function SidebarLink({ link, plateId, onNavigate }: { link: ShellLink; plateId: 
           {link.phase ? (
             <span
               className={cn(
-                'relative rounded-full border px-1.5 text-[0.5625rem] font-bold uppercase leading-4 tracking-wide',
+                'relative rounded-full border px-1.5 text-micro font-bold uppercase leading-4 tracking-wide',
                 isActive ? 'border-white/40 text-white/85' : 'border-sidebar-border text-sidebar-muted',
               )}
             >
@@ -70,7 +70,7 @@ export function SidebarNav({ sections, onNavigate }: { sections: ShellSection[];
     <nav aria-label={t('shell.mainNavigation')} className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
       {sections.map((section) => (
         <div key={section.key}>
-          <p className="mb-2 px-3 text-[0.625rem] font-bold uppercase tracking-[0.14em] text-sidebar-muted">{section.label}</p>
+          <p className="mb-2 px-3 text-micro font-bold uppercase tracking-[0.14em] text-sidebar-muted">{section.label}</p>
           <div className="space-y-1">
             {section.links.map((link) => (
               <SidebarLink key={link.key} link={link} plateId={plateId} onNavigate={onNavigate} />
@@ -98,7 +98,7 @@ export function SidebarBody({
     <>
       <div className={cn('flex h-16 shrink-0 items-center justify-between gap-2 px-5', onNavigate && 'pr-14')}>
         <BrandMark />
-        <span className="rounded-full border border-primary/40 bg-primary/5 px-2 py-0.5 text-[0.5625rem] font-bold uppercase leading-4 tracking-[0.12em] text-primary">
+        <span className="rounded-full border border-primary/40 bg-primary/5 px-2 py-0.5 text-micro font-bold uppercase leading-4 tracking-[0.12em] text-primary">
           {areaLabel}
         </span>
       </div>
@@ -114,8 +114,8 @@ export function SidebarBody({
 export type Crumb = { label: string; to?: string };
 
 /**
- * Frame shared by every signed-in area (FND-032): fixed glass sidebar on desktop, a Radix drawer on phones
- * (focus trapped, Escape closes), a sticky glass header with breadcrumbs and title, the soft brand glow behind content.
+ * Frame shared by every signed-in area (FND-032): fixed chrome sidebar on desktop, a Radix drawer on phones
+ * (focus trapped, Escape closes), a sticky chrome header with breadcrumbs and title, the soft brand glow behind content.
  */
 export function ShellFrame({
   areaLabel,
@@ -149,10 +149,9 @@ export function ShellFrame({
 
   return (
     <div className="relative min-h-screen bg-background">
-      <div aria-hidden="true" className="brand-glow-soft pointer-events-none fixed inset-0" />
 
       {hideSidebar ? null : (
-        <aside className="glass fixed inset-y-0 left-0 z-30 hidden w-[17rem] flex-col border-y-0 border-l-0 border-r text-sidebar-foreground lg:flex">
+        <aside className="chrome fixed inset-y-0 left-0 z-30 hidden w-[17rem] flex-col border-y-0 border-l-0 border-r text-sidebar-foreground lg:flex">
           <SidebarBody areaLabel={areaLabel} context={context} sections={sections} />
         </aside>
       )}
@@ -167,7 +166,7 @@ export function ShellFrame({
                 (event.currentTarget as HTMLElement | null)?.focus();
               }}
               tabIndex={-1}
-              className="glass fixed inset-y-0 left-0 z-50 flex w-[18rem] max-w-[85vw] animate-fade flex-col border-y-0 border-l-0 border-r text-sidebar-foreground shadow-pop focus:outline-none lg:hidden">
+              className="chrome fixed inset-y-0 left-0 z-50 flex w-[18rem] max-w-[85vw] animate-fade flex-col border-y-0 border-l-0 border-r text-sidebar-foreground shadow-pop focus:outline-none lg:hidden">
               <DialogPrimitive.Title className="sr-only">{t('shell.mainNavigation')}</DialogPrimitive.Title>
               <DialogPrimitive.Description className="sr-only">{areaLabel}</DialogPrimitive.Description>
               <SidebarBody areaLabel={areaLabel} context={context} sections={sections} onNavigate={() => setDrawerOpen(false)} />
@@ -182,7 +181,7 @@ export function ShellFrame({
       )}
 
       <div className={cn('relative', !hideSidebar && 'lg:pl-[17rem]')}>
-        <header className="glass sticky top-0 z-20 flex h-16 items-center gap-2 border-x-0 border-t-0 border-b px-3 sm:gap-3 sm:px-6 lg:px-8">
+        <header className="chrome sticky top-0 z-20 flex h-16 items-center gap-2 border-x-0 border-t-0 border-b px-3 sm:gap-3 sm:px-6 lg:px-8">
           {hideSidebar ? null : (
             <Button variant="ghost" size="icon" className="lg:hidden" aria-label={t('shell.openMenu')} onClick={() => setDrawerOpen(true)}>
               <Menu />
@@ -190,7 +189,7 @@ export function ShellFrame({
           )}
           <div className="min-w-0 flex-1">
             <nav aria-label={t('shell.breadcrumb')} className="hidden sm:block">
-              <ol className="flex min-w-0 items-center gap-1 text-[0.6875rem] font-semibold text-muted-foreground">
+              <ol className="flex min-w-0 items-center gap-1 text-micro font-semibold text-muted-foreground">
                 {crumbs.map((crumb, index) => (
                   <li key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-1">
                     {index > 0 ? <ChevronRight className="size-3 shrink-0 opacity-60" aria-hidden="true" /> : null}
@@ -207,7 +206,7 @@ export function ShellFrame({
                 ))}
               </ol>
             </nav>
-            <p className="truncate font-display text-[1.0625rem] font-bold leading-6 text-foreground sm:text-[1.125rem]">{title}</p>
+            <p className="truncate font-display text-title-sm font-bold leading-6 text-foreground sm:text-lg">{title}</p>
           </div>
           {headerEnd}
         </header>
@@ -285,7 +284,7 @@ export function AppShell({ area, me, membership, children }: { area: Area; me: M
     <nav
       aria-label={t('shell.quickNavigation')}
       className={cn(
-        'glass fixed inset-x-0 bottom-0 z-20 grid border-x-0 border-b-0 border-t pb-[env(safe-area-inset-bottom)]',
+        'chrome fixed inset-x-0 bottom-0 z-20 grid border-x-0 border-b-0 border-t pb-[env(safe-area-inset-bottom)]',
         area === 'store' && 'lg:hidden',
       )}
       style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
@@ -299,7 +298,7 @@ export function AppShell({ area, me, membership, children }: { area: Area; me: M
             end={!item.path}
             className={({ isActive }) =>
               cn(
-                'relative flex h-16 flex-col items-center justify-center gap-1 text-[0.6875rem] transition-colors',
+                'relative flex h-16 flex-col items-center justify-center gap-1 text-micro transition-colors',
                 isActive ? 'font-bold text-primary' : 'font-medium text-muted-foreground hover:text-foreground',
               )
             }
@@ -310,7 +309,7 @@ export function AppShell({ area, me, membership, children }: { area: Area; me: M
                   <motion.span
                     layoutId="bottom-tab"
                     aria-hidden="true"
-                    className="absolute inset-x-4 top-0 h-[3px] rounded-full bg-primary shadow-glow-teal"
+                    className="absolute inset-x-4 top-0 h-[3px] rounded-full bg-primary"
                     transition={{ type: 'spring', stiffness: 420, damping: 36 }}
                   />
                 ) : null}

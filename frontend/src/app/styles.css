@@ -134,58 +134,6 @@
     letter-spacing: -0.02em;
   }
 
-  /*
-   * Sign-in screens (restored b2c8b71 layout). Scoped to `.auth-theme`, so nothing else is affected; the
-   * values equal the global palette.
-   * Dark is the reference look; light keeps the same identity on a pale
-   * blue canvas. Headings use Montserrat (covers Tajik Cyrillic), body text Inter.
-   */
-  .auth-theme {
-    --background: 214 45% 97%; /* #F3F7FC */
-    --foreground: 222 55% 14%; /* #0F1B3A */
-    --surface: 0 0% 100%;
-    --subtle: 214 45% 96%;
-    --muted-foreground: 219 16% 38%;
-    --input: 216 28% 84%;
-    --border: 216 32% 89%;
-    --primary: 174 84% 26%; /* #0B7D72: white text passes AA */
-    --primary-hover: 174 88% 21%;
-    --primary-foreground: 0 0% 100%;
-    --primary-soft: 170 60% 92%;
-    --ring: 174 72% 32%;
-    --brand-from: 174 84% 30%;
-    --brand-to: 221 83% 48%;
-  }
-
-  .dark .auth-theme {
-    --background: 224 72% 8%; /* #061129 */
-    --foreground: 210 40% 97%;
-    --surface: 223 50% 13%; /* #111C38 card */
-    --subtle: 222 42% 17%; /* #18244A fields */
-    --muted-foreground: 218 25% 72%;
-    --input: 220 30% 27%;
-    --border: 221 35% 21%;
-    --primary: 172 66% 50%; /* #2DD4BF on navy */
-    --primary-hover: 172 70% 60%;
-    --primary-foreground: 224 72% 8%;
-    --primary-soft: 176 50% 16%;
-    --ring: 172 66% 50%;
-    --brand-from: 172 66% 50%;
-    --brand-to: 199 89% 60%;
-  }
-
-  .auth-display {
-    font-family: 'Montserrat Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
-    letter-spacing: -0.02em;
-  }
-
-  /* Teal-to-blue text used for the brand word in headings. */
-  .auth-brand-text {
-    background-image: linear-gradient(90deg, hsl(var(--brand-from)), hsl(var(--brand-to)));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
 
   /* Colors cross-fade only while the theme is being switched, never during normal interaction. */
   .theme-transition,
@@ -225,63 +173,36 @@
 }
 
 @layer components {
-  /* Teal→blue text for the brand word ("Farmo") and brand accents in headings. */
-  .brand-text {
-    background-image: linear-gradient(90deg, hsl(var(--brand-from)), hsl(var(--brand-to)));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
 
-  /* Page glow of the sign-in screens: blue top-left, teal bottom-right. `.brand-glow-soft` is the calmer app version. */
-  .brand-glow {
-    background-image: radial-gradient(90% 70% at 12% 18%, rgb(37 99 235 / 0.12), transparent 60%),
-      radial-gradient(60% 60% at 95% 90%, rgb(13 148 136 / 0.1), transparent 60%);
-  }
-  .dark .brand-glow {
-    background-image: radial-gradient(90% 70% at 12% 18%, rgb(29 78 216 / 0.42), transparent 60%),
-      radial-gradient(60% 60% at 95% 90%, rgb(8 145 178 / 0.2), transparent 60%);
-  }
-  .brand-glow-soft {
-    background-image: radial-gradient(70% 45% at 8% 0%, rgb(37 99 235 / 0.07), transparent 65%),
-      radial-gradient(50% 40% at 100% 100%, rgb(13 148 136 / 0.06), transparent 65%);
-  }
-  .dark .brand-glow-soft {
-    background-image: radial-gradient(70% 45% at 8% 0%, rgb(29 78 216 / 0.22), transparent 65%),
-      radial-gradient(50% 40% at 100% 100%, rgb(8 145 178 / 0.1), transparent 65%);
-  }
 
-  /* Frosted surface (sign-in card, shell header/sidebar): translucent surface + blur, hairline edge. */
-  .glass {
-    @apply border-border bg-surface/85 backdrop-blur-xl;
+  /*
+   * Chrome surface: sidebar, drawer, sticky header, tab bar, dialog and menu panels. Opaque on purpose.
+   * This was a translucent blurred panel; at 27 call sites the blur cost a composite layer on every scroll
+   * and let body text show through the sidebar. Chrome sits above content, so it reads as a solid plane.
+   */
+  .chrome {
+    @apply border-border bg-surface;
   }
-  .dark .glass {
-    @apply border-white/10 bg-surface/75;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  .dark .chrome {
+    @apply border-white/10;
   }
 
   /* Card depth of the design language: soft navy shadow in light, deep shadow + top highlight at night. */
   .surface-card {
     @apply rounded-2xl border bg-surface shadow-card;
   }
+  /*
+   * At night the border does the separating. A dark canvas swallows a drop shadow, so the previous
+   * 60px-blur shadow and inner highlight cost a paint without being visible; a slightly stronger edge
+   * reads as depth instead.
+   */
   .dark .surface-card {
-    box-shadow: 0 24px 60px -32px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.04);
+    @apply border-white/10;
+    box-shadow: none;
   }
 }
 
 @layer utilities {
-  /* Staggered entrance for form rows (disabled by prefers-reduced-motion above). */
-  .stagger-in > * {
-    animation: rise-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-  .stagger-in > *:nth-child(2) { animation-delay: 40ms; }
-  .stagger-in > *:nth-child(3) { animation-delay: 80ms; }
-  .stagger-in > *:nth-child(4) { animation-delay: 120ms; }
-  .stagger-in > *:nth-child(5) { animation-delay: 160ms; }
-  .stagger-in > *:nth-child(6) { animation-delay: 200ms; }
-  .stagger-in > *:nth-child(7) { animation-delay: 240ms; }
-  .stagger-in > *:nth-child(8) { animation-delay: 280ms; }
-  .stagger-in > *:nth-child(n + 9) { animation-delay: 320ms; }
 
   /* Link with an underline that grows from the left on hover/focus. */
   .link-grow {
@@ -296,21 +217,27 @@
     background-size: 100% 1px;
   }
 
-  /* Codes, phone numbers, amounts: tabular digits that align in columns (DESIGN.md financial-mono). */
+  /*
+   * Machine identifiers only: public codes, phone numbers, IDs, version strings, verification digits.
+   *
+   * JetBrains Mono does NOT ship the Tajik Cyrillic letters (ғ қ ҳ ҷ ӣ ӯ are absent from every subset it
+   * bundles, verified against the woff2 cmaps), so any Tajik text placed in this class falls back to another
+   * family mid-string. Never apply it to translated copy, units or a localised currency name.
+   */
   .font-data {
     font-family: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
   }
+
+  /*
+   * Money, quantities, dates and percentages: Inter with tabular figures. Inter does carry the full Tajik
+   * range and ships `tnum`, so digits align in a column without switching family. This is the default for
+   * operational numbers; monospace is reserved for the identifiers above.
+   */
+  .font-numeric {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.005em;
+  }
 }
 
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}

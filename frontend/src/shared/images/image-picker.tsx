@@ -90,7 +90,7 @@ export function ImagePicker({
       <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
         <Avatar kind={KIND[subject]} name={name} size="xl" src={src} alt={t(key('alt'), { name })} />
         <div className="min-w-0 flex-1 space-y-3">
-          <p className="text-[0.8125rem] text-muted-foreground">{src ? t('images.current') : t(key('empty'))}</p>
+          <p className="text-label text-muted-foreground">{src ? t('images.current') : t(key('empty'))}</p>
           {canEdit ? (
             <>
               <div className="flex flex-wrap gap-2">
@@ -141,7 +141,7 @@ export function ImagePicker({
       >
         <div className="flex items-center gap-4 rounded-2xl border bg-subtle/40 p-4">
           <Avatar kind={KIND[subject]} name={name} size="xl" src={chosen?.preview} alt={t('images.previewAlt')} />
-          <p className="min-w-0 truncate text-[0.8125rem] text-muted-foreground">{chosen?.file.name}</p>
+          <p className="min-w-0 truncate text-label text-muted-foreground">{chosen?.file.name}</p>
         </div>
       </ConfirmDialog>
 
