@@ -108,9 +108,7 @@ export function Statement({
 }) {
   return (
     <div className={cn('max-w-[48rem]', align === 'center' && 'mx-auto text-center')}>
-      <Display as="p" size="hero" className="text-[length:clamp(1.875rem,1.1rem+3vw,3.5rem)] leading-[1.12]">
-        {children}
-      </Display>
+      <p className="font-serif text-statement font-semibold text-balance">{children}</p>
       {answer ? <p className="mt-10 max-w-measure text-lead text-muted-foreground">{answer}</p> : null}
     </div>
   );

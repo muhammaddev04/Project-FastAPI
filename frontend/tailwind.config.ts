@@ -57,6 +57,8 @@ export default {
          */
         hero: ['clamp(2.25rem, 1.35rem + 3.6vw, 4.25rem)', { lineHeight: '1.05', letterSpacing: '-0.032em' }],
         section: ['clamp(1.75rem, 1.25rem + 2vw, 2.75rem)', { lineHeight: '1.1', letterSpacing: '-0.028em' }],
+        /* The typographic moments: one sentence, alone in its band, between the hero and a section heading. */
+        statement: ['clamp(1.875rem, 1.1rem + 3vw, 3.5rem)', { lineHeight: '1.12', letterSpacing: '-0.03em' }],
         'section-sm': ['clamp(1.375rem, 1.1rem + 1.1vw, 1.875rem)', { lineHeight: '1.2', letterSpacing: '-0.022em' }],
         /* Lead paragraph under a display heading; sans, because it is read rather than looked at. */
         lead: ['clamp(1.0625rem, 1rem + 0.45vw, 1.3125rem)', { lineHeight: '1.6' }],

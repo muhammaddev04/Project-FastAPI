@@ -31,13 +31,18 @@ function Header() {
 
   // A route change closes the sheet, including a hash link to a section of the page already shown.
   useEffect(() => setOpen(false), [pathname]);
-  // The sheet covers the page, so the page must not scroll behind it.
+  // The sheet covers the page, so the page must not scroll behind it, and Escape must close it.
   useEffect(() => {
     if (!open) return undefined;
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
     return () => {
       document.body.style.overflow = overflow;
+      document.removeEventListener('keydown', onKeyDown);
     };
   }, [open]);
 
