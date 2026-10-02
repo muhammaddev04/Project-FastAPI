@@ -24,7 +24,6 @@ export function PlannedModulePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={t(`shell.areas.${area}`)}
         title={t(`nav.${area}.${item.key}`)}
         description={t(`planned.${area}.${item.key}`)}
         actions={<PhaseBadge phase={item.phase} />}

@@ -379,7 +379,9 @@
     "organizations": "Ташкилотҳо",
     "current": "Ҷорӣ",
     "newOrganization": "Ташкилоти нав",
-    "breadcrumb": "Роҳнамо"
+    "breadcrumb": "Роҳнамо",
+    "plannedGroup": "Нақшавӣ",
+    "plannedGroupHint": "Ҳоло дастрас нест"
   },
   "nav": {
     "sections": {

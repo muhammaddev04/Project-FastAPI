@@ -165,7 +165,6 @@ export function WelcomePage({ me, fixedType }: { me: Me; fixedType?: OrgType }) 
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
         <div className="animate-fade-in">
           <PageHeader
-            eyebrow={t('onboarding.eyebrow')}
             title={t('onboarding.title', { name: me.full_name.split(' ')[0] })}
             description={t('onboarding.subtitle')}
           />

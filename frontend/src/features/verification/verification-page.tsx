@@ -164,7 +164,7 @@ export function VerificationPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow={t('verification.eyebrow')} title={t('verification.title')} description={t('verification.why')} />
+      <PageHeader title={t('verification.title')} description={t('verification.why')} />
       <SettingsTabs />
 
       <Card className="overflow-hidden">

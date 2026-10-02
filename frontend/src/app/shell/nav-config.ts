@@ -111,6 +111,30 @@ export function navFor(area: Area, membership: Membership): NavSection[] {
     .filter((section) => section.items.length > 0);
 }
 
+/**
+ * Splits navigation into what works today and what a later TZ phase delivers.
+ *
+ * An item carrying a `phase` renders an honest "planned" page, so previously a Company OWNER opened the
+ * product to nine sidebar entries of which seven led nowhere. Mixed into the same list, that reads as a
+ * broken application rather than an early one. `available` keeps its sections and grouping; `planned`
+ * collapses into one quiet list the shell renders apart from the working navigation, so the sidebar answers
+ * "what can I do now" at a glance while the roadmap stays discoverable.
+ *
+ * Both halves keep their routes: a planned path still resolves to its placeholder page if opened directly.
+ */
+export function navByAvailability(
+  area: Area,
+  membership: Membership,
+): { available: NavSection[]; planned: NavItem[] } {
+  const sections = navFor(area, membership);
+  return {
+    available: sections
+      .map((section) => ({ ...section, items: section.items.filter((item) => !item.phase) }))
+      .filter((section) => section.items.length > 0),
+    planned: sections.flatMap((section) => section.items.filter((item) => item.phase)),
+  };
+}
+
 export function findItem(area: Area, path: string): NavItem | undefined {
   return BY_AREA[area].flatMap((section) => section.items).find((item) => item.path === path);
 }

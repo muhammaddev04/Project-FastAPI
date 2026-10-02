@@ -257,7 +257,7 @@ export function VerificationsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow={t('admin.eyebrow')} title={t('admin.verifications.title')} description={t('admin.verifications.description')} />
+      <PageHeader title={t('admin.verifications.title')} description={t('admin.verifications.description')} />
 
       <DataTable<AdminRequestSummary>
         caption={t('admin.verifications.title')}

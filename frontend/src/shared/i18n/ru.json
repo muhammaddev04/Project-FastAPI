@@ -379,7 +379,9 @@
     "organizations": "Организации",
     "current": "Текущая",
     "newOrganization": "Новая организация",
-    "breadcrumb": "Навигационная цепочка"
+    "breadcrumb": "Навигационная цепочка",
+    "plannedGroup": "В планах",
+    "plannedGroupHint": "Пока недоступно"
   },
   "nav": {
     "sections": {

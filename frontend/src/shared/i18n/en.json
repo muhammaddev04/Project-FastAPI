@@ -379,7 +379,9 @@
     "organizations": "Organizations",
     "current": "Current",
     "newOrganization": "New organization",
-    "breadcrumb": "Breadcrumb"
+    "breadcrumb": "Breadcrumb",
+    "plannedGroup": "Planned",
+    "plannedGroupHint": "Not available yet"
   },
   "nav": {
     "sections": {
