@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, MailCheck } from 'lucide-react';
+import { MailCheck } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,7 @@ import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
 import { Alert, Button, CodeInput, FormField, Input } from '@/shared/ui';
 import { useResendVerification, useVerifyEmail } from './api';
-import { AuthCard, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
+import { AuthCard, CardSwitch, authLabel } from './auth-layout';
 import { MethodUnavailable } from './availability';
 import { verifyEmailSchema, type VerifyEmailValues } from './schemas';
 import { useAuthMethod } from './use-auth-method';
@@ -96,7 +96,7 @@ export function VerifyEmailPage() {
           <Alert tone="success" title={t('auth.verify.successTitle')}>
             {t('auth.verify.successText')}
           </Alert>
-          <Button asChild block className={authPrimaryButton}>
+          <Button asChild block size="xl">
             <Link to="/login" replace>
               {t('auth.verify.goToLogin')}
             </Link>
@@ -122,7 +122,7 @@ export function VerifyEmailPage() {
 
       <form className="mt-5 space-y-4" noValidate onSubmit={onVerify}>
         <FormField labelClassName={authLabel} label={t('auth.fields.email')} error={message(errors.email?.message)}>
-          <Input variant="auth" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" leading={<Mail />} {...form.register('email')} />
+          <Input size="lg" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
         </FormField>
         <FormField labelClassName={authLabel} label={t('auth.verify.codeLabel')} hint={t('auth.verify.codeHint')} error={message(errors.code?.message)}>
           <CodeInput length={CODE_LENGTH} {...codeField} />
@@ -134,7 +134,7 @@ export function VerifyEmailPage() {
         ) : null}
         {resend.isSuccess ? <Alert tone="success">{t('auth.verify.resendSent')}</Alert> : null}
         {resend.isError ? <Alert tone="danger">{errorMessage(resend.error, t)}</Alert> : null}
-        <Button type="submit" block className={authPrimaryButton} disabled={!available || verifyIn > 0} loading={meta.isPending || verify.isPending}>
+        <Button type="submit" block size="xl" disabled={!available || verifyIn > 0} loading={meta.isPending || verify.isPending}>
           {verifyIn > 0 ? t('auth.verify.verifyIn', { seconds: verifyIn }) : t('auth.verify.submit')}
         </Button>
         <Button

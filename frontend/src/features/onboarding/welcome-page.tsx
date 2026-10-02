@@ -236,7 +236,7 @@ export function WelcomePage({ me, fixedType }: { me: Me; fixedType?: OrgType }) 
                 <Button type="button" variant="secondary" onClick={() => setReviewing(false)}>
                   {t('onboarding.edit')}
                 </Button>
-                <Button type="submit" variant="brand" size="lg" loading={create.isPending} className="sm:min-w-48">
+                <Button type="submit" variant="primary" size="lg" loading={create.isPending} className="sm:min-w-48">
                   {selected === 'COMPANY' ? t('onboarding.createCompany') : t('onboarding.createStore')}
                 </Button>
               </div>

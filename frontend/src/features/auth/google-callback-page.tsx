@@ -9,7 +9,7 @@ import { clearGoogleIntent, isGoogleLinkReturn } from '@/shared/auth/google-inte
 import { useSessionStore } from '@/shared/auth/session-store';
 import { Alert, Button, Spinner } from '@/shared/ui';
 import { goToGoogle, useGoogleSignIn } from './api';
-import { AuthCard, authPrimaryButton } from './auth-layout';
+import { AuthCard } from './auth-layout';
 
 type Returned = { code: string | null; state: string | null; error: string | null };
 
@@ -79,7 +79,7 @@ function SignInCallback({ returned }: { returned: Returned }) {
         <div className="mt-5 space-y-2">
           {/* An address that already has a password account signs in with it; nothing else is worth a retry. */}
           {code !== 'oauth_account_exists' && code !== 'user_blocked' && code !== 'oauth_email_not_verified' ? (
-            <Button type="button" block className={authPrimaryButton} onClick={goToGoogle}>
+            <Button type="button" block size="xl" onClick={goToGoogle}>
               {t('auth.google.tryAgain')}
             </Button>
           ) : null}
@@ -150,7 +150,7 @@ function LinkCallback({ returned, urlClean }: { returned: Returned; urlClean: bo
         <Waiting text={t('auth.google.linking')} />
       )}
       {problem ? (
-        <Button asChild block className={`mt-5 ${authPrimaryButton}`}>
+        <Button asChild block size="xl" className="mt-5">
           <Link to={signedOut ? '/login' : '/profile'} replace onClick={clearGoogleIntent}>
             {signedOut ? t('auth.register.signIn') : t('auth.google.backToProfile')}
           </Link>

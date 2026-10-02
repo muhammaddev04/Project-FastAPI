@@ -34,7 +34,7 @@ export function StoreDashboard() {
             <p className="text-label text-muted-foreground">{t('dashboard.store.repeatText')}</p>
           </div>
         </div>
-        <Button variant="brand" size="lg" disabled aria-describedby="repeat-order-note" className="relative max-sm:w-full">
+        <Button variant="primary" size="lg" disabled aria-describedby="repeat-order-note" className="relative max-sm:w-full">
           {t('dashboard.store.repeatAction')}
         </Button>
         <span id="repeat-order-note" className="sr-only">

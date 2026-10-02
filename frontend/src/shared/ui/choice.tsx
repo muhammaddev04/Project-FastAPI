@@ -14,9 +14,11 @@ export function ChoiceGroup({ legend, children, size = 'md', className }: { lege
 }
 
 /**
- * One radio tile: rounded-2xl card that turns teal with a soft glow when chosen. The icon tile takes the entity
- * gradient of the choice (company teal, store sky) so the identity is visible before the organization exists.
- * `compact` is the one-line tile of the sign-in form; the default shows the description and details.
+ * One radio tile (Phase C4/C10). Chosen state is a primary border, a tinted ground and a solid primary icon
+ * plate. The per-entity gradient (teal for company, sky for store) is gone: colouring the two options
+ * differently read as two unrelated brands rather than one question with two answers.
+ *
+ * This is the only implementation of an either/or choice in the product; a page must not hand-roll its own.
  */
 export function ChoiceCard({
   field,
@@ -27,7 +29,6 @@ export function ChoiceCard({
   badge,
   description,
   children,
-  entity,
   compact = false,
 }: {
   field: UseFormRegisterReturn;
@@ -38,18 +39,14 @@ export function ChoiceCard({
   badge?: ReactNode;
   description?: ReactNode;
   children?: ReactNode;
-  entity?: 'company' | 'store';
   compact?: boolean;
 }) {
-  const fill = entity === 'store' ? 'from-brand-sky to-brand-blue' : 'from-brand-light to-brand';
   return (
     <label
       className={cn(
-        'relative flex cursor-pointer rounded-2xl border transition-[border-color,background-color,box-shadow,transform] duration-200 focus-within:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)] active:scale-[0.99]',
+        'relative flex cursor-pointer rounded-2xl border transition-[border-color,background-color] duration-fast focus-within:shadow-[0_0_0_2px_hsl(var(--primary)/0.18)]',
         compact ? 'items-center gap-2.5 px-2.5 py-3 sm:gap-3 sm:px-3.5 2xl:gap-4 2xl:rounded-2xl 2xl:px-5 2xl:py-4 short:py-1.5 short:2xl:py-3' : 'flex-col gap-3 p-4 sm:p-5',
-        selected
-          ? 'border-primary/70 bg-primary/[0.07] shadow-[0_16px_34px_-24px_hsl(var(--primary)/0.9)]'
-          : 'border-input bg-subtle/50 hover:-translate-y-0.5 hover:border-primary/40',
+        selected ? 'border-primary bg-primary/[0.06]' : 'border-input bg-subtle/50 hover:border-primary/40',
       )}
     >
       <input type="radio" value={value} className="sr-only" {...field} />
@@ -58,7 +55,7 @@ export function ChoiceCard({
           className={cn(
             'flex shrink-0 items-center justify-center rounded-xl transition-colors',
             compact ? 'size-8 sm:size-9 2xl:size-11' : 'size-11',
-            selected ? cn('bg-gradient-to-br text-white', fill) : 'border bg-surface text-muted-foreground',
+            selected ? 'bg-primary text-primary-foreground' : 'border bg-surface text-muted-foreground',
           )}
         >
           <Icon className="size-[1.125rem]" aria-hidden="true" />

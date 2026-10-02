@@ -31,7 +31,6 @@ export function OrgTypeChoice({
           value={type}
           selected={selected === type}
           icon={icon}
-          entity={key}
           title={t(`onboarding.${key}.title`)}
           description={t(`onboarding.${key}.description`)}
         >

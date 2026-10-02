@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +7,7 @@ import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
 import { Alert, Button, CodeInput, FormField, Input, PasswordInput } from '@/shared/ui';
 import { usePasswordResetComplete, usePasswordResetStart, usePasswordResetVerify } from './api';
-import { AuthCard, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
+import { AuthCard, CardSwitch, authLabel } from './auth-layout';
 import { MethodUnavailable } from './availability';
 import { PasswordChecklist } from './password-checklist';
 import {
@@ -52,7 +51,7 @@ export function ForgotPasswordPage() {
         <Alert tone="success" title={t('auth.resetPassword.successTitle')}>
           {t('auth.resetPassword.successText')}
         </Alert>
-        <Button asChild block className={`mt-5 ${authPrimaryButton}`}>
+        <Button asChild block size="xl" className="mt-5">
           <Link to="/login" replace>
             {t('auth.resetPassword.goToLogin')}
           </Link>
@@ -113,14 +112,14 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
       ) : null}
       <form className="space-y-4" noValidate onSubmit={onSubmit}>
         <FormField labelClassName={authLabel} label={t('auth.fields.email')} hint={t('auth.forgot.emailHint')} error={message(form.formState.errors.email?.message)}>
-          <Input variant="auth" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" leading={<Mail />} {...form.register('email')} />
+          <Input size="lg" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
         </FormField>
         {failure ? (
           <Alert tone="danger" title={t('auth.forgot.failed')}>
             {errorMessage(failure, t)}
           </Alert>
         ) : null}
-        <Button type="submit" block className={`!mt-6 ${authPrimaryButton}`} disabled={!available || retryIn > 0} loading={meta.isPending || start.isPending}>
+        <Button type="submit" block size="xl" className="!mt-6" disabled={!available || retryIn > 0} loading={meta.isPending || start.isPending}>
           {retryIn > 0 ? t('auth.forgot.retryIn', { seconds: retryIn }) : t('auth.forgot.submit')}
         </Button>
       </form>
@@ -186,7 +185,7 @@ function CodeStep({ email, onVerified, onChangeEmail }: { email: string; onVerif
         ) : null}
         {resend.isSuccess ? <Alert tone="success">{t('auth.forgot.codeResent')}</Alert> : null}
         {resend.isError ? <Alert tone="danger">{errorMessage(resend.error, t)}</Alert> : null}
-        <Button type="submit" block className={authPrimaryButton} disabled={verifyIn > 0} loading={verify.isPending}>
+        <Button type="submit" block size="xl" disabled={verifyIn > 0} loading={verify.isPending}>
           {verifyIn > 0 ? t('auth.verify.verifyIn', { seconds: verifyIn }) : t('auth.forgot.verifyCode')}
         </Button>
         <Button
@@ -247,12 +246,12 @@ function NewPasswordStep({ token, onDone, onRestart }: { token: string; onDone: 
       <form className="space-y-4" noValidate onSubmit={onSubmit}>
         <div className="space-y-2">
           <FormField labelClassName={authLabel} label={t('auth.fields.newPassword')} error={message(errors.password?.message)}>
-            <PasswordInput variant="auth" autoComplete="new-password" {...form.register('password')} />
+            <PasswordInput size="lg" autoComplete="new-password" {...form.register('password')} />
           </FormField>
           <PasswordChecklist password={password} />
         </div>
         <FormField labelClassName={authLabel} label={t('auth.fields.confirmPassword')} error={message(errors.confirmPassword?.message)}>
-          <PasswordInput variant="auth" autoComplete="new-password" {...form.register('confirmPassword')} />
+          <PasswordInput size="lg" autoComplete="new-password" {...form.register('confirmPassword')} />
         </FormField>
         <p className="text-caption text-muted-foreground">{t('auth.resetPassword.signOutNote')}</p>
         {failure ? (
@@ -270,7 +269,7 @@ function NewPasswordStep({ token, onDone, onRestart }: { token: string; onDone: 
             {authorizationGone ? t('auth.resetPassword.expiredText') : errorMessage(failure, t)}
           </Alert>
         ) : null}
-        <Button type="submit" block className={`!mt-6 ${authPrimaryButton}`} disabled={authorizationGone} loading={complete.isPending}>
+        <Button type="submit" block size="xl" className="!mt-6" disabled={authorizationGone} loading={complete.isPending}>
           {t('auth.resetPassword.submit')}
         </Button>
       </form>

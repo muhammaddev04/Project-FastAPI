@@ -1,17 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, Building2, Check, Mail, Store, UserRound } from 'lucide-react';
+import { ArrowRight, Building2, Store } from 'lucide-react';
 import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
 import { currentLanguage } from '@/shared/i18n';
-import { cn } from '@/shared/lib/cn';
-import { Alert, Button, FormField, Input, PasswordInput } from '@/shared/ui';
+import { Alert, Button, Checkbox, CheckboxField, ChoiceCard, ChoiceGroup, FormField, Input, PasswordInput } from '@/shared/ui';
 import { useRegister } from './api';
 import { GoogleButton, OrDivider } from './google-button';
-import { AuthCard, BrandTitle, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
+import { AuthCard, BrandTitle, CardSwitch, authLabel } from './auth-layout';
 import { MethodUnavailable } from './availability';
 import { PasswordChecklist } from './password-checklist';
 import { PASSWORD_PROBLEMS, registerSchema, type RegisterValues } from './schemas';
@@ -25,7 +24,13 @@ const SERVER_FIELDS: Record<string, 'email' | 'password' | 'fullName'> = {
   full_name: 'fullName',
 };
 
-/** Store / Company choice as two compact tiles with their TZ commercial terms (Store free, Company trial). */
+/**
+ * Store / Company choice with the TZ commercial terms (Store free, Company trial).
+ *
+ * This was 40 lines of hand-rolled tile markup, a second implementation of the same decision that
+ * `/welcome` already renders, and the only place in the product that hardcoded `#0B7D72` instead of using
+ * the primary token. It now composes the shared choice primitive.
+ */
 function RoleChoice({ selected, field }: { selected: RegisterValues['orgType']; field: UseFormRegisterReturn }) {
   const { t } = useTranslation();
   const options = [
@@ -33,38 +38,20 @@ function RoleChoice({ selected, field }: { selected: RegisterValues['orgType']; 
     { type: 'COMPANY' as const, icon: Building2, badge: t('auth.register.companyBadge') },
   ];
   return (
-    <fieldset>
-      <legend className={cn(authLabel, 'mb-2')}>{t('auth.register.typeLegend')}</legend>
-      <div className="grid grid-cols-1 gap-2.5 min-[360px]:grid-cols-2">
-        {options.map(({ type, icon: Icon, badge }) => {
-          const active = selected === type;
-          return (
-            <label
-              key={type}
-              className={cn(
-                'relative flex cursor-pointer items-center gap-2 rounded-2xl border px-2.5 py-3 short:py-1.5 sm:gap-3 transition-[border-color,background-color,box-shadow,transform] duration-200 focus-within:shadow-[0_0_0_3px_hsl(var(--primary)/0.2)] active:scale-[0.98] sm:px-3.5',
-                active ? 'border-primary/70 bg-primary/10' : 'border-input bg-subtle/60 hover:-translate-y-0.5 hover:border-primary/40',
-              )}
-            >
-              <input type="radio" value={type} className="sr-only" {...field} />
-              <span
-                className={cn(
-                  'flex size-8 shrink-0 items-center sm:size-9 justify-center rounded-xl transition-colors',
-                  active ? 'bg-[#0B7D72] text-white dark:bg-[#0D8276]' : 'bg-surface text-muted-foreground',
-                )}
-              >
-                <Icon className="size-[1.125rem]" aria-hidden="true" />
-              </span>
-              <span className="min-w-0">
-                <span className="block break-words text-label font-semibold leading-tight sm:text-body">{t(`auth.register.roles.${type}.title`)}</span>
-                <span className="block text-micro font-medium text-muted-foreground">{badge}</span>
-              </span>
-              {active ? <Check className="absolute right-2.5 top-2.5 size-3.5 text-primary" aria-hidden="true" /> : null}
-            </label>
-          );
-        })}
-      </div>
-    </fieldset>
+    <ChoiceGroup legend={t('auth.register.typeLegend')} className="min-[360px]:grid-cols-2">
+      {options.map(({ type, icon, badge }) => (
+        <ChoiceCard
+          key={type}
+          compact
+          field={field}
+          value={type}
+          selected={selected === type}
+          icon={icon}
+          title={t(`auth.register.roles.${type}.title`)}
+          badge={badge}
+        />
+      ))}
+    </ChoiceGroup>
   );
 }
 
@@ -167,18 +154,18 @@ export function RegisterPage() {
             label={orgType === 'COMPANY' ? t('onboarding.companyName') : t('onboarding.storeName')}
             error={message(errors.orgName?.message)}
           >
-            <Input variant="auth" autoComplete="organization" leading={orgType === 'COMPANY' ? <Building2 /> : <Store />} {...form.register('orgName')} />
+            <Input size="lg" autoComplete="organization" {...form.register('orgName')} />
           </FormField>
           <FormField labelClassName={authLabel} label={t('auth.fields.fullName')} error={message(errors.fullName?.message)}>
-            <Input variant="auth" autoComplete="name" placeholder={t('auth.register.namePlaceholder')} leading={<UserRound />} {...form.register('fullName')} />
+            <Input size="lg" autoComplete="name" placeholder={t('auth.register.namePlaceholder')} {...form.register('fullName')} />
           </FormField>
         </div>
         <FormField labelClassName={authLabel} label={t('auth.fields.email')} hint={t('auth.register.emailHint')} error={message(errors.email?.message)}>
-          <Input variant="auth" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" leading={<Mail />} {...form.register('email')} />
+          <Input size="lg" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
         </FormField>
         <div className="space-y-2">
           <FormField labelClassName={authLabel} label={t('auth.fields.newPassword')} error={message(errors.password?.message)}>
-            <PasswordInput variant="auth" placeholder={t('auth.login.passwordPlaceholder')} autoComplete="new-password" {...form.register('password')} />
+            <PasswordInput size="lg" placeholder={t('auth.login.passwordPlaceholder')} autoComplete="new-password" {...form.register('password')} />
           </FormField>
           <AnimatePresence initial={false}>
             {password ? (
@@ -194,24 +181,19 @@ export function RegisterPage() {
             ) : null}
           </AnimatePresence>
         </div>
-        <div className="space-y-1">
-          <label className="flex cursor-pointer items-start gap-2.5 text-caption leading-[1.125rem] text-muted-foreground sm:text-label sm:leading-5 short:sm:text-caption short:sm:leading-[1.125rem]">
-            <input type="checkbox" className="mt-0.5 size-4 shrink-0 cursor-pointer rounded accent-[hsl(var(--primary))]" {...form.register('acceptTerms')} />
-            <span>{t('auth.register.terms')}</span>
-          </label>
-          {errors.acceptTerms?.message ? (
-            <p role="alert" className="pl-6 text-label text-danger">
-              {t(errors.acceptTerms.message)}
-            </p>
-          ) : null}
-        </div>
+        <CheckboxField
+          control={<Checkbox {...form.register('acceptTerms')} />}
+          error={errors.acceptTerms?.message ? t(errors.acceptTerms.message) : undefined}
+        >
+          {t('auth.register.terms')}
+        </CheckboxField>
         <NextSteps />
         {formError ? (
           <Alert tone="danger" title={t('auth.register.failed')}>
             {errorMessage(formError, t)}
           </Alert>
         ) : null}
-        <Button type="submit" block className={authPrimaryButton} disabled={!available} loading={meta.isPending || registration.isPending}>
+        <Button type="submit" block size="xl" disabled={!available} loading={meta.isPending || registration.isPending}>
           {t('auth.register.submit')}
           <ArrowRight className="transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
         </Button>

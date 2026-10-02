@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRight, Mail, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { errorMessage } from '@/shared/api/errors';
 import { useSessionStore } from '@/shared/auth/session-store';
 import { Alert, Button, FormField, Input, PasswordInput } from '@/shared/ui';
 import { useLogin } from './api';
-import { AuthCard, BrandTitle, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
+import { AuthCard, BrandTitle, CardSwitch, authLabel } from './auth-layout';
 import { MethodUnavailable } from './availability';
 import { GoogleButton, OrDivider } from './google-button';
 import { loginSchema, type LoginValues } from './schemas';
@@ -89,12 +89,12 @@ export function LoginPage() {
       <form className="space-y-4 short:space-y-2.5" noValidate onSubmit={onSubmit}>
         <FormField labelClassName={authLabel} label={t('auth.fields.email')} error={message(errors.email?.message)}>
           <Input
-            variant="auth"
+            size="lg"
             type="email"
             inputMode="email"
             autoComplete="username"
             placeholder="name@company.tj"
-            leading={<Mail />}
+           
             {...form.register('email')}
           />
         </FormField>
@@ -108,7 +108,7 @@ export function LoginPage() {
             </Link>
           }
         >
-          <PasswordInput variant="auth" placeholder={t('auth.login.passwordPlaceholder')} autoComplete="current-password" {...form.register('password')} />
+          <PasswordInput size="lg" placeholder={t('auth.login.passwordPlaceholder')} autoComplete="current-password" {...form.register('password')} />
         </FormField>
         <p className="flex items-center gap-2 text-label text-muted-foreground">
           <ShieldCheck className="size-4 shrink-0 text-primary" aria-hidden="true" />
@@ -118,7 +118,7 @@ export function LoginPage() {
         <Button
           type="submit"
           block
-          className={authPrimaryButton}
+          size="xl"
           disabled={!available || retryIn > 0}
           loading={meta.isPending || login.isPending || login.isSuccess}
         >

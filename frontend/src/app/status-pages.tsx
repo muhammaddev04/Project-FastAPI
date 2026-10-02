@@ -19,7 +19,7 @@ function StatusPage({ code, icon: Icon, title, description }: { code: string; ic
         </span>
         <h1 className="font-display text-2xl font-extrabold sm:text-display-sm">{title}</h1>
         <p className="mt-2 text-body-lg leading-relaxed text-muted-foreground">{description}</p>
-        <Button asChild variant="brand" size="lg" className="mt-7">
+        <Button asChild variant="primary" size="lg" className="mt-7">
           <Link to="/">{t('states.goHome')}</Link>
         </Button>
       </div>

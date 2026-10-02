@@ -291,13 +291,6 @@ export function AuthCard({
 /** Field label inside auth cards. */
 export const authLabel = 'text-body-lg font-medium text-foreground/90';
 
-/**
- * Primary action: teal→blue gradient with white text (mobile screenshot, light mode); on dark desktop the
- * sky→cyan gradient with navy text from the laptop screenshot. Lifts on hover, presses on click.
- */
-export const authPrimaryButton =
-  'group h-[3.25rem] short:h-12 rounded-2xl bg-gradient-to-r from-[#0B7D72] to-[#1D4ED8] text-base font-bold text-white shadow-[0_12px_30px_-12px_rgba(29,78,216,0.6)] hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-12px_rgba(29,78,216,0.7)] hover:brightness-110 active:translate-y-0 active:scale-[0.99] disabled:hover:translate-y-0 disabled:hover:brightness-100 disabled:shadow-none sm:h-14 sm:text-title-sm short:sm:h-12 dark:lg:from-[#0EA5E9] dark:lg:to-[#06B6D4] dark:lg:text-[#06122B] dark:lg:shadow-[0_12px_30px_-12px_rgba(6,182,212,0.7)]';
-
 /** Bottom line of a card: muted question + teal link with a growing underline. */
 export function CardSwitch({ question, to, link }: { question: string; to: string; link: string }) {
   return (
