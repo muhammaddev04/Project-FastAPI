@@ -28,10 +28,10 @@ export function BrandMark({ className, size = 'sm' }: { className?: string; size
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <span
         className={cn(
-          'flex shrink-0 items-center justify-center bg-gradient-to-br from-brand-light to-brand shadow-[0_8px_24px_-8px_rgba(45,212,191,0.65)]',
+          'flex shrink-0 items-center justify-center bg-gradient-to-br from-brand-light to-brand',
           size === 'lg' || size === 'hero'
             ? cn(
-                'size-10 rounded-xl transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105 lg:size-12 lg:rounded-2xl',
+                'size-10 rounded-xl lg:size-12 lg:rounded-2xl',
                 size === 'hero' && '2xl:size-16 2xl:rounded-2xl',
               )
             : size === 'md'

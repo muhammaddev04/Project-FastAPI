@@ -4,7 +4,7 @@
 
 /*
  * TezFarmo design tokens (DESIGN.md, CR-002). The whole product uses the language of the sign-in screens:
- * pale-blue canvas / navy night canvas, white or navy glass surfaces, deep teal action color with a teal→blue
+ * pale-blue canvas / navy night canvas, opaque white or navy chrome surfaces, deep teal action color and a
  * brand gradient, Montserrat display type, rounded surfaces and a soft teal glow on the active element.
  */
 @layer base {
@@ -64,7 +64,7 @@
     --accent-foreground: 0 0% 100%;
     --accent-soft: var(--primary-soft);
 
-    /* Shell chrome: white glass in light, navy glass at night (same for every area). */
+    /* Shell chrome: opaque white in light, navy at night (same for every area). */
     --sidebar: 0 0% 100%;
     --sidebar-foreground: 222 55% 14%;
     --sidebar-muted: 219 16% 38%;
@@ -154,7 +154,7 @@
   }
 
   body {
-    @apply min-h-screen bg-background font-sans text-[0.875rem] leading-5 text-foreground antialiased;
+    @apply min-h-screen bg-background font-sans text-body text-foreground antialiased;
     font-feature-settings: 'cv11', 'ss01';
   }
 

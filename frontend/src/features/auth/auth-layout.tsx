@@ -45,7 +45,7 @@ function Brand() {
   const { t } = useTranslation();
   return (
     <Link to="/login" aria-label={t('common.appName')} className="group flex min-w-0 items-center gap-2.5 rounded-xl sm:gap-3">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#2DD4BF] to-[#0D9488] shadow-[0_8px_24px_-8px_rgba(45,212,191,0.65)] transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105 lg:size-12 lg:rounded-2xl">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-light to-brand lg:size-12 lg:rounded-2xl">
         <LogoMark inverted className="h-5 lg:h-6" />
       </span>
       <span className="font-display text-[1.375rem] font-extrabold leading-none lg:text-display-sm">
@@ -244,7 +244,7 @@ export function AuthTabs() {
             {active ? (
               <motion.span
                 aria-hidden="true"
-                className="absolute inset-0 rounded-xl bg-[#0B7D72] shadow-[0_10px_24px_-12px_rgba(20,184,166,0.9)] dark:bg-[#0D8276]"
+                className="absolute inset-0 rounded-xl bg-primary-strong"
                 initial={{ x: slideFrom }}
                 animate={{ x: 0 }}
                 transition={{ type: 'spring', stiffness: 420, damping: 36 }}

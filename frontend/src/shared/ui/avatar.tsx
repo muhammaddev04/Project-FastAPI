@@ -22,10 +22,15 @@ const SIZES: Record<Size, { box: string; text: string; icon: string; badge: stri
   xl: { box: 'size-16 sm:size-20', text: 'text-xl sm:text-2xl', icon: 'size-8 sm:size-9', badge: 'size-6 [&_svg]:size-3.5' },
 };
 
+/*
+ * The hue still tells a person from a company from a store, which is information. The gradient and the
+ * coloured glow behind each one were not: three fills meant three gradients and three glow shadows for what
+ * is, at 32px, a solid coloured square with a letter on it.
+ */
 const KIND: Record<AvatarKind, { shape: string; fill: string; icon?: LucideIcon }> = {
-  person: { shape: 'rounded-full', fill: 'from-brand to-brand-blue shadow-[0_8px_22px_-10px_rgba(29,78,216,0.7)]' },
-  company: { shape: 'rounded-2xl', fill: 'from-brand-light to-brand shadow-[0_8px_24px_-8px_rgba(45,212,191,0.65)]', icon: Building2 },
-  store: { shape: 'rounded-2xl', fill: 'from-brand-sky to-brand-blue shadow-[0_8px_24px_-8px_rgba(14,165,233,0.6)]', icon: Store },
+  person: { shape: 'rounded-full', fill: 'bg-brand-blue' },
+  company: { shape: 'rounded-2xl', fill: 'bg-brand', icon: Building2 },
+  store: { shape: 'rounded-2xl', fill: 'bg-brand-sky', icon: Store },
 };
 
 export function Avatar({
@@ -57,7 +62,7 @@ export function Avatar({
     <span
       aria-hidden={picture && alt ? undefined : true}
       className={cn(
-        'relative inline-flex shrink-0 items-center justify-center bg-gradient-to-br font-display font-bold text-white',
+        'relative inline-flex shrink-0 items-center justify-center font-display font-semibold text-white',
         s.box,
         k.shape,
         k.fill,

@@ -48,7 +48,6 @@ export function StoreDashboard() {
           title={t('home.store.catalog')}
           description={t('home.store.catalogText')}
           phase="P04"
-          ghostTiles={6}
           className="lg:col-span-2"
         />
         <PlannedPanel icon={ShoppingCart} title={t('home.store.cart')} description={t('home.store.cartText')} phase="P07" />
