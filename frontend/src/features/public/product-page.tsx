@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { JOURNEY_STEPS } from '@/features/auth/journey-steps';
 import { Button } from '@/shared/ui';
 import { Availability, Band, Display, Eyebrow, Index, Lead, Reveal, Split, Statement } from './primitives';
+import { RuledField } from './texture';
 import { LIVE_MODULES, PLANNED_MODULES } from './roadmap';
 
 /**
@@ -114,9 +115,13 @@ export function ProductPage() {
         </div>
       </Band>
 
-      {/* The transition. A statement does the work a section header would have done badly. */}
-      <Band space="air" hairline>
-        <Reveal>
+      {/*
+       * The transition from what exists to what does not. A statement does the work a section header would have
+       * done badly, over the ruled field so the turn in the page has some weight behind it.
+       */}
+      <Band space="air" hairline className="relative overflow-hidden">
+        <RuledField className="pointer-events-none absolute inset-0" />
+        <Reveal className="relative">
           <Statement answer={t('site.product.planned.lead')}>{t('site.product.planned.title')}</Statement>
         </Reveal>
       </Band>

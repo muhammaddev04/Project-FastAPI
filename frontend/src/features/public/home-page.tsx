@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { JOURNEY_STEPS } from '@/features/auth/journey-steps';
 import { Button } from '@/shared/ui';
+import { PipelineFragment } from './fragments';
+import { ASSET_MANIFEST } from './media-assets';
+import { Figure, Oversized } from './media';
 import { Availability, Band, Display, Eyebrow, Index, Lead, Reveal, Split, Statement } from './primitives';
+import { RuledField } from './texture';
 import { RelationshipFlow } from './relationship-flow';
 import { PLANNED_MODULES } from './roadmap';
 
@@ -154,6 +158,19 @@ export function HomePage() {
         </Split>
       </Band>
 
+      {/*
+       * Image-led band, full bleed, no frame. Until the depot photograph exists the slot renders the order
+       * pipeline at display scale on the ink ground, cropped by the viewport edge so the row reads as continuing
+       * past it. Either way the band is the subject: no heading sits on top of it.
+       */}
+      <section className="relative overflow-hidden bg-foreground">
+        <Figure slot={ASSET_MANIFEST[0]!} bleed className="border-0 bg-foreground">
+          <Oversized className="h-full">
+            <PipelineFragment className="h-full" />
+          </Oversized>
+        </Figure>
+      </section>
+
       {/* Restrained trio. Full width, no boxes, separated by whitespace only. */}
       <Band hairline>
         <div className="max-w-[40rem]">
@@ -182,9 +199,13 @@ export function HomePage() {
         </Split>
       </Band>
 
-      {/* Second typographic moment, centred this time so it does not echo the first. */}
-      <Band space="air" hairline>
-        <Reveal>
+      {/*
+       * Second typographic moment, centred so it does not echo the first, over the ruled field: the ledger paper
+       * the whole product is about, masked so the rules never run under the words.
+       */}
+      <Band space="air" hairline className="relative overflow-hidden">
+        <RuledField className="pointer-events-none absolute inset-0" />
+        <Reveal className="relative">
           <Statement align="center">{t('site.home.openStatement')}</Statement>
         </Reveal>
       </Band>

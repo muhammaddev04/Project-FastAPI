@@ -23,20 +23,32 @@ describe('public site', () => {
      * fails here rather than being noticed on the page a month later.
      */
     it.each([
-      ['/', 8],
-      ['/how-it-works', 7],
+      ['/', 9],
+      ['/how-it-works', 8],
       ['/product', 6],
     ])('%s is a sequence of bands, not one repeated section', async (path, atLeast) => {
       mockApi([{ path: '/meta', body: META }]);
       renderRoutes(routes, path);
 
       await screen.findByRole('heading', { level: 1 });
-      const bands = document.querySelectorAll('main > section');
+      const bands = [...document.querySelectorAll('main > section')];
       expect(bands.length).toBeGreaterThanOrEqual(atLeast);
-      // Exactly one inverted band per page: the closing action.
-      expect([...bands].filter((band) => band.className.includes('bg-foreground'))).toHaveLength(1);
+      // The page closes on the inverted action band, whatever came before it.
+      expect(bands[bands.length - 1]!.className).toContain('bg-foreground');
       // No marketing copy sits in a shadowed or heavily rounded container.
       expect(document.querySelectorAll('main .shadow-card, main .shadow-pop')).toHaveLength(0);
+    });
+
+    it.each([
+      ['/', 1],
+      ['/how-it-works', 2],
+    ])('%s carries %i image-led band(s) that the frame does not contain', async (path, figures) => {
+      mockApi([{ path: '/meta', body: META }]);
+      renderRoutes(routes, path);
+
+      await screen.findByRole('heading', { level: 1 });
+      // A figure per declared slot on the page: image-led composition, not text in every band.
+      expect(document.querySelectorAll('main figure')).toHaveLength(figures);
     });
 
     it('gives the home page one dominant headline and keeps the supporting copy far smaller', async () => {

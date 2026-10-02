@@ -9,6 +9,7 @@ import { cn } from '@/shared/lib/cn';
 import { ThemeSwitcher } from '@/shared/theme/theme-switcher';
 import { BrandMark, Button, SupportLink } from '@/shared/ui';
 import { Frame } from './primitives';
+import { PaperGrain } from './texture';
 
 /** The three public pages, in the order the argument is made. */
 export const PUBLIC_NAV = [
@@ -53,7 +54,7 @@ function Header() {
     );
 
   return (
-    <header className="sticky top-0 z-30 border-b bg-background">
+    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-[2px]">
       <Frame>
         <div className="flex h-14 items-center justify-between gap-4 lg:h-16">
           <Link to="/" aria-label={t('common.appName')} className="rounded-xl">
@@ -139,7 +140,7 @@ function Footer() {
   const { t } = useTranslation();
   const meta = useMeta();
   return (
-    <footer className="border-t bg-subtle/50">
+    <footer className="relative z-10 border-t bg-subtle/50">
       <Frame className="py-12 lg:py-16">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="max-w-sm">
@@ -198,10 +199,11 @@ function Footer() {
 export function PublicShell({ children }: { children?: ReactNode }) {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="paper flex min-h-screen flex-col bg-background font-sans text-foreground">
+      <div className="paper relative flex min-h-screen flex-col bg-background font-sans text-foreground">
+        <PaperGrain />
         <Header />
         {/* `/` is not a child route: it decides between the homepage and a signed-in user's destination first. */}
-        <main className="flex-1">{children ?? <Outlet />}</main>
+        <main className="relative z-10 flex-1">{children ?? <Outlet />}</main>
         <Footer />
       </div>
     </MotionConfig>

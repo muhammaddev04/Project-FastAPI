@@ -144,7 +144,11 @@ export default {
         pop: '0 16px 32px -12px rgb(15 23 42 / 0.18), 0 4px 8px -4px rgb(15 23 42 / 0.1)',
       },
       transitionTimingFunction: {
-        /* The reference's single easing curve, used for section reveals and nothing else. */
+        /*
+         * The one easing curve on the public site and the authentication screens: every reveal, wipe, draw and
+         * cross-fade uses it. Phase E4 retired the second curve (0.2, 0.8, 0.2, 1) that Phase C had left in the
+         * page transition and the code input, because two curves in one flow is two motion personalities.
+         */
         paper: 'cubic-bezier(0.23, 1, 0.32, 1)',
       },
       maxWidth: {

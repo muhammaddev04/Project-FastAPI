@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui';
+import { HandoverFragment, VerificationFragment } from './fragments';
+import { ASSET_MANIFEST } from './media-assets';
+import { Figure, Oversized } from './media';
 import { Availability, Band, Display, Eyebrow, Index, Lead, Reveal, Split, Statement } from './primitives';
 import { RelationshipFlow } from './relationship-flow';
 
@@ -116,7 +119,10 @@ export function HowItWorksPage() {
         </Reveal>
       </Band>
 
-      {/* Store: reversed, and a grid rather than a column, so the silhouette differs from the company's. */}
+      {/*
+       * Store: reversed, a grid rather than a column, and an image in the text column. The two sides differ in
+       * medium as well as in layout, which is the point: one is a sequence of work, the other a place of work.
+       */}
       <Band tone="sunk" hairline>
         <Split reverse weight="text-minor" aside={<StorePath />}>
           <Eyebrow>{t('site.how.store.eyebrow')}</Eyebrow>
@@ -125,8 +131,25 @@ export function HowItWorksPage() {
             {t('site.how.store.subtitle')}
           </p>
           <Lead className="mt-6 text-body-lg">{t('site.how.store.lead')}</Lead>
+          <Figure slot={ASSET_MANIFEST[1]!} className="mt-10">
+            <VerificationFragment />
+          </Figure>
         </Split>
       </Band>
+
+      {/*
+       * Full-bleed image band on the way into the order pipeline. Until the delivery photograph exists the slot
+       * renders the handover as oversized type, the stages running off the edge.
+       */}
+      <section className="relative overflow-hidden bg-foreground">
+        <Figure slot={ASSET_MANIFEST[2]!} bleed className="border-0 bg-foreground">
+          <Oversized className="h-full">
+            <div className="mx-auto h-full max-w-frame px-5 sm:px-8 lg:px-12">
+              <HandoverFragment className="h-full" />
+            </div>
+          </Oversized>
+        </Figure>
+      </section>
 
       {/* One order, as a horizontal progression. Hairline-separated cells, not five cards. */}
       <Band hairline>

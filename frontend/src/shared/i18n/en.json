@@ -1216,6 +1216,18 @@
           "text": "One balance both sides agree on"
         }
       }
+    },
+    "media": {
+      "verificationNote": "The states a verification request moves through. A TezFarmo administrator decides; nothing here is automatic.",
+      "wholesale-floor": {
+        "alt": "A wholesale depot floor with stacked cases and pallets ready to be distributed to shops."
+      },
+      "shop-counter": {
+        "alt": "The counter of a neighbourhood shop, with stock on the shelves behind it."
+      },
+      "delivery-run": {
+        "alt": "Crates being carried from a loaded van into a shop during a delivery run."
+      }
     }
   }
 }
