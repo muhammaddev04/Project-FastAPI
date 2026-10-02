@@ -1,304 +1,107 @@
-import { AnimatePresence, MotionConfig, motion, type Variants } from 'framer-motion';
-import { BadgeCheck, LogIn, Send, ShieldCheck, Store, UserPlus, Zap } from 'lucide-react';
-import { useRef, type ReactNode } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { Link, NavLink, useLocation, useOutlet } from 'react-router-dom';
-import { useMeta } from '@/shared/api/meta';
-import { LanguageSwitcher } from '@/shared/i18n/language-switcher';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import type { FormEvent, ReactNode } from 'react';
+import { Link, useLocation, useOutlet } from 'react-router-dom';
+import { JourneyShell } from '@/app/shell/journey-shell';
 import { cn } from '@/shared/lib/cn';
-import { ThemeSwitcher } from '@/shared/theme/theme-switcher';
-import { LogoMark } from '@/shared/ui';
-import { SUPPORT_TELEGRAM } from '@/shared/ui/support-link';
-
-const EASE = [0.2, 0.8, 0.2, 1] as const;
-
-const stagger: Variants = { hidden: {}, shown: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } };
-const rise: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  shown: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
-};
-
-/** Soft glows and large outlined circles behind the page (screenshots); they drift slowly and stay out of the way. */
-function Backdrop() {
-  return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(90%_70%_at_12%_18%,rgba(37,99,235,0.12),transparent_60%),radial-gradient(60%_60%_at_95%_90%,rgba(13,148,136,0.10),transparent_60%)] dark:bg-[radial-gradient(90%_70%_at_12%_18%,rgba(29,78,216,0.42),transparent_60%),radial-gradient(60%_60%_at_95%_90%,rgba(8,145,178,0.2),transparent_60%)]" />
-      <motion.div
-        className="absolute -left-[14rem] top-16 size-[44rem] rounded-full border border-blue-700/10 bg-blue-700/[0.03] dark:border-white/[0.06] dark:bg-white/[0.025]"
-        animate={{ x: [0, 18, 0], y: [0, -12, 0] }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute -bottom-[16rem] -right-[10rem] size-[40rem] rounded-full border border-teal-700/10 dark:border-cyan-300/10"
-        animate={{ x: [0, -16, 0], y: [0, 10, 0] }}
-        transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      {/* Mobile: the coloured blobs that frame the card in the phone screenshot. */}
-      <div className="absolute -left-24 -top-24 size-72 rounded-full bg-blue-500/20 blur-3xl dark:bg-blue-500/30 lg:hidden" />
-      <div className="absolute -right-20 top-1/3 size-64 rounded-full bg-cyan-400/15 blur-3xl lg:hidden" />
-    </div>
-  );
-}
-
-/** Teal tile with the TezFarmo mark, "Tez" + gradient "Farmo", and the B2B NETWORK tag. */
-function Brand() {
-  const { t } = useTranslation();
-  return (
-    <Link to="/login" aria-label={t('common.appName')} className="group flex min-w-0 items-center gap-2.5 rounded-xl sm:gap-3">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-light to-brand lg:size-12 lg:rounded-2xl">
-        <LogoMark inverted className="h-5 lg:h-6" />
-      </span>
-      <span className="font-display text-[1.375rem] font-extrabold leading-none lg:text-display-sm">
-        Tez<span className="text-primary">Farmo</span>
-      </span>
-      <span className="hidden rounded-full border border-primary/40 bg-primary/5 px-2.5 py-1 text-micro font-bold leading-none tracking-[0.12em] text-primary sm:inline-block">
-        {t('auth.shell.network')}
-      </span>
-    </Link>
-  );
-}
-
-function Header() {
-  const { t } = useTranslation();
-  return (
-    <header className="relative z-10 border-b border-border/60 bg-surface/50 backdrop-blur-md dark:border-white/[0.06] dark:bg-[#050D22]/60">
-      <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-4 sm:px-6 lg:h-[4.75rem] lg:px-10 short:lg:h-16">
-        <Brand />
-        <div className="hidden h-11 items-center gap-4 rounded-full border border-border/80 bg-surface/40 px-5 text-label font-medium text-foreground/85 xl:flex">
-          <span className="flex items-center gap-2">
-            <span className="relative flex size-2.5">
-              <span className="absolute inset-0 animate-ping rounded-full bg-primary/60 motion-reduce:animate-none" />
-              <span className="relative size-2.5 rounded-full bg-primary" />
-            </span>
-            {t('auth.shell.pillNetwork')}
-          </span>
-          <span className="h-4 w-px bg-border" aria-hidden="true" />
-          <span className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-primary" aria-hidden="true" />
-            {t('auth.shell.pillVerified')}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <a
-            href={`https://t.me/${SUPPORT_TELEGRAM}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`${t('common.support')} @${SUPPORT_TELEGRAM}`}
-            className="group hidden items-center gap-2.5 rounded-full text-body font-medium text-foreground/85 transition-colors hover:text-foreground sm:flex"
-          >
-            <span className="flex size-9 items-center justify-center rounded-full border border-border bg-surface/50 text-primary transition-[transform,border-color] duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/50 lg:size-10">
-              <Send className="size-4" aria-hidden="true" />
-            </span>
-            <span className="hidden lg:inline">@{SUPPORT_TELEGRAM}</span>
-          </a>
-          <ThemeSwitcher className="hidden bg-surface/50 sm:inline-flex" />
-          <LanguageSwitcher className="bg-surface/50" />
-        </div>
-      </div>
-    </header>
-  );
-}
-
-/** Desktop-only left column: badge, large headline, two feature cards and the "verified network" line. */
-function Hero() {
-  const { t } = useTranslation();
-  const features = [
-    { icon: Zap, title: t('auth.shell.fastTitle'), text: t('auth.shell.fastText') },
-    { icon: BadgeCheck, title: t('auth.shell.verifiedTitle'), text: t('auth.shell.verifiedText') },
-  ];
-  return (
-    <motion.section variants={stagger} initial="hidden" animate="shown" className="hidden lg:block" aria-label={t('auth.shell.heroBadge')}>
-      <motion.p
-        variants={rise}
-        className="inline-flex h-10 items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-4 text-body font-semibold text-primary-ink"
-      >
-        <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
-        {t('auth.shell.heroBadge')}
-      </motion.p>
-      <motion.h2
-        variants={rise}
-        className="font-display mt-7 text-[2.5rem] font-black leading-[1.06] xl:text-[3.25rem] 2xl:text-[3.75rem]"
-      >
-        <span className="block">{t('auth.shell.heroLine1')}</span>
-        <span className="block">{t('auth.shell.heroLine2')}</span>
-        <span className="text-primary block pb-1">{t('auth.shell.heroAccent')}</span>
-      </motion.h2>
-      <motion.p variants={rise} className="mt-6 max-w-[36rem] text-title-sm leading-relaxed text-muted-foreground xl:text-[1.1875rem]">
-        {t('auth.shell.heroText')}
-      </motion.p>
-      <motion.ul variants={rise} className="mt-10 grid max-w-[48rem] grid-cols-2 gap-4 xl:gap-5">
-        {features.map(({ icon: Icon, title, text }) => (
-          <li
-            key={title}
-            className="rounded-2xl border border-border bg-surface/60 p-5 transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_18px_40px_-20px_rgba(13,148,136,0.45)] xl:p-6"
-          >
-            <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Icon className="size-5" aria-hidden="true" />
-            </span>
-            <p className="mt-4 text-title-sm font-bold">{title}</p>
-            <p className="mt-1.5 text-body leading-snug text-muted-foreground">{text}</p>
-          </li>
-        ))}
-      </motion.ul>
-      <motion.div variants={rise} className="mt-10 flex items-center gap-4">
-        <span className="flex -space-x-2.5" aria-hidden="true">
-          <span className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-[#0D9488] text-caption font-bold text-white">TF</span>
-          <span className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-[#1D4ED8] text-micro font-bold text-white">B2B</span>
-          <span className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-[#6D28D9] text-white">
-            <Store className="size-4" />
-          </span>
-        </span>
-        <p className="max-w-[30rem] text-body-lg text-muted-foreground">{t('auth.shell.joinText')}</p>
-      </motion.div>
-    </motion.section>
-  );
-}
-
-function Footer() {
-  const { t } = useTranslation();
-  const meta = useMeta();
-  return (
-    <footer className="relative z-10 border-t border-border/60 bg-surface/40 dark:border-white/[0.06] dark:bg-[#040A1C]/70">
-      <div className="mx-auto flex max-w-[90rem] flex-col items-center gap-1.5 px-4 py-4 text-center text-caption text-muted-foreground sm:px-6 lg:flex-row lg:justify-between lg:px-10 lg:py-5 lg:text-label">
-        {/* On phones the theme switch lives here so the header keeps logo + language on one row. */}
-        <ThemeSwitcher className="mb-1.5 bg-surface/50 sm:hidden" />
-        <p className="font-data">TezFarmo · v{meta.data?.version ?? '—'}</p>
-        <p>{t('auth.shell.rights', { year: new Date().getFullYear() })}</p>
-      </div>
-    </footer>
-  );
-}
+import { JourneyProgress } from './journey';
+import { AUTH_FORM, journeyStepFor, type JourneyStep } from './journey-steps';
 
 /**
- * Auth layout route (navy/teal screenshots): header, desktop hero and footer stay mounted while the card
- * content (login, register, verify, forgot/reset, Google) cross-fades inside one persistent card frame.
+ * Authentication screens (Phase D).
+ *
+ * What this replaced: a centred, translucent card floating over a page-sized radial gradient with two slowly
+ * drifting outlined circles and two blurred colour blobs, next to a desktop hero column holding a pill badge,
+ * a three-line 60px display headline, two feature cards that lifted and glowed on hover, and a cluster of
+ * three invented avatars ("TF", "B2B", a shop icon) above the line "companies and stores start trading once
+ * their organization is verified". Signing in competed for attention with a landing page.
+ *
+ * What it is now: the shared two-plane `JourneyShell`. A navy aside carries the brand, one sentence about the
+ * product and the position in the registration journey; the form sits on the plain canvas beside it with no
+ * card around it. Removing the card is the change that makes the screen read as an application rather than a
+ * promotion: a form that sits on the page does not need to be introduced.
  */
+/** Layout route for every guest screen: the aside stays mounted while the working column cross-fades. */
 export function AuthShell() {
   const location = useLocation();
   const outlet = useOutlet();
   return (
     <MotionConfig reducedMotion="user">
-      <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-background font-sans text-foreground">
-        <Backdrop />
-        <Header />
-        <main className="relative z-10 mx-auto grid w-full max-w-[90rem] flex-1 items-center gap-10 px-4 py-5 sm:px-6 sm:py-8 lg:grid-cols-[minmax(0,1fr)_31rem] lg:gap-12 lg:px-10 lg:py-6 short:py-3 short:sm:py-4 short:lg:py-2 xl:grid-cols-[minmax(0,1fr)_34rem] xl:gap-16">
-          <Hero />
+      <JourneyShell step={journeyStepFor(location.pathname)}>
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.5, ease: EASE }}
-            className="mx-auto w-full max-w-[31rem] rounded-2xl border border-border bg-surface/90 px-5 py-6 shadow-[0_30px_80px_-30px_rgba(15,27,58,0.28)] backdrop-blur-xl dark:border-white/10 dark:bg-surface/80 dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-9 sm:py-8 lg:max-w-none lg:rounded-2xl xl:px-10 short:py-5 short:sm:py-5"
+            key={location.pathname}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={location.pathname}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22, ease: EASE }}
-              >
-                {outlet}
-              </motion.div>
-            </AnimatePresence>
+            {outlet}
           </motion.div>
-        </main>
-        <Footer />
-      </div>
+        </AnimatePresence>
+      </JourneyShell>
     </MotionConfig>
   );
 }
 
-/** Heading copy with the brand word in the teal→blue gradient, e.g. "Welcome to <b>TezFarmo</b>". */
-export function BrandTitle({ i18nKey }: { i18nKey: string }) {
-  return <Trans i18nKey={i18nKey} components={{ b: <span className="text-primary" /> }} />;
-}
-
-/** Remembers the last tab route so the selection plate slides in from the tab the user came from. */
-let lastTab: '/login' | '/register' | null = null;
-
-/** Login | Register switch from the screenshots (links, so each form keeps its own URL). */
-export function AuthTabs() {
-  const { t } = useTranslation();
-  const current = useLocation().pathname.startsWith('/register') ? '/register' : '/login';
-  const from = useRef(lastTab);
-  lastTab = current;
-  const tabs = [
-    { to: '/login' as const, icon: LogIn, label: t('auth.shell.tabLogin') },
-    { to: '/register' as const, icon: UserPlus, label: t('auth.shell.tabRegister') },
-  ];
-  const slideFrom = from.current && from.current !== current ? (current === '/register' ? '-100%' : '100%') : 0;
-  return (
-    <nav aria-label={t('auth.shell.tabsLabel')} className="mt-5 grid grid-cols-2 gap-1 rounded-2xl border border-border bg-subtle/60 p-1.5 short:mt-3.5 short:p-1">
-      {tabs.map(({ to, icon: Icon, label }) => {
-        const active = to === current;
-        return (
-          <NavLink
-            key={to}
-            to={to}
-            replace
-            className={cn(
-              'relative flex h-11 items-center justify-center gap-2 rounded-xl text-body-lg font-semibold transition-colors sm:h-12 sm:text-base short:h-10 short:sm:h-10',
-              active ? 'text-white' : 'text-muted-foreground hover:bg-surface/60 hover:text-foreground',
-            )}
-          >
-            {active ? (
-              <motion.span
-                aria-hidden="true"
-                className="absolute inset-0 rounded-xl bg-primary-strong"
-                initial={{ x: slideFrom }}
-                animate={{ x: 0 }}
-                transition={{ type: 'spring', stiffness: 420, damping: 36 }}
-              />
-            ) : null}
-            <Icon className="relative size-[1.125rem]" aria-hidden="true" />
-            <span className="relative">{label}</span>
-          </NavLink>
-        );
-      })}
-    </nav>
-  );
-}
-
-/** Card content header: status badge, title, subtitle, optional Login/Register tabs, then the form rows. */
-export function AuthCard({
+/**
+ * One screen of the flow: where you are, what this asks for, and the form.
+ *
+ * The heading block is left-aligned and uses the named type scale. It used to be centred, in an arbitrary
+ * 1.625rem/2rem size, under a "B2B PLATFORM" pill and above a `Trans`-interpolated gradient brand word.
+ * A centred heading over left-aligned fields gives a form two competing axes, and the pill restated what the
+ * brand lockup two inches away already says.
+ */
+export function AuthPage({
+  step,
   title,
-  subtitle,
-  tabs = false,
+  lead,
+  above,
   children,
+  footer,
 }: {
+  /** Shows the compact journey position on viewports without the aside. */
+  step?: JourneyStep;
   title: ReactNode;
-  subtitle?: ReactNode;
-  tabs?: boolean;
+  lead?: ReactNode;
+  /** Position line for a sequence that is not the onboarding journey (password recovery). */
+  above?: ReactNode;
   children: ReactNode;
+  footer?: ReactNode;
 }) {
-  const { t } = useTranslation();
   return (
     <div>
-      <div className="text-center">
-        <p className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-1.5 short:hidden text-micro font-bold tracking-[0.12em] text-primary sm:text-caption">
-          <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
-          {t('auth.shell.cardBadge')}
-        </p>
-        <h1 className="font-display mt-4 text-[1.625rem] short:mt-0 font-extrabold leading-tight sm:text-display xl:text-[2rem] short:sm:text-display-sm short:xl:text-display">{title}</h1>
-        {subtitle ? <p className="mx-auto mt-2 max-w-[24rem] text-body-lg leading-relaxed text-muted-foreground sm:text-base short:mt-1.5 short:leading-snug">{subtitle}</p> : null}
-      </div>
-      {tabs ? <AuthTabs /> : null}
-      <div className="mt-5 short:mt-4">{children}</div>
+      {step ? <JourneyProgress current={step} className="mb-6" /> : null}
+      {above ? <div className="mb-5">{above}</div> : null}
+      <h1 className="font-display text-display-sm font-bold tracking-tight sm:text-display">{title}</h1>
+      {lead ? <p className="mt-2.5 text-body-lg leading-relaxed text-muted-foreground">{lead}</p> : null}
+      <div className="mt-7">{children}</div>
+      {footer ? <div className="mt-7 border-t pt-5 text-body text-muted-foreground">{footer}</div> : null}
     </div>
   );
 }
 
-/** Field label inside auth cards. */
-export const authLabel = 'text-body-lg font-medium text-foreground/90';
-
-/** Bottom line of a card: muted question + teal link with a growing underline. */
-export function CardSwitch({ question, to, link }: { question: string; to: string; link: string }) {
+/** Closing line of a screen: a question and the one link that answers it. */
+export function AuthSwitch({ question, to, link, state }: { question: string; to: string; link: string; state?: unknown }) {
   return (
-    <p className="mt-5 border-t border-border pt-4 text-center text-body-lg text-muted-foreground short:mt-3 short:pt-2.5">
+    <p>
       {question}{' '}
-      <Link to={to} className="link-grow font-semibold text-primary hover:text-primary-hover">
+      <Link to={to} state={state} className="link-grow font-semibold text-primary hover:text-primary-hover">
         {link}
       </Link>
     </p>
   );
+}
+
+/** An authentication form: `noValidate` (the messages are ours) and one value per row. */
+export function AuthForm({ onSubmit, children }: { onSubmit: (event: FormEvent<HTMLFormElement>) => void; children: ReactNode }) {
+  return (
+    <form noValidate className={AUTH_FORM} onSubmit={onSubmit}>
+      {children}
+    </form>
+  );
+}
+
+/** Stacked actions under a form: the primary one first, then the quieter alternatives. */
+export function AuthActions({ className, children }: { className?: string; children: ReactNode }) {
+  return <div className={cn('space-y-2.5', className)}>{children}</div>;
 }

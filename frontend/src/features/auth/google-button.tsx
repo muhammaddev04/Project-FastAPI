@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/shared/ui';
+import { Button, Divider } from '@/shared/ui';
 import { goToGoogle } from './api';
 import { useAuthMethod } from './use-auth-method';
 
@@ -17,8 +17,13 @@ export function GoogleMark() {
 }
 
 /**
- * "Continue with Google". The OAuth flow (authorization code + state + PKCE + nonce, server-side exchange)
- * is owned by the backend; until /meta reports it as enabled the button stays disabled and explains why.
+ * "Continue with Google". The OAuth flow (authorization code + state + PKCE + nonce, server-side exchange) is
+ * owned by the backend; until /meta reports it as enabled the button stays disabled and explains why.
+ *
+ * Phase D: the button is the shared `social` variant at the same height as the submit button above it, instead
+ * of 14 classes of bespoke white panel with its own two-layer shadow and a hover lift. Google's brand rules
+ * dictate the colours, not the geometry, and a second action on the same screen should not be a different
+ * shape from the first.
  */
 export function GoogleButton() {
   const { t } = useTranslation();
@@ -33,15 +38,16 @@ export function GoogleButton() {
     return () => window.removeEventListener('pageshow', reset);
   }, []);
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <Button
         type="button"
-        variant="ghost"
+        variant="social"
         block
-        className="h-[3.25rem] gap-3 rounded-2xl border border-slate-200 bg-white text-body-lg font-semibold text-slate-800 shadow-[0_6px_18px_-10px_rgba(15,27,58,0.35)] hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_12px_26px_-12px_rgba(15,27,58,0.45)] active:translate-y-0 disabled:hover:translate-y-0 sm:h-14 short:h-12 short:sm:h-12 [&_svg]:!size-5"
+        size="xl"
+        className="[&_svg]:size-[1.125rem]"
         disabled={!available}
         loading={leaving}
-        aria-describedby="google-status"
+        aria-describedby={!available && !meta.isPending ? 'google-status' : undefined}
         onClick={() => {
           setLeaving(true);
           goToGoogle();
@@ -51,7 +57,7 @@ export function GoogleButton() {
         {t('auth.google.button')}
       </Button>
       {!available && !meta.isPending ? (
-        <p id="google-status" className="text-center text-2xs text-muted-foreground">
+        <p id="google-status" className="text-caption text-muted-foreground">
           {t('auth.google.notEnabled')}
         </p>
       ) : null}
@@ -59,16 +65,8 @@ export function GoogleButton() {
   );
 }
 
-/** "— OR VIA —" rule with the label in a small pill (screenshots). */
-export function OrDivider({ label }: { label?: string }) {
+/** The rule between the credentials form and the Google button. */
+export function OrDivider({ className }: { className?: string }) {
   const { t } = useTranslation();
-  return (
-    <div className="my-5 flex items-center gap-3 short:my-2.5" role="separator">
-      <span className="h-px flex-1 bg-border" />
-      <span className="rounded-full border border-border bg-subtle/70 px-3 py-1 text-micro font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-        {label ?? t('auth.shell.orVia')}
-      </span>
-      <span className="h-px flex-1 bg-border" />
-    </div>
-  );
+  return <Divider label={t('auth.or')} className={className} />;
 }
