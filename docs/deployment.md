@@ -131,8 +131,42 @@ ssh-keyscan -H 37.27.245.216        # -> DEPLOY_SSH_KNOWN_HOSTS
 Variables (optional — the workflow falls back to the values above): `DEPLOY_HOST`, `DEPLOY_USER`,
 `DEPLOY_PATH`, `DEPLOY_SSH_PORT`.
 
+> `ssh-keyscan` must be run against **exactly** the value the workflow connects to. The pinned entries
+> are matched by host, so a `known_hosts` scanned from `37.27.245.216` does not verify a `DEPLOY_HOST`
+> variable set to a DNS name (and vice versa) — host verification then fails with
+> `Host key verification failed`, which is the correct refusal, not a bug. If you set `DEPLOY_HOST`,
+> re-scan that name. Scanning both and storing both lines is also fine.
+
 An **Environment** named `production` (**Settings → Environments**) is referenced by the workflow; add
 required reviewers there if deployments should need an approval.
+
+### Verify the setup before the first deployment
+
+Three server-side prerequisites are **not** created by a deployment and are not visible in CI. The
+deploy script fails cleanly without them, but checking first turns a failed deployment into a
+two-minute fix. Run these as the `dev` user on the server:
+
+```bash
+# 1. the deploy account can reach the Docker daemon (membership in the docker group).
+#    `docker compose version` does NOT contact the daemon, so it succeeds even when this is wrong —
+#    `docker ps` is the check that actually proves it.
+docker ps >/dev/null && echo "docker: ok"
+#    if this prints a permission error:  sudo usermod -aG docker dev   (then log out and back in)
+
+# 2. the checkout can fetch non-interactively. A deployment runs `git fetch` with no TTY, so a
+#    private repository needs a stored credential or a deploy key here; a public one needs nothing.
+cd /home/dev/Project-FastAPI && GIT_TERMINAL_PROMPT=0 git fetch --dry-run origin && echo "fetch: ok"
+
+# 3. the three server-only files exist and the tree is clean (the script requires both).
+test -s .env && test -s backend/.env && test -s infra/seaweedfs/s3.prod.json && echo "config: ok"
+git status --porcelain   # must print nothing
+```
+
+And from your machine, that the key GitHub will use actually works:
+
+```bash
+ssh -i ./tezfarmo_deploy -o IdentitiesOnly=yes -o BatchMode=yes dev@37.27.245.216 'echo ssh: ok'
+```
 
 ## How a deployment runs
 
@@ -285,6 +319,10 @@ git log --oneline -1                                 # which commit is deployed
 | `must set APP_ENV=production` / `EMAIL_PROVIDER=smtp` | `backend/.env` would fail the startup validator; fix it on the server (the preflight never prints values) |
 | `… is N characters, production requires at least 32` | one of the three secrets in `backend/.env` is too short (SEC-003) |
 | `is not an ancestor of origin/main` | the SHA is not on `main` (a PR head, or history was rewritten — `ALLOW_OFF_MAIN=1` to override deliberately) |
+| `commit … is not available from origin` | the SHA does not exist on the remote — usually a typo in a manual `workflow_dispatch` rollback, or a commit that was never pushed |
+| `no successful CI run found for …` | CI has not passed for that exact commit; the gate refuses to deploy an unvalidated SHA (check the Actions tab for that SHA) |
+| `Host key verification failed` (in Actions) | `DEPLOY_SSH_KNOWN_HOSTS` was scanned from a different host/name than the workflow connects to — re-run `ssh-keyscan` against the exact `DEPLOY_HOST` |
+| `permission denied … docker.sock` (in the deploy log) | the `dev` account is not in the `docker` group — see [Verify the setup](#verify-the-setup-before-the-first-deployment) |
 | `/api/health/ready` reports `postgres: unavailable` | `DATABASE_URL` in `backend/.env` does not use host `postgres:5432`, or does not match `.env` |
 | `/api/health/ready` reports `redis: unavailable` | `REDIS_URL` is not `redis://redis:6379/0` |
 | local health check passes, public one fails | host nginx, DNS or TLS — outside this repository |

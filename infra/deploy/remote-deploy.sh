@@ -216,7 +216,11 @@ log "required production settings are present (values were not read out or print
 log "git fetch origin"
 git fetch --prune origin
 # A rollback target may no longer be reachable from a branch tip; ask for it directly if needed.
-git cat-file -e "${DEPLOY_SHA}^{commit}" 2>/dev/null || git fetch origin "$DEPLOY_SHA"
+# The direct fetch is allowed to fail (a mistyped SHA is simply "not our ref" on the server): swallowing
+# it here is what makes the explicit message below reachable instead of a raw `git upload-pack` fatal.
+if ! git cat-file -e "${DEPLOY_SHA}^{commit}" 2>/dev/null; then
+  git fetch origin "$DEPLOY_SHA" 2>/dev/null || true
+fi
 git cat-file -e "${DEPLOY_SHA}^{commit}" 2>/dev/null || fail "commit $DEPLOY_SHA is not available from origin"
 
 # Refuse a commit that is not on main (e.g. a pull-request head that happened to pass CI). A rollback
