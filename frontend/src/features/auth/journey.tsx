@@ -1,4 +1,3 @@
-import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/cn';
 import { JOURNEY_STEPS, journeyIndex, type JourneyStep } from './journey-steps';
@@ -10,56 +9,47 @@ function stateOf(index: number, currentIndex: number): State {
 }
 
 /**
- * Vertical journey list for the navy aside (lg and up).
+ * The journey rail for the editorial column (Phase E, rebuilt).
  *
- * A dot and a hairline connector, not numbered circles: the number is already in the "Step 2 of 5" line that
- * the same component renders on phones, and printing it twice made the rail the loudest thing on the screen.
- * State is carried by the mark (check / filled dot / hollow dot), the weight and the colour together, so it
- * survives both a greyscale rendering and a user who cannot separate teal from grey.
+ * Phase D drew dots joined by a connector, with a hint under the current step. That is a widget, and it made the
+ * rail the loudest thing in the column. This is an indexed list instead: a monospaced numeral, the step name,
+ * and a rule. The current step is the only one in full ink with the teal numeral; completed steps are quiet;
+ * upcoming ones are quieter still. No circles, no connector, no fill.
+ *
+ * State is carried by the numeral colour, the text weight AND a word in the accessible name, so it survives
+ * both a greyscale rendering and a reader who cannot separate teal from grey.
  */
 export function JourneyRail({ current }: { current: JourneyStep }) {
   const { t } = useTranslation();
   const currentIndex = journeyIndex(current);
   return (
-    <ol aria-label={t('auth.journey.label')} className="space-y-0">
+    <ol aria-label={t('auth.journey.label')} className="border-t">
       {JOURNEY_STEPS.map((step, index) => {
         const state = stateOf(index, currentIndex);
-        const last = index === JOURNEY_STEPS.length - 1;
         return (
-          <li key={step} aria-current={state === 'current' ? 'step' : undefined} className="flex gap-3.5">
-            <span className="flex flex-col items-center pt-1" aria-hidden="true">
-              <span
-                className={cn(
-                  'flex size-[1.125rem] shrink-0 items-center justify-center rounded-full border transition-colors',
-                  state === 'done'
-                    ? 'border-aside-accent bg-aside-accent text-aside'
-                    : state === 'current'
-                      ? 'border-aside-accent bg-aside-accent/20'
-                      : 'border-aside-border',
-                )}
-              >
-                {state === 'done' ? (
-                  <Check className="size-3" strokeWidth={3} />
-                ) : state === 'current' ? (
-                  <span className="size-1.5 rounded-full bg-aside-accent" />
-                ) : null}
-              </span>
-              {last ? null : <span className={cn('w-px flex-1', index < currentIndex ? 'bg-aside-accent/50' : 'bg-aside-border')} />}
+          <li
+            key={step}
+            aria-current={state === 'current' ? 'step' : undefined}
+            className="flex items-baseline gap-4 border-b py-3.5"
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                'font-data text-caption tabular-nums',
+                state === 'current' ? 'text-primary' : 'text-muted-foreground/70',
+              )}
+            >
+              {String(index + 1).padStart(2, '0')}
             </span>
-            <span className={cn('min-w-0 pb-5', last && 'pb-0')}>
-              <span
-                className={cn(
-                  'block text-body-lg leading-snug',
-                  state === 'current' ? 'font-semibold text-aside-foreground' : state === 'done' ? 'text-aside-foreground/80' : 'text-aside-muted',
-                )}
-              >
-                {t(`auth.journey.steps.${step}.title`)}
-              </span>
-              {state === 'current' ? (
-                <span className="mt-1 block text-label leading-snug text-aside-muted">{t(`auth.journey.steps.${step}.hint`)}</span>
-              ) : null}
-              <span className="sr-only">{t(`auth.journey.state.${state}`)}</span>
+            <span
+              className={cn(
+                'min-w-0 text-body',
+                state === 'current' ? 'font-semibold text-foreground' : state === 'done' ? 'text-foreground/70' : 'text-muted-foreground',
+              )}
+            >
+              {t(`auth.journey.steps.${step}.title`)}
             </span>
+            <span className="sr-only">{t(`auth.journey.state.${state}`)}</span>
           </li>
         );
       })}
@@ -68,50 +58,34 @@ export function JourneyRail({ current }: { current: JourneyStep }) {
 }
 
 /**
- * The same position, compactly, for every viewport that has no aside: the count, the step name and a bar of
- * one segment per step. It replaces the per-page "After registration: 1 confirm email, 2 review, 3 access"
- * strip, which described the journey without ever saying which part of it the user was looking at.
+ * The same position for viewports with no editorial column: the count, the step name, and one hairline rule
+ * filled to the fraction reached. A five-segment bar was a widget standing in for one sentence.
  */
 export function JourneyProgress({ current, className }: { current: JourneyStep; className?: string }) {
   const { t } = useTranslation();
   const currentIndex = journeyIndex(current);
+  const total = JOURNEY_STEPS.length;
   return (
     <div className={cn('lg:hidden', className)}>
       <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-        <span className="text-caption font-semibold uppercase tracking-[0.08em] text-primary-ink">
-          {t('auth.journey.position', { current: currentIndex + 1, total: JOURNEY_STEPS.length })}
+        <span className="font-data text-caption tabular-nums text-primary">
+          {t('auth.journey.position', { current: currentIndex + 1, total })}
         </span>
         <span className="text-caption text-muted-foreground">{t(`auth.journey.steps.${current}.title`)}</span>
       </p>
-      <ol aria-label={t('auth.journey.label')} className="mt-2 flex gap-1.5">
-        {JOURNEY_STEPS.map((step, index) => {
-          const state = stateOf(index, currentIndex);
-          return (
-            <li
-              key={step}
-              aria-current={state === 'current' ? 'step' : undefined}
-              className={cn('h-1 flex-1 rounded-full', state === 'upcoming' ? 'bg-muted' : 'bg-primary')}
-            >
-              <span className="sr-only">{`${t(`auth.journey.steps.${step}.title`)} ${t(`auth.journey.state.${state}`)}`}</span>
-            </li>
-          );
-        })}
-      </ol>
+      <div className="mt-3 h-px w-full bg-border" role="presentation">
+        <div className="h-px bg-primary" style={{ width: `${((currentIndex + 1) / total) * 100}%` }} />
+      </div>
     </div>
   );
 }
 
-/**
- * Position inside a short self-contained sequence that is not the onboarding journey (password recovery).
- * Same restraint, no rail: three steps do not need a map, only a count.
- */
+/** Position inside a short sequence that is not the onboarding journey (password recovery). */
 export function StepCount({ current, total, label }: { current: number; total: number; label: string }) {
   const { t } = useTranslation();
   return (
     <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-      <span className="text-caption font-semibold uppercase tracking-[0.08em] text-primary-ink">
-        {t('auth.journey.position', { current, total })}
-      </span>
+      <span className="font-data text-caption tabular-nums text-primary">{t('auth.journey.position', { current, total })}</span>
       <span className="text-caption text-muted-foreground">{label}</span>
     </p>
   );

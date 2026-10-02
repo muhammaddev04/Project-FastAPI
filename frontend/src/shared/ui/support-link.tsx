@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib/cn';
 /** TZ F-SUP-1: every screen offers a way to reach platform support on Telegram. */
 export const SUPPORT_TELEGRAM = 'tezfarmo_support';
 
-export function SupportLink({ className, tone = 'default' }: { className?: string; tone?: 'default' | 'inverted' | 'aside' }) {
+export function SupportLink({ className, tone = 'default' }: { className?: string; tone?: 'default' | 'inverted' }) {
   const { t } = useTranslation();
   return (
     <a
@@ -14,11 +14,7 @@ export function SupportLink({ className, tone = 'default' }: { className?: strin
       rel="noopener noreferrer"
       className={cn(
         'inline-flex items-center gap-1.5 text-label font-medium transition-colors',
-        tone === 'inverted'
-          ? 'text-sidebar-muted hover:text-sidebar-foreground'
-          : tone === 'aside'
-            ? 'text-aside-muted hover:text-aside-foreground focus-visible:ring-offset-aside'
-            : 'text-primary hover:text-primary-hover',
+        tone === 'inverted' ? 'text-sidebar-muted hover:text-sidebar-foreground' : 'text-primary hover:text-primary-hover',
         className,
       )}
     >

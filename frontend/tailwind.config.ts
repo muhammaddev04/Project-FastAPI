@@ -106,14 +106,6 @@ export default {
           delivered: { DEFAULT: token('status-delivered'), soft: token('status-delivered-soft') },
           disputed: { DEFAULT: token('status-disputed'), soft: token('status-disputed-soft') },
         },
-        /* Phase D: the navy aside plane of the authentication screens. */
-        aside: {
-          DEFAULT: token('aside'),
-          foreground: token('aside-foreground'),
-          muted: token('aside-muted'),
-          border: token('aside-border'),
-          accent: token('aside-accent'),
-        },
         sidebar: {
           DEFAULT: token('sidebar'),
           foreground: token('sidebar-foreground'),
@@ -136,12 +128,6 @@ export default {
         xl: '0.625rem',
         /* Surfaces: cards, dialogs, drawers, tables. */
         '2xl': '0.75rem',
-        /*
-         * Public site media and full-width panels only. The reference carries exactly two radii, a control
-         * radius and this one; at this size the corner reads as the edge of a photograph rather than as
-         * decoration, which is why Phase C was right to delete it from app surfaces and right to want it here.
-         */
-        '3xl': '1.25rem',
       },
       /*
        * Elevation is for things that genuinely float above the page, and nothing else. The teal `glow` /

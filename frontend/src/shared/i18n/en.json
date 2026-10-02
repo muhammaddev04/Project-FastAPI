@@ -338,21 +338,7 @@
     },
     "aside": {
       "statement": "TezFarmo connects suppliers and stores in Tajikistan: catalogue and prices, orders, delivery and settlements in one place.",
-      "rights": "© {{year}} TezFarmo B2B Commerce Network. Dushanbe, Tajikistan.",
-      "facts": {
-        "verified": {
-          "title": "Verified organizations",
-          "text": "Every company and store is checked by TezFarmo before it can trade."
-        },
-        "direct": {
-          "title": "Direct supply",
-          "text": "Stores order from their suppliers without an intermediary in between."
-        },
-        "oneAccount": {
-          "title": "One account",
-          "text": "Your account can belong to several organizations and switch between them."
-        }
-      }
+      "bridge": "One agreement, agreed before the first order."
     },
     "journey": {
       "label": "Setting up your account",
@@ -928,8 +914,8 @@
   "site": {
     "backToSite": "Back to TezFarmo",
     "availability": {
-      "live": "in the product",
-      "planned": "being built"
+      "live": "available",
+      "planned": "in development"
     },
     "nav": {
       "label": "TezFarmo",
@@ -1005,54 +991,22 @@
       }
     },
     "home": {
-      "eyebrow": "B2B wholesale, Tajikistan",
-      "title": "Suppliers and the stores they sell to, working from one order book.",
-      "lead": "TezFarmo is where a distributor company and a retail store agree their terms, place and confirm orders, arrange delivery and keep one balance between them. One record both sides can see, instead of a phone call, a notebook and a chat thread that disagree.",
+      "title": "A simpler way for companies and stores to work together.",
+      "lead": "TezFarmo gives a supplier and a shop one shared record of the terms they agreed, the orders between them and the balance that follows.",
       "seeHow": "See how it works",
-      "heroNote": "Free to create an account. Your organization trades once it has been verified.",
-      "relationship": {
-        "eyebrow": "Two sides",
-        "title": "One agreement, written down once.",
-        "lead": "Everything in TezFarmo hangs off the relationship between a supplier and a store. Either side can start it, and both work from the same terms afterwards.",
-        "company": {
-          "title": "Company, the supplier",
-          "text": "Distributors and producers selling wholesale to shops.",
-          "points": [
-            "Publish a catalogue and the prices for each partner",
-            "Accept or decline the orders that arrive",
-            "Set a credit limit and watch the balance"
-          ]
-        },
-        "store": {
-          "title": "Store, the buyer",
-          "text": "Shops and retail outlets buying stock to sell on.",
-          "points": [
-            "Order from a supplier you already work with",
-            "Know the price before you order",
-            "See what you owe and what you have paid"
-          ]
-        },
-        "bridge": {
-          "title": "Partnership",
-          "text": "A store asks using the supplier’s code, or the supplier invites the store. Terms are agreed before the first order.",
-          "note": "Either side can start"
-        }
-      },
       "truths": {
-        "eyebrow": "What this gives you today",
         "title": "Three things that are true the day you sign up.",
-        "lead": "TezFarmo is early, and the rest of this page is honest about that. These three are working now.",
-        "verified": {
-          "title": "Verified organizations only",
-          "text": "Every company and store sends its registration and tax documents, and a TezFarmo administrator checks them before it can trade. Nobody is on the other side of an order anonymously."
+        "relationships": {
+          "title": "Clear relationships",
+          "text": "Every company and store is checked by a TezFarmo administrator before it can trade. Nobody is on the other side of an order anonymously."
         },
-        "memberships": {
-          "title": "One account, several businesses",
-          "text": "If you run a shop and a distribution company, that is one sign-in and a switch between them, not two accounts and two passwords."
+        "oneFlow": {
+          "title": "One way in",
+          "text": "One account can hold a shop and a distribution company, with a switch between them rather than two sign-ins."
         },
-        "roles": {
+        "history": {
           "title": "Roles that match the job",
-          "text": "An owner, a manager, an operator, a warehouse keeper, a courier and a shop assistant each get the screens their work needs. The server enforces it, not just the interface."
+          "text": "An owner, a manager, a warehouse keeper and a courier each get the screens their own work needs, enforced on the server."
         }
       },
       "setup": {
@@ -1065,22 +1019,27 @@
         "eyebrow": "Built in the open",
         "title": "What works now, and what is next.",
         "lead": "The platform is being built in phases. Rather than describe all of it as if it shipped, here is the state of each part.",
-        "note": "Signing up now gets you a verified organization, your team and your roles, ready for the trading features as each one lands.",
         "more": "See what each part does"
       },
       "cta": {
         "title": "Start with a verified organization.",
         "lead": "Create your account, confirm your email, and tell us whether you supply shops or run one. The rest follows from there."
+      },
+      "statement": {
+        "problem": "Wholesale should not depend on remembering which chat the price was in.",
+        "answer": "Today a supplier and a shop keep the same arrangement in three places at once: a phone call, a notebook and a message thread. None of them agrees with the others, and the disagreement surfaces when the goods or the money are already in motion."
+      },
+      "openStatement": "One record. Both sides. No reconciling notebooks.",
+      "agreement": {
+        "eyebrow": "The agreement",
+        "title": "Nothing is ordered before the terms exist.",
+        "lead": "A supplier and a shop do not meet in a directory and start trading. One of them opens the relationship, the other accepts, and the terms they agree govern every order after that."
       }
     },
     "how": {
-      "eyebrow": "How it works",
       "title": "From two strangers to a settled order.",
       "lead": "TezFarmo follows the way wholesale already works in Tajikistan, and writes each step down. Here is that path, from both sides, with an honest note on which parts are in the product today.",
       "partnership": {
-        "eyebrow": "The agreement",
-        "title": "Nothing is ordered before the terms exist.",
-        "lead": "A supplier and a store do not simply find each other in a directory and start trading. One of them opens the relationship, the other accepts it, and the terms they agree govern every order after that.",
         "request": {
           "title": "A store asks, using a code",
           "text": "Every verified company has a short public code. A store enters it to ask for a partnership, which means a supplier is never approached by someone who could not find their code."
@@ -1123,7 +1082,8 @@
             "title": "Settle up",
             "text": "Charges and payments build one balance per partner, so a disagreement about what is owed has a record to check."
           }
-        }
+        },
+        "eyebrow": "The supplier"
       },
       "store": {
         "title": "If you run a shop",
@@ -1154,7 +1114,8 @@
             "title": "Know what you owe",
             "text": "One running balance per supplier, with every charge and payment behind it."
           }
-        }
+        },
+        "eyebrow": "The buyer"
       },
       "pipeline": {
         "eyebrow": "One order",
@@ -1188,10 +1149,14 @@
         "title": "Which side are you on?",
         "lead": "You pick that after confirming your email, and it decides what your account can do. Nothing to choose up front.",
         "product": "See the full product"
+      },
+      "between": "The same agreement, read from the other side.",
+      "together": {
+        "title": "Where the two paths meet.",
+        "lead": "Both sides end up in the same record: the agreement they share, and everything that follows from it."
       }
     },
     "product": {
-      "eyebrow": "Product",
       "title": "What is in TezFarmo, and what is still coming.",
       "lead": "The platform is being built in phases, and the honest version of this page separates the two. Everything below is specified; the marker says whether you can use it now.",
       "for": {
@@ -1200,12 +1165,9 @@
         "both": "For both sides"
       },
       "live": {
-        "eyebrow": "In the product",
-        "title": "Available the day you sign up.",
-        "lead": "Account, organization, verification, people and permissions. This is a working foundation, not a waiting room."
+        "eyebrow": "In the product"
       },
       "planned": {
-        "eyebrow": "Being built",
         "title": "Specified, under construction.",
         "lead": "These are designed and scheduled, not aspirations. They are not in the product yet, and nothing here pretends otherwise.",
         "note": "We would rather you knew exactly what you are signing up for than discovered the gap after registering."
@@ -1214,6 +1176,45 @@
         "title": "Get your organization verified now.",
         "lead": "Verification takes a person’s review, so it is worth starting before you need the trading features.",
         "how": "How it works"
+      }
+    },
+    "flow": {
+      "company": {
+        "title": "Company",
+        "role": "Supplier, distributor",
+        "brings": "Goods, prices and stock",
+        "needs": "Orders it can rely on"
+      },
+      "store": {
+        "title": "Store",
+        "role": "Retailer, shop",
+        "brings": "Demand and payment",
+        "needs": "A price it knows in advance"
+      },
+      "brings": "Brings",
+      "needs": "Needs",
+      "note": "The agreement is in the product today. The steps below it are being built.",
+      "steps": {
+        "partnership": {
+          "title": "Partnership",
+          "text": "Who works with whom, and on what terms"
+        },
+        "catalog": {
+          "title": "Catalogue and prices",
+          "text": "What is for sale, at the price agreed for you"
+        },
+        "order": {
+          "title": "Order",
+          "text": "Placed, then confirmed in full or in part"
+        },
+        "delivery": {
+          "title": "Delivery",
+          "text": "A run to the shop, followed to the door"
+        },
+        "ledger": {
+          "title": "Ledger",
+          "text": "One balance both sides agree on"
+        }
       }
     }
   }

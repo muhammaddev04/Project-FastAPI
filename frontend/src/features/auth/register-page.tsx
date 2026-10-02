@@ -83,7 +83,6 @@ export function RegisterPage() {
 
   return (
     <AuthPage
-      step="account"
       title={t('auth.register.title')}
       lead={t('auth.register.lead')}
       footer={<AuthSwitch question={t('auth.register.haveAccount')} to="/login" link={t('auth.register.signIn')} />}

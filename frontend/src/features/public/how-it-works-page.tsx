@@ -1,86 +1,84 @@
-import { ArrowRight, Building2, Store } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui';
-import { Availability, Display, Eyebrow, Lead, Reveal, Section } from './primitives';
+import { Availability, Band, Display, Eyebrow, Index, Lead, Reveal, Split, Statement } from './primitives';
+import { RelationshipFlow } from './relationship-flow';
 
-/**
- * The order pipeline, which is the real one: these are the statuses the design system already carries colour
- * tokens for, in the order P07 defines. DISPUTED is shown apart because it is not a stage every order reaches.
- */
-const PIPELINE = ['new', 'confirmed', 'assembling', 'transit', 'delivered'] as const;
-
-/** Six steps per side. The keys match the i18n blocks; the availability comes from the TZ phase of each step. */
-const JOURNEY: Record<'company' | 'store', { key: string; phase?: string }[]> = {
+/** Six steps per side, with the availability of each taken from the TZ phase that delivers it. */
+const JOURNEY: Record<'company' | 'store', { key: string; live?: boolean }[]> = {
   company: [
-    { key: 'create' },
-    { key: 'verify' },
-    { key: 'catalog', phase: 'P04' },
-    { key: 'partners', phase: 'P06' },
-    { key: 'orders', phase: 'P07' },
-    { key: 'settle', phase: 'P09' },
+    { key: 'create', live: true },
+    { key: 'verify', live: true },
+    { key: 'catalog' },
+    { key: 'partners' },
+    { key: 'orders' },
+    { key: 'settle' },
   ],
   store: [
-    { key: 'create' },
-    { key: 'verify' },
-    { key: 'find', phase: 'P06' },
-    { key: 'terms', phase: 'P06' },
-    { key: 'order', phase: 'P07' },
-    { key: 'debt', phase: 'P09' },
+    { key: 'create', live: true },
+    { key: 'verify', live: true },
+    { key: 'find' },
+    { key: 'terms' },
+    { key: 'order' },
+    { key: 'debt' },
   ],
 };
 
+/** The order pipeline: the statuses the design system already carries colour tokens for, in P07's order. */
+const PIPELINE = ['new', 'confirmed', 'assembling', 'transit', 'delivered'] as const;
+
 /**
- * One side's narrative.
+ * The company's path: a vertical editorial sequence, each step a rule and two sentences.
  *
- * A numbered column with a hairline connector, not a row of cards: the steps are sequential, and six cards in a
- * grid say "pick one" where the content says "then this". The two sides are stacked rather than put behind a
- * tab, because a visitor who does not yet know which side they are on cannot choose a tab, and the page is the
- * place where they find out.
+ * The two sides deliberately do not share a layout. Reusing one component for both would make the page say
+ * "here is the same thing twice" when the point is that the two sides experience different work.
  */
-function Side({ side, icon: Icon }: { side: 'company' | 'store'; icon: typeof Building2 }) {
+function CompanyPath() {
   const { t } = useTranslation();
   return (
-    <div>
-      <div className="flex items-center gap-3.5">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-        <div>
-          <h2 className="font-serif text-section-sm font-semibold">{t(`site.how.${side}.title`)}</h2>
-          <p className="text-label text-muted-foreground">{t(`site.how.${side}.subtitle`)}</p>
-        </div>
-      </div>
-      <p className="mt-5 max-w-measure text-body leading-relaxed text-muted-foreground">{t(`site.how.${side}.lead`)}</p>
+    <ol>
+      {JOURNEY.company.map(({ key, live }, index) => (
+        <Reveal key={key}>
+          <li className="grid gap-x-8 gap-y-2 border-t py-7 sm:grid-cols-[auto_minmax(0,16rem)_minmax(0,1fr)] sm:items-baseline">
+            <Index n={index + 1} className="sm:pt-1" />
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h3 className="font-serif text-section-sm font-semibold">{t(`site.how.company.steps.${key}.title`)}</h3>
+              <Availability state={live ? 'live' : 'planned'} />
+            </div>
+            <p className="max-w-measure text-body leading-relaxed text-muted-foreground">
+              {t(`site.how.company.steps.${key}.text`)}
+            </p>
+          </li>
+        </Reveal>
+      ))}
+    </ol>
+  );
+}
 
-      <ol className="mt-9">
-        {JOURNEY[side].map(({ key, phase }, index) => {
-          const last = index === JOURNEY[side].length - 1;
-          return (
-            <Reveal key={key} delay={index * 0.05}>
-              <li className="flex gap-5">
-                <span className="flex flex-col items-center" aria-hidden="true">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border bg-surface font-data text-caption font-bold">
-                    {index + 1}
-                  </span>
-                  {last ? null : <span className="min-h-10 w-px flex-1 bg-border" />}
-                </span>
-                <div className={cn('min-w-0', last ? 'pb-0' : 'pb-9')}>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                    <h3 className="text-body-lg font-semibold">{t(`site.how.${side}.steps.${key}.title`)}</h3>
-                    <Availability state={phase ? 'planned' : 'live'} phase={phase} />
-                  </div>
-                  <p className="mt-1.5 max-w-measure text-body leading-relaxed text-muted-foreground">
-                    {t(`site.how.${side}.steps.${key}.text`)}
-                  </p>
-                </div>
-              </li>
-            </Reveal>
-          );
-        })}
-      </ol>
-    </div>
+/**
+ * The store's path: the same information as a stepped column with a connector, which reads as a shorter, more
+ * linear journey. That is also true of the work itself.
+ */
+function StorePath() {
+  const { t } = useTranslation();
+  return (
+    <ol className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+      {JOURNEY.store.map(({ key, live }, index) => (
+        <Reveal key={key} delay={index * 0.04}>
+          <li>
+            <div className="flex items-center gap-3">
+              <Index n={index + 1} />
+              <span aria-hidden="true" className="h-px flex-1 bg-border" />
+              <Availability state={live ? 'live' : 'planned'} />
+            </div>
+            <h3 className="mt-4 font-serif text-section-sm font-semibold">{t(`site.how.store.steps.${key}.title`)}</h3>
+            <p className="mt-2 text-body leading-relaxed text-muted-foreground">{t(`site.how.store.steps.${key}.text`)}</p>
+          </li>
+        </Reveal>
+      ))}
+    </ol>
   );
 }
 
@@ -88,77 +86,95 @@ export function HowItWorksPage() {
   const { t } = useTranslation();
   return (
     <>
-      <Section space="tight" className="pt-14 sm:pt-20 lg:pt-24">
-        <div className="max-w-3xl">
-          <Eyebrow>{t('site.how.eyebrow')}</Eyebrow>
-          <Display as="h1" size="hero" className="mt-5">
-            {t('site.how.title')}
-          </Display>
-          <Lead className="mt-6">{t('site.how.lead')}</Lead>
-        </div>
-      </Section>
-
-      {/* The agreement, which is the thing both sides arrive at and the reason the rest of the flow exists. */}
-      <Section tone="sunk" hairline>
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-16">
-          <div>
-            <Eyebrow>{t('site.how.partnership.eyebrow')}</Eyebrow>
-            <Display className="mt-4">{t('site.how.partnership.title')}</Display>
+      {/* Opens on a statement, not on a heading and a lead. */}
+      {/* One band, not a section wrapping a band: the hero is a band like every other. */}
+      <Band space="tight" className="pt-16 sm:pt-24 lg:pt-32">
+          <div className="max-w-[48rem]">
+            <Display as="h1" size="hero">
+              {t('site.how.title')}
+            </Display>
+            <Lead className="mt-10 text-body-lg sm:text-lead">{t('site.how.lead')}</Lead>
           </div>
-          <div>
-            <Lead>{t('site.how.partnership.lead')}</Lead>
-            <dl className="mt-8 space-y-6">
-              {(['request', 'invite', 'terms'] as const).map((key) => (
-                <Reveal key={key}>
-                  <div className="border-t pt-5">
-                    <dt className="text-body-lg font-semibold">{t(`site.how.partnership.${key}.title`)}</dt>
-                    <dd className="mt-1.5 max-w-measure text-body leading-relaxed text-muted-foreground">
-                      {t(`site.how.partnership.${key}.text`)}
-                    </dd>
-                  </div>
-                </Reveal>
-              ))}
-            </dl>
-          </div>
-        </div>
-      </Section>
+      </Band>
 
-      <Section hairline>
-        <div className="grid gap-16 lg:grid-cols-2 lg:gap-20">
-          <Side side="company" icon={Building2} />
-          <Side side="store" icon={Store} />
-        </div>
-      </Section>
+      {/* Company: text in the minority column, the sequence carrying the width. */}
+      <Band tone="sunk" hairline>
+        <Split aside={<CompanyPath />}>
+          <Eyebrow>{t('site.how.company.eyebrow')}</Eyebrow>
+          <Display className="mt-5">{t('site.how.company.title')}</Display>
+          <p className="mt-3 text-label uppercase tracking-[0.06em] text-muted-foreground">
+            {t('site.how.company.subtitle')}
+          </p>
+          <Lead className="mt-6 text-body-lg">{t('site.how.company.lead')}</Lead>
+        </Split>
+      </Band>
 
-      {/* The life of one order, in the statuses the product actually uses. */}
-      <Section tone="sunk" hairline>
-        <div className="max-w-3xl">
+      {/* Air between the two sides, so they read as two stories rather than one list. */}
+      <Band space="air">
+        <Reveal>
+          <Statement>{t('site.how.between')}</Statement>
+        </Reveal>
+      </Band>
+
+      {/* Store: reversed, and a grid rather than a column, so the silhouette differs from the company's. */}
+      <Band tone="sunk" hairline>
+        <Split reverse weight="text-minor" aside={<StorePath />}>
+          <Eyebrow>{t('site.how.store.eyebrow')}</Eyebrow>
+          <Display className="mt-5">{t('site.how.store.title')}</Display>
+          <p className="mt-3 text-label uppercase tracking-[0.06em] text-muted-foreground">
+            {t('site.how.store.subtitle')}
+          </p>
+          <Lead className="mt-6 text-body-lg">{t('site.how.store.lead')}</Lead>
+        </Split>
+      </Band>
+
+      {/* One order, as a horizontal progression. Hairline-separated cells, not five cards. */}
+      <Band hairline>
+        <div className="max-w-[44rem]">
           <Eyebrow>{t('site.how.pipeline.eyebrow')}</Eyebrow>
-          <Display className="mt-4">{t('site.how.pipeline.title')}</Display>
-          <Lead className="mt-5">{t('site.how.pipeline.lead')}</Lead>
+          <Display className="mt-5">{t('site.how.pipeline.title')}</Display>
+          <Lead className="mt-6 text-body-lg">{t('site.how.pipeline.lead')}</Lead>
         </div>
-        <ol className="mt-12 grid gap-px overflow-hidden rounded-3xl border bg-border sm:grid-cols-2 lg:grid-cols-5">
+        <ol className="mt-14 grid border-t sm:grid-cols-2 lg:grid-cols-5 lg:border-t-0">
           {PIPELINE.map((stage, index) => (
-            <li key={stage} className="bg-surface p-5 sm:p-6">
-              <span className="font-data text-caption font-bold text-muted-foreground">{`0${index + 1}`}</span>
-              <p className="mt-3 text-body-lg font-semibold">{t(`site.how.pipeline.stages.${stage}.title`)}</p>
-              <p className="mt-1.5 text-label leading-relaxed text-muted-foreground">
-                {t(`site.how.pipeline.stages.${stage}.text`)}
-              </p>
-            </li>
+            <Reveal key={stage} delay={index * 0.05}>
+              <li className={cn('border-b py-6 lg:border-b-0 lg:border-t lg:pr-6', index > 0 && 'lg:border-l lg:pl-6')}>
+                <div className="flex items-center gap-3">
+                  <Index n={index + 1} />
+                  <span aria-hidden="true" className="h-px flex-1 bg-border lg:hidden" />
+                </div>
+                <p className="mt-3 text-body-lg font-semibold">{t(`site.how.pipeline.stages.${stage}.title`)}</p>
+                <p className="mt-1.5 text-label leading-relaxed text-muted-foreground">
+                  {t(`site.how.pipeline.stages.${stage}.text`)}
+                </p>
+              </li>
+            </Reveal>
           ))}
         </ol>
-        <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <Availability state="planned" />
           <p className="max-w-measure text-label leading-relaxed text-muted-foreground">{t('site.how.pipeline.disputed')}</p>
-          <Availability state="planned" phase="P07" />
         </div>
-      </Section>
+      </Band>
 
-      <Section tone="ink">
-        <div className="max-w-2xl">
-          <Display className="text-background">{t('site.how.cta.title')}</Display>
-          <p className="mt-5 max-w-measure text-lead text-background/75">{t('site.how.cta.lead')}</p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+      {/* Both sides brought back together: the same relationship visual that opened the home page. */}
+      <Band tone="sunk" hairline>
+        <div className="max-w-[44rem]">
+          <Display>{t('site.how.together.title')}</Display>
+          <Lead className="mt-6 text-body-lg">{t('site.how.together.lead')}</Lead>
+        </div>
+        <div className="mt-14">
+          <Reveal>
+            <RelationshipFlow />
+          </Reveal>
+        </div>
+      </Band>
+
+      <Band tone="ink">
+        <div className="max-w-[40rem]">
+          <Display>{t('site.how.cta.title')}</Display>
+          <p className="mt-6 max-w-measure text-lead text-background/70">{t('site.how.cta.lead')}</p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button asChild size="xl" className="bg-background text-foreground hover:bg-background/90">
               <Link to="/register">
                 {t('site.nav.createAccount')}
@@ -170,7 +186,7 @@ export function HowItWorksPage() {
             </Button>
           </div>
         </div>
-      </Section>
+      </Band>
     </>
   );
 }

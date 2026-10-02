@@ -2,7 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { JourneyShell } from '@/app/shell/journey-shell';
+import { AuthFrame } from '@/features/auth/auth-frame';
 import { AuthPage } from '@/features/auth/auth-layout';
 import { AccountMenu } from '@/shared/auth/account-menu';
 import { areaFor, areaHome, isUsable } from '@/shared/auth/context';
@@ -31,8 +31,8 @@ export function BusinessTypePage({ me }: { me: Me }) {
   const existing = me.memberships.filter(isUsable);
 
   return (
-    <JourneyShell step="type" actions={<AccountMenu me={me} compact />}>
-      <AuthPage step="type" title={t('onboarding.type.title')} lead={t('onboarding.type.lead')}>
+    <AuthFrame step="type" actions={<AccountMenu me={me} compact />}>
+      <AuthPage title={t('onboarding.type.title')} lead={t('onboarding.type.lead')}>
         <form
           className="space-y-6"
           onSubmit={form.handleSubmit(({ type }) => navigate(`/welcome/${type.toLowerCase()}`))}
@@ -81,6 +81,6 @@ export function BusinessTypePage({ me }: { me: Me }) {
           </section>
         ) : null}
       </AuthPage>
-    </JourneyShell>
+    </AuthFrame>
   );
 }

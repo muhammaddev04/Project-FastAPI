@@ -1,97 +1,81 @@
-import { ArrowRight, Building2, Check, ShieldCheck, Store, Users } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { JOURNEY_STEPS } from '@/features/auth/journey-steps';
-import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui';
-import { Availability, Display, Eyebrow, Lead, Reveal, Section } from './primitives';
-import { ROADMAP } from './roadmap';
-
-/** The three things TezFarmo does today. Every one of them is implemented; none is a promise. */
-const TRUTHS = [
-  { key: 'verified', icon: ShieldCheck },
-  { key: 'memberships', icon: Users },
-  { key: 'roles', icon: Building2 },
-] as const;
+import { Availability, Band, Display, Eyebrow, Index, Lead, Reveal, Split, Statement } from './primitives';
+import { RelationshipFlow } from './relationship-flow';
+import { PLANNED_MODULES } from './roadmap';
 
 /**
- * The relationship the whole product exists to serve, drawn once.
+ * The home page (Phase E, rebuilt).
  *
- * Two columns and the agreement between them, not a flow chart: the point is that a company and a store are
- * two parties to one arrangement, and that either of them can start it. The arrow directions are the real ones
- * from the TZ, where a store requests with the company's public code and a company invites.
+ * The first version was a hero and then four bands of eyebrow, heading, lead and a grid. Five sections with one
+ * silhouette is the generic shape this redesign exists to remove, so the page is now a sequence that changes
+ * rhythm: a hero whose headline is the largest object on the screen, a bare statement with nothing else in its
+ * band, a wide product moment, a restrained trio with no boxes, two asymmetric stories facing opposite ways, a
+ * second statement, an indexed roadmap and one closing action.
+ *
+ * No section repeats another section's layout. That is the whole brief.
  */
-function Relationship() {
+
+/** The three things that are true today. No icons, no cards: a marker, a line, and two sentences. */
+function Truths() {
   const { t } = useTranslation();
-  const sides = [
-    { key: 'company', icon: Building2 },
-    { key: 'store', icon: Store },
-  ] as const;
+  const truths = ['relationships', 'oneFlow', 'history'] as const;
   return (
-    <div className="mt-12 grid gap-4 lg:mt-16 lg:grid-cols-[1fr_auto_1fr] lg:items-stretch lg:gap-6">
-      {sides.map(({ key, icon: Icon }, index) => (
-        <Reveal key={key} delay={index * 0.08} className="flex">
-          <div className="flex w-full flex-col rounded-3xl border bg-surface p-6 sm:p-8">
-            <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Icon className="size-5" aria-hidden="true" />
-            </span>
-            <h3 className="mt-5 font-serif text-section-sm font-semibold">{t(`site.home.relationship.${key}.title`)}</h3>
-            <p className="mt-2 text-body leading-relaxed text-muted-foreground">{t(`site.home.relationship.${key}.text`)}</p>
-            <ul className="mt-5 space-y-2 border-t pt-4">
-              {(t(`site.home.relationship.${key}.points`, { returnObjects: true }) as string[]).map((point) => (
-                <li key={point} className="flex gap-2.5 text-label leading-relaxed text-muted-foreground">
-                  <Check className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                  {point}
-                </li>
-              ))}
-            </ul>
-          </div>
+    <div className="grid gap-12 sm:grid-cols-3 sm:gap-10 lg:gap-16">
+      {truths.map((key, index) => (
+        <Reveal key={key} delay={index * 0.07}>
+          <Index n={index + 1} />
+          <h3 className="mt-4 font-serif text-section-sm font-semibold">{t(`site.home.truths.${key}.title`)}</h3>
+          <p className="mt-2.5 text-body leading-relaxed text-muted-foreground">{t(`site.home.truths.${key}.text`)}</p>
         </Reveal>
       ))}
-
-      {/* The agreement sits between the two parties on a wide screen, and under the first one on a phone. */}
-      <Reveal
-        delay={0.16}
-        className="order-last flex items-center justify-center lg:order-none lg:row-start-1 lg:col-start-2"
-      >
-        <div className="flex w-full flex-col items-center gap-3 rounded-3xl border border-primary/30 bg-primary/[0.06] px-6 py-6 text-center lg:h-full lg:w-[13rem] lg:justify-center">
-          <p className="font-serif text-title font-semibold text-primary-ink">{t('site.home.relationship.bridge.title')}</p>
-          <p className="text-label leading-relaxed text-muted-foreground">{t('site.home.relationship.bridge.text')}</p>
-          <p className="mt-1 text-micro font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-            {t('site.home.relationship.bridge.note')}
-          </p>
-        </div>
-      </Reveal>
     </div>
   );
 }
 
-/**
- * What setting up actually involves, stated as the five steps the product really has.
- *
- * This is the honest alternative to a product screenshot. The application has three working screens and a
- * verification queue; a mocked dashboard full of invented orders would be the one thing on this page that
- * could not survive a visitor signing up, so the setup path is shown instead, because it is real.
- */
-function SetupPreview() {
+/** Setup, as the five steps the product really has. Bordered, because it is an interface, not an argument. */
+function SetupSequence() {
   const { t } = useTranslation();
   return (
-    <div className="mt-12 overflow-hidden rounded-3xl border bg-surface">
+    <div className="overflow-hidden rounded-2xl border bg-surface">
       <ol className="divide-y">
         {JOURNEY_STEPS.map((step, index) => (
-          <li key={step} className="flex items-start gap-4 px-5 py-4 sm:px-8 sm:py-5">
-            <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 font-data text-caption font-bold text-primary-ink">
-              {index + 1}
-            </span>
+          <li key={step} className="flex items-baseline gap-4 px-5 py-4 sm:px-6">
+            <Index n={index + 1} className="shrink-0" />
             <div className="min-w-0">
-              <p className="text-body-lg font-semibold">{t(`auth.journey.steps.${step}.title`)}</p>
+              <p className="text-body font-semibold">{t(`auth.journey.steps.${step}.title`)}</p>
               <p className="mt-0.5 text-label leading-relaxed text-muted-foreground">{t(`auth.journey.steps.${step}.hint`)}</p>
             </div>
           </li>
         ))}
       </ol>
-      <p className="border-t bg-subtle/60 px-5 py-4 text-label text-muted-foreground sm:px-8">{t('site.home.setup.note')}</p>
     </div>
+  );
+}
+
+/** The roadmap as an indexed editorial list: serif title, quiet status, one line, a rule. No cards. */
+function Roadmap() {
+  const { t } = useTranslation();
+  return (
+    <ul className="mt-14">
+      {PLANNED_MODULES.map((entry, index) => (
+        <Reveal key={entry.key}>
+          <li className="grid gap-x-8 gap-y-2 border-t py-6 sm:grid-cols-[auto_minmax(0,18rem)_minmax(0,1fr)] sm:items-baseline">
+            <Index n={index + 1} className="sm:pt-1" />
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h3 className="font-serif text-section-sm font-semibold">{t(`site.modules.${entry.key}.title`)}</h3>
+              <Availability state="planned" />
+            </div>
+            <p className="max-w-measure text-body leading-relaxed text-muted-foreground">
+              {t(`site.modules.${entry.key}.text`)}
+            </p>
+          </li>
+        </Reveal>
+      ))}
+    </ul>
   );
 }
 
@@ -100,104 +84,131 @@ export function HomePage() {
   return (
     <>
       {/*
-       * Hero. One sentence of what this is, one of who it is for, two actions. The reference opens on a single
-       * large statement and a photograph, not on a value-proposition stack, so there is no second headline
-       * here, no badge row and no statistics strip.
+       * Hero. The headline is the dominant object; the supporting line is deliberately a fraction of its size.
+       * Left-aligned and asymmetric, and the product visual gets the full width of the frame beneath it rather
+       * than being squeezed into a column beside the text.
        */}
-      <Section space="tight" className="pt-14 sm:pt-20 lg:pt-28">
-        <div className="max-w-3xl">
-          <Reveal>
-            <Eyebrow>{t('site.home.eyebrow')}</Eyebrow>
-            <Display as="h1" size="hero" className="mt-5">
+      <Band space="tight" className="pt-16 sm:pt-24 lg:pt-32">
+        <div>
+          <div className="max-w-[52rem]">
+            <Display as="h1" size="hero">
               {t('site.home.title')}
             </Display>
-            <Lead className="mt-6">{t('site.home.lead')}</Lead>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button asChild size="xl" className="sm:w-auto">
-                <Link to="/register">
-                  {t('site.nav.createAccount')}
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button asChild variant="secondary" size="xl">
-                <Link to="/how-it-works">{t('site.home.seeHow')}</Link>
-              </Button>
+            <div className="mt-10 grid gap-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <Lead className="max-w-[34rem] text-body-lg sm:text-lead">{t('site.home.lead')}</Lead>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Button asChild size="xl">
+                  <Link to="/register">
+                    {t('site.nav.createAccount')}
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
+                <Button asChild variant="ghost" size="xl">
+                  <Link to="/how-it-works">{t('site.home.seeHow')}</Link>
+                </Button>
+              </div>
             </div>
-            <p className="mt-5 text-label text-muted-foreground">{t('site.home.heroNote')}</p>
+          </div>
+        </div>
+        <div className="mt-16 lg:mt-24">
+          <Reveal>
+            <RelationshipFlow />
           </Reveal>
         </div>
-      </Section>
+      </Band>
 
-      <Section tone="sunk" hairline>
-        <div className="max-w-3xl">
-          <Eyebrow>{t('site.home.relationship.eyebrow')}</Eyebrow>
-          <Display className="mt-4">{t('site.home.relationship.title')}</Display>
-          <Lead className="mt-5">{t('site.home.relationship.lead')}</Lead>
-        </div>
-        <Relationship />
-      </Section>
+      {/* Rhythm change: one statement, a lot of air, no chrome at all. */}
+      <Band space="air">
+        <Reveal>
+          <Statement answer={t('site.home.statement.answer')}>{t('site.home.statement.problem')}</Statement>
+        </Reveal>
+      </Band>
 
-      <Section hairline>
-        <div className="max-w-3xl">
-          <Eyebrow>{t('site.home.truths.eyebrow')}</Eyebrow>
-          <Display className="mt-4">{t('site.home.truths.title')}</Display>
-          <Lead className="mt-5">{t('site.home.truths.lead')}</Lead>
-        </div>
-        <dl className="mt-12 grid gap-10 sm:grid-cols-3 sm:gap-8 lg:mt-16">
-          {TRUTHS.map(({ key, icon: Icon }, index) => (
-            <Reveal key={key} delay={index * 0.08}>
-              <Icon className="size-5 text-primary" aria-hidden="true" />
-              <dt className="mt-4 font-serif text-section-sm font-semibold">{t(`site.home.truths.${key}.title`)}</dt>
-              <dd className="mt-2 text-body leading-relaxed text-muted-foreground">{t(`site.home.truths.${key}.text`)}</dd>
+      {/* Product moment: the agreement, with the text in the minority column. */}
+      <Band tone="sunk" hairline>
+        <Split
+          aside={
+            <Reveal>
+              <ol className="space-y-px overflow-hidden rounded-2xl border bg-border">
+                {(['request', 'invite', 'terms'] as const).map((key, index) => (
+                  <li key={key} className="bg-surface px-5 py-5 sm:px-6">
+                    <div className="flex items-baseline gap-3">
+                      <Index n={index + 1} />
+                      <div className="min-w-0">
+                        <h3 className="text-body-lg font-semibold">{t(`site.how.partnership.${key}.title`)}</h3>
+                        <p className="mt-1.5 max-w-measure text-body leading-relaxed text-muted-foreground">
+                          {t(`site.how.partnership.${key}.text`)}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </Reveal>
-          ))}
-        </dl>
-      </Section>
+          }
+        >
+          <Eyebrow>{t('site.home.agreement.eyebrow')}</Eyebrow>
+          <Display className="mt-5">{t('site.home.agreement.title')}</Display>
+          <Lead className="mt-6 text-body-lg">{t('site.home.agreement.lead')}</Lead>
+          <Availability state="live" className="mt-6" />
+        </Split>
+      </Band>
 
-      <Section tone="sunk" hairline>
-        <div className="max-w-3xl">
+      {/* Restrained trio. Full width, no boxes, separated by whitespace only. */}
+      <Band hairline>
+        <div className="max-w-[40rem]">
+          <Display size="section-sm">{t('site.home.truths.title')}</Display>
+        </div>
+        <div className="mt-14 lg:mt-20">
+          <Truths />
+        </div>
+      </Band>
+
+      {/* Asymmetric story, reversed: the visual leads and the text follows it. */}
+      <Band tone="sunk" hairline>
+        <Split
+          reverse
+          weight="text-minor"
+          aside={
+            <Reveal>
+              <SetupSequence />
+            </Reveal>
+          }
+        >
           <Eyebrow>{t('site.home.setup.eyebrow')}</Eyebrow>
-          <Display className="mt-4">{t('site.home.setup.title')}</Display>
-          <Lead className="mt-5">{t('site.home.setup.lead')}</Lead>
-        </div>
-        <SetupPreview />
-      </Section>
+          <Display className="mt-5">{t('site.home.setup.title')}</Display>
+          <Lead className="mt-6 text-body-lg">{t('site.home.setup.lead')}</Lead>
+          <p className="mt-6 max-w-measure text-label leading-relaxed text-muted-foreground">{t('site.home.setup.note')}</p>
+        </Split>
+      </Band>
 
-      {/* Being built in the open: the roadmap in product language, with the phase tag kept small. */}
-      <Section hairline>
-        <div className="max-w-3xl">
+      {/* Second typographic moment, centred this time so it does not echo the first. */}
+      <Band space="air" hairline>
+        <Reveal>
+          <Statement align="center">{t('site.home.openStatement')}</Statement>
+        </Reveal>
+      </Band>
+
+      <Band tone="sunk" hairline>
+        <div className="max-w-[44rem]">
           <Eyebrow>{t('site.home.roadmap.eyebrow')}</Eyebrow>
-          <Display className="mt-4">{t('site.home.roadmap.title')}</Display>
-          <Lead className="mt-5">{t('site.home.roadmap.lead')}</Lead>
+          <Display className="mt-5">{t('site.home.roadmap.title')}</Display>
+          <Lead className="mt-6 text-body-lg">{t('site.home.roadmap.lead')}</Lead>
         </div>
-        <ul className="mt-10 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
-          {ROADMAP.map((item) => (
-            <li key={item.key} className={cn('flex items-center justify-between gap-3 border-b py-3')}>
-              <span className="min-w-0 text-body font-medium">{t(`site.modules.${item.key}.title`)}</span>
-              <Availability state={item.phase ? 'planned' : 'live'} phase={item.phase} />
-            </li>
-          ))}
-        </ul>
-        <p className="mt-8 max-w-measure text-label leading-relaxed text-muted-foreground">{t('site.home.roadmap.note')}</p>
-        <Link to="/product" className="link-grow mt-4 inline-flex items-center gap-1.5 text-body font-semibold text-primary">
+        <Roadmap />
+        <Link to="/product" className="link-grow mt-10 inline-flex items-center gap-1.5 text-body font-semibold text-primary">
           {t('site.home.roadmap.more')}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
-      </Section>
+      </Band>
 
-      {/* Closing action. One heading, one button, nothing else on the band. */}
-      <Section tone="ink">
-        <div className="max-w-2xl">
-          <Display className="text-background">{t('site.home.cta.title')}</Display>
-          <p className="mt-5 max-w-measure text-lead text-background/75">{t('site.home.cta.lead')}</p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button
-              asChild
-              size="xl"
-              className="bg-background text-foreground hover:bg-background/90"
-            >
+      {/* One closing action. The only inverted band on the page. */}
+      <Band tone="ink" space="default">
+        <div className="max-w-[40rem]">
+          <Display>{t('site.home.cta.title')}</Display>
+          <p className="mt-6 max-w-measure text-lead text-background/70">{t('site.home.cta.lead')}</p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button asChild size="xl" className="bg-background text-foreground hover:bg-background/90">
               <Link to="/register">
                 {t('site.nav.createAccount')}
                 <ArrowRight aria-hidden="true" />
@@ -208,7 +219,7 @@ export function HomePage() {
             </Button>
           </div>
         </div>
-      </Section>
+      </Band>
     </>
   );
 }

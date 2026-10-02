@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { JourneyShell } from '@/app/shell/journey-shell';
+import { AuthFrame } from '@/features/auth/auth-frame';
 import { AuthForm, AuthPage } from '@/features/auth/auth-layout';
 import { ApiError } from '@/shared/api/client';
 import { errorMessage, fieldErrorMap } from '@/shared/api/errors';
@@ -175,9 +175,8 @@ export function BusinessSetupPage({ me, type }: { me: Me; type: OrgType }) {
   if (optional(values.email)) summary.push([t('onboarding.fields.email'), values.email.trim()]);
 
   return (
-    <JourneyShell step="setup" width="wide" actions={<AccountMenu me={me} compact />}>
+    <AuthFrame step="setup" width="wide" actions={<AccountMenu me={me} compact />}>
       <AuthPage
-        step="setup"
         title={isCompany ? t('onboarding.setupCompany') : t('onboarding.setupStore')}
         lead={t('onboarding.setup.lead')}
       >
@@ -252,6 +251,6 @@ export function BusinessSetupPage({ me, type }: { me: Me; type: OrgType }) {
           </dl>
         </ConfirmDialog>
       </AuthPage>
-    </JourneyShell>
+    </AuthFrame>
   );
 }

@@ -4,7 +4,7 @@ import { JourneyProgress, JourneyRail } from './journey';
 import { maskEmail } from './mask';
 import { renderWithProviders } from '@/test/render';
 
-describe('registration journey (Phase D)', () => {
+describe('registration journey', () => {
   it('runs in the order the backend allows', () => {
     expect([...JOURNEY_STEPS]).toEqual(['account', 'verify', 'type', 'setup', 'review']);
     expect(journeyIndex('type')).toBe(2);
@@ -30,8 +30,10 @@ describe('registration journey (Phase D)', () => {
     expect(items[1]).toHaveTextContent('done');
     expect(items[2]).toHaveAttribute('aria-current', 'step');
     expect(items[2]).toHaveTextContent('current step');
-    // The current step is the only one that explains itself.
-    expect(items[2]).toHaveTextContent('Are you a supplier or a store?');
+    expect(items[2]).toHaveTextContent('Business type');
+    // Phase E: the rail is an index, not a widget. The step's own explanation belongs to the step's page, so the
+    // rail carries the name and the state and nothing else.
+    expect(items[2]).not.toHaveTextContent('Are you a supplier or a store?');
     expect(items[3]).toHaveTextContent('not started');
     expect(items[3]).not.toHaveAttribute('aria-current');
   });

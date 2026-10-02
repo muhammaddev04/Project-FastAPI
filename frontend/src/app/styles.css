@@ -64,16 +64,6 @@
     --accent-foreground: 0 0% 100%;
     --accent-soft: var(--primary-soft);
 
-    /*
-     * Aside panel of the authentication screens (Phase D): a solid navy plane flush to the viewport edge,
-     * identical in both themes, so the sign-in composition reads the same way day and night. It carries its
-     * own accent because the light-theme `--primary` (#0B7D72) does not reach AA on a navy ground.
-     */
-    --aside: 222 55% 14%;
-    --aside-foreground: 210 40% 97%;
-    --aside-muted: 218 22% 70%;
-    --aside-border: 222 36% 25%;
-    --aside-accent: 172 66% 50%;
 
     /* Shell chrome: opaque white in light, navy at night (same for every area). */
     --sidebar: 0 0% 100%;
@@ -132,9 +122,6 @@
     --status-disputed: 0 84% 64%;
     --status-disputed-soft: 0 50% 16%;
 
-    /* The aside is already the darkest plane in light; at night it steps below the navy canvas. */
-    --aside: 224 68% 7%;
-    --aside-border: 221 35% 20%;
 
     --sidebar: 224 64% 10%;
     --sidebar-foreground: 210 40% 97%;
@@ -213,17 +200,6 @@
     --input: 26 17% 80%;
     /* Teal on warm paper measures 4.7:1, so it stays usable for text and not only for fills. */
     --ring: 174 72% 32%;
-
-    /*
-     * The authentication aside becomes the same ink plane the public site closes its pages with, so arriving at
-     * /login from the homepage is a continuation rather than a different product. Phase D's navy was built for
-     * the cool app palette and reads as a stranger next to warm paper.
-     */
-    --aside: 24 17% 13%;
-    --aside-foreground: 30 33% 97%;
-    --aside-muted: 28 12% 70%;
-    --aside-border: 24 10% 26%;
-    --aside-accent: 172 66% 50%;
   }
 
   .dark .paper {

@@ -22,20 +22,11 @@ export function LogoMark({ className, inverted = false }: { className?: string; 
 /**
  * The brand lockup: teal tile with the white mark, then "Tez" + "Farmo" in Montserrat.
  *
- * Phase D removed the `hero` size. It existed so the sign-in screen could print the lockup at 2xl in a
- * 64px tile above a three-line display headline; the authentication screens no longer open with a brand
- * statement, so the only remaining sizes are the ones real chrome uses. `tone="aside"` is for the navy
- * authentication panel, where neither the foreground nor the primary token has contrast.
+ * Phase D removed the `hero` size, which printed the lockup at 2xl in a 64px tile above a three-line display
+ * headline. Phase E removed `tone="aside"` with the navy panel it was built for: the authentication screens are
+ * paper now, so the ordinary foreground and primary tokens have contrast and the lockup has one appearance.
  */
-export function BrandMark({
-  className,
-  size = 'sm',
-  tone = 'default',
-}: {
-  className?: string;
-  size?: 'sm' | 'md' | 'lg';
-  tone?: 'default' | 'aside';
-}) {
+export function BrandMark({ className, size = 'sm' }: { className?: string; size?: 'sm' | 'md' | 'lg' }) {
   return (
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <span
@@ -48,12 +39,11 @@ export function BrandMark({
       </span>
       <span
         className={cn(
-          'font-display font-extrabold leading-none',
-          tone === 'aside' ? 'text-aside-foreground' : 'text-foreground',
+          'font-display font-extrabold leading-none text-foreground',
           size === 'lg' ? 'text-title sm:text-display-sm' : size === 'md' ? 'text-title' : 'text-title-sm',
         )}
       >
-        Tez<span className={tone === 'aside' ? 'text-aside-accent' : 'text-primary'}>Farmo</span>
+        Tez<span className="text-primary">Farmo</span>
       </span>
     </span>
   );

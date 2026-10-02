@@ -92,7 +92,6 @@ export function VerifyEmailPage() {
 
   return (
     <AuthPage
-      step="verify"
       title={t('auth.verify.title')}
       lead={handedOver ? t('auth.verify.sentTo', { email: maskEmail(handedOver) }) : t('auth.verify.checkInbox')}
       footer={<AuthSwitch question={t('auth.verify.alreadyVerified')} to="/login" link={t('auth.register.signIn')} />}

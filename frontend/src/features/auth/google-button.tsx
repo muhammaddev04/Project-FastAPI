@@ -20,10 +20,10 @@ export function GoogleMark() {
  * "Continue with Google". The OAuth flow (authorization code + state + PKCE + nonce, server-side exchange) is
  * owned by the backend; until /meta reports it as enabled the button stays disabled and explains why.
  *
- * Phase D: the button is the shared `social` variant at the same height as the submit button above it, instead
- * of 14 classes of bespoke white panel with its own two-layer shadow and a hover lift. Google's brand rules
- * dictate the colours, not the geometry, and a second action on the same screen should not be a different
- * shape from the first.
+ * Phase D made it the shared `social` variant instead of 14 classes of bespoke white panel with a two-layer
+ * shadow and a hover lift. Phase E dropped it one size below the submit button: it is an alternative route in,
+ * not a peer of the action the screen is for, and at equal height and equal width the two competed. Google's
+ * brand rules dictate its colours, not its size.
  */
 export function GoogleButton() {
   const { t } = useTranslation();
@@ -43,8 +43,8 @@ export function GoogleButton() {
         type="button"
         variant="social"
         block
-        size="xl"
-        className="[&_svg]:size-[1.125rem]"
+        size="lg"
+        className="[&_svg]:size-4"
         disabled={!available}
         loading={leaving}
         aria-describedby={!available && !meta.isPending ? 'google-status' : undefined}

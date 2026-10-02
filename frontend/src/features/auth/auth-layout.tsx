@@ -1,10 +1,9 @@
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import type { FormEvent, ReactNode } from 'react';
 import { Link, useLocation, useOutlet } from 'react-router-dom';
-import { JourneyShell } from '@/app/shell/journey-shell';
 import { cn } from '@/shared/lib/cn';
-import { JourneyProgress } from './journey';
-import { AUTH_FORM, journeyStepFor, type JourneyStep } from './journey-steps';
+import { AuthFrame } from './auth-frame';
+import { AUTH_FORM, journeyStepFor } from './journey-steps';
 
 /**
  * Authentication screens (Phase D).
@@ -26,7 +25,7 @@ export function AuthShell() {
   const outlet = useOutlet();
   return (
     <MotionConfig reducedMotion="user">
-      <JourneyShell step={journeyStepFor(location.pathname)}>
+      <AuthFrame step={journeyStepFor(location.pathname)}>
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
@@ -38,7 +37,7 @@ export function AuthShell() {
             {outlet}
           </motion.div>
         </AnimatePresence>
-      </JourneyShell>
+      </AuthFrame>
     </MotionConfig>
   );
 }
@@ -55,15 +54,12 @@ export function AuthShell() {
  * screen read as part of the same website rather than as the door to a different one.
  */
 export function AuthPage({
-  step,
   title,
   lead,
   above,
   children,
   footer,
 }: {
-  /** Shows the compact journey position on viewports without the aside. */
-  step?: JourneyStep;
   title: ReactNode;
   lead?: ReactNode;
   /** Position line for a sequence that is not the onboarding journey (password recovery). */
@@ -73,13 +69,12 @@ export function AuthPage({
 }) {
   return (
     <div>
-      {step ? <JourneyProgress current={step} className="mb-6" /> : null}
       {above ? <div className="mb-5">{above}</div> : null}
-      {/* Phase E: the same serif display face as the public site, so /login continues the page it came from. */}
-      <h1 className="font-serif text-section font-semibold">{title}</h1>
-      {lead ? <p className="mt-2.5 text-body-lg leading-relaxed text-muted-foreground">{lead}</p> : null}
-      <div className="mt-7">{children}</div>
-      {footer ? <div className="mt-7 border-t pt-5 text-body text-muted-foreground">{footer}</div> : null}
+      {/* The same serif display face as the public site, so /login continues the page it came from. */}
+      <h1 className="font-serif text-section-sm font-semibold leading-snug sm:text-section">{title}</h1>
+      {lead ? <p className="mt-3 text-body leading-relaxed text-muted-foreground">{lead}</p> : null}
+      <div className="mt-8">{children}</div>
+      {footer ? <div className="mt-8 border-t pt-5 text-label text-muted-foreground">{footer}</div> : null}
     </div>
   );
 }

@@ -1,103 +1,154 @@
-import { ArrowRight, Building2, Store, Users } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { JOURNEY_STEPS } from '@/features/auth/journey-steps';
 import { Button } from '@/shared/ui';
-import { Availability, Display, Eyebrow, Lead, Reveal, Section } from './primitives';
-import { LIVE_MODULES, PLANNED_MODULES, type ModuleEntry } from './roadmap';
-
-const SIDE_ICON = { company: Building2, store: Store, both: Users } as const;
+import { Availability, Band, Display, Eyebrow, Index, Lead, Reveal, Split, Statement } from './primitives';
+import { LIVE_MODULES, PLANNED_MODULES } from './roadmap';
 
 /**
- * One capability.
+ * The product page (Phase E, rebuilt).
  *
- * The live and the planned entries use the same row, with the same weight, and differ only in their marker and
- * in the tense of their sentence. Styling the planned ones as faded placeholders would make the product look
- * broken; styling them identically to the live ones would be a lie. The marker carries the difference.
+ * It was two sticky columns each listing bordered rows, which made the live capabilities and the unbuilt ones
+ * look like the same kind of thing at the same scale. Now what exists gets room to be a product story, and what
+ * does not gets an honest indexed sequence. The difference in treatment is itself the message.
+ *
+ * TZ phase codes are gone from this page. P04 and P07 are internal scheduling; a visitor needs to know whether
+ * something works, which the marker says in words.
  */
-function Module({ entry }: { entry: ModuleEntry }) {
+
+/** What the setup steps actually are, used as the visual for the first story. Real labels, real order. */
+function SetupStories() {
   const { t } = useTranslation();
-  const Icon = SIDE_ICON[entry.side];
   return (
-    <Reveal>
-      <div className="flex gap-4 border-t py-6">
-        <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Icon className="size-4" aria-hidden="true" />
-        </span>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <h3 className="text-body-lg font-semibold">{t(`site.modules.${entry.key}.title`)}</h3>
-            <Availability state={entry.phase ? 'planned' : 'live'} phase={entry.phase} />
-          </div>
-          <p className="mt-1.5 max-w-measure text-body leading-relaxed text-muted-foreground">
-            {t(`site.modules.${entry.key}.text`)}
+    <div className="overflow-hidden rounded-2xl border bg-surface">
+      <ol className="divide-y">
+        {JOURNEY_STEPS.map((step, index) => (
+          <li key={step} className="flex items-baseline gap-4 px-5 py-4 sm:px-6">
+            <Index n={index + 1} className="shrink-0" />
+            <div className="min-w-0">
+              <p className="text-body font-semibold">{t(`auth.journey.steps.${step}.title`)}</p>
+              <p className="mt-0.5 text-label leading-relaxed text-muted-foreground">{t(`auth.journey.steps.${step}.hint`)}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/** The role vocabulary, as the visual for the roles story. These are the real roles the backend enforces. */
+function RoleMatrix() {
+  const { t } = useTranslation();
+  const sides = [
+    { key: 'company', roles: ['OWNER', 'MANAGER', 'OPERATOR', 'WAREHOUSE', 'COURIER'] },
+    { key: 'store', roles: ['OWNER', 'SELLER'] },
+  ] as const;
+  return (
+    <div className="grid gap-px overflow-hidden rounded-2xl border bg-border sm:grid-cols-2">
+      {sides.map(({ key, roles }) => (
+        <div key={key} className="bg-surface p-5 sm:p-6">
+          <p className="text-micro font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+            {t(`orgTypes.${key === 'company' ? 'COMPANY' : 'STORE'}`)}
           </p>
-          <p className="mt-2 text-label text-muted-foreground">
-            {t(`site.product.for.${entry.side}`)}
-          </p>
+          <ul className="mt-4 space-y-2">
+            {roles.map((role) => (
+              <li key={role} className="flex items-center gap-2.5 text-body text-foreground/85">
+                <span aria-hidden="true" className="size-1 shrink-0 rounded-full bg-muted-foreground/50" />
+                {t(`roles.${role}`)}
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-    </Reveal>
+      ))}
+    </div>
   );
 }
 
 export function ProductPage() {
   const { t } = useTranslation();
+  /** The live capabilities, paired with the visual that shows each one honestly. */
+  const stories = [
+    { entry: LIVE_MODULES[0]!, aside: <SetupStories />, reverse: false },
+    { entry: LIVE_MODULES[2]!, aside: <RoleMatrix />, reverse: true },
+  ];
+
   return (
     <>
-      <Section space="tight" className="pt-14 sm:pt-20 lg:pt-24">
-        <div className="max-w-3xl">
-          <Eyebrow>{t('site.product.eyebrow')}</Eyebrow>
-          <Display as="h1" size="hero" className="mt-5">
-            {t('site.product.title')}
-          </Display>
-          <Lead className="mt-6">{t('site.product.lead')}</Lead>
-        </div>
-      </Section>
-
-      {/* What a visitor gets the day they sign up. */}
-      <Section tone="sunk" hairline>
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <Eyebrow>{t('site.product.live.eyebrow')}</Eyebrow>
-            <Display size="section" className="mt-4">
-              {t('site.product.live.title')}
+      {/* One band, not a section wrapping a band: the hero is a band like every other. */}
+      <Band space="tight" className="pt-16 sm:pt-24 lg:pt-32">
+          <div className="max-w-[48rem]">
+            <Display as="h1" size="hero">
+              {t('site.product.title')}
             </Display>
-            <Lead className="mt-5 text-body">{t('site.product.live.lead')}</Lead>
+            <Lead className="mt-10 text-body-lg sm:text-lead">{t('site.product.lead')}</Lead>
           </div>
-          <div className="border-b">
-            {LIVE_MODULES.map((entry) => (
-              <Module key={entry.key} entry={entry} />
-            ))}
-          </div>
-        </div>
-      </Section>
+      </Band>
 
-      {/* What is specified and being built, in product language, with the phase tag kept small. */}
-      <Section hairline>
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <Eyebrow>{t('site.product.planned.eyebrow')}</Eyebrow>
-            <Display size="section" className="mt-4">
-              {t('site.product.planned.title')}
-            </Display>
-            <Lead className="mt-5 text-body">{t('site.product.planned.lead')}</Lead>
-            <p className="mt-5 max-w-measure text-label leading-relaxed text-muted-foreground">
-              {t('site.product.planned.note')}
-            </p>
-          </div>
-          <div className="border-b">
-            {PLANNED_MODULES.map((entry) => (
-              <Module key={entry.key} entry={entry} />
-            ))}
-          </div>
-        </div>
-      </Section>
+      {/* Available today: two full stories, each with its own visual and its own direction. */}
+      {stories.map(({ entry, aside, reverse }, index) => (
+        <Band key={entry.key} tone={index % 2 === 0 ? 'sunk' : 'default'} hairline>
+          <Split reverse={reverse} aside={<Reveal>{aside}</Reveal>}>
+            {index === 0 ? <Eyebrow>{t('site.product.live.eyebrow')}</Eyebrow> : null}
+            <Display className={index === 0 ? 'mt-5' : undefined}>{t(`site.modules.${entry.key}.title`)}</Display>
+            <Lead className="mt-6 text-body-lg">{t(`site.modules.${entry.key}.text`)}</Lead>
+            <Availability state="live" className="mt-6" />
+          </Split>
+        </Band>
+      ))}
 
-      <Section tone="ink">
-        <div className="max-w-2xl">
-          <Display className="text-background">{t('site.product.cta.title')}</Display>
-          <p className="mt-5 max-w-measure text-lead text-background/75">{t('site.product.cta.lead')}</p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+      {/* The remaining live capabilities, stated plainly rather than given a story each. */}
+      <Band hairline space="tight">
+        <div className="grid gap-10 sm:grid-cols-2 lg:gap-16">
+          {[LIVE_MODULES[1]!, LIVE_MODULES[3]!].map((entry) => (
+            <Reveal key={entry.key}>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h3 className="font-serif text-section-sm font-semibold">{t(`site.modules.${entry.key}.title`)}</h3>
+                <Availability state="live" />
+              </div>
+              <p className="mt-2.5 max-w-measure text-body leading-relaxed text-muted-foreground">
+                {t(`site.modules.${entry.key}.text`)}
+              </p>
+            </Reveal>
+          ))}
+        </div>
+      </Band>
+
+      {/* The transition. A statement does the work a section header would have done badly. */}
+      <Band space="air" hairline>
+        <Reveal>
+          <Statement answer={t('site.product.planned.lead')}>{t('site.product.planned.title')}</Statement>
+        </Reveal>
+      </Band>
+
+      <Band tone="sunk" hairline>
+        <ul>
+          {PLANNED_MODULES.map((entry, index) => (
+            <Reveal key={entry.key}>
+              <li className="grid gap-x-8 gap-y-2 border-t py-7 sm:grid-cols-[auto_minmax(0,18rem)_minmax(0,1fr)] sm:items-baseline">
+                <Index n={index + 1} className="sm:pt-1" />
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className="font-serif text-section-sm font-semibold">{t(`site.modules.${entry.key}.title`)}</h3>
+                  <Availability state="planned" />
+                </div>
+                <div className="min-w-0">
+                  <p className="max-w-measure text-body leading-relaxed text-muted-foreground">
+                    {t(`site.modules.${entry.key}.text`)}
+                  </p>
+                  <p className="mt-1.5 text-caption text-muted-foreground">{t(`site.product.for.${entry.side}`)}</p>
+                </div>
+              </li>
+            </Reveal>
+          ))}
+        </ul>
+        <p className="mt-10 max-w-measure text-label leading-relaxed text-muted-foreground">{t('site.product.planned.note')}</p>
+      </Band>
+
+      <Band tone="ink">
+        <div className="max-w-[40rem]">
+          <Display>{t('site.product.cta.title')}</Display>
+          <p className="mt-6 max-w-measure text-lead text-background/70">{t('site.product.cta.lead')}</p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button asChild size="xl" className="bg-background text-foreground hover:bg-background/90">
               <Link to="/register">
                 {t('site.nav.createAccount')}
@@ -109,7 +160,7 @@ export function ProductPage() {
             </Button>
           </div>
         </div>
-      </Section>
+      </Band>
     </>
   );
 }
