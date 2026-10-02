@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -37,13 +38,15 @@ export function JourneyShell({
   const facts = ['verified', 'direct', 'oneAccount'] as const;
   const version = `v${meta.data?.version ?? '-'}`;
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground lg:grid lg:grid-cols-[21rem_minmax(0,1fr)] xl:grid-cols-[25rem_minmax(0,1fr)]">
+    <div className="paper min-h-screen bg-background font-sans text-foreground lg:grid lg:grid-cols-[21rem_minmax(0,1fr)] xl:grid-cols-[25rem_minmax(0,1fr)]">
       <aside className="hidden bg-aside lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:gap-10 lg:px-10 lg:py-10 xl:px-12">
         <div>
           <Link to="/" aria-label={t('common.appName')} className="inline-flex rounded-xl focus-visible:ring-offset-aside">
             <BrandMark tone="aside" size="md" />
           </Link>
-          <p className="mt-8 max-w-[22rem] text-title-sm leading-relaxed text-aside-foreground">{t('auth.aside.statement')}</p>
+          <p className="mt-8 max-w-[22rem] font-serif text-section-sm font-medium leading-snug text-aside-foreground">
+            {t('auth.aside.statement')}
+          </p>
         </div>
         <div className="max-w-[22rem]">
           {step ? (
@@ -64,7 +67,11 @@ export function JourneyShell({
             </dl>
           )}
         </div>
-        <div className="flex flex-col gap-2 border-t border-aside-border pt-6 text-caption text-aside-muted">
+        <div className="flex flex-col gap-3 border-t border-aside-border pt-6 text-caption text-aside-muted">
+          <Link to="/" className="link-grow inline-flex w-fit items-center gap-1.5 font-medium text-aside-foreground/85 hover:text-aside-foreground">
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            {t('site.backToSite')}
+          </Link>
           <SupportLink tone="aside" />
           <p className="font-data">{version}</p>
         </div>
@@ -88,6 +95,10 @@ export function JourneyShell({
         </main>
         <footer className="px-5 pb-6 sm:px-8 lg:hidden">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t pt-4 text-caption text-muted-foreground">
+            <Link to="/" className="link-grow inline-flex items-center gap-1.5 font-medium text-foreground/85 hover:text-foreground">
+              <ArrowLeft className="size-3.5" aria-hidden="true" />
+              {t('site.backToSite')}
+            </Link>
             <SupportLink />
             <p className="font-data">{version}</p>
             <p className="basis-full">{t('auth.aside.rights', { year: new Date().getFullYear() })}</p>

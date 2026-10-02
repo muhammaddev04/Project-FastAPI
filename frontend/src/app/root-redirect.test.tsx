@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Location } from 'react-router-dom';
 import { resetSessionRestoreForTests, restoreSession, useSessionStore } from '@/shared/auth/session-store';
@@ -51,15 +51,38 @@ describe('root route `/`', () => {
     document.cookie = 'csrf_token=; Max-Age=0; path=/';
   });
 
-  it('sends an unauthenticated visitor to /login', async () => {
+  // Phase E: `/` is the public homepage for visitors. It renders; it does not redirect anywhere.
+  it('shows the public homepage to a visitor and sends them nowhere', async () => {
     const { calls } = mockApi([{ path: '/meta', body: META }]);
     await restoreSession(); // no CSRF cookie: nothing to restore
 
-    const { current } = renderRoutes(routes, '/');
+    const page = renderAt('/');
 
-    await waitFor(() => expect(current.location?.pathname).toBe('/login'));
-    expect(await screen.findByRole('button', { name: 'Login now' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument();
+    // A marketing page repeats its actions by design, so scope to the header rather than counting them.
+    const header = within(screen.getByRole('banner'));
+    expect(header.getByRole('link', { name: 'Create account' })).toHaveAttribute('href', '/register');
+    expect(header.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/login');
+    expect(within(screen.getByRole('navigation', { name: 'TezFarmo' })).getAllByRole('link')).toHaveLength(3);
+    // No navigation at all is what makes a loop impossible for a guest.
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    page.stop();
+    expect(page.visited).toEqual(['/']);
     expect(pathOf(calls, '/auth/refresh')).toHaveLength(0);
+    expect(pathOf(calls, '/me')).toHaveLength(0);
+  });
+
+  it('serves the other public pages without a session', async () => {
+    mockApi([{ path: '/meta', body: META }]);
+    await restoreSession();
+
+    for (const path of ['/how-it-works', '/product']) {
+      const page = renderAt(path);
+      expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument();
+      page.stop();
+      expect(page.visited).toEqual([path]);
+      page.unmount();
+    }
   });
 
   it('keeps an unauthenticated visitor on /login', async () => {
@@ -102,6 +125,22 @@ describe('root route `/`', () => {
     expect(pathOf(calls, '/me').length).toBeLessThanOrEqual(1);
   });
 
+  it('never shows a signed-in user the public homepage at `/`', async () => {
+    mockApi([
+      { path: '/meta', body: META },
+      { path: '/me', body: COMPANY_USER },
+    ]);
+    useSessionStore.setState({ accessToken: 'live-access' });
+    const page = renderAt('/');
+
+    await waitFor(() => expect(page.current.location?.pathname).toBe('/company'));
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    page.stop();
+    // Straight there: `homePath` never returns `/`, so the signed-in branch cannot bounce back.
+    expect(page.visited).toEqual(['/', '/company']);
+    expect(screen.queryByRole('link', { name: 'Create account' })).not.toBeInTheDocument();
+  });
+
   it('restores the session on a reload of `/` without passing through /login', async () => {
     setCsrfCookie();
     mockApi([
@@ -118,7 +157,7 @@ describe('root route `/`', () => {
     expect(page.visited).not.toContain('/login');
   });
 
-  it('treats a refused restoration as signed out: `/` goes to /login', async () => {
+  it('treats a refused restoration as a visitor: `/` settles on the public homepage', async () => {
     setCsrfCookie();
     mockApi([
       { path: '/meta', body: META },
@@ -126,9 +165,12 @@ describe('root route `/`', () => {
     ]);
 
     void restoreSession();
-    const { current } = renderRoutes(routes, '/');
+    const page = renderAt('/');
 
-    await waitFor(() => expect(current.location?.pathname).toBe('/login'));
+    // Someone with a stale cookie waits behind the loader rather than seeing the homepage and being moved off it.
+    expect(await screen.findByRole('heading', { level: 1 }, { timeout: 3000 })).toBeInTheDocument();
+    page.stop();
+    expect(page.visited).toEqual(['/']);
     expect(screen.queryByText('You were signed out')).not.toBeInTheDocument();
   });
 
@@ -157,8 +199,10 @@ describe('root route `/`', () => {
     unmount();
     resetSessionRestoreForTests();
     await restoreSession();
-    const reloaded = renderRoutes(routes, '/');
-    await waitFor(() => expect(reloaded.current.location?.pathname).toBe('/login'));
+    const reloaded = renderAt('/');
+    expect(await screen.findByRole('heading', { level: 1 })).toBeInTheDocument();
+    reloaded.stop();
+    expect(reloaded.visited).toEqual(['/']);
     expect(pathOf(calls, '/auth/refresh')).toHaveLength(0);
   });
 

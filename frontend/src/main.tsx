@@ -2,6 +2,8 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/jetbrains-mono';
 import '@fontsource-variable/montserrat';
 import '@fontsource-variable/montserrat/wght-italic.css';
+// Phase E: display face of the public site. Declared as a dependency since CR-002 and never imported until now.
+import '@fontsource-variable/noto-serif';
 import './app/styles.css';
 import './shared/i18n';
 import { StrictMode } from 'react';

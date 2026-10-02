@@ -187,6 +187,67 @@
   }
 }
 
+/*
+ * Paper surface (Phase E): the public website and the authentication screens.
+ *
+ * The authenticated product is a data tool and keeps the Phase C system: cool blue-grey canvas, white chrome,
+ * tight density. The public site has a different job, so it gets a different ground: warm paper, a serif for
+ * the few sentences that carry the argument, and whitespace instead of cards. Teal stays, because it is the
+ * brand; the canvas changes, because #F3F7FC is a dashboard colour and it makes a marketing page look like a
+ * settings screen.
+ *
+ * These are the same semantic token names the components already read, redefined on a wrapper. That is the
+ * whole mechanism: Button, Input, FormField and the rest change ground without knowing this file exists, so
+ * the public site needs no parallel component library.
+ */
+@layer base {
+  .paper {
+    --background: 30 33% 97%; /* #FAF7F2 warm paper, never white */
+    --foreground: 24 17% 14%; /* #2A2320 warm charcoal, never neutral black */
+    --surface: 0 0% 100%;
+    --subtle: 30 26% 94%;
+    --container: 30 24% 91%;
+    --muted: 30 20% 90%;
+    --muted-foreground: 24 9% 38%;
+    --border: 28 20% 88%;
+    --input: 26 17% 80%;
+    /* Teal on warm paper measures 4.7:1, so it stays usable for text and not only for fills. */
+    --ring: 174 72% 32%;
+
+    /*
+     * The authentication aside becomes the same ink plane the public site closes its pages with, so arriving at
+     * /login from the homepage is a continuation rather than a different product. Phase D's navy was built for
+     * the cool app palette and reads as a stranger next to warm paper.
+     */
+    --aside: 24 17% 13%;
+    --aside-foreground: 30 33% 97%;
+    --aside-muted: 28 12% 70%;
+    --aside-border: 24 10% 26%;
+    --aside-accent: 172 66% 50%;
+  }
+
+  .dark .paper {
+    --background: 24 14% 9%;
+    --foreground: 30 20% 94%;
+    --surface: 24 12% 13%;
+    --subtle: 24 11% 17%;
+    --container: 24 10% 20%;
+    --muted: 24 10% 22%;
+    --muted-foreground: 28 12% 70%;
+    --border: 24 9% 24%;
+    --input: 24 9% 30%;
+  }
+
+  /*
+   * Display face of the public site. Noto Serif was already a dependency and never imported; it is the only
+   * serif in the project that carries the Tajik Cyrillic range (ғ қ ҳ ҷ ӣ ӯ), which rules out most of the
+   * flared display serifs this direction would otherwise suggest.
+   */
+  .font-display-serif {
+    font-family: 'Noto Serif Variable', 'Noto Serif', ui-serif, Georgia, serif;
+  }
+}
+
 @layer components {
 
 

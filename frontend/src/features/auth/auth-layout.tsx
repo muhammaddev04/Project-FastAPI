@@ -46,10 +46,13 @@ export function AuthShell() {
 /**
  * One screen of the flow: where you are, what this asks for, and the form.
  *
- * The heading block is left-aligned and uses the named type scale. It used to be centred, in an arbitrary
- * 1.625rem/2rem size, under a "B2B PLATFORM" pill and above a `Trans`-interpolated gradient brand word.
- * A centred heading over left-aligned fields gives a form two competing axes, and the pill restated what the
- * brand lockup two inches away already says.
+ * The heading block is left-aligned. It used to be centred, in an arbitrary 1.625rem/2rem size, under a
+ * "B2B PLATFORM" pill and above a `Trans`-interpolated gradient brand word. A centred heading over
+ * left-aligned fields gives a form two competing axes, and the pill restated what the brand lockup two inches
+ * away already says.
+ *
+ * Phase E moved the heading onto the public site's serif display step, which is what makes an authentication
+ * screen read as part of the same website rather than as the door to a different one.
  */
 export function AuthPage({
   step,
@@ -72,7 +75,8 @@ export function AuthPage({
     <div>
       {step ? <JourneyProgress current={step} className="mb-6" /> : null}
       {above ? <div className="mb-5">{above}</div> : null}
-      <h1 className="font-display text-display-sm font-bold tracking-tight sm:text-display">{title}</h1>
+      {/* Phase E: the same serif display face as the public site, so /login continues the page it came from. */}
+      <h1 className="font-serif text-section font-semibold">{title}</h1>
       {lead ? <p className="mt-2.5 text-body-lg leading-relaxed text-muted-foreground">{lead}</p> : null}
       <div className="mt-7">{children}</div>
       {footer ? <div className="mt-7 border-t pt-5 text-body text-muted-foreground">{footer}</div> : null}

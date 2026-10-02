@@ -15,6 +15,8 @@ export default {
         sans: ['"Inter Variable"', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
         display: ['"Montserrat Variable"', '"Inter Variable"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono Variable"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        /* Public site display face only. Noto Serif is the one serif here with the Tajik Cyrillic range. */
+        serif: ['"Noto Serif Variable"', '"Noto Serif"', 'ui-serif', 'Georgia', 'serif'],
       },
       /*
        * Named type scale (CR-002 revision). Before this there were 23 distinct `text-[…rem]` values used 202
@@ -44,6 +46,20 @@ export default {
         /* Page h1 from sm upwards. */
         display: ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.02em' }],
         'display-lg': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '-0.025em' }],
+        /*
+         * Public site display steps (Phase E). Fluid with clamp() rather than the reference's raw `vw`, which
+         * needs a separate rule per breakpoint regime and has no floor or ceiling: three of those regimes is
+         * how a viewport-height variant gets invented. One clamp per step covers 320px to 2560px, so these
+         * sizes need no breakpoint of their own.
+         *
+         * Tracking is tighter than the body scale but looser than the reference's -0.07em: at that value
+         * Cyrillic descenders and the ҳ/ҷ cedillas start colliding with the next letter.
+         */
+        hero: ['clamp(2.25rem, 1.35rem + 3.6vw, 4.25rem)', { lineHeight: '1.05', letterSpacing: '-0.032em' }],
+        section: ['clamp(1.75rem, 1.25rem + 2vw, 2.75rem)', { lineHeight: '1.1', letterSpacing: '-0.028em' }],
+        'section-sm': ['clamp(1.375rem, 1.1rem + 1.1vw, 1.875rem)', { lineHeight: '1.2', letterSpacing: '-0.022em' }],
+        /* Lead paragraph under a display heading; sans, because it is read rather than looked at. */
+        lead: ['clamp(1.0625rem, 1rem + 0.45vw, 1.3125rem)', { lineHeight: '1.6' }],
       },
       colors: {
         background: token('background'),
@@ -120,6 +136,12 @@ export default {
         xl: '0.625rem',
         /* Surfaces: cards, dialogs, drawers, tables. */
         '2xl': '0.75rem',
+        /*
+         * Public site media and full-width panels only. The reference carries exactly two radii, a control
+         * radius and this one; at this size the corner reads as the edge of a photograph rather than as
+         * decoration, which is why Phase C was right to delete it from app surfaces and right to want it here.
+         */
+        '3xl': '1.25rem',
       },
       /*
        * Elevation is for things that genuinely float above the page, and nothing else. The teal `glow` /
@@ -132,6 +154,16 @@ export default {
         raised: '0 1px 3px 0 rgb(15 27 58 / 0.06), 0 1px 2px -1px rgb(15 27 58 / 0.04)',
         /* Overlays only: dialog, drawer, dropdown, toast. */
         pop: '0 16px 32px -12px rgb(15 23 42 / 0.18), 0 4px 8px -4px rgb(15 23 42 / 0.1)',
+      },
+      transitionTimingFunction: {
+        /* The reference's single easing curve, used for section reveals and nothing else. */
+        paper: 'cubic-bezier(0.23, 1, 0.32, 1)',
+      },
+      maxWidth: {
+        /* Outer frame of every public section. */
+        frame: '80rem',
+        /* Reading measure: a paragraph wider than this loses the line it is on. */
+        measure: '65ch',
       },
       transitionDuration: {
         /* Two speeds: `fast` for state on a control, `base` for something entering or leaving. */

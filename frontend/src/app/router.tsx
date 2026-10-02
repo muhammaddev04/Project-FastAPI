@@ -14,6 +14,10 @@ import { OrganizationProfilePage } from '@/features/organization/organization-pr
 import { BusinessSetupPage } from '@/features/onboarding/business-setup-page';
 import { BusinessTypePage } from '@/features/onboarding/business-type-page';
 import { VerificationPage } from '@/features/verification/verification-page';
+import { HomePage } from '@/features/public/home-page';
+import { HowItWorksPage } from '@/features/public/how-it-works-page';
+import { ProductPage } from '@/features/public/product-page';
+import { PublicShell } from '@/features/public/public-shell';
 import { ProfilePage } from '@/features/profile/profile-page';
 import { TeamPage } from '@/features/team/team-page';
 import { useMe } from '@/shared/auth/api';
@@ -24,20 +28,49 @@ import { AdminLayout, AdminPlannedPage } from './shell/admin-layout';
 import { AreaLayout } from './shell/area-layout';
 import { ForbiddenPage, NotFoundPage } from './status-pages';
 
-/** `/`: signed-in users go to their application (or onboarding); everyone else to sign-in. */
-function RootRedirect() {
+/**
+ * `/`: the public homepage for visitors, their own application for signed-in users (Phase E).
+ *
+ * Before this, `/` sent everyone who was not signed in to /login, so there was no way to find out what
+ * TezFarmo is without an account.
+ *
+ * The guest branch renders; it does not redirect. That is what makes a loop impossible here: a visitor at `/`
+ * triggers no navigation at all, and `homePath` never returns `/` (it returns an area root, an onboarding step
+ * or a verification page), so the signed-in branch cannot bounce back.
+ *
+ * The order of the checks is the session-restoration contract. `restoreSession` sets `restoring` only when the
+ * readable CSRF cookie is present, so a visitor who has never signed in is never in that state and never waits
+ * behind a loader; someone reloading with a live refresh cookie does wait, instead of being shown a marketing
+ * page for a frame and then moved off it.
+ */
+function RootRoute() {
   const accessToken = useSessionStore((state) => state.accessToken);
   const restoring = useSessionStore((state) => state.restoring);
   const activeOrgId = useSessionStore((state) => state.activeOrgId);
   const me = useMe();
-  if (!accessToken && !restoring) return <Navigate to="/login" replace />;
+  if (!accessToken && !restoring) {
+    return (
+      <PublicShell>
+        <HomePage />
+      </PublicShell>
+    );
+  }
+  // Still restoring, or signed in and /me has not answered: RequireAuth owns the loader and the retryable error.
   if (!me.data) return <RequireAuth />;
   return <Navigate to={homePath(me.data, activeOrgId)} replace />;
 }
 
 /** FND-031 route table. */
 export const routes: RouteObject[] = [
-  { path: '/', element: <RootRedirect /> },
+  { path: '/', element: <RootRoute /> },
+  // Phase E: the public site. Its own shell and its own (warm) palette; no session is required or assumed.
+  {
+    element: <PublicShell />,
+    children: [
+      { path: '/how-it-works', element: <HowItWorksPage /> },
+      { path: '/product', element: <ProductPage /> },
+    ],
+  },
   {
     // Auth layout route: the brand panel stays mounted while the card animates between pages.
     element: <RequireGuest><AuthShell /></RequireGuest>,
