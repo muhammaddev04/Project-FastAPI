@@ -7,8 +7,10 @@ import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
 import { Alert, Button, CodeInput, FormField, Input, PasswordInput } from '@/shared/ui';
 import { usePasswordResetComplete, usePasswordResetStart, usePasswordResetVerify } from './api';
-import { AuthCard, CardSwitch, authLabel } from './auth-layout';
+import { AuthActions, AuthForm, AuthPage, AuthSwitch } from './auth-layout';
 import { MethodUnavailable } from './availability';
+import { StepCount } from './journey';
+import { maskEmail } from './mask';
 import { PasswordChecklist } from './password-checklist';
 import {
   PASSWORD_PROBLEMS,
@@ -25,6 +27,7 @@ import { useCountdown } from './use-countdown';
 /** A fresh code can be asked for after this long in the UI; the server's own limit answers 429 + Retry-After. */
 const RESEND_COOLDOWN_SECONDS = 60;
 const CODE_LENGTH = 6;
+const TOTAL_STEPS = 3;
 
 type Step = { name: 'email' } | { name: 'code'; email: string } | { name: 'password'; token: string } | { name: 'done' };
 
@@ -34,12 +37,22 @@ function useFieldMessage() {
   return (key?: string) => (key ? (key.startsWith('validation.') ? t(key) : key) : undefined);
 }
 
+/** Where in the three-step recovery the user is. Three steps need a count, not a map. */
+function RecoveryStep({ current }: { current: 1 | 2 | 3 }) {
+  const { t } = useTranslation();
+  return <StepCount current={current} total={TOTAL_STEPS} label={t(`auth.forgot.steps.${current}`)} />;
+}
+
 /**
  * CR-001 /forgot-password (IAM-015, owner change: a code instead of a link):
- * 1. email → `password/reset/start` (the same neutral answer for every address);
- * 2. the 6-digit code from the email → `password/reset/verify` → a one-time reset authorization kept in memory;
- * 3. the new password → `password/reset/complete` with that authorization; every device is signed out.
- * Nothing secret ever goes into the URL.
+ * 1. email to `password/reset/start` (the same neutral answer for every address);
+ * 2. the 6-digit code from the email to `password/reset/verify`, which returns a one-time reset
+ *    authorization kept in memory;
+ * 3. the new password to `password/reset/complete` with that authorization; every device is signed out.
+ *
+ * Nothing secret ever goes into the URL. Phase D changed only the presentation: the three steps now say which
+ * one they are, the destination address is masked where it is repeated back, and the screens are the same
+ * composition as the rest of the authentication flow rather than three differently shaped cards.
  */
 export function ForgotPasswordPage() {
   const { t } = useTranslation();
@@ -47,16 +60,13 @@ export function ForgotPasswordPage() {
 
   if (step.name === 'done') {
     return (
-      <AuthCard title={t('auth.resetPassword.title')}>
-        <Alert tone="success" title={t('auth.resetPassword.successTitle')}>
-          {t('auth.resetPassword.successText')}
-        </Alert>
-        <Button asChild block size="xl" className="mt-5">
+      <AuthPage title={t('auth.resetPassword.successTitle')} lead={t('auth.resetPassword.successText')}>
+        <Button asChild block size="xl">
           <Link to="/login" replace>
             {t('auth.resetPassword.goToLogin')}
           </Link>
         </Button>
-      </AuthCard>
+      </AuthPage>
     );
   }
   if (step.name === 'password') {
@@ -104,14 +114,19 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
   });
 
   return (
-    <AuthCard title={t('auth.forgot.title')} subtitle={t('auth.forgot.subtitle')}>
+    <AuthPage
+      above={<RecoveryStep current={1} />}
+      title={t('auth.forgot.title')}
+      lead={t('auth.forgot.subtitle')}
+      footer={<AuthSwitch question={t('auth.reset.remembered')} to="/login" link={t('auth.register.signIn')} />}
+    >
       {!available ? (
         <div className="mb-5">
           <MethodUnavailable method="password_reset" meta={meta} />
         </div>
       ) : null}
-      <form className="space-y-4" noValidate onSubmit={onSubmit}>
-        <FormField labelClassName={authLabel} label={t('auth.fields.email')} hint={t('auth.forgot.emailHint')} error={message(form.formState.errors.email?.message)}>
+      <AuthForm onSubmit={onSubmit}>
+        <FormField size="lg" label={t('auth.fields.email')} hint={t('auth.forgot.emailHint')} error={message(form.formState.errors.email?.message)}>
           <Input size="lg" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
         </FormField>
         {failure ? (
@@ -119,12 +134,11 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
             {errorMessage(failure, t)}
           </Alert>
         ) : null}
-        <Button type="submit" block size="xl" className="!mt-6" disabled={!available || retryIn > 0} loading={meta.isPending || start.isPending}>
+        <Button type="submit" block size="xl" disabled={!available || retryIn > 0} loading={meta.isPending || start.isPending}>
           {retryIn > 0 ? t('auth.forgot.retryIn', { seconds: retryIn }) : t('auth.forgot.submit')}
         </Button>
-      </form>
-      <CardSwitch question={t('auth.reset.remembered')} to="/login" link={t('auth.register.signIn')} />
-    </AuthCard>
+      </AuthForm>
+    </AuthPage>
   );
 }
 
@@ -173,10 +187,15 @@ function CodeStep({ email, onVerified, onChangeEmail }: { email: string; onVerif
   };
 
   return (
-    <AuthCard title={t('auth.forgot.title')} subtitle={t('auth.forgot.codeSent', { email })}>
-      <form className="space-y-4" noValidate onSubmit={onSubmit}>
-        <FormField labelClassName={authLabel} label={t('auth.verify.codeLabel')} hint={t('auth.verify.codeHint')} error={message(form.formState.errors.code?.message)}>
-          <CodeInput length={CODE_LENGTH} {...codeField} />
+    <AuthPage
+      above={<RecoveryStep current={2} />}
+      title={t('auth.forgot.codeTitle')}
+      lead={t('auth.forgot.codeSent', { email: maskEmail(email) })}
+      footer={<AuthSwitch question={t('auth.reset.remembered')} to="/login" link={t('auth.register.signIn')} />}
+    >
+      <AuthForm onSubmit={onSubmit}>
+        <FormField size="lg" label={t('auth.verify.codeLabel')} hint={t('auth.verify.codeHint')} error={message(form.formState.errors.code?.message)}>
+          <CodeInput length={CODE_LENGTH} autoFocus {...codeField} />
         </FormField>
         {failure ? (
           <Alert tone="danger" title={t('auth.forgot.codeFailed')}>
@@ -185,26 +204,28 @@ function CodeStep({ email, onVerified, onChangeEmail }: { email: string; onVerif
         ) : null}
         {resend.isSuccess ? <Alert tone="success">{t('auth.forgot.codeResent')}</Alert> : null}
         {resend.isError ? <Alert tone="danger">{errorMessage(resend.error, t)}</Alert> : null}
-        <Button type="submit" block size="xl" disabled={verifyIn > 0} loading={verify.isPending}>
-          {verifyIn > 0 ? t('auth.verify.verifyIn', { seconds: verifyIn }) : t('auth.forgot.verifyCode')}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          block
-          className="h-11 rounded-2xl text-body font-semibold text-primary"
-          disabled={resendIn > 0}
-          loading={resend.isPending}
-          onClick={() => void onResend()}
-        >
-          {resendIn > 0 ? t('auth.verify.resendIn', { seconds: resendIn }) : t('auth.verify.resend')}
-        </Button>
-      </form>
-      <Button type="button" variant="ghost" block className="mt-1 h-11 rounded-2xl text-body text-muted-foreground" onClick={onChangeEmail}>
-        {t('auth.forgot.changeEmail')}
-      </Button>
-      <CardSwitch question={t('auth.reset.remembered')} to="/login" link={t('auth.register.signIn')} />
-    </AuthCard>
+        <AuthActions>
+          <Button type="submit" block size="xl" disabled={verifyIn > 0} loading={verify.isPending}>
+            {verifyIn > 0 ? t('auth.verify.verifyIn', { seconds: verifyIn }) : t('auth.forgot.verifyCode')}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            block
+            size="lg"
+            className="text-primary"
+            disabled={resendIn > 0}
+            loading={resend.isPending}
+            onClick={() => void onResend()}
+          >
+            {resendIn > 0 ? t('auth.verify.resendIn', { seconds: resendIn }) : t('auth.verify.resend')}
+          </Button>
+          <Button type="button" variant="ghost" block size="lg" className="text-muted-foreground" onClick={onChangeEmail}>
+            {t('auth.forgot.changeEmail')}
+          </Button>
+        </AuthActions>
+      </AuthForm>
+    </AuthPage>
   );
 }
 
@@ -242,18 +263,18 @@ function NewPasswordStep({ token, onDone, onRestart }: { token: string; onDone: 
   });
 
   return (
-    <AuthCard title={t('auth.resetPassword.title')} subtitle={t('auth.resetPassword.subtitle')}>
-      <form className="space-y-4" noValidate onSubmit={onSubmit}>
+    <AuthPage above={<RecoveryStep current={3} />} title={t('auth.resetPassword.title')} lead={t('auth.resetPassword.subtitle')}>
+      <AuthForm onSubmit={onSubmit}>
         <div className="space-y-2">
-          <FormField labelClassName={authLabel} label={t('auth.fields.newPassword')} error={message(errors.password?.message)}>
+          <FormField size="lg" label={t('auth.fields.newPassword')} error={message(errors.password?.message)}>
             <PasswordInput size="lg" autoComplete="new-password" {...form.register('password')} />
           </FormField>
           <PasswordChecklist password={password} />
         </div>
-        <FormField labelClassName={authLabel} label={t('auth.fields.confirmPassword')} error={message(errors.confirmPassword?.message)}>
+        <FormField size="lg" label={t('auth.fields.confirmPassword')} error={message(errors.confirmPassword?.message)}>
           <PasswordInput size="lg" autoComplete="new-password" {...form.register('confirmPassword')} />
         </FormField>
-        <p className="text-caption text-muted-foreground">{t('auth.resetPassword.signOutNote')}</p>
+        <p className="text-label text-muted-foreground">{t('auth.resetPassword.signOutNote')}</p>
         {failure ? (
           <Alert
             tone="danger"
@@ -269,10 +290,10 @@ function NewPasswordStep({ token, onDone, onRestart }: { token: string; onDone: 
             {authorizationGone ? t('auth.resetPassword.expiredText') : errorMessage(failure, t)}
           </Alert>
         ) : null}
-        <Button type="submit" block size="xl" className="!mt-6" disabled={authorizationGone} loading={complete.isPending}>
+        <Button type="submit" block size="xl" disabled={authorizationGone} loading={complete.isPending}>
           {t('auth.resetPassword.submit')}
         </Button>
-      </form>
-    </AuthCard>
+      </AuthForm>
+    </AuthPage>
   );
 }

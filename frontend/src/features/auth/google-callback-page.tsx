@@ -9,23 +9,31 @@ import { clearGoogleIntent, isGoogleLinkReturn } from '@/shared/auth/google-inte
 import { useSessionStore } from '@/shared/auth/session-store';
 import { Alert, Button, Spinner } from '@/shared/ui';
 import { goToGoogle, useGoogleSignIn } from './api';
-import { AuthCard } from './auth-layout';
+import { AuthActions, AuthPage } from './auth-layout';
 
 type Returned = { code: string | null; state: string | null; error: string | null };
 
+/** Codes that no retry can fix: the user has to take a different route in. */
+const TERMINAL = ['oauth_account_exists', 'user_blocked', 'oauth_email_not_verified'];
+
 function Waiting({ text }: { text: string }) {
   return (
-    <div role="status" className="flex items-center gap-3 rounded-2xl bg-primary/10 px-4 py-3.5 text-body-lg text-foreground/85">
-      <Spinner className="size-5 text-primary" />
+    <div role="status" className="flex items-center gap-3 rounded-xl border bg-subtle/60 px-4 py-3.5 text-body text-foreground">
+      <Spinner className="size-4 text-primary" />
       {text}
     </div>
   );
 }
 
 /**
- * Google redirects back here with `code` + `state` (or `error`), for a sign-in or, when the signed-in user started
- * "Connect Google" on /profile, for linking. Code and state are read once, removed from the address bar and handed to
- * the matching backend endpoint, which checks that the transaction really is of that kind.
+ * Google redirects back here with `code` + `state` (or `error`), for a sign-in or, when the signed-in user
+ * started "Connect Google" on /profile, for linking. Code and state are read once, removed from the address bar
+ * and handed to the matching backend endpoint, which checks that the transaction really is of that kind.
+ *
+ * Phase D did not touch any of that. What changed is that each outcome now says what to do next: a cancelled
+ * consent offers both Google and the password form, a transport failure offers a retry, and the one case that
+ * is neither (the address already belongs to a password account) says so and sends the user to /login instead
+ * of offering a retry that would fail identically.
  */
 export function GoogleCallbackPage() {
   const [params, setParams] = useSearchParams();
@@ -57,9 +65,10 @@ function SignInCallback({ returned }: { returned: Returned }) {
 
   const failure = !usable ? (returned.error === 'access_denied' ? 'cancelled' : 'broken') : signIn.isError ? 'failed' : null;
   const code = signIn.error instanceof ApiError ? signIn.error.code : null;
+  const conflict = code === 'oauth_account_exists';
 
   return (
-    <AuthCard title={t('auth.google.callbackTitle')}>
+    <AuthPage title={t('auth.google.callbackTitle')} lead={failure ? undefined : t('auth.google.callbackSubtitle')}>
       {failure === 'cancelled' ? (
         <Alert tone="warning" title={t('auth.google.cancelledTitle')}>
           {t('auth.google.cancelledText')}
@@ -69,26 +78,26 @@ function SignInCallback({ returned }: { returned: Returned }) {
           {t('errors.oauth_failed')}
         </Alert>
       ) : failure === 'failed' ? (
-        <Alert tone="danger" title={t('auth.google.failedTitle')}>
-          {errorMessage(signIn.error, t)}
+        <Alert tone={conflict ? 'warning' : 'danger'} title={conflict ? t('auth.google.conflictTitle') : t('auth.google.failedTitle')}>
+          {conflict ? t('auth.google.conflictText') : errorMessage(signIn.error, t)}
         </Alert>
       ) : (
         <Waiting text={t('auth.google.signingIn')} />
       )}
       {failure ? (
-        <div className="mt-5 space-y-2">
+        <AuthActions className="mt-6">
           {/* An address that already has a password account signs in with it; nothing else is worth a retry. */}
-          {code !== 'oauth_account_exists' && code !== 'user_blocked' && code !== 'oauth_email_not_verified' ? (
+          {code && TERMINAL.includes(code) ? null : (
             <Button type="button" block size="xl" onClick={goToGoogle}>
               {t('auth.google.tryAgain')}
             </Button>
-          ) : null}
-          <Button asChild variant="ghost" block className="h-11 rounded-2xl text-body text-muted-foreground">
-            <Link to="/login">{t('auth.reset.back')}</Link>
+          )}
+          <Button asChild variant={code && TERMINAL.includes(code) ? 'primary' : 'ghost'} block size={code && TERMINAL.includes(code) ? 'xl' : 'lg'}>
+            <Link to="/login">{conflict ? t('auth.google.signInWithPassword') : t('auth.reset.back')}</Link>
           </Button>
-        </div>
+        </AuthActions>
       ) : null}
-    </AuthCard>
+    </AuthPage>
   );
 }
 
@@ -141,7 +150,7 @@ function LinkCallback({ returned, urlClean }: { returned: Returned; urlClean: bo
         : null;
 
   return (
-    <AuthCard title={t('auth.google.linkTitle')}>
+    <AuthPage title={t('auth.google.linkTitle')}>
       {problem ? (
         <Alert tone="danger" title={t('auth.google.linkFailedTitle')}>
           {problem}
@@ -150,12 +159,12 @@ function LinkCallback({ returned, urlClean }: { returned: Returned; urlClean: bo
         <Waiting text={t('auth.google.linking')} />
       )}
       {problem ? (
-        <Button asChild block size="xl" className="mt-5">
+        <Button asChild block size="xl" className="mt-6">
           <Link to={signedOut ? '/login' : '/profile'} replace onClick={clearGoogleIntent}>
             {signedOut ? t('auth.register.signIn') : t('auth.google.backToProfile')}
           </Link>
         </Button>
       ) : null}
-    </AuthCard>
+    </AuthPage>
   );
 }
