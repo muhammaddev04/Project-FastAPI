@@ -6,7 +6,7 @@ import { Button } from './button';
 import { Card } from './card';
 import { Select } from './select';
 import { SkeletonRows } from './skeleton';
-import { EmptyState, ErrorState } from './states';
+import { EmptyState, ErrorState, NoResultsState } from './states';
 
 export type Column<T> = {
   key: string;
@@ -17,6 +17,12 @@ export type Column<T> = {
   primary?: boolean;
   /** The column can be ordered by the server (the endpoint's API-003 `ordering` whitelist). */
   sortable?: boolean;
+  /**
+   * Money, quantities, counts. Right-aligns the column and applies tabular figures, so digits line up by
+   * place value and a column of amounts can be compared by eye. Uses Inter's `tnum` rather than the
+   * monospace family, which carries no Tajik glyphs.
+   */
+  numeric?: boolean;
 };
 
 export type Pagination = { offset: number; limit: number; count: number; onChange: (offset: number) => void };
@@ -28,6 +34,12 @@ export type Sorting = SortState & { onChange: (sort: SortState) => void };
 
 /** API-003 filters of the list: whether any differs from the screen's default, and how to go back to it. */
 export type Filtering = { changed: boolean; onReset: () => void };
+
+/**
+ * Row height. `compact` is for operational queues a person scans all day (admin review, future order and
+ * ledger lists); `default` suits short tables read occasionally, such as a team of five.
+ */
+export type Density = 'compact' | 'default';
 
 const ARIA_SORT = { asc: 'ascending', desc: 'descending' } as const;
 
@@ -56,6 +68,7 @@ export function DataTable<T>({
   busy = false,
   onRowClick,
   selectedKey,
+  density = 'default',
   className,
 }: {
   columns: Column<T>[];
@@ -73,6 +86,7 @@ export function DataTable<T>({
   busy?: boolean;
   onRowClick?: (row: T) => void;
   selectedKey?: string | null;
+  density?: Density;
   className?: string;
 }) {
   const { t } = useTranslation();
@@ -103,11 +117,12 @@ export function DataTable<T>({
       ) : error ? (
         <ErrorState message={error} onRetry={onRetry} />
       ) : !rows || rows.length === 0 ? (
-        <EmptyState
-          title={filters?.changed ? t('table.noMatches') : empty.title}
-          description={filters?.changed ? t('table.noMatchesHint') : empty.description}
-          action={resetButton}
-        />
+        /* Rows exist but none match vs nothing exists yet: different situations, different next step. */
+        filters?.changed ? (
+          <NoResultsState action={resetButton} compact={density === 'compact'} />
+        ) : (
+          <EmptyState title={empty.title} description={empty.description} compact={density === 'compact'} />
+        )
       ) : (
         <>
         {sort && sortable.length > 0 ? (
@@ -131,9 +146,11 @@ export function DataTable<T>({
             </Select>
           </div>
         ) : null}
+        {/* The card clips overflow, so a table wider than its container needs its own scroll region. */}
+        <div className="md:overflow-x-auto">
         <table aria-busy={busy || undefined} className="w-full text-left text-label max-md:block">
           {caption ? <caption className="sr-only">{caption}</caption> : null}
-          <thead className="border-b bg-subtle/70 text-micro uppercase tracking-[0.1em] text-muted-foreground max-md:sr-only">
+          <thead className="border-b bg-subtle/70 text-caption font-medium text-muted-foreground max-md:sr-only">
             <tr>
               {columns.map((column) => {
                 const active = sort && column.sortable && sort.key === column.key ? sort.direction : null;
@@ -143,7 +160,11 @@ export function DataTable<T>({
                     key={column.key}
                     scope="col"
                     aria-sort={sort && column.sortable ? (active ? ARIA_SORT[active] : 'none') : undefined}
-                    className={cn('px-5 py-3 font-bold', column.className)}
+                    className={cn(
+                      density === 'compact' ? 'px-4 py-2' : 'px-5 py-2.5',
+                      column.numeric && 'text-right',
+                      column.className,
+                    )}
                   >
                     {sort && column.sortable ? (
                       <button
@@ -151,7 +172,8 @@ export function DataTable<T>({
                         disabled={busy}
                         onClick={() => toggle(column.key)}
                         className={cn(
-                          '-mx-1 inline-flex items-center gap-1 rounded px-1 uppercase tracking-[0.1em] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60',
+                          '-mx-1 inline-flex items-center gap-1 rounded px-1 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60',
+                          column.numeric && 'flex-row-reverse',
                           active && 'text-foreground',
                         )}
                       >
@@ -185,7 +207,9 @@ export function DataTable<T>({
                       key={column.key}
                       data-label={column.header}
                       className={cn(
-                        'px-5 py-3.5 align-middle max-md:px-0',
+                        'align-middle max-md:px-0',
+                        density === 'compact' ? 'px-4 py-2 max-md:py-1.5' : 'px-5 py-3 max-md:py-1.5',
+                        column.numeric && 'text-right font-numeric max-md:text-left',
                         column.primary
                           ? 'max-md:block max-md:pb-2 max-md:pt-0'
                           : 'max-md:flex max-md:items-center max-md:justify-between max-md:gap-3 max-md:py-1.5 max-md:before:text-caption max-md:before:text-muted-foreground max-md:before:content-[attr(data-label)]',
@@ -200,6 +224,7 @@ export function DataTable<T>({
             })}
           </tbody>
         </table>
+        </div>
         </>
       )}
       {pagination && rows && rows.length > 0 && !loading && !error ? (

@@ -1,11 +1,21 @@
 import { CheckCircle2, CircleDashed, Clock3, PauseCircle, ShieldCheck, XCircle, type LucideIcon } from 'lucide-react';
 import type { BadgeTone } from './badge';
 
-export type Preset = { label: string; tones: Record<string, BadgeTone>; icons?: Record<string, LucideIcon> };
+/**
+ * A status family. `icons` is required, not optional: a status that is only a colour fails for anyone who
+ * cannot distinguish the hues, and making the field mandatory means a future preset cannot forget it.
+ */
+export type Preset = { label: string; tones: Record<string, BadgeTone>; icons: Record<string, LucideIcon> };
 
 /**
- * FND-035 StatusBadge: one chip per domain status family, so the same status looks the same everywhere.
- * Labels come from the existing translation groups of each family.
+ * One entry per domain status family, so a given status looks identical everywhere it appears (FND-035).
+ * Labels resolve against each family's existing translation group, so adding a family costs a preset and a
+ * translation block, not a new component.
+ *
+ * Families are added as their TZ phase lands. P07 orders, P08 delivery, P09 payments, P10 disputes and
+ * partnership states all map onto this registry; the tones they need already exist in `badge.tsx`. No
+ * preset is declared before the phase that renders it, so nothing here points at translation keys that do
+ * not yet exist.
  */
 export const PRESETS = {
   /** P02 organization verification (NOT_SUBMITTED → PENDING → APPROVED | REJECTED). */

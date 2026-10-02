@@ -27,7 +27,9 @@
     "notFoundTitle": "Page not found",
     "notFoundDescription": "The page you are looking for doesn't exist or has moved.",
     "goHome": "Go to start",
-    "offline": "You're offline. Changes can't be saved until the connection is back."
+    "offline": "You're offline. Changes can't be saved until the connection is back.",
+    "unavailableTitle": "Temporarily unavailable",
+    "unavailableDescription": "This section isn't available right now. Try again shortly."
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
