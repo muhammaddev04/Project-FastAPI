@@ -132,11 +132,7 @@
     "verificationQueue": "Verification queue"
   },
   "onboarding": {
-    "eyebrow": "Workspace setup",
-    "title": "Welcome, {{name}}. Let's set up your workspace.",
-    "subtitle": "TezFarmo connects suppliers and the stores they serve. Choose which side of the trade you're on — you'll become the owner and can invite your team later.",
     "existingTitle": "Your organizations",
-    "typeLegend": "What are you setting up?",
     "company": {
       "title": "Company",
       "description": "A supplier or distributor that sells to stores.",
@@ -176,14 +172,23 @@
       "longitude": "Longitude",
       "coordinates": "Location"
     },
-    "optional": "optional",
     "notProvided": "Not provided",
     "myLocation": "Use my location",
-    "review": "Review",
     "reviewTitle": "Check your details",
     "edit": "Edit",
     "setupCompany": "Set up your company",
-    "setupStore": "Set up your store"
+    "setupStore": "Set up your store",
+    "type": {
+      "title": "How will you use TezFarmo?",
+      "lead": "This decides what your account can do. Pick the one that describes your business.",
+      "legend": "Your side of the trade"
+    },
+    "setup": {
+      "lead": "Only what we need to create your organization. You can complete the rest of the profile later.",
+      "optionalTitle": "Optional details",
+      "emailHint": "A business address for order and invoice notifications."
+    },
+    "reviewText": "Check the details before we create the organization. The legal name and tax identifier are locked afterwards."
   },
   "auth": {
     "or": "or",
@@ -246,7 +251,10 @@
       "linking": "Connecting your Google account…",
       "linkFailedTitle": "Couldn't connect Google",
       "linkSignedOut": "Your session ended during the connection. Sign in and try again from your profile.",
-      "backToProfile": "Back to profile"
+      "backToProfile": "Back to profile",
+      "conflictTitle": "This email already has a password account",
+      "conflictText": "An account already exists for this address, created with a password. Sign in with your email and password, then connect Google from your profile.",
+      "signInWithPassword": "Sign in with email"
     },
     "login": {
       "sessionEnded": "You were signed out",
@@ -255,33 +263,24 @@
       "noAccount": "Don't have an account?",
       "createAccount": "Sign up",
       "lockoutHint": "5 attempts per 15 minutes (brute-force protection)",
-      "passwordPlaceholder": "Enter your password",
       "failed": "Couldn't sign in",
       "notVerifiedTitle": "Confirm your email first",
       "goVerify": "Enter your code or get a new one",
-      "retryIn": "Try again in {{seconds}} s"
+      "retryIn": "Try again in {{seconds}} s",
+      "title": "Sign in",
+      "lead": "Use the email and password of your TezFarmo account.",
+      "verifiedNext": "Your email is confirmed. Sign in to finish setting up your business."
     },
     "register": {
-      "typeLegend": "Choose your role in the system",
       "emailHint": "You'll sign in with this address. We'll send a confirmation link to it.",
       "submit": "Create account",
       "haveAccount": "Already have an account?",
       "signIn": "Log in",
-      "storeBadge": "100% free to use",
-      "companyBadge": "14-day trial",
-      "roles": {
-        "STORE": {
-          "title": "Store / Shop",
-          "description": "Buy wholesale with fast delivery and payment on terms"
-        },
-        "COMPANY": {
-          "title": "Company / Distributor",
-          "description": "Supplier of goods and wholesale seller"
-        }
-      },
       "namePlaceholder": "e.g. Jamshed Karimov",
       "terms": "I agree to the TezFarmo Terms of Use and Privacy Policy (electronic offer of the Republic of Tajikistan) and confirm my business identity.",
-      "failed": "Couldn't create the account"
+      "failed": "Couldn't create the account",
+      "title": "Create your account",
+      "lead": "Takes a minute. You tell us about your business after confirming your email."
     },
     "reset": {
       "back": "Back to sign in",
@@ -298,7 +297,13 @@
       "verifyCode": "Continue",
       "codeFailed": "Couldn't check the code",
       "codeResent": "If this address has an account, a new code is on its way.",
-      "changeEmail": "Use a different email"
+      "changeEmail": "Use a different email",
+      "codeTitle": "Enter the code",
+      "steps": {
+        "1": "Your email",
+        "2": "Code from the email",
+        "3": "New password"
+      }
     },
     "resetPassword": {
       "title": "Choose a new password",
@@ -320,48 +325,65 @@
       "alreadyVerified": "Already confirmed?",
       "sentTo": "We sent a 6-digit code to {{email}}. Enter it below to activate your account. Check spam if you don't see it.",
       "successTitle": "Email confirmed",
-      "successText": "You can sign in now. Taking you to the sign-in page…",
-      "goToLogin": "Sign in",
       "failedTitle": "Couldn't confirm your email",
       "resendSent": "If this address is waiting for confirmation, a new code is on its way.",
       "resendIn": "Send a new code in {{seconds}} s",
       "codeLabel": "Verification code",
       "codeHint": "The 6 digits from the email",
-      "codePlaceholder": "000000",
       "submit": "Verify email",
       "verifyIn": "Try again in {{seconds}} s",
       "codeInvalid": "That code isn't right or was already used. Check the email or send a new code.",
-      "codeExpired": "This code has expired. Send a new code."
+      "codeExpired": "This code has expired. Send a new code.",
+      "nextStep": "No code arriving, or wrong address?"
     },
-    "shell": {
-      "network": "B2B NETWORK",
-      "pillNetwork": "Companies and stores in one network",
-      "pillVerified": "Verified organizations only",
-      "support": "Support",
-      "heroBadge": "B2B platform for Tajikistan",
-      "heroLine1": "Direct supply",
-      "heroLine2": "between companies",
-      "heroAccent": "and stores",
-      "heroText": "Suppliers and stores work together directly: catalog and prices, orders, delivery and settlements in one place.",
-      "fastTitle": "Fast ordering",
-      "fastText": "Orders go straight to your partner supplier.",
-      "verifiedTitle": "Verified partners",
-      "verifiedText": "Every company and store is reviewed before trading.",
-      "joinText": "Companies and stores start trading once their organization is verified.",
+    "aside": {
+      "statement": "TezFarmo connects suppliers and stores in Tajikistan: catalogue and prices, orders, delivery and settlements in one place.",
       "rights": "© {{year}} TezFarmo B2B Commerce Network. Dushanbe, Tajikistan.",
-      "cardBadge": "B2B PLATFORM",
-      "tabsLabel": "Sign in or register",
-      "tabLogin": "Log in",
-      "tabRegister": "Register",
-      "loginTitle": "Welcome to <b>TezFarmo</b>",
-      "loginSubtitle": "Direct trade between stores and suppliers",
-      "registerTitle": "Join <b>TezFarmo</b>",
-      "registerSubtitle": "Takes a minute. You complete the profile after verification.",
-      "orVia": "or via",
-      "flowTitle": "After registration",
-      "flowEmail": "Confirm email",
-      "flowReview": "Organization review",
-      "flowAccess": "Approval and access"
+      "facts": {
+        "verified": {
+          "title": "Verified organizations",
+          "text": "Every company and store is checked by TezFarmo before it can trade."
+        },
+        "direct": {
+          "title": "Direct supply",
+          "text": "Stores order from their suppliers without an intermediary in between."
+        },
+        "oneAccount": {
+          "title": "One account",
+          "text": "Your account can belong to several organizations and switch between them."
+        }
+      }
+    },
+    "journey": {
+      "label": "Setting up your account",
+      "position": "Step {{current}} of {{total}}",
+      "state": {
+        "done": "done",
+        "current": "current step",
+        "upcoming": "not started"
+      },
+      "steps": {
+        "account": {
+          "title": "Create account",
+          "hint": "Your name, email and a password."
+        },
+        "verify": {
+          "title": "Confirm email",
+          "hint": "Enter the 6-digit code we sent you."
+        },
+        "type": {
+          "title": "Business type",
+          "hint": "Are you a supplier or a store?"
+        },
+        "setup": {
+          "title": "Business details",
+          "hint": "The details we need to create your organization."
+        },
+        "review": {
+          "title": "Verification",
+          "hint": "Send your documents for review."
+        }
+      }
     }
   },
   "shell": {
@@ -726,6 +748,14 @@
       "submit": "Documents submitted",
       "review": "Review by TezFarmo",
       "decision": "Decision"
+    },
+    "finalStep": "Last step of setup",
+    "afterTitle": "What happens after you submit",
+    "afterHelp": "Review is done by a TezFarmo administrator, not automatically.",
+    "after": {
+      "submit": "You upload the documents below and submit them for review.",
+      "review": "A TezFarmo administrator checks them. This usually takes one working day.",
+      "decision": "Once approved, your organization can trade. If something is wrong, we tell you why and you can submit again."
     }
   },
   "admin": {
