@@ -4,7 +4,7 @@ import { useEffect, useId, useState, type KeyboardEvent } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 
-/** Sliding teal plate of the Login | Register switch, shared by every tab bar. */
+/** Sliding teal plate shared by every tab bar. */
 function Plate({ layoutId }: { layoutId: string }) {
   return (
     <motion.span
@@ -25,21 +25,23 @@ export type LinkTab = { to: string; label: string; icon?: LucideIcon };
 const lastActive = new Map<string, number>();
 
 /**
- * Tabs that are routes (Login | Register, Settings: Profile | Verification): each tab keeps its own URL. Pages
- * remount their tab bar, so the plate starts under the previously active tab and slides to the new one.
+ * Tabs that are routes (Settings: Profile | Verification): each tab keeps its own URL. Pages remount their tab
+ * bar, so the plate starts under the previously active tab and slides to the new one.
+ *
+ * Phase D removed `size="lg"`, which sized the bar for the sign-in card's Login | Register switch and carried
+ * the only `short:` and `2xl:` rules in this file. That switch is gone: registration is a five-step journey,
+ * not the other half of the sign-in screen.
  */
 export function LinkTabs({
   items,
   label,
   replace = false,
-  size = 'md',
   fill = false,
   className,
 }: {
   items: LinkTab[];
   label: string;
   replace?: boolean;
-  size?: 'md' | 'lg';
   /** Equal-width tabs across the whole bar. */
   fill?: boolean;
   className?: string;
@@ -52,7 +54,11 @@ export function LinkTabs({
   }, [label, active]);
   const offset = from !== undefined && from !== active && active >= 0 ? `${(from - active) * 100}%` : 0;
   return (
-    <nav aria-label={label} className={cn(frame, fill ? 'grid w-full' : 'w-full sm:w-fit', size === 'lg' && '2xl:rounded-[1.25rem]', className)} style={fill ? { gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` } : undefined}>
+    <nav
+      aria-label={label}
+      className={cn(frame, fill ? 'grid w-full' : 'w-full sm:w-fit', className)}
+      style={fill ? { gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` } : undefined}
+    >
       {items.map(({ to, label: text, icon: Icon }, index) => {
         const isActive = index === active;
         return (
@@ -62,7 +68,6 @@ export function LinkTabs({
             replace={replace}
             className={cn(
               tab,
-              size === 'lg' ? 'h-11 text-body-lg sm:h-12 sm:text-base 2xl:h-[3.75rem] 2xl:rounded-2xl 2xl:text-title short:h-10 short:sm:h-10 short:2xl:h-12' : '',
               !fill && 'flex-1 sm:flex-none',
               isActive ? 'text-white' : 'text-muted-foreground hover:bg-surface/70 hover:text-foreground',
             )}
@@ -70,7 +75,7 @@ export function LinkTabs({
             {isActive ? (
               <motion.span
                 aria-hidden="true"
-                className={cn('absolute inset-0 rounded-xl bg-primary-strong', size === 'lg' && '2xl:rounded-2xl')}
+                className="absolute inset-0 rounded-xl bg-primary-strong"
                 initial={{ x: offset }}
                 animate={{ x: 0 }}
                 transition={{ type: 'spring', stiffness: 420, damping: 36 }}

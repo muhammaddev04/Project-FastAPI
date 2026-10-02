@@ -6,7 +6,7 @@ export function Divider({ label, className }: { label?: string; className?: stri
     <div className={cn('flex items-center gap-3', className)} role="separator">
       <span className="h-px flex-1 bg-border" />
       {label ? (
-        <span className="rounded-full border bg-subtle/70 px-3 py-1 text-micro font-semibold uppercase tracking-[0.12em] text-muted-foreground 2xl:px-5 2xl:py-1.5 2xl:text-body-lg">
+        <span className="rounded-full border bg-subtle/70 px-3 py-1 text-micro font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {label}
         </span>
       ) : null}

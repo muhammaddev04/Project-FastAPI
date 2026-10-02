@@ -20,34 +20,40 @@ export function LogoMark({ className, inverted = false }: { className?: string; 
 }
 
 /**
- * The brand lockup of the sign-in screens: teal tile with the white mark, "Tez" + gradient "Farmo" in Montserrat.
- * `size="sm"` fits the app header and sidebar.
+ * The brand lockup: teal tile with the white mark, then "Tez" + "Farmo" in Montserrat.
+ *
+ * Phase D removed the `hero` size. It existed so the sign-in screen could print the lockup at 2xl in a
+ * 64px tile above a three-line display headline; the authentication screens no longer open with a brand
+ * statement, so the only remaining sizes are the ones real chrome uses. `tone="aside"` is for the navy
+ * authentication panel, where neither the foreground nor the primary token has contrast.
  */
-export function BrandMark({ className, size = 'sm' }: { className?: string; size?: 'sm' | 'md' | 'lg' | 'hero' }) {
+export function BrandMark({
+  className,
+  size = 'sm',
+  tone = 'default',
+}: {
+  className?: string;
+  size?: 'sm' | 'md' | 'lg';
+  tone?: 'default' | 'aside';
+}) {
   return (
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <span
         className={cn(
           'flex shrink-0 items-center justify-center bg-gradient-to-br from-brand-light to-brand',
-          size === 'lg' || size === 'hero'
-            ? cn(
-                'size-10 rounded-xl lg:size-12 lg:rounded-2xl',
-                size === 'hero' && '2xl:size-16 2xl:rounded-2xl',
-              )
-            : size === 'md'
-              ? 'size-10 rounded-xl'
-              : 'size-9 rounded-xl',
+          size === 'lg' ? 'size-10 rounded-xl lg:size-12 lg:rounded-2xl' : size === 'md' ? 'size-10 rounded-xl' : 'size-9 rounded-xl',
         )}
       >
-        <LogoMark inverted className={size === 'hero' ? 'h-5 lg:h-6 2xl:h-8' : size === 'lg' ? 'h-5 lg:h-6' : size === 'md' ? 'h-5' : 'h-[1.125rem]'} />
+        <LogoMark inverted className={size === 'lg' ? 'h-5 lg:h-6' : size === 'md' ? 'h-5' : 'h-[1.125rem]'} />
       </span>
       <span
         className={cn(
-          'font-display font-extrabold leading-none text-foreground',
-          size === 'hero' ? 'text-[1.375rem] lg:text-display-sm 2xl:text-display-lg' : size === 'lg' ? 'text-[1.375rem] lg:text-display-sm' : size === 'md' ? 'text-[1.375rem]' : 'text-[1.1875rem]',
+          'font-display font-extrabold leading-none',
+          tone === 'aside' ? 'text-aside-foreground' : 'text-foreground',
+          size === 'lg' ? 'text-title sm:text-display-sm' : size === 'md' ? 'text-title' : 'text-title-sm',
         )}
       >
-        Tez<span className="text-primary">Farmo</span>
+        Tez<span className={tone === 'aside' ? 'text-aside-accent' : 'text-primary'}>Farmo</span>
       </span>
     </span>
   );

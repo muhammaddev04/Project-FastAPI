@@ -4,20 +4,24 @@ import type { UseFormRegisterReturn } from 'react-hook-form';
 import { cn } from '@/shared/lib/cn';
 
 /** Radio tile group (fieldset + legend) for choices such as Company vs Store. */
-export function ChoiceGroup({ legend, children, size = 'md', className }: { legend: ReactNode; children: ReactNode; size?: 'md' | 'lg'; className?: string }) {
+export function ChoiceGroup({ legend, children, className }: { legend: ReactNode; children: ReactNode; className?: string }) {
   return (
     <fieldset>
-      <legend className={cn('mb-2.5 text-foreground/90', size === 'lg' ? 'text-body-lg font-medium 2xl:mb-3 2xl:text-lg' : 'text-body font-semibold')}>{legend}</legend>
+      <legend className="mb-2.5 text-body font-semibold text-foreground/90">{legend}</legend>
       <div className={cn('grid gap-3', className)}>{children}</div>
     </fieldset>
   );
 }
 
 /**
- * One radio tile (Phase C4/C10). Chosen state is a primary border, a tinted ground and a solid primary icon
- * plate. The per-entity gradient (teal for company, sky for store) is gone: colouring the two options
- * differently read as two unrelated brands rather than one question with two answers.
+ * One radio tile (Phase C4, Phase D).
  *
+ * The chosen state is carried by three things at once: a doubled border, a tinted ground and a filled check
+ * mark in the corner marker. That redundancy is deliberate. A tile that announces itself only by turning teal
+ * is unreadable to anyone who cannot separate teal from grey, and invisible in a greyscale print of the screen.
+ *
+ * Phase D removed the `compact` variant and the 2xl step-up. `compact` existed so the registration form could
+ * fit this question above five other fields; the question now has a screen to itself, so there is one size.
  * This is the only implementation of an either/or choice in the product; a page must not hand-roll its own.
  */
 export function ChoiceCard({
@@ -29,7 +33,6 @@ export function ChoiceCard({
   badge,
   description,
   children,
-  compact = false,
 }: {
   field: UseFormRegisterReturn;
   value: string;
@@ -39,48 +42,42 @@ export function ChoiceCard({
   badge?: ReactNode;
   description?: ReactNode;
   children?: ReactNode;
-  compact?: boolean;
 }) {
   return (
     <label
       className={cn(
-        'relative flex cursor-pointer rounded-2xl border transition-[border-color,background-color] duration-fast focus-within:shadow-[0_0_0_2px_hsl(var(--primary)/0.18)]',
-        compact ? 'items-center gap-2.5 px-2.5 py-3 sm:gap-3 sm:px-3.5 2xl:gap-4 2xl:rounded-2xl 2xl:px-5 2xl:py-4 short:py-1.5 short:2xl:py-3' : 'flex-col gap-3 p-4 sm:p-5',
-        selected ? 'border-primary bg-primary/[0.06]' : 'border-input bg-subtle/50 hover:border-primary/40',
+        'relative flex cursor-pointer flex-col gap-3 rounded-2xl border p-4 transition-[border-color,background-color,box-shadow] duration-fast focus-within:shadow-[0_0_0_2px_hsl(var(--primary)/0.18)] sm:p-5',
+        selected
+          ? 'border-primary bg-primary/[0.06] shadow-[inset_0_0_0_1px_hsl(var(--primary))]'
+          : 'border-input bg-subtle/50 hover:border-primary/40',
       )}
     >
       <input type="radio" value={value} className="sr-only" {...field} />
-      <span className={cn('flex items-center', compact ? '' : 'justify-between')}>
+      <span className="flex items-center justify-between">
         <span
           className={cn(
-            'flex shrink-0 items-center justify-center rounded-xl transition-colors',
-            compact ? 'size-8 sm:size-9 2xl:size-11' : 'size-11',
+            'flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors',
             selected ? 'bg-primary text-primary-foreground' : 'border bg-surface text-muted-foreground',
           )}
         >
           <Icon className="size-[1.125rem]" aria-hidden="true" />
         </span>
-        {compact ? null : (
-          <span
-            aria-hidden="true"
-            className={cn(
-              'flex size-5 items-center justify-center rounded-full border transition-colors',
-              selected ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-surface',
-            )}
-          >
-            {selected ? <Check className="size-3" /> : null}
-          </span>
-        )}
+        <span
+          aria-hidden="true"
+          className={cn(
+            'flex size-5 items-center justify-center rounded-full border transition-colors',
+            selected ? 'border-primary bg-primary text-primary-foreground' : 'border-input bg-surface',
+          )}
+        >
+          {selected ? <Check className="size-3" strokeWidth={3} /> : null}
+        </span>
       </span>
       <span className="min-w-0">
-        <span className={cn('block break-words font-semibold leading-tight', compact ? 'text-label sm:text-body 2xl:text-title-sm' : 'font-display text-base font-bold')}>
-          {title}
-        </span>
-        {badge ? <span className="block text-micro font-medium text-muted-foreground 2xl:text-body">{badge}</span> : null}
+        <span className="block break-words font-display text-title-sm font-bold leading-tight">{title}</span>
+        {badge ? <span className="mt-0.5 block text-caption font-medium text-muted-foreground">{badge}</span> : null}
         {description ? <span className="mt-1 block text-label leading-relaxed text-muted-foreground">{description}</span> : null}
       </span>
       {children}
-      {compact && selected ? <Check className="absolute right-2.5 top-2.5 size-3.5 text-primary" aria-hidden="true" /> : null}
     </label>
   );
 }

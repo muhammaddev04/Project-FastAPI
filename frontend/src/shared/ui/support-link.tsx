@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib/cn';
 /** TZ F-SUP-1: every screen offers a way to reach platform support on Telegram. */
 export const SUPPORT_TELEGRAM = 'tezfarmo_support';
 
-export function SupportLink({ className, tone = 'default' }: { className?: string; tone?: 'default' | 'inverted' }) {
+export function SupportLink({ className, tone = 'default' }: { className?: string; tone?: 'default' | 'inverted' | 'aside' }) {
   const { t } = useTranslation();
   return (
     <a
@@ -14,7 +14,11 @@ export function SupportLink({ className, tone = 'default' }: { className?: strin
       rel="noopener noreferrer"
       className={cn(
         'inline-flex items-center gap-1.5 text-label font-medium transition-colors',
-        tone === 'inverted' ? 'text-sidebar-muted hover:text-sidebar-foreground' : 'text-primary hover:text-primary-hover',
+        tone === 'inverted'
+          ? 'text-sidebar-muted hover:text-sidebar-foreground'
+          : tone === 'aside'
+            ? 'text-aside-muted hover:text-aside-foreground focus-visible:ring-offset-aside'
+            : 'text-primary hover:text-primary-hover',
         className,
       )}
     >
@@ -25,8 +29,8 @@ export function SupportLink({ className, tone = 'default' }: { className?: strin
   );
 }
 
-/** Header form of the support link: round icon button (lifts on hover) with the handle on wide screens. */
-export function SupportButton({ className, large = false }: { className?: string; large?: boolean }) {
+/** Header form of the support link: round icon button with the handle on wide screens. */
+export function SupportButton({ className }: { className?: string }) {
   const { t } = useTranslation();
   return (
     <a
@@ -36,10 +40,10 @@ export function SupportButton({ className, large = false }: { className?: string
       aria-label={`${t('common.support')} @${SUPPORT_TELEGRAM}`}
       className={cn('group items-center gap-2.5 rounded-full text-body font-medium text-foreground/85 transition-colors hover:text-foreground', className)}
     >
-      <span className={cn('flex size-10 items-center justify-center rounded-full border bg-surface/50 text-primary transition-[transform,border-color] duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/50', large && '2xl:size-11')}>
+      <span className="flex size-10 items-center justify-center rounded-full border bg-surface/50 text-primary transition-colors duration-base group-hover:border-primary/50">
         <Send className="size-4" aria-hidden="true" />
       </span>
-      <span className={cn('hidden lg:inline', large && '2xl:text-lg')}>@{SUPPORT_TELEGRAM}</span>
+      <span className="hidden lg:inline">@{SUPPORT_TELEGRAM}</span>
     </a>
   );
 }
