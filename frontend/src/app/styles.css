@@ -64,6 +64,17 @@
     --accent-foreground: 0 0% 100%;
     --accent-soft: var(--primary-soft);
 
+    /*
+     * Aside panel of the authentication screens (Phase D): a solid navy plane flush to the viewport edge,
+     * identical in both themes, so the sign-in composition reads the same way day and night. It carries its
+     * own accent because the light-theme `--primary` (#0B7D72) does not reach AA on a navy ground.
+     */
+    --aside: 222 55% 14%;
+    --aside-foreground: 210 40% 97%;
+    --aside-muted: 218 22% 70%;
+    --aside-border: 222 36% 25%;
+    --aside-accent: 172 66% 50%;
+
     /* Shell chrome: opaque white in light, navy at night (same for every area). */
     --sidebar: 0 0% 100%;
     --sidebar-foreground: 222 55% 14%;
@@ -120,6 +131,10 @@
     --status-delivered-soft: 160 45% 14%;
     --status-disputed: 0 84% 64%;
     --status-disputed-soft: 0 50% 16%;
+
+    /* The aside is already the darkest plane in light; at night it steps below the navy canvas. */
+    --aside: 224 68% 7%;
+    --aside-border: 221 35% 20%;
 
     --sidebar: 224 64% 10%;
     --sidebar-foreground: 210 40% 97%;

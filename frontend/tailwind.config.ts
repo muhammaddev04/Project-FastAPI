@@ -1,5 +1,4 @@
 import type { Config } from 'tailwindcss';
-import plugin from 'tailwindcss/plugin';
 
 const token = (name: string) => `hsl(var(--${name}) / <alpha-value>)`;
 
@@ -91,6 +90,14 @@ export default {
           delivered: { DEFAULT: token('status-delivered'), soft: token('status-delivered-soft') },
           disputed: { DEFAULT: token('status-disputed'), soft: token('status-disputed-soft') },
         },
+        /* Phase D: the navy aside plane of the authentication screens. */
+        aside: {
+          DEFAULT: token('aside'),
+          foreground: token('aside-foreground'),
+          muted: token('aside-muted'),
+          border: token('aside-border'),
+          accent: token('aside-accent'),
+        },
         sidebar: {
           DEFAULT: token('sidebar'),
           foreground: token('sidebar-foreground'),
@@ -148,13 +155,12 @@ export default {
       },
     },
   },
-  plugins: [
-    /*
-     * `short:` = viewports up to ~920px tall (laptops, most phones): tighter vertical rhythm so auth forms fit.
-     * A variant, not a screen: a raw-media screen would switch off Tailwind's min-[…] / max-* width variants.
-     */
-    plugin(({ addVariant }) => {
-      addVariant('short', '@media (max-height: 920px)');
-    }),
-  ],
+  /*
+   * No plugins. The `short:` variant (`@media (max-height: 920px)`) lived here for Phase C and earlier: the
+   * sign-in card was tall enough to overflow a laptop viewport, so 45 rules across nine files shaved padding,
+   * heights and line-heights off it, and two of them hid content outright. Phase D made the authentication
+   * screens one column of fields on the page canvas with no card to fit inside, which removed every call site.
+   * A viewport-height variant is a workaround for a layout that is too tall, so it goes with the layout.
+   */
+  plugins: [],
 } satisfies Config;
