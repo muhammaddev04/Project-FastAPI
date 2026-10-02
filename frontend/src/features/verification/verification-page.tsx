@@ -1,4 +1,4 @@
-import { Check, CircleDashed, Clock3, FileCheck2, FileText, FileUp, ShieldCheck, XCircle } from 'lucide-react';
+import { Check, CircleDashed, ClipboardList, Clock3, FileCheck2, FileText, FileUp, ShieldCheck, XCircle } from 'lucide-react';
 import { useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAreaContext } from '@/app/shell/use-area-context';
@@ -164,7 +164,16 @@ export function VerificationPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t('verification.title')} description={t('verification.why')} />
+      <PageHeader title={t('verification.title')} description={t('verification.why')}>
+        {/*
+         * Phase D: this page is the last step of the journey that starts at /register, and for an organization
+         * that has just been created it is the only thing standing between the owner and a working account. It
+         * says so, so arriving here does not read as having been dropped into a settings tab.
+         */}
+        {status === 'NOT_SUBMITTED' ? (
+          <p className="text-caption font-semibold uppercase tracking-[0.08em] text-primary-ink">{t('verification.finalStep')}</p>
+        ) : null}
+      </PageHeader>
       <SettingsTabs />
 
       <Card className="overflow-hidden">
@@ -210,6 +219,22 @@ export function VerificationPage() {
           ))}
         </ol>
       </Card>
+
+      {status === 'NOT_SUBMITTED' ? (
+        <Card className="p-5 sm:p-6">
+          <SectionHeader icon={ClipboardList} title={t('verification.afterTitle')} subtitle={t('verification.afterHelp')} />
+          <ol className="mt-4 space-y-3">
+            {(['submit', 'review', 'decision'] as const).map((key, index) => (
+              <li key={key} className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-caption font-bold text-primary-ink">
+                  {index + 1}
+                </span>
+                <span className="min-w-0 text-body leading-relaxed text-muted-foreground">{t(`verification.after.${key}`)}</span>
+              </li>
+            ))}
+          </ol>
+        </Card>
+      ) : null}
 
       {status === 'REJECTED' && request?.rejection_reason ? (
         <Alert tone="danger" title={t('verification.rejectedTitle')}>

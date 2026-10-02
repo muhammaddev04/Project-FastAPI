@@ -11,7 +11,8 @@ import { StoreDashboard } from '@/features/dashboard/store-dashboard';
 import { PlannedModulePage } from '@/features/modules/planned-module-page';
 import { VerificationsPage } from '@/features/admin/verifications-page';
 import { OrganizationProfilePage } from '@/features/organization/organization-profile-page';
-import { WelcomePage } from '@/features/onboarding/welcome-page';
+import { BusinessSetupPage } from '@/features/onboarding/business-setup-page';
+import { BusinessTypePage } from '@/features/onboarding/business-type-page';
 import { VerificationPage } from '@/features/verification/verification-page';
 import { ProfilePage } from '@/features/profile/profile-page';
 import { TeamPage } from '@/features/team/team-page';
@@ -42,26 +43,37 @@ export const routes: RouteObject[] = [
     element: <RequireGuest><AuthShell /></RequireGuest>,
     children: [
       { path: '/login', element: <LoginPage /> },
+      // Phase D steps 1 and 2. `/verify-email` is the pre-Phase-D address of step 2 and renders the same page,
+      // so the links already in people's inboxes and bookmarks keep working.
       { path: '/register', element: <RegisterPage /> },
-      { path: '/forgot-password', element: <ForgotPasswordPage /> },
+      { path: '/register/verify', element: <VerifyEmailPage /> },
       { path: '/verify-email', element: <VerifyEmailPage /> },
+      { path: '/forgot-password', element: <ForgotPasswordPage /> },
       { path: '/auth/google/callback', element: <GoogleCallbackPage /> },
     ],
   },
   // CR-001: recovery starts with email and a 6-digit code; the old SMS-era path and the old reset-link page point there.
   { path: '/reset', element: <Navigate to="/forgot-password" replace /> },
   { path: '/reset-password', element: <Navigate to="/forgot-password" replace /> },
-  // P01 §10 / P02 §8: without an organization, the type chosen at registration opens directly (never asked twice).
+  /*
+   * Phase D steps 3 and 4. The business type is a screen of its own, and the organization form is the screen
+   * after it; both need a session, because `POST /organizations/*` does.
+   *
+   * P01 §10 / P02 §8 still holds: a user who registered before Phase D arrives with the type already on their
+   * record and is sent straight to step 4, so the question is never asked twice.
+   */
   {
     path: '/welcome',
     element: (
       <RequireAuth>
-        {(me) => (usableMemberships(me).length === 0 && me.onboarding?.org_type ? <Navigate to={onboardingPath(me)} replace /> : <WelcomePage me={me} />)}
+        {(me) =>
+          usableMemberships(me).length === 0 && me.onboarding?.org_type ? <Navigate to={onboardingPath(me)} replace /> : <BusinessTypePage me={me} />
+        }
       </RequireAuth>
     ),
   },
-  { path: '/welcome/company', element: <RequireAuth>{(me) => <WelcomePage me={me} fixedType="COMPANY" />}</RequireAuth> },
-  { path: '/welcome/store', element: <RequireAuth>{(me) => <WelcomePage me={me} fixedType="STORE" />}</RequireAuth> },
+  { path: '/welcome/company', element: <RequireAuth>{(me) => <BusinessSetupPage me={me} type="COMPANY" />}</RequireAuth> },
+  { path: '/welcome/store', element: <RequireAuth>{(me) => <BusinessSetupPage me={me} type="STORE" />}</RequireAuth> },
   { path: '/profile', element: <RequireAuth>{(me) => <ProfilePage me={me} />}</RequireAuth> },
   {
     path: '/admin',
