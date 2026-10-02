@@ -1,13 +1,20 @@
-import { AnimatePresence, motion, useAnimationControls } from 'framer-motion';
-import { cloneElement, isValidElement, useEffect, useId, type ReactElement, type ReactNode } from 'react';
+import { cloneElement, isValidElement, useId, type ReactElement, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/shared/lib/cn';
 import { Label } from './label';
 
-type FieldControlProps = { id?: string; invalid?: boolean; 'aria-describedby'?: string };
+type FieldControlProps = { id?: string; invalid?: boolean; 'aria-describedby'?: string; required?: boolean };
 
 /**
- * Label + control + hint/error wired together for screen readers (FND-035 FormField).
- * A new validation error gives the control a short shake and slides its message in.
+ * Label, control and hint/error wired together for assistive technology (FND-035).
+ *
+ * Phase C4 removed two things. The control no longer shakes when validation fails: the message, the border
+ * and `aria-invalid` already carry the state, and a 320ms horizontal jitter on a field someone is typing
+ * into is motion that interrupts rather than informs. And framer-motion is gone from the form path, so a
+ * message appearing costs a CSS fade instead of a JS animation on every keystroke-triggered revalidation.
+ *
+ * `requirement` marks the exception rather than the rule: in these forms most fields are required, so
+ * "optional" is the useful label and a wall of asterisks is not.
  */
 export function FormField({
   label,
@@ -15,6 +22,7 @@ export function FormField({
   error,
   action,
   labelClassName,
+  requirement,
   size = 'md',
   children,
 }: {
@@ -23,56 +31,48 @@ export function FormField({
   error?: string;
   action?: ReactNode;
   labelClassName?: string;
-  /** `lg`: the larger label of the sign-in forms. */
+  requirement?: 'required' | 'optional';
+  /** `lg`: the larger label of the sign-in and onboarding forms. */
   size?: 'md' | 'lg';
   children: ReactElement<FieldControlProps>;
 }) {
+  const { t } = useTranslation();
   const generated = useId();
   const id = (isValidElement(children) && children.props.id) || generated;
+  // The error replaces the hint, so only one of them is ever referenced.
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
-  const controls = useAnimationControls();
-
-  useEffect(() => {
-    if (error) void controls.start({ x: [0, -5, 5, -3, 3, 0], transition: { duration: 0.32 } });
-  }, [error, controls]);
 
   return (
-    <div className={cn('space-y-2', size === 'lg' && '2xl:space-y-3')}>
-      <div className="flex items-center justify-between gap-3">
-        <Label htmlFor={id} className={cn(size === 'lg' && 'text-[0.9375rem] font-medium 2xl:text-[1.125rem]', labelClassName)}>
+    <div className="space-y-1.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <Label htmlFor={id} className={cn(size === 'lg' && 'text-body-lg', labelClassName)}>
           {label}
+          {requirement === 'optional' ? (
+            <span className="ml-1.5 font-normal text-muted-foreground">{t('common.optional')}</span>
+          ) : null}
+          {requirement === 'required' ? (
+            <span className="ml-1 text-danger" aria-hidden="true">
+              *
+            </span>
+          ) : null}
         </Label>
         {action}
       </div>
-      <motion.div animate={controls}>{cloneElement(children, { id, invalid: Boolean(error), 'aria-describedby': describedBy })}</motion.div>
-      <AnimatePresence mode="wait" initial={false}>
-        {error ? (
-          <motion.p
-            key="error"
-            id={`${id}-error`}
-            role="alert"
-            className={cn('text-[0.8125rem] text-danger', size === 'lg' && '2xl:text-[0.9375rem]')}
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.16 }}
-          >
-            {error}
-          </motion.p>
-        ) : hint ? (
-          <motion.p
-            key="hint"
-            id={`${id}-hint`}
-            className={cn('px-0.5 text-[0.8125rem] text-muted-foreground', size === 'lg' && '2xl:text-[0.9375rem]')}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.16 }}
-          >
-            {hint}
-          </motion.p>
-        ) : null}
-      </AnimatePresence>
+      {cloneElement(children, {
+        id,
+        invalid: Boolean(error),
+        'aria-describedby': describedBy,
+        required: requirement === 'required' || children.props.required,
+      })}
+      {error ? (
+        <p id={`${id}-error`} role="alert" className="animate-fade-in text-label text-danger">
+          {error}
+        </p>
+      ) : hint ? (
+        <p id={`${id}-hint`} className="text-label text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }

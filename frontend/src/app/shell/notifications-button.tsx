@@ -18,7 +18,7 @@ export function NotificationsButton() {
           {t('dashboard.notifications.title')}
           <PhaseBadge phase="P11" />
         </DropdownMenuLabel>
-        <p className="px-2.5 pb-3 text-[0.8125rem] text-muted-foreground">{t('dashboard.notifications.empty')}</p>
+        <p className="px-2.5 pb-3 text-label text-muted-foreground">{t('dashboard.notifications.empty')}</p>
       </DropdownMenuContent>
     </DropdownMenu>
   );

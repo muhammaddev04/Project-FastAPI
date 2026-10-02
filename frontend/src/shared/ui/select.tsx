@@ -10,8 +10,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
         ref={ref}
         aria-invalid={invalid || undefined}
         className={cn(
-          'h-11 w-full appearance-none rounded-xl border bg-subtle pl-3.5 pr-10 text-[0.875rem] text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary/70 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.14)] focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60',
-          invalid ? 'border-danger focus:shadow-[0_0_0_3px_hsl(var(--danger)/0.12)]' : 'border-input hover:border-primary/50',
+          'h-9 w-full appearance-none rounded-xl border bg-subtle pl-3 pr-9 text-body text-foreground outline-none transition-[border-color,box-shadow] duration-fast focus:border-primary focus:shadow-[0_0_0_2px_hsl(var(--primary)/0.18)] focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-60',
+          invalid ? 'border-danger focus:shadow-[0_0_0_2px_hsl(var(--danger)/0.18)]' : 'border-input hover:border-primary/50',
         )}
         {...props}
       >

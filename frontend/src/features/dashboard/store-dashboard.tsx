@@ -25,17 +25,16 @@ export function StoreDashboard() {
       <OrgHero greeting={t('dashboard.store.greeting', { name: me.full_name.split(' ')[0] })} />
 
       <Card className="relative flex flex-col gap-4 overflow-hidden p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div aria-hidden="true" className="brand-glow-soft pointer-events-none absolute inset-0" />
         <div className="flex items-start gap-3">
           <span className="relative flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <RefreshCcw className="size-5" aria-hidden="true" />
           </span>
           <div>
             <p className="text-sm font-semibold">{t('dashboard.store.repeatTitle')}</p>
-            <p className="text-[0.8125rem] text-muted-foreground">{t('dashboard.store.repeatText')}</p>
+            <p className="text-label text-muted-foreground">{t('dashboard.store.repeatText')}</p>
           </div>
         </div>
-        <Button variant="brand" size="lg" disabled aria-describedby="repeat-order-note" className="relative max-sm:w-full">
+        <Button variant="primary" size="lg" disabled aria-describedby="repeat-order-note" className="relative max-sm:w-full">
           {t('dashboard.store.repeatAction')}
         </Button>
         <span id="repeat-order-note" className="sr-only">
@@ -49,7 +48,6 @@ export function StoreDashboard() {
           title={t('home.store.catalog')}
           description={t('home.store.catalogText')}
           phase="P04"
-          ghostTiles={6}
           className="lg:col-span-2"
         />
         <PlannedPanel icon={ShoppingCart} title={t('home.store.cart')} description={t('home.store.cartText')} phase="P07" />

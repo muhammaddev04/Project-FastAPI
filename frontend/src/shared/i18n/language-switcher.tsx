@@ -3,7 +3,7 @@ import { SegmentedControl } from '@/shared/ui/segmented-control';
 import { SUPPORTED_LANGUAGES, currentLanguage, setLanguage, type Language } from './index';
 
 /** FND-033: TG / RU / EN switch; the choice is stored in localStorage. */
-export function LanguageSwitcher({ className, size }: { className?: string; size?: 'sm' | 'md' | 'hero' }) {
+export function LanguageSwitcher({ className, size }: { className?: string; size?: 'sm' | 'md' }) {
   const { t } = useTranslation();
   return (
     <SegmentedControl<Language>

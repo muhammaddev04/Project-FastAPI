@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import type { Me } from '@/shared/auth/types';
 import { Card, EmptyState, PageHeader, PhaseBadge } from '@/shared/ui';
-import { HeaderTools, ShellFrame, type Crumb, type ShellSection } from './app-shell';
+import { HeaderTools, PlannedGroup, ShellFrame, type Crumb, type ShellSection } from './app-shell';
 import type { AdminContext } from './use-admin-context';
 
 /**
@@ -26,10 +26,8 @@ export function AdminLayout({ me }: { me: Me }) {
   const { pathname } = useLocation();
   const toLinks = (items: AdminItem[]) =>
     items.map((item) => ({ key: item.key, to: `/admin/${item.key}`, icon: item.icon, label: t(`nav.admin.${item.key}`), phase: item.phase }));
-  const sections: ShellSection[] = [
-    { key: 'review', label: t('nav.sections.review'), links: toLinks(REVIEW) },
-    { key: 'platform', label: t('nav.sections.platform'), links: toLinks(PLATFORM) },
-  ];
+  // Only the built screen is navigation; the five P12 screens are the roadmap (C8).
+  const sections: ShellSection[] = [{ key: 'review', label: t('nav.sections.review'), links: toLinks(REVIEW) }];
   const current = ALL.find((item) => pathname.startsWith(`/admin/${item.key}`)) ?? REVIEW[0]!;
   const crumbs: Crumb[] = [{ label: t('admin.eyebrow'), to: '/admin' }, { label: t(`nav.admin.${current.key}`) }];
   return (
@@ -37,18 +35,18 @@ export function AdminLayout({ me }: { me: Me }) {
       areaLabel={t('shell.areas.admin')}
       context={
         <div className="flex items-center gap-3 rounded-2xl border bg-surface/60 p-2.5 dark:bg-subtle/50">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-deep to-brand-blue text-white">
-            <Activity className="size-5" aria-hidden="true" />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+            <Activity className="size-4" aria-hidden="true" />
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-[0.8125rem] font-bold leading-4">{t('admin.eyebrow')}</span>
-            <span className="mt-0.5 block truncate text-2xs text-sidebar-muted">SUPERADMIN</span>
+            <span className="block truncate text-label font-medium">{t('admin.eyebrow')}</span>
+            <span className="block truncate text-caption text-sidebar-muted">SUPERADMIN</span>
           </span>
         </div>
       }
       sections={sections}
+      navFooter={<PlannedGroup links={toLinks(PLATFORM)} />}
       crumbs={crumbs}
-      title={t(`nav.admin.${current.key}`)}
       headerEnd={<HeaderTools me={me} notifications={false} />}
     >
       <Outlet context={{ me } satisfies AdminContext} />
@@ -65,13 +63,11 @@ export function AdminPlannedPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={t('admin.eyebrow')}
         title={t(`nav.admin.${item.key}`)}
         description={t(`planned.admin.${item.key}`)}
         actions={<PhaseBadge phase={item.phase} />}
       />
       <Card className="relative overflow-hidden">
-        <div aria-hidden="true" className="brand-glow-soft pointer-events-none absolute inset-0" />
         <EmptyState icon={item.icon} title={t('planned.title', { phase: item.phase })} description={t('planned.description')} className="relative py-16 sm:py-20" />
       </Card>
     </div>

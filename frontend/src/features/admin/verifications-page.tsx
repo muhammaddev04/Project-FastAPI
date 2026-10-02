@@ -71,7 +71,7 @@ function DocumentLink({ requestId, documentId, label }: { requestId: string; doc
           {t('admin.verifications.openDocument', { name: label })}
         </Button>
       )}
-      {failed ? <span className="text-[0.8125rem] text-danger">{errorMessage(failed, t)}</span> : null}
+      {failed ? <span className="text-label text-danger">{errorMessage(failed, t)}</span> : null}
     </span>
   );
 }
@@ -79,7 +79,7 @@ function DocumentLink({ requestId, documentId, label }: { requestId: string; doc
 function DetailSection({ icon: Icon, title, children }: { icon: typeof FileText; title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className="flex items-center gap-2 font-display text-[0.9375rem] font-bold">
+      <h3 className="flex items-center gap-2 font-display text-body-lg font-bold">
         <Icon className="size-4 text-primary" aria-hidden="true" />
         {title}
       </h3>
@@ -123,7 +123,7 @@ function RequestDetail({ id, adminId }: { id: string; adminId: string }) {
         <Avatar kind={data.org_type === 'STORE' ? 'store' : 'company'} size="lg" />
         <div className="min-w-0">
           <DialogPrimitiveTitle className="break-words font-display text-lg font-bold leading-snug">{data.org_name}</DialogPrimitiveTitle>
-          <p className="text-[0.8125rem] text-muted-foreground">
+          <p className="text-label text-muted-foreground">
             {t(`orgTypes.${data.org_type}`)} · {t('admin.verifications.submittedAt', { date: date(data.submitted_at) })}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -146,7 +146,7 @@ function RequestDetail({ id, adminId }: { id: string; adminId: string }) {
       <DetailSection icon={FileText} title={t('admin.verifications.documentsTitle')}>
         <ul className="space-y-2">
           {data.documents.map((document) => (
-            <li key={document.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-subtle/40 px-3.5 py-2.5 text-[0.8125rem]">
+            <li key={document.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-subtle/40 px-3.5 py-2.5 text-label">
               <span className="font-semibold">{t(`verification.docTypes.${document.doc_type}`)}</span>
               <DocumentLink requestId={data.id} documentId={document.id} label={document.file.display_name} />
             </li>
@@ -164,7 +164,7 @@ function RequestDetail({ id, adminId }: { id: string; adminId: string }) {
 
       {data.history.length > 0 ? (
         <DetailSection icon={History} title={t('admin.verifications.historyTitle')}>
-          <ul className="space-y-1.5 text-[0.8125rem]">
+          <ul className="space-y-1.5 text-label">
             {data.history.map((item) => (
               <li key={item.id} className="flex flex-wrap items-center gap-2">
                 <StatusBadge kind="request" value={item.status} />
@@ -257,7 +257,7 @@ export function VerificationsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow={t('admin.eyebrow')} title={t('admin.verifications.title')} description={t('admin.verifications.description')} />
+      <PageHeader title={t('admin.verifications.title')} description={t('admin.verifications.description')} />
 
       <DataTable<AdminRequestSummary>
         caption={t('admin.verifications.title')}

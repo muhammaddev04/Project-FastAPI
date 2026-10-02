@@ -32,7 +32,7 @@ export function Alert({
   return (
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
-      className={cn('flex animate-fade-in flex-wrap items-start gap-3 rounded-xl border px-3.5 py-3 text-[0.8125rem] leading-5 text-foreground', box, className)}
+      className={cn('flex animate-fade-in flex-wrap items-start gap-3 rounded-xl border px-3.5 py-3 text-label leading-5 text-foreground', box, className)}
     >
       <span className={cn('flex size-7 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4', iconClass)}>
         {icon ?? <Icon aria-hidden="true" />}

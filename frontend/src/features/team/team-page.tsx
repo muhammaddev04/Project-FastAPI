@@ -53,7 +53,6 @@ export function TeamPage() {
     <RequirePermission membership={membership} code="members.view">
       <div className="space-y-6">
         <PageHeader
-          eyebrow={membership.org_name}
           title={t('team.title')}
           description={t('team.description')}
           actions={

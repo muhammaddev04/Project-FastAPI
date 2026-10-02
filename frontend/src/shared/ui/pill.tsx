@@ -2,17 +2,18 @@ import type { ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 
 /**
- * Brand pill (eyebrows, the sign-in card badge, hero tags): teal outline chip with a beacon dot; `live` makes the
- * dot ping (disabled by reduced motion).
+ * Brand pill: teal outline chip with a beacon dot; `live` makes the dot ping (disabled by reduced motion).
+ *
+ * Phase D dropped the `card` and `hero` sizes and their 2xl step-ups. They sized the chip for the sign-in
+ * card badge ("B2B PLATFORM") and the hero tag ("B2B platform for Tajikistan"), both of which are gone: the
+ * first restated the brand lockup beside it, the second was a marketing line on a sign-in screen.
  */
-export function Pill({ children, size = 'sm', live = false, className }: { children: ReactNode; size?: 'sm' | 'md' | 'card' | 'hero'; live?: boolean; className?: string }) {
+export function Pill({ children, size = 'sm', live = false, className }: { children: ReactNode; size?: 'sm' | 'md'; live?: boolean; className?: string }) {
   return (
     <span
       className={cn(
         'inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 font-bold text-primary-ink',
-        size === 'md' || size === 'hero'
-          ? cn('h-10 px-4 text-[0.875rem] font-semibold', size === 'hero' && '2xl:h-[2.625rem] 2xl:px-5 2xl:text-[1.0625rem] 2xl:font-bold')
-          : cn('px-3 py-1 text-[0.625rem] uppercase tracking-[0.12em] sm:text-[0.6875rem]', size === 'card' && '2xl:h-[2.625rem] 2xl:px-6 2xl:py-0 2xl:text-[1.0625rem] 2xl:tracking-[0.06em]'),
+        size === 'md' ? 'h-10 px-4 text-body font-semibold' : 'px-3 py-1 text-micro uppercase tracking-[0.12em]',
         className,
       )}
     >

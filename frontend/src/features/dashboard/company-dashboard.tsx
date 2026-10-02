@@ -59,7 +59,7 @@ export function CompanyDashboard() {
       </div>
 
       {isOwnerOrManager ? (
-        <PlannedPanel icon={PackageSearch} title={t('home.company.catalog')} description={t('home.company.catalogText')} phase="P04" ghostTiles={3} />
+        <PlannedPanel icon={PackageSearch} title={t('home.company.catalog')} description={t('home.company.catalogText')} phase="P04" />
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">

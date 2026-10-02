@@ -53,7 +53,9 @@ describe('forgot password with a 6-digit code (IAM-015)', () => {
     const { current } = renderRoutes(routes, '/forgot-password');
 
     await requestCode();
-    expect(screen.getByText(/if an account exists for nigina@example\.tj, we've sent a 6-digit code/i)).toBeInTheDocument();
+    // Phase D: the destination is named so a typo is visible, but the local part is masked (maskEmail).
+    expect(screen.getByText(/if an account exists for n••••a@example\.tj, we've sent a 6-digit code/i)).toBeInTheDocument();
+    expect(screen.queryByText(/nigina@example\.tj/)).not.toBeInTheDocument();
     await enterCode();
     await choosePassword();
 

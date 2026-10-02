@@ -3,22 +3,23 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/shared/lib/cn';
 
 /**
- * Card surfaces (DESIGN.md, CR-002): rounded-2xl, hairline border, soft navy depth (`.surface-card`).
- * `interactive` lifts and glows teal on hover; `glass` is the translucent sign-in treatment for chrome-like panels;
- * `inset` is a flat tinted block inside another card.
+ * Card surfaces (DESIGN.md, CR-002 revision).
+ *
+ * This had seven variants, of which only `standard` was ever used: `elevated`, `interactive`, `chrome`,
+ * `panel` and `tile` had zero call sites between them and existed to offer frosted panels and hover
+ * lift-and-glow effects. They are gone, and with them the last of the Card-level glassmorphism.
+ *
+ * What remains is the distinction that actually carries meaning: a card is a raised surface, an inset is a
+ * recessed block inside one. `interactive` is kept for the one case where elevation has to answer the
+ * pointer, and it shifts border and background rather than translating the element, so a grid of cards
+ * cannot jitter under the cursor.
  */
 const cardVariants = cva('', {
   variants: {
     variant: {
       standard: 'surface-card',
-      elevated: 'surface-card shadow-panel',
-      interactive:
-        'surface-card transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_18px_40px_-20px_hsl(var(--primary)/0.45)]',
-      glass: 'glass rounded-2xl border shadow-card',
-      /* Hero / sign-in panel: large glass surface with deep soft depth. */
-      panel: 'glass rounded-[1.75rem] border shadow-panel dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.75),inset_0_1px_0_rgba(255,255,255,0.06)]',
+      interactive: 'surface-card transition-[border-color,background-color] duration-200 hover:border-primary/40 hover:bg-subtle/40',
       inset: 'rounded-xl border bg-subtle/50',
-      tile: 'rounded-2xl border bg-surface/60 transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[0_18px_40px_-20px_hsl(var(--primary)/0.45)]',
     },
   },
   defaultVariants: { variant: 'standard' },
@@ -49,8 +50,8 @@ export function CardHeader({
           <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary [&_svg]:size-4">{icon}</span>
         ) : null}
         <div className="min-w-0">
-          <h2 className="text-[0.9375rem] font-semibold text-foreground">{title}</h2>
-          {description ? <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">{description}</p> : null}
+          <h2 className="text-body-lg font-semibold text-foreground">{title}</h2>
+          {description ? <p className="mt-0.5 text-label text-muted-foreground">{description}</p> : null}
         </div>
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}

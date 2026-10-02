@@ -19,14 +19,14 @@ export function Toaster() {
           <div
             key={item.id}
             role={item.tone === 'danger' ? 'alert' : 'status'}
-            className="glass pointer-events-auto flex w-full max-w-sm animate-toast-in items-start gap-3 rounded-2xl border p-3.5 shadow-pop"
+            className="chrome pointer-events-auto flex w-full max-w-sm animate-toast-in items-start gap-3 rounded-2xl border p-3.5 shadow-pop"
           >
             <span className={cn('flex size-8 shrink-0 items-center justify-center rounded-xl', ICON_CLASS[item.tone])}>
               <Icon className="size-4" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1 pt-0.5">
-              <p className="text-[0.875rem] font-semibold">{item.title}</p>
-              {item.description ? <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">{item.description}</p> : null}
+              <p className="text-body font-semibold">{item.title}</p>
+              {item.description ? <p className="mt-0.5 text-label text-muted-foreground">{item.description}</p> : null}
             </div>
             <button
               type="button"

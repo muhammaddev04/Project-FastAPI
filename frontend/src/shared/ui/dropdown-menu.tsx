@@ -12,7 +12,7 @@ export const DropdownMenuContent = forwardRef<ElementRef<typeof Menu.Content>, C
       <Menu.Content
         ref={ref}
         sideOffset={sideOffset}
-        className={cn('glass z-50 min-w-56 animate-fade-in overflow-hidden rounded-2xl border p-1.5 text-foreground shadow-pop', className)}
+        className={cn('chrome z-50 min-w-56 animate-fade-in overflow-hidden rounded-2xl border p-1.5 text-foreground shadow-pop', className)}
         {...props}
       />
     </Menu.Portal>
@@ -25,7 +25,7 @@ export const DropdownMenuItem = forwardRef<ElementRef<typeof Menu.Item>, Compone
     <Menu.Item
       ref={ref}
       className={cn(
-        'flex cursor-pointer select-none items-center gap-2.5 rounded-xl px-2.5 py-2 text-[0.8125rem] outline-none transition-colors data-[disabled]:pointer-events-none data-[highlighted]:bg-primary/10 data-[highlighted]:text-foreground data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:text-muted-foreground',
+        'flex cursor-pointer select-none items-center gap-2.5 rounded-xl px-2.5 py-2 text-label outline-none transition-colors data-[disabled]:pointer-events-none data-[highlighted]:bg-primary/10 data-[highlighted]:text-foreground data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:text-muted-foreground',
         className,
       )}
       {...props}

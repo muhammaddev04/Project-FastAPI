@@ -10,7 +10,7 @@ export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogClose = DialogPrimitive.Close;
 
 /**
- * Dialog panel (DESIGN.md Tier 4): navy scrim, glass rounded-2xl panel that rises in; focus is trapped and Escape
+ * Dialog panel (DESIGN.md Tier 4): navy scrim, chrome rounded-2xl panel that rises in; focus is trapped and Escape
  * closes (Radix). On phones it becomes a bottom sheet.
  */
 export const DialogContent = forwardRef<
@@ -30,7 +30,7 @@ export const DialogContent = forwardRef<
         }}
         tabIndex={-1}
         className={cn(
-          'glass fixed inset-x-0 bottom-0 z-50 max-h-[92vh] animate-fade overflow-y-auto rounded-t-[1.75rem] border p-5 shadow-pop focus:outline-none',
+          'chrome fixed inset-x-0 bottom-0 z-50 max-h-[92vh] animate-fade overflow-y-auto rounded-t-2xl border p-5 shadow-pop focus:outline-none',
           'sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[calc(100%-2rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:p-6',
           className,
         )}
@@ -66,7 +66,7 @@ export function DialogHeader({ icon: Icon, tone = 'primary', title, description 
       <div className="min-w-0">
         <DialogPrimitive.Title className="font-display text-lg font-bold leading-snug">{title}</DialogPrimitive.Title>
         {description ? (
-          <DialogPrimitive.Description className="mt-1 text-[0.875rem] leading-relaxed text-muted-foreground">{description}</DialogPrimitive.Description>
+          <DialogPrimitive.Description className="mt-1 text-body leading-relaxed text-muted-foreground">{description}</DialogPrimitive.Description>
         ) : (
           <DialogPrimitive.Description className="sr-only">{title}</DialogPrimitive.Description>
         )}

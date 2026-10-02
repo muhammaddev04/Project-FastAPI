@@ -15,7 +15,7 @@ export function AccessCard({ membership }: { membership: Membership }) {
       <CardHeader icon={<KeyRound />} title={t('dashboard.access.title')} description={t('dashboard.access.description')} />
       <CardBody className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-[0.8125rem] text-muted-foreground">{t('dashboard.access.role')}</span>
+          <span className="text-label text-muted-foreground">{t('dashboard.access.role')}</span>
           <Badge tone="accent">{t(`roles.${membership.role}`)}</Badge>
         </div>
         {membership.permissions.length ? (
@@ -27,7 +27,7 @@ export function AccessCard({ membership }: { membership: Membership }) {
             ))}
           </ul>
         ) : (
-          <p className="text-[0.8125rem] text-muted-foreground">{t('dashboard.access.none')}</p>
+          <p className="text-label text-muted-foreground">{t('dashboard.access.none')}</p>
         )}
       </CardBody>
     </Card>
@@ -47,7 +47,7 @@ export function TeamCard({ membership }: { membership: Membership }) {
         icon={<Users />}
         title={t('dashboard.team.title')}
         action={
-          <Link to={`/${area}/team`} className="link-grow inline-flex items-center gap-1 text-[0.8125rem] font-semibold text-primary hover:text-primary-hover">
+          <Link to={`/${area}/team`} className="link-grow inline-flex items-center gap-1 text-label font-semibold text-primary hover:text-primary-hover">
             {t('dashboard.team.open')} <ArrowRight className="size-3.5" aria-hidden="true" />
           </Link>
         }
@@ -61,7 +61,7 @@ export function TeamCard({ membership }: { membership: Membership }) {
           <div className="flex items-center gap-3">
             <p>
               <span className="font-display text-3xl font-extrabold tabular-nums text-foreground">{members.data.count}</span>{' '}
-              <span className="text-[0.8125rem] text-muted-foreground">{t('dashboard.team.members')}</span>
+              <span className="text-label text-muted-foreground">{t('dashboard.team.members')}</span>
             </p>
           </div>
         )}
@@ -84,8 +84,8 @@ export function ReadinessChecklist({ membership, steps }: { membership: Membersh
               {index + 1}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[0.875rem] font-semibold">{t(`dashboard.readiness.${area}.${step.key}.title`)}</p>
-              <p className="text-[0.8125rem] text-muted-foreground">{t(`dashboard.readiness.${area}.${step.key}.text`)}</p>
+              <p className="text-body font-semibold">{t(`dashboard.readiness.${area}.${step.key}.title`)}</p>
+              <p className="text-label text-muted-foreground">{t(`dashboard.readiness.${area}.${step.key}.text`)}</p>
             </div>
             <PhaseBadge phase={step.phase} />
           </li>

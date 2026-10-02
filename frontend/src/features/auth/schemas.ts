@@ -45,19 +45,21 @@ export const loginSchema = z.object({
 export type LoginValues = z.input<typeof loginSchema>;
 
 /**
- * Short registration: only what creating the account and starting the organization review needs
- * (role, organization name, owner name, email, password, terms). The rest of the profile is filled in later.
- * The interface language is sent as the preferred language; the password has a show/hide toggle instead of a repeat field.
+ * Step 1 of the journey: exactly the four values `POST /auth/register` needs to create a user, plus the terms.
+ *
+ * `org_type` and `org_name` used to be collected here as the P01 §10 onboarding intent. They are optional on
+ * RegisterRequest, and asking a stranger to classify their business before they have an account put the
+ * hardest question on the first screen; the Company/Store choice is now step 3, where the answer immediately
+ * creates the organization instead of being parked on the user record. The interface language is sent as the
+ * preferred language, and the password has a show/hide toggle rather than a repeat field.
  */
-export const registerSchema = z.object({
-  orgType: z.enum(['COMPANY', 'STORE']),
-  orgName: z.string().trim().min(2, 'validation.nameTooShort').max(200, 'validation.tooLong'),
+export const createAccountSchema = z.object({
   fullName: z.string().trim().min(2, 'validation.nameTooShort').max(150, 'validation.tooLong'),
   email: emailSchema,
   password: newPasswordSchema,
   acceptTerms: z.literal(true, { errorMap: () => ({ message: 'validation.acceptTerms' }) }),
 });
-export type RegisterValues = z.input<typeof registerSchema>;
+export type CreateAccountValues = z.input<typeof createAccountSchema>;
 
 /** The 6-digit email verification code (backend: exactly six ASCII digits). */
 export const verificationCodeSchema = z.string().regex(/^[0-9]{6}$/, 'validation.codeSixDigits');

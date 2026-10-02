@@ -1,6 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, MailCheck } from 'lucide-react';
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -8,19 +6,16 @@ import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
 import { Alert, Button, CodeInput, FormField, Input } from '@/shared/ui';
 import { useResendVerification, useVerifyEmail } from './api';
-import { AuthCard, CardSwitch, authLabel, authPrimaryButton } from './auth-layout';
+import { AuthActions, AuthForm, AuthPage, AuthSwitch } from './auth-layout';
 import { MethodUnavailable } from './availability';
+import type { LoginState, VerifyEmailState } from './handover';
+import { maskEmail } from './mask';
 import { verifyEmailSchema, type VerifyEmailValues } from './schemas';
 import { useAuthMethod } from './use-auth-method';
 import { useCountdown } from './use-countdown';
 
-/** Router state handed over by /register and /login; kept in history only, never in storage. */
-export type VerifyEmailState = { email?: string; justRegistered?: boolean } | null;
-
 /** P01 §2.2: another email only 60 s after the previous one; registration has just sent one. */
 const RESEND_COOLDOWN_SECONDS = 60;
-/** How long the success state stays before moving on to /login. */
-const REDIRECT_DELAY_MS = 2500;
 const CODE_LENGTH = 6;
 
 /** Code problems get wording about codes (the shared `errors.*` text also covers reset links). */
@@ -31,14 +26,23 @@ function verifyError(error: unknown, t: (key: string) => string): string {
 }
 
 /**
- * /verify-email: the user types the 6-digit code from the verification email - nothing to click in the email.
- * The email names whose code it is (prefilled after registration or login). A new code can be requested here;
- * that answer is the same for every address (no account enumeration).
+ * Step 2 of 5: confirm the address with the 6-digit code from the email (Phase D).
+ *
+ * The code field is the only thing the screen asks for when step 1 handed the address over, and the address is
+ * named above it in masked form so a typo is still obvious without printing the whole thing on a phone screen
+ * in a shop. Opened cold (a reload, an old bookmark, the "confirm your email first" path on /login without
+ * state), it also asks for the address, because verification happens before any session exists and a bare
+ * 6-digit code can never be matched against every user's codes.
+ *
+ * On success it goes straight to /login with the address and a success banner rather than showing a
+ * congratulations screen for 2.5 seconds and then moving on. The backend issues no session here, so signing in
+ * is genuinely the next step; the shortest honest path is to arrive on the sign-in form with one field left.
  */
 export function VerifyEmailPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const state = useLocation().state as VerifyEmailState;
+  const handedOver = state?.email;
   const { available, meta } = useAuthMethod('email_verification');
   const verify = useVerifyEmail();
   const resend = useResendVerification();
@@ -47,19 +51,13 @@ export function VerifyEmailPage() {
   const form = useForm<VerifyEmailValues>({
     resolver: zodResolver(verifyEmailSchema),
     mode: 'onTouched',
-    defaultValues: { email: state?.email ?? '', code: '' },
+    defaultValues: { email: handedOver ?? '', code: '' },
   });
   const errors = form.formState.errors;
   // Client rules are translation keys; server validation messages arrive already translated (Accept-Language).
   const message = (key?: string) => (key ? (key.startsWith('validation.') ? t(key) : key) : undefined);
   const codeField = form.register('code');
   const verifyFailed = verify.error instanceof ApiError && verify.error.code === 'validation_error' ? null : verify.error;
-
-  useEffect(() => {
-    if (!verify.isSuccess) return undefined;
-    const timer = setTimeout(() => navigate('/login', { replace: true }), REDIRECT_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [verify.isSuccess, navigate]);
 
   const onVerify = form.handleSubmit(async (values) => {
     resend.reset();
@@ -74,7 +72,10 @@ export function VerifyEmailPage() {
       } else if (error.status === 429) {
         setVerifyIn(error.retryAfterSeconds ?? RESEND_COOLDOWN_SECONDS);
       }
+      return;
     }
+    const next: LoginState = { email: values.email, justVerified: true };
+    navigate('/login', { replace: true, state: next });
   });
 
   const onResend = async () => {
@@ -89,43 +90,29 @@ export function VerifyEmailPage() {
     }
   };
 
-  if (verify.isSuccess) {
-    return (
-      <AuthCard title={t('auth.verify.title')}>
-        <div className="space-y-4">
-          <Alert tone="success" title={t('auth.verify.successTitle')}>
-            {t('auth.verify.successText')}
-          </Alert>
-          <Button asChild block className={authPrimaryButton}>
-            <Link to="/login" replace>
-              {t('auth.verify.goToLogin')}
-            </Link>
-          </Button>
-        </div>
-      </AuthCard>
-    );
-  }
-
   return (
-    <AuthCard title={t('auth.verify.title')}>
-      <div className="flex items-start gap-3 rounded-2xl bg-primary/10 px-4 py-3.5">
-        <MailCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-        <p className="min-w-0 break-words text-[0.9375rem] leading-relaxed text-foreground/85">
-          {state?.email ? t('auth.verify.sentTo', { email: state.email }) : t('auth.verify.checkInbox')}
-        </p>
-      </div>
+    <AuthPage
+      title={t('auth.verify.title')}
+      lead={handedOver ? t('auth.verify.sentTo', { email: maskEmail(handedOver) }) : t('auth.verify.checkInbox')}
+      footer={<AuthSwitch question={t('auth.verify.alreadyVerified')} to="/login" link={t('auth.register.signIn')} />}
+    >
       {!available ? (
-        <div className="mt-4">
+        <div className="mb-5">
           <MethodUnavailable method="email_verification" meta={meta} />
         </div>
       ) : null}
 
-      <form className="mt-5 space-y-4" noValidate onSubmit={onVerify}>
-        <FormField labelClassName={authLabel} label={t('auth.fields.email')} error={message(errors.email?.message)}>
-          <Input variant="auth" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" leading={<Mail />} {...form.register('email')} />
-        </FormField>
-        <FormField labelClassName={authLabel} label={t('auth.verify.codeLabel')} hint={t('auth.verify.codeHint')} error={message(errors.code?.message)}>
-          <CodeInput length={CODE_LENGTH} {...codeField} />
+      <AuthForm onSubmit={onVerify}>
+        {handedOver ? (
+          // The address is already known, so it is not a question; it still has to reach the request and the resend.
+          <input type="hidden" {...form.register('email')} />
+        ) : (
+          <FormField size="lg" label={t('auth.fields.email')} error={message(errors.email?.message)}>
+            <Input size="lg" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
+          </FormField>
+        )}
+        <FormField size="lg" label={t('auth.verify.codeLabel')} hint={t('auth.verify.codeHint')} error={message(errors.code?.message)}>
+          <CodeInput length={CODE_LENGTH} autoFocus={Boolean(handedOver)} {...codeField} />
         </FormField>
         {verifyFailed ? (
           <Alert tone="danger" title={t('auth.verify.failedTitle')}>
@@ -134,26 +121,30 @@ export function VerifyEmailPage() {
         ) : null}
         {resend.isSuccess ? <Alert tone="success">{t('auth.verify.resendSent')}</Alert> : null}
         {resend.isError ? <Alert tone="danger">{errorMessage(resend.error, t)}</Alert> : null}
-        <Button type="submit" block className={authPrimaryButton} disabled={!available || verifyIn > 0} loading={meta.isPending || verify.isPending}>
-          {verifyIn > 0 ? t('auth.verify.verifyIn', { seconds: verifyIn }) : t('auth.verify.submit')}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          block
-          className="h-11 rounded-2xl text-[0.875rem] font-semibold text-primary"
-          disabled={!available || resendIn > 0}
-          loading={resend.isPending}
-          onClick={() => void onResend()}
-        >
-          {resendIn > 0 ? t('auth.verify.resendIn', { seconds: resendIn }) : t('auth.verify.resend')}
-        </Button>
-      </form>
-
-      <Button asChild variant="ghost" block className="mt-1 h-11 rounded-2xl text-[0.875rem] text-muted-foreground">
-        <Link to="/register">{t('auth.verify.wrongEmail')}</Link>
-      </Button>
-      <CardSwitch question={t('auth.verify.alreadyVerified')} to="/login" link={t('auth.register.signIn')} />
-    </AuthCard>
+        <AuthActions>
+          <Button type="submit" block size="xl" disabled={!available || verifyIn > 0} loading={meta.isPending || verify.isPending}>
+            {verifyIn > 0 ? t('auth.verify.verifyIn', { seconds: verifyIn }) : t('auth.verify.submit')}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            block
+            size="lg"
+            className="text-primary"
+            disabled={!available || resendIn > 0}
+            loading={resend.isPending}
+            onClick={() => void onResend()}
+          >
+            {resendIn > 0 ? t('auth.verify.resendIn', { seconds: resendIn }) : t('auth.verify.resend')}
+          </Button>
+        </AuthActions>
+      </AuthForm>
+      <p className="mt-4 text-label text-muted-foreground">
+        {t('auth.verify.nextStep')}{' '}
+        <Link to="/register" className="link-grow font-semibold text-primary hover:text-primary-hover">
+          {t('auth.verify.wrongEmail')}
+        </Link>
+      </p>
+    </AuthPage>
   );
 }

@@ -24,19 +24,17 @@ export function PlannedModulePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={t(`shell.areas.${area}`)}
         title={t(`nav.${area}.${item.key}`)}
         description={t(`planned.${area}.${item.key}`)}
         actions={<PhaseBadge phase={item.phase} />}
       />
       <Card className="relative overflow-hidden">
-        <div aria-hidden="true" className="brand-glow-soft pointer-events-none absolute inset-0" />
         <EmptyState
           icon={Icon}
           title={t('planned.title', { phase: item.phase })}
           description={t('planned.description')}
           action={
-            <span className="inline-flex items-center gap-2 rounded-full border bg-surface/70 px-3.5 py-1.5 text-[0.8125rem] font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-2 rounded-full border bg-surface/70 px-3.5 py-1.5 text-label font-medium text-muted-foreground">
               <CalendarClock className="size-4 text-primary" aria-hidden="true" />
               {t(`planned.phases.${item.phase}`)}
             </span>

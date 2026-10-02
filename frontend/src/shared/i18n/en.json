@@ -27,7 +27,9 @@
     "notFoundTitle": "Page not found",
     "notFoundDescription": "The page you are looking for doesn't exist or has moved.",
     "goHome": "Go to start",
-    "offline": "You're offline. Changes can't be saved until the connection is back."
+    "offline": "You're offline. Changes can't be saved until the connection is back.",
+    "unavailableTitle": "Temporarily unavailable",
+    "unavailableDescription": "This section isn't available right now. Try again shortly."
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -130,11 +132,7 @@
     "verificationQueue": "Verification queue"
   },
   "onboarding": {
-    "eyebrow": "Workspace setup",
-    "title": "Welcome, {{name}}. Let's set up your workspace.",
-    "subtitle": "TezFarmo connects suppliers and the stores they serve. Choose which side of the trade you're on — you'll become the owner and can invite your team later.",
     "existingTitle": "Your organizations",
-    "typeLegend": "What are you setting up?",
     "company": {
       "title": "Company",
       "description": "A supplier or distributor that sells to stores.",
@@ -174,14 +172,23 @@
       "longitude": "Longitude",
       "coordinates": "Location"
     },
-    "optional": "optional",
     "notProvided": "Not provided",
     "myLocation": "Use my location",
-    "review": "Review",
     "reviewTitle": "Check your details",
     "edit": "Edit",
     "setupCompany": "Set up your company",
-    "setupStore": "Set up your store"
+    "setupStore": "Set up your store",
+    "type": {
+      "title": "How will you use TezFarmo?",
+      "lead": "This decides what your account can do. Pick the one that describes your business.",
+      "legend": "Your side of the trade"
+    },
+    "setup": {
+      "lead": "Only what we need to create your organization. You can complete the rest of the profile later.",
+      "optionalTitle": "Optional details",
+      "emailHint": "A business address for order and invoice notifications."
+    },
+    "reviewText": "Check the details before we create the organization. The legal name and tax identifier are locked afterwards."
   },
   "auth": {
     "or": "or",
@@ -244,7 +251,10 @@
       "linking": "Connecting your Google account…",
       "linkFailedTitle": "Couldn't connect Google",
       "linkSignedOut": "Your session ended during the connection. Sign in and try again from your profile.",
-      "backToProfile": "Back to profile"
+      "backToProfile": "Back to profile",
+      "conflictTitle": "This email already has a password account",
+      "conflictText": "An account already exists for this address, created with a password. Sign in with your email and password, then connect Google from your profile.",
+      "signInWithPassword": "Sign in with email"
     },
     "login": {
       "sessionEnded": "You were signed out",
@@ -253,33 +263,24 @@
       "noAccount": "Don't have an account?",
       "createAccount": "Sign up",
       "lockoutHint": "5 attempts per 15 minutes (brute-force protection)",
-      "passwordPlaceholder": "Enter your password",
       "failed": "Couldn't sign in",
       "notVerifiedTitle": "Confirm your email first",
       "goVerify": "Enter your code or get a new one",
-      "retryIn": "Try again in {{seconds}} s"
+      "retryIn": "Try again in {{seconds}} s",
+      "title": "Sign in",
+      "lead": "Use the email and password of your TezFarmo account.",
+      "verifiedNext": "Your email is confirmed. Sign in to finish setting up your business."
     },
     "register": {
-      "typeLegend": "Choose your role in the system",
       "emailHint": "You'll sign in with this address. We'll send a confirmation link to it.",
       "submit": "Create account",
       "haveAccount": "Already have an account?",
       "signIn": "Log in",
-      "storeBadge": "100% free to use",
-      "companyBadge": "14-day trial",
-      "roles": {
-        "STORE": {
-          "title": "Store / Shop",
-          "description": "Buy wholesale with fast delivery and payment on terms"
-        },
-        "COMPANY": {
-          "title": "Company / Distributor",
-          "description": "Supplier of goods and wholesale seller"
-        }
-      },
       "namePlaceholder": "e.g. Jamshed Karimov",
       "terms": "I agree to the TezFarmo Terms of Use and Privacy Policy (electronic offer of the Republic of Tajikistan) and confirm my business identity.",
-      "failed": "Couldn't create the account"
+      "failed": "Couldn't create the account",
+      "title": "Create your account",
+      "lead": "Takes a minute. You tell us about your business after confirming your email."
     },
     "reset": {
       "back": "Back to sign in",
@@ -296,7 +297,13 @@
       "verifyCode": "Continue",
       "codeFailed": "Couldn't check the code",
       "codeResent": "If this address has an account, a new code is on its way.",
-      "changeEmail": "Use a different email"
+      "changeEmail": "Use a different email",
+      "codeTitle": "Enter the code",
+      "steps": {
+        "1": "Your email",
+        "2": "Code from the email",
+        "3": "New password"
+      }
     },
     "resetPassword": {
       "title": "Choose a new password",
@@ -318,48 +325,51 @@
       "alreadyVerified": "Already confirmed?",
       "sentTo": "We sent a 6-digit code to {{email}}. Enter it below to activate your account. Check spam if you don't see it.",
       "successTitle": "Email confirmed",
-      "successText": "You can sign in now. Taking you to the sign-in page…",
-      "goToLogin": "Sign in",
       "failedTitle": "Couldn't confirm your email",
       "resendSent": "If this address is waiting for confirmation, a new code is on its way.",
       "resendIn": "Send a new code in {{seconds}} s",
       "codeLabel": "Verification code",
       "codeHint": "The 6 digits from the email",
-      "codePlaceholder": "000000",
       "submit": "Verify email",
       "verifyIn": "Try again in {{seconds}} s",
       "codeInvalid": "That code isn't right or was already used. Check the email or send a new code.",
-      "codeExpired": "This code has expired. Send a new code."
+      "codeExpired": "This code has expired. Send a new code.",
+      "nextStep": "No code arriving, or wrong address?"
     },
-    "shell": {
-      "network": "B2B NETWORK",
-      "pillNetwork": "Companies and stores in one network",
-      "pillVerified": "Verified organizations only",
-      "support": "Support",
-      "heroBadge": "B2B platform for Tajikistan",
-      "heroLine1": "Direct supply",
-      "heroLine2": "between companies",
-      "heroAccent": "and stores",
-      "heroText": "Suppliers and stores work together directly: catalog and prices, orders, delivery and settlements in one place.",
-      "fastTitle": "Fast ordering",
-      "fastText": "Orders go straight to your partner supplier.",
-      "verifiedTitle": "Verified partners",
-      "verifiedText": "Every company and store is reviewed before trading.",
-      "joinText": "Companies and stores start trading once their organization is verified.",
-      "rights": "© {{year}} TezFarmo B2B Commerce Network. Dushanbe, Tajikistan.",
-      "cardBadge": "B2B PLATFORM",
-      "tabsLabel": "Sign in or register",
-      "tabLogin": "Log in",
-      "tabRegister": "Register",
-      "loginTitle": "Welcome to <b>TezFarmo</b>",
-      "loginSubtitle": "Direct trade between stores and suppliers",
-      "registerTitle": "Join <b>TezFarmo</b>",
-      "registerSubtitle": "Takes a minute. You complete the profile after verification.",
-      "orVia": "or via",
-      "flowTitle": "After registration",
-      "flowEmail": "Confirm email",
-      "flowReview": "Organization review",
-      "flowAccess": "Approval and access"
+    "aside": {
+      "statement": "TezFarmo connects suppliers and stores in Tajikistan: catalogue and prices, orders, delivery and settlements in one place.",
+      "bridge": "One agreement, agreed before the first order."
+    },
+    "journey": {
+      "label": "Setting up your account",
+      "position": "Step {{current}} of {{total}}",
+      "state": {
+        "done": "done",
+        "current": "current step",
+        "upcoming": "not started"
+      },
+      "steps": {
+        "account": {
+          "title": "Create account",
+          "hint": "Your name, email and a password."
+        },
+        "verify": {
+          "title": "Confirm email",
+          "hint": "Enter the 6-digit code we sent you."
+        },
+        "type": {
+          "title": "Business type",
+          "hint": "Are you a supplier or a store?"
+        },
+        "setup": {
+          "title": "Business details",
+          "hint": "The details we need to create your organization."
+        },
+        "review": {
+          "title": "Verification",
+          "hint": "Send your documents for review."
+        }
+      }
     }
   },
   "shell": {
@@ -377,7 +387,9 @@
     "organizations": "Organizations",
     "current": "Current",
     "newOrganization": "New organization",
-    "breadcrumb": "Breadcrumb"
+    "breadcrumb": "Breadcrumb",
+    "plannedGroup": "Planned",
+    "plannedGroupHint": "Not available yet"
   },
   "nav": {
     "sections": {
@@ -722,6 +734,14 @@
       "submit": "Documents submitted",
       "review": "Review by TezFarmo",
       "decision": "Decision"
+    },
+    "finalStep": "Last step of setup",
+    "afterTitle": "What happens after you submit",
+    "afterHelp": "Review is done by a TezFarmo administrator, not automatically.",
+    "after": {
+      "submit": "You upload the documents below and submit them for review.",
+      "review": "A TezFarmo administrator checks them. This usually takes one working day.",
+      "decision": "Once approved, your organization can trade. If something is wrong, we tell you why and you can submit again."
     }
   },
   "admin": {
@@ -889,6 +909,325 @@
       "uploaded": "Store image updated.",
       "removed": "Store image removed.",
       "readOnly": "Only the owner can change the store image."
+    }
+  },
+  "site": {
+    "backToSite": "Back to TezFarmo",
+    "availability": {
+      "live": "available",
+      "planned": "in development"
+    },
+    "nav": {
+      "label": "TezFarmo",
+      "menu": "Menu",
+      "home": "Home",
+      "howItWorks": "How it works",
+      "product": "Product",
+      "signIn": "Sign in",
+      "createAccount": "Create account"
+    },
+    "footer": {
+      "about": "A B2B platform for wholesale trade in Tajikistan, connecting supplier companies with the stores that buy from them.",
+      "siteTitle": "Site",
+      "accountTitle": "Account",
+      "rights": "© {{year}} TezFarmo B2B Commerce Network. Dushanbe, Tajikistan."
+    },
+    "modules": {
+      "organizations": {
+        "title": "Companies and stores",
+        "text": "Create your organization with its legal name, taxpayer number, contacts and address. One account can belong to more than one."
+      },
+      "verification": {
+        "title": "Organization verification",
+        "text": "Send your registration and tax documents once. A TezFarmo administrator reviews them, and you can see where the request stands."
+      },
+      "team": {
+        "title": "Team and roles",
+        "text": "Add the people you work with and give each one a role. What someone can do follows from that role, on the server as well as in the screens."
+      },
+      "areas": {
+        "title": "A workspace per role",
+        "text": "A supplier, a shop and a courier each open the screens their own work needs, not a single interface with most of it hidden."
+      },
+      "catalog": {
+        "title": "Catalogue and prices",
+        "text": "Products with their units, price lists that can differ per partner, and import from a spreadsheet instead of retyping."
+      },
+      "partnerships": {
+        "title": "Partnerships",
+        "text": "A store asks to work with a supplier using its code, or a supplier invites a store. Terms, including a credit limit, are written down and versioned."
+      },
+      "orders": {
+        "title": "Orders",
+        "text": "A store orders from its supplier’s catalogue. The supplier confirms it in full, confirms part of it, or declines, and both sides see the same order."
+      },
+      "inventory": {
+        "title": "Stock",
+        "text": "What a supplier has on hand, what is already reserved against confirmed orders, and what has run out."
+      },
+      "delivery": {
+        "title": "Delivery",
+        "text": "Group confirmed orders into runs, give them to a courier, and follow a delivery until it is handed over."
+      },
+      "finance": {
+        "title": "Payments and debt",
+        "text": "Charges and payments per partnership, with a running balance, so both sides agree on what is owed without reconciling notebooks."
+      },
+      "returns": {
+        "title": "Returns and disputes",
+        "text": "Send goods back and raise a disagreement, with the reason and the decision recorded against the order."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "text": "Each side is told when an order, a partnership or a set of terms changes, rather than finding out on the next phone call."
+      },
+      "reports": {
+        "title": "Reports",
+        "text": "Sales, outstanding debt and delivery figures over the period you choose."
+      },
+      "subscriptions": {
+        "title": "Subscription",
+        "text": "Plans and billing for supplier companies. Stores use TezFarmo at no charge."
+      }
+    },
+    "home": {
+      "title": "A simpler way for companies and stores to work together.",
+      "lead": "TezFarmo gives a supplier and a shop one shared record of the terms they agreed, the orders between them and the balance that follows.",
+      "seeHow": "See how it works",
+      "truths": {
+        "title": "Three things that are true the day you sign up.",
+        "relationships": {
+          "title": "Clear relationships",
+          "text": "Every company and store is checked by a TezFarmo administrator before it can trade. Nobody is on the other side of an order anonymously."
+        },
+        "oneFlow": {
+          "title": "One way in",
+          "text": "One account can hold a shop and a distribution company, with a switch between them rather than two sign-ins."
+        },
+        "history": {
+          "title": "Roles that match the job",
+          "text": "An owner, a manager, a warehouse keeper and a courier each get the screens their own work needs, enforced on the server."
+        }
+      },
+      "setup": {
+        "eyebrow": "Getting started",
+        "title": "Five short steps, one question at a time.",
+        "lead": "Creating an account asks for your name, your email and a password. Everything about the business comes after you have confirmed the address, and only what is needed to register the organization.",
+        "note": "We do not promise instant approval: a person reviews your documents, and the request shows you where it stands while they do."
+      },
+      "roadmap": {
+        "eyebrow": "Built in the open",
+        "title": "What works now, and what is next.",
+        "lead": "The platform is being built in phases. Rather than describe all of it as if it shipped, here is the state of each part.",
+        "more": "See what each part does"
+      },
+      "cta": {
+        "title": "Start with a verified organization.",
+        "lead": "Create your account, confirm your email, and tell us whether you supply shops or run one. The rest follows from there."
+      },
+      "statement": {
+        "problem": "Wholesale should not depend on remembering which chat the price was in.",
+        "answer": "Today a supplier and a shop keep the same arrangement in three places at once: a phone call, a notebook and a message thread. None of them agrees with the others, and the disagreement surfaces when the goods or the money are already in motion."
+      },
+      "openStatement": "One record. Both sides. No reconciling notebooks.",
+      "agreement": {
+        "eyebrow": "The agreement",
+        "title": "Nothing is ordered before the terms exist.",
+        "lead": "A supplier and a shop do not meet in a directory and start trading. One of them opens the relationship, the other accepts, and the terms they agree govern every order after that."
+      }
+    },
+    "how": {
+      "title": "From two strangers to a settled order.",
+      "lead": "TezFarmo follows the way wholesale already works in Tajikistan, and writes each step down. Here is that path, from both sides, with an honest note on which parts are in the product today.",
+      "partnership": {
+        "request": {
+          "title": "A store asks, using a code",
+          "text": "Every verified company has a short public code. A store enters it to ask for a partnership, which means a supplier is never approached by someone who could not find their code."
+        },
+        "invite": {
+          "title": "Or a supplier invites",
+          "text": "A company that already knows a shop can invite it directly, so an existing offline relationship does not have to be re-established from scratch."
+        },
+        "terms": {
+          "title": "Terms are written and kept",
+          "text": "Prices for that partner, payment terms and a credit limit are recorded, and a change makes a new version rather than quietly overwriting the old one."
+        }
+      },
+      "company": {
+        "title": "If you supply shops",
+        "subtitle": "Company, distributor, producer",
+        "lead": "You bring a catalogue and stock. TezFarmo brings you the orders and the record of what each shop owes.",
+        "steps": {
+          "create": {
+            "title": "Register the company",
+            "text": "Legal name, taxpayer number, phone, city and address. You become its owner."
+          },
+          "verify": {
+            "title": "Get verified",
+            "text": "Send the registration and tax documents. A TezFarmo administrator reviews them; trading opens when they are approved."
+          },
+          "catalog": {
+            "title": "Put up the catalogue",
+            "text": "Products and units, with price lists that can differ by partner. Import from a spreadsheet rather than typing it twice."
+          },
+          "partners": {
+            "title": "Take on stores",
+            "text": "Accept the stores that ask for you, or invite the ones you already serve, and set each one’s terms and credit limit."
+          },
+          "orders": {
+            "title": "Work the orders",
+            "text": "Orders arrive against your own prices. Confirm in full, confirm what you can supply, or decline with a reason."
+          },
+          "settle": {
+            "title": "Settle up",
+            "text": "Charges and payments build one balance per partner, so a disagreement about what is owed has a record to check."
+          }
+        },
+        "eyebrow": "The supplier"
+      },
+      "store": {
+        "title": "If you run a shop",
+        "subtitle": "Store, retail outlet",
+        "lead": "You bring the demand. TezFarmo brings you a known price before you order and a clear statement of what you owe.",
+        "steps": {
+          "create": {
+            "title": "Register the store",
+            "text": "Legal name, phone, city and address, and the location if you want to be found on a map."
+          },
+          "verify": {
+            "title": "Get verified",
+            "text": "The same document check as a supplier. It is what lets a company trust an order from you."
+          },
+          "find": {
+            "title": "Connect to a supplier",
+            "text": "Ask for a partnership with the supplier’s code, or accept the invitation one sends you."
+          },
+          "terms": {
+            "title": "Agree the terms",
+            "text": "Your prices, your payment terms and your credit limit are set before the first order, not argued about after it."
+          },
+          "order": {
+            "title": "Order from the catalogue",
+            "text": "Order at the prices agreed for you. You see whether it was confirmed in full, in part, or declined."
+          },
+          "debt": {
+            "title": "Know what you owe",
+            "text": "One running balance per supplier, with every charge and payment behind it."
+          }
+        },
+        "eyebrow": "The buyer"
+      },
+      "pipeline": {
+        "eyebrow": "One order",
+        "title": "The stages an order passes through.",
+        "lead": "Both sides see the same stage at the same time, which is the point: no one has to ring up to ask where an order has got to.",
+        "stages": {
+          "new": {
+            "title": "New",
+            "text": "The store has sent the order. The supplier has not answered yet."
+          },
+          "confirmed": {
+            "title": "Confirmed",
+            "text": "The supplier has accepted it, in full or in part, at the agreed prices."
+          },
+          "assembling": {
+            "title": "Assembling",
+            "text": "The goods are being picked and packed against the confirmed lines."
+          },
+          "transit": {
+            "title": "In transit",
+            "text": "A courier has the order and is on the way to the shop."
+          },
+          "delivered": {
+            "title": "Delivered",
+            "text": "The shop has the goods. The charge is on the balance between the two sides."
+          }
+        },
+        "disputed": "An order can also be disputed, when the two sides disagree about what arrived. That is recorded against the order with the reason and the outcome."
+      },
+      "cta": {
+        "title": "Which side are you on?",
+        "lead": "You pick that after confirming your email, and it decides what your account can do. Nothing to choose up front.",
+        "product": "See the full product"
+      },
+      "between": "The same agreement, read from the other side.",
+      "together": {
+        "title": "Where the two paths meet.",
+        "lead": "Both sides end up in the same record: the agreement they share, and everything that follows from it."
+      }
+    },
+    "product": {
+      "title": "What is in TezFarmo, and what is still coming.",
+      "lead": "The platform is being built in phases, and the honest version of this page separates the two. Everything below is specified; the marker says whether you can use it now.",
+      "for": {
+        "company": "For supplier companies",
+        "store": "For stores",
+        "both": "For both sides"
+      },
+      "live": {
+        "eyebrow": "In the product"
+      },
+      "planned": {
+        "title": "Specified, under construction.",
+        "lead": "These are designed and scheduled, not aspirations. They are not in the product yet, and nothing here pretends otherwise.",
+        "note": "We would rather you knew exactly what you are signing up for than discovered the gap after registering."
+      },
+      "cta": {
+        "title": "Get your organization verified now.",
+        "lead": "Verification takes a person’s review, so it is worth starting before you need the trading features.",
+        "how": "How it works"
+      }
+    },
+    "flow": {
+      "company": {
+        "title": "Company",
+        "role": "Supplier, distributor",
+        "brings": "Goods, prices and stock",
+        "needs": "Orders it can rely on"
+      },
+      "store": {
+        "title": "Store",
+        "role": "Retailer, shop",
+        "brings": "Demand and payment",
+        "needs": "A price it knows in advance"
+      },
+      "brings": "Brings",
+      "needs": "Needs",
+      "note": "The agreement is in the product today. The steps below it are being built.",
+      "steps": {
+        "partnership": {
+          "title": "Partnership",
+          "text": "Who works with whom, and on what terms"
+        },
+        "catalog": {
+          "title": "Catalogue and prices",
+          "text": "What is for sale, at the price agreed for you"
+        },
+        "order": {
+          "title": "Order",
+          "text": "Placed, then confirmed in full or in part"
+        },
+        "delivery": {
+          "title": "Delivery",
+          "text": "A run to the shop, followed to the door"
+        },
+        "ledger": {
+          "title": "Ledger",
+          "text": "One balance both sides agree on"
+        }
+      }
+    },
+    "media": {
+      "verificationNote": "The states a verification request moves through. A TezFarmo administrator decides; nothing here is automatic.",
+      "wholesale-floor": {
+        "alt": "A wholesale depot floor with stacked cases and pallets ready to be distributed to shops."
+      },
+      "shop-counter": {
+        "alt": "The counter of a neighbourhood shop, with stock on the shelves behind it."
+      },
+      "delivery-run": {
+        "alt": "Crates being carried from a loaded van into a shop during a delivery run."
+      }
     }
   }
 }

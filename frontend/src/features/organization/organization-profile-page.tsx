@@ -80,7 +80,7 @@ function ResponsiblePerson() {
   const owner = owners.data?.results[0];
   return (
     <div className="h-full rounded-2xl border bg-surface/70 p-4 dark:bg-subtle/40">
-      <p className="text-[0.625rem] font-bold uppercase tracking-[0.1em] text-primary">{t('orgProfile.responsible')}</p>
+      <p className="text-micro font-bold uppercase tracking-[0.1em] text-primary">{t('orgProfile.responsible')}</p>
       {owners.isPending ? (
         <Skeleton className="mt-3 h-10" />
       ) : owner ? (
@@ -88,12 +88,12 @@ function ResponsiblePerson() {
           <Avatar name={owner.full_name} size="md" />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold">{owner.full_name}</p>
-            <p className="truncate text-[0.75rem] text-muted-foreground">{t('roles.OWNER')}</p>
-            <p className="truncate text-[0.75rem] text-muted-foreground">{owner.email}</p>
+            <p className="truncate text-caption text-muted-foreground">{t('roles.OWNER')}</p>
+            <p className="truncate text-caption text-muted-foreground">{owner.email}</p>
           </div>
         </div>
       ) : (
-        <p className="mt-3 text-[0.8125rem] text-muted-foreground">—</p>
+        <p className="mt-3 text-label text-muted-foreground">—</p>
       )}
     </div>
   );
@@ -317,14 +317,14 @@ export function OrganizationProfilePage() {
                     <li key={document.id} className="flex items-center gap-3 rounded-xl border bg-subtle/40 px-3 py-2.5">
                       <FileText className="size-4 shrink-0 text-danger" aria-hidden="true" />
                       <div className="min-w-0">
-                        <p className="truncate text-[0.8125rem] font-medium">{t(`verification.docTypes.${document.doc_type}`)}</p>
-                        <p className="truncate text-[0.75rem] text-muted-foreground">{document.file.display_name}</p>
+                        <p className="truncate text-label font-medium">{t(`verification.docTypes.${document.doc_type}`)}</p>
+                        <p className="truncate text-caption text-muted-foreground">{document.file.display_name}</p>
                       </div>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="mt-4 text-[0.8125rem] text-muted-foreground">{t('orgProfile.documentsEmpty')}</p>
+                <p className="mt-4 text-label text-muted-foreground">{t('orgProfile.documentsEmpty')}</p>
               )}
               <Button asChild variant="secondary" block className="mt-4">
                 <Link to={`/${area}/settings/verification`}>{t('orgProfile.openVerification')}</Link>
@@ -351,7 +351,7 @@ export function OrganizationProfilePage() {
             <Card className="p-5 sm:p-6">
               <SectionHeader icon={Hash} title={t('orgProfile.publicCode')} />
               <p className="mt-3 font-data text-2xl font-semibold tracking-[0.3em] text-primary">{data.public_code}</p>
-              <p className="mt-2 text-[0.8125rem] text-muted-foreground">{t('orgProfile.publicCodeHint')}</p>
+              <p className="mt-2 text-label text-muted-foreground">{t('orgProfile.publicCodeHint')}</p>
             </Card>
           )}
 

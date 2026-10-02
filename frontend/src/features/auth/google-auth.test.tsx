@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { routes } from '@/app/router';
 import { useSessionStore } from '@/shared/auth/session-store';
@@ -90,6 +90,7 @@ describe('Continue with Google (F-1.9)', () => {
     expect(document.body.textContent).not.toContain(CODE);
   });
 
+  // Phase D: a conflict is not a failure, so it is a warning that names the cause and offers the route that works.
   it('explains an existing password account and offers only the way back to sign in', async () => {
     mockApi([
       { path: '/meta', body: META },
@@ -97,11 +98,12 @@ describe('Continue with Google (F-1.9)', () => {
     ]);
     const { current } = renderRoutes(routes, `/auth/google/callback?state=${STATE}&code=${CODE}`);
 
-    const alert = await screen.findByRole('alert');
-    expect(within(alert).getByText("Couldn't sign in with Google")).toBeInTheDocument();
-    expect(within(alert).getByText('An account with this email already exists. Sign in with your email and password.')).toBeInTheDocument();
+    // The waiting row is also role="status", so wait for the outcome itself rather than for the first status.
+    const title = await screen.findByText('This email already has a password account');
+    expect(title.closest('[role="status"]')).toBeInTheDocument();
+    expect(screen.getByText(/already exists for this address, created with a password/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Try Google again' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute('href', '/login');
+    expect(screen.getByRole('link', { name: 'Sign in with email' })).toHaveAttribute('href', '/login');
     expect(current.location?.pathname).toBe('/auth/google/callback');
     expect(useSessionStore.getState().accessToken).toBeNull();
   });

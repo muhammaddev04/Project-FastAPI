@@ -9,18 +9,12 @@ const OPTIONS: { type: OrgType; icon: typeof Building2; key: 'company' | 'store'
   { type: 'STORE', icon: Store, key: 'store' },
 ];
 
-/** Company vs Store choice on /welcome: shared choice tiles with the TZ description and points of each side. */
-export function OrgTypeChoice({
-  selected,
-  field,
-  legend,
-  compact = false,
-}: {
-  selected: OrgType;
-  field: UseFormRegisterReturn;
-  legend: string;
-  compact?: boolean;
-}) {
+/**
+ * Company vs Store, the one question of step 3: shared choice tiles with the TZ description and the two or
+ * three things each side does on the platform. The `compact` prop that hid the points is gone; it existed for
+ * the registration form, which no longer asks this.
+ */
+export function OrgTypeChoice({ selected, field, legend }: { selected: OrgType; field: UseFormRegisterReturn; legend: string }) {
   const { t } = useTranslation();
   return (
     <ChoiceGroup legend={legend} className="sm:grid-cols-2">
@@ -31,20 +25,17 @@ export function OrgTypeChoice({
           value={type}
           selected={selected === type}
           icon={icon}
-          entity={key}
           title={t(`onboarding.${key}.title`)}
           description={t(`onboarding.${key}.description`)}
         >
-          {compact ? null : (
-            <ul className="space-y-1.5 border-t pt-3 text-[0.8125rem] text-muted-foreground">
-              {(t(`onboarding.${key}.points`, { returnObjects: true }) as string[]).map((point) => (
-                <li key={point} className="flex gap-2">
-                  <Check className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                  {point}
-                </li>
-              ))}
-            </ul>
-          )}
+          <ul className="space-y-1.5 border-t pt-3 text-label text-muted-foreground">
+            {(t(`onboarding.${key}.points`, { returnObjects: true }) as string[]).map((point) => (
+              <li key={point} className="flex gap-2">
+                <Check className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
+                {point}
+              </li>
+            ))}
+          </ul>
         </ChoiceCard>
       ))}
     </ChoiceGroup>

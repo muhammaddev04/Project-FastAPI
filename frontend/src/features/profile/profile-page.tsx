@@ -15,7 +15,7 @@ import type { Me, Membership } from '@/shared/auth/types';
 import { setLanguage } from '@/shared/i18n';
 import { formatDate } from '@/shared/lib/datetime';
 import { ImagePicker } from '@/shared/images/image-picker';
-import { Alert, Avatar, Badge, Button, Card, FormField, Input, MetaChip, Pill, ProfileHeader, SectionHeader, Select, StatCard, StatusBadge } from '@/shared/ui';
+import { Alert, Avatar, Badge, Button, Card, FormField, Input, MetaChip, ProfileHeader, SectionHeader, Select, StatCard, StatusBadge } from '@/shared/ui';
 import { ConnectedAccounts } from './connected-accounts';
 import { useGoogleLinkState } from './google-link-api';
 import { PasswordChangeCard } from './password-change-card';
@@ -50,7 +50,7 @@ function MembershipsCard({ me }: { me: Me }) {
       <SectionHeader icon={Building2} title={t('profile.memberships.title')} subtitle={t('profile.memberships.subtitle')} />
       {memberships.length === 0 ? (
         <div className="mt-4 space-y-3">
-          <p className="text-[0.8125rem] text-muted-foreground">{t('profile.memberships.empty')}</p>
+          <p className="text-label text-muted-foreground">{t('profile.memberships.empty')}</p>
           <Button asChild variant="secondary">
             <Link to={homePath(me, activeOrgId)}>{t('profile.memberships.create')}</Link>
           </Button>
@@ -143,7 +143,6 @@ export function ProfilePage({ me }: { me: Me }) {
       <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
         <ProfileHeader
           mark={<Avatar name={me.full_name} size="xl" verified={me.email_verified} src={me.avatar_url} alt={t('images.avatar.alt', { name: me.full_name })} />}
-          eyebrow={<Pill>{t('profile.eyebrow')}</Pill>}
           title={me.full_name}
           subtitle={t('profile.subtitle')}
           chips={

@@ -13,7 +13,7 @@ export function SupportLink({ className, tone = 'default' }: { className?: strin
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'inline-flex items-center gap-1.5 text-[0.8125rem] font-medium transition-colors',
+        'inline-flex items-center gap-1.5 text-label font-medium transition-colors',
         tone === 'inverted' ? 'text-sidebar-muted hover:text-sidebar-foreground' : 'text-primary hover:text-primary-hover',
         className,
       )}
@@ -25,8 +25,8 @@ export function SupportLink({ className, tone = 'default' }: { className?: strin
   );
 }
 
-/** Header form of the support link: round icon button (lifts on hover) with the handle on wide screens. */
-export function SupportButton({ className, large = false }: { className?: string; large?: boolean }) {
+/** Header form of the support link: round icon button with the handle on wide screens. */
+export function SupportButton({ className }: { className?: string }) {
   const { t } = useTranslation();
   return (
     <a
@@ -34,12 +34,12 @@ export function SupportButton({ className, large = false }: { className?: string
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${t('common.support')} @${SUPPORT_TELEGRAM}`}
-      className={cn('group items-center gap-2.5 rounded-full text-[0.875rem] font-medium text-foreground/85 transition-colors hover:text-foreground', className)}
+      className={cn('group items-center gap-2.5 rounded-full text-body font-medium text-foreground/85 transition-colors hover:text-foreground', className)}
     >
-      <span className={cn('flex size-10 items-center justify-center rounded-full border bg-surface/50 text-primary transition-[transform,border-color] duration-200 group-hover:-translate-y-0.5 group-hover:border-primary/50', large && '2xl:size-11')}>
+      <span className="flex size-10 items-center justify-center rounded-full border bg-surface/50 text-primary transition-colors duration-base group-hover:border-primary/50">
         <Send className="size-4" aria-hidden="true" />
       </span>
-      <span className={cn('hidden lg:inline', large && '2xl:text-[1.125rem]')}>@{SUPPORT_TELEGRAM}</span>
+      <span className="hidden lg:inline">@{SUPPORT_TELEGRAM}</span>
     </a>
   );
 }

@@ -3,11 +3,17 @@ import type { HTMLAttributes } from 'react';
 import { cn } from '@/shared/lib/cn';
 
 /**
- * Status chip (DESIGN.md): the only pill shape in the system — uppercase caption type with an optional beacon dot.
- * Order-status tones (P07) come from the `status-*` tokens.
+ * Status chip (DESIGN.md, revised in Phase C5). The one sanctioned pill shape in the product.
+ *
+ * It no longer shouts. Uppercase, bold and 0.06em tracking made a status the loudest thing in a table row,
+ * competing with the data it described, and uppercase is measurably slower to read in Cyrillic because it
+ * removes the ascender and descender cues the eye uses for word shape. Sentence case at medium weight stays
+ * legible at 11px and lets the row read as a row.
+ *
+ * Order-pipeline tones (P07) come from the `status-*` tokens and are defined here ready for that phase.
  */
 const badgeVariants = cva(
-  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[0.625rem] font-bold uppercase leading-[0.875rem] tracking-[0.06em] [&_svg]:size-3',
+  'inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-micro font-medium [&_svg]:size-3',
   {
     variants: {
       tone: {

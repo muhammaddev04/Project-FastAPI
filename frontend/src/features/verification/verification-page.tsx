@@ -1,4 +1,4 @@
-import { Check, CircleDashed, Clock3, FileCheck2, FileText, FileUp, ShieldCheck, XCircle } from 'lucide-react';
+import { Check, CircleDashed, ClipboardList, Clock3, FileCheck2, FileText, FileUp, ShieldCheck, XCircle } from 'lucide-react';
 import { useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAreaContext } from '@/app/shell/use-area-context';
@@ -73,21 +73,21 @@ function DocumentSlot({
           <div className="min-w-0">
           <p className="text-sm font-medium">
             {t(`verification.docTypes.${docType}`)}
-            {optional ? <span className="ml-1.5 text-[0.75rem] font-normal text-muted-foreground">{t('verification.optional')}</span> : null}
+            {optional ? <span className="ml-1.5 text-caption font-normal text-muted-foreground">{t('verification.optional')}</span> : null}
           </p>
           {value ? (
-            <p className="mt-0.5 flex items-center gap-1.5 truncate text-[0.8125rem] text-muted-foreground">
+            <p className="mt-0.5 flex items-center gap-1.5 truncate text-label text-muted-foreground">
               <FileCheck2 className="size-3.5 shrink-0 text-success" aria-hidden="true" />
               <span className="truncate">{value.display_name}</span> · {formatBytes(value.size_bytes)}
             </p>
           ) : (
-            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">{t('verification.fileHint')}</p>
+            <p className="mt-0.5 text-label text-muted-foreground">{t('verification.fileHint')}</p>
           )}
           </div>
         </div>
         <label
           htmlFor={inputId}
-          className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-primary/40 bg-surface/60 px-3.5 text-[0.8125rem] font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/5"
+          className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-primary/40 bg-surface/60 px-3.5 text-label font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/5"
         >
           {upload.isPending ? <Spinner className="size-4" label={t('verification.uploading')} /> : <FileUp className="size-4" aria-hidden="true" />}
           {value ? t('verification.replaceFile') : t('verification.chooseFile')}
@@ -103,7 +103,7 @@ function DocumentSlot({
         />
       </div>
       {problem ? (
-        <p role="alert" className="mt-2 text-[0.8125rem] text-danger">
+        <p role="alert" className="mt-2 text-label text-danger">
           {problem}
         </p>
       ) : null}
@@ -164,7 +164,16 @@ export function VerificationPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow={t('verification.eyebrow')} title={t('verification.title')} description={t('verification.why')} />
+      <PageHeader title={t('verification.title')} description={t('verification.why')}>
+        {/*
+         * Phase D: this page is the last step of the journey that starts at /register, and for an organization
+         * that has just been created it is the only thing standing between the owner and a working account. It
+         * says so, so arriving here does not read as having been dropped into a settings tab.
+         */}
+        {status === 'NOT_SUBMITTED' ? (
+          <p className="text-caption font-semibold uppercase tracking-[0.08em] text-primary-ink">{t('verification.finalStep')}</p>
+        ) : null}
+      </PageHeader>
       <SettingsTabs />
 
       <Card className="overflow-hidden">
@@ -177,12 +186,12 @@ export function VerificationPage() {
               <p className="font-display text-base font-bold">{t('verification.statusLabel')}</p>
               <StatusBadge kind="verification" value={status} />
             </div>
-            <p className="mt-2 text-[0.875rem] leading-relaxed text-muted-foreground">{t(`verification.explain.${status}`)}</p>
+            <p className="mt-2 text-body leading-relaxed text-muted-foreground">{t(`verification.explain.${status}`)}</p>
             {status === 'APPROVED' ? (
-              <p className="mt-1 text-[0.8125rem] text-muted-foreground">{t('verification.verifiedAt', { date: date(data.verified_at) })}</p>
+              <p className="mt-1 text-label text-muted-foreground">{t('verification.verifiedAt', { date: date(data.verified_at) })}</p>
             ) : null}
             {request ? (
-              <p className="mt-1 text-[0.8125rem] text-muted-foreground">{t('verification.submittedAt', { date: date(request.submitted_at) })}</p>
+              <p className="mt-1 text-label text-muted-foreground">{t('verification.submittedAt', { date: date(request.submitted_at) })}</p>
             ) : null}
           </div>
         </div>
@@ -191,25 +200,41 @@ export function VerificationPage() {
             <li key={step.key} className="flex items-center gap-2.5 px-3 py-3.5 sm:px-6" aria-current={step.current ? 'step' : undefined}>
               <span
                 className={cn(
-                  'flex size-7 shrink-0 items-center justify-center rounded-full border text-[0.75rem] font-bold',
+                  'flex size-7 shrink-0 items-center justify-center rounded-full border text-caption font-bold',
                   step.done
                     ? 'border-primary bg-primary text-primary-foreground'
                     : step.current
                       ? status === 'REJECTED'
                         ? 'border-danger bg-danger-soft text-danger'
-                        : 'animate-pulse-ring border-primary bg-primary/10 text-primary-ink'
+                        : ' border-primary bg-primary/10 text-primary-ink'
                       : 'bg-surface text-muted-foreground',
                 )}
               >
                 {step.done ? <Check className="size-3.5" aria-hidden="true" /> : index + 1}
               </span>
-              <span className={cn('min-w-0 text-[0.75rem] font-semibold leading-tight sm:text-[0.8125rem]', step.done || step.current ? 'text-foreground' : 'text-muted-foreground')}>
+              <span className={cn('min-w-0 text-caption font-semibold leading-tight sm:text-label', step.done || step.current ? 'text-foreground' : 'text-muted-foreground')}>
                 {t(`verification.steps.${step.key}`)}
               </span>
             </li>
           ))}
         </ol>
       </Card>
+
+      {status === 'NOT_SUBMITTED' ? (
+        <Card className="p-5 sm:p-6">
+          <SectionHeader icon={ClipboardList} title={t('verification.afterTitle')} subtitle={t('verification.afterHelp')} />
+          <ol className="mt-4 space-y-3">
+            {(['submit', 'review', 'decision'] as const).map((key, index) => (
+              <li key={key} className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-caption font-bold text-primary-ink">
+                  {index + 1}
+                </span>
+                <span className="min-w-0 text-body leading-relaxed text-muted-foreground">{t(`verification.after.${key}`)}</span>
+              </li>
+            ))}
+          </ol>
+        </Card>
+      ) : null}
 
       {status === 'REJECTED' && request?.rejection_reason ? (
         <Alert tone="danger" title={t('verification.rejectedTitle')}>
@@ -264,8 +289,8 @@ export function VerificationPage() {
               <li key={document.id} className="flex items-center gap-3 rounded-xl border bg-subtle/40 px-3.5 py-3">
                 <FileText className="size-4 shrink-0 text-primary" aria-hidden="true" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[0.8125rem] font-semibold">{t(`verification.docTypes.${document.doc_type}`)}</span>
-                  <span className="block truncate text-[0.75rem] text-muted-foreground">
+                  <span className="block truncate text-label font-semibold">{t(`verification.docTypes.${document.doc_type}`)}</span>
+                  <span className="block truncate text-caption text-muted-foreground">
                     {document.file.display_name} · {formatBytes(document.file.size_bytes)}
                   </span>
                 </span>
