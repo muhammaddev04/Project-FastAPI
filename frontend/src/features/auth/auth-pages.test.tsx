@@ -20,8 +20,8 @@ function apiError(code: string, details: Record<string, unknown> = {}) {
   return { error: { code, message: code, details, request_id: 'r' } };
 }
 
+/** Step 1 asks for the account and nothing else: no role, no organization name (Phase D). */
 async function fillRegistration(email = '  Nigina@Example.TJ ') {
-  await userEvent.type(screen.getByLabelText(/store name/i), 'Corner Market');
   await userEvent.type(screen.getByLabelText(/full name/i), 'Nigina Karimova');
   await userEvent.type(screen.getByLabelText(/^email/i), email);
   await userEvent.type(screen.getByLabelText(/create a password/i), 'Dushanbe2026x');
@@ -42,15 +42,28 @@ describe('auth screens (CR-001: email)', () => {
     it('signs in with email and links to registration and forgot-password', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
-      expect(screen.getByRole('heading', { name: 'Welcome to TezFarmo' })).toBeInTheDocument();
-      const tabs = screen.getByRole('navigation', { name: 'Sign in or register' });
-      expect(within(tabs).getByRole('link', { name: 'Log in' })).toHaveAttribute('aria-current', 'page');
-      expect(within(tabs).getByRole('link', { name: 'Register' })).toHaveAttribute('href', '/register');
+      expect(screen.getByRole('heading', { level: 1, name: 'Sign in' })).toBeInTheDocument();
+      // Phase D: registration is a five-step journey, not the other half of this screen, so there is no tab plate.
+      expect(screen.queryByRole('navigation', { name: 'Sign in or register' })).not.toBeInTheDocument();
       expect(screen.getByLabelText('Email')).toHaveAttribute('type', 'email');
       expect(screen.queryByLabelText(/phone/i)).not.toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/register');
       expect(screen.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute('href', '/forgot-password');
-      expect(screen.getByRole('link', { name: /support/i })).toHaveAttribute('href', 'https://t.me/tezfarmo_support');
+      // One support link is shown per viewport (the aside on desktop, the page footer on phones).
+      expect(screen.getAllByRole('link', { name: /support/i })[0]).toHaveAttribute('href', 'https://t.me/tezfarmo_support');
+    });
+
+    it('states the lockout rule only once an attempt has actually been refused', async () => {
+      mockApi([
+        { path: '/meta', body: { ...META_DISABLED, auth: { ...META_DISABLED.auth, password_login: true } } },
+        { method: 'POST', path: '/auth/login', status: 429, body: apiError('rate_limited', { retry_after: 90 }) },
+      ]);
+      renderRoutes(routes, '/login');
+      expect(screen.queryByText(/brute-force protection/i)).not.toBeInTheDocument();
+      await userEvent.type(screen.getByLabelText('Email'), 'nigina@example.tj');
+      await userEvent.type(screen.getByLabelText('Password'), 'Dushanbe2026x');
+      await userEvent.click(await screen.findByRole('button', { name: 'Login now' }));
+      expect(await screen.findByText(/brute-force protection/i)).toBeInTheDocument();
     });
 
     it('explains that sign-in is not enabled and sends no credentials', async () => {
@@ -97,31 +110,42 @@ describe('auth screens (CR-001: email)', () => {
   });
 
   describe('registration', () => {
-    it('is one short screen: role, organization, name, email, password, terms — no phone or SMS', () => {
+    it('is step 1 of 5 and asks only for the account: name, email, password, terms', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      expect(screen.getByRole('heading', { name: 'Join TezFarmo' })).toBeInTheDocument();
-      expect(screen.getByRole('radio', { name: /^store/i })).toBeChecked();
-      expect(screen.getByLabelText(/store name/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1, name: 'Create your account' })).toBeInTheDocument();
+      expect(screen.getByText('Step 1 of 5')).toBeInTheDocument();
       expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^email/i)).toHaveAttribute('type', 'email');
       expect(screen.getByLabelText(/create a password/i)).toBeInTheDocument();
-      expect(screen.getAllByRole('textbox')).toHaveLength(3);
+      expect(screen.getByRole('checkbox')).toBeInTheDocument();
+      // The business questions moved to steps 3 and 4, after the address is confirmed.
+      expect(screen.queryByRole('radio', { name: /company|store/i })).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/store name|company name/i)).not.toBeInTheDocument();
+      expect(screen.getAllByRole('textbox')).toHaveLength(2);
       expect(screen.queryByLabelText(/mobile|phone|repeat the password|preferred language/i)).not.toBeInTheDocument();
-      expect(screen.getByText('Organization review')).toBeInTheDocument();
     });
 
-    it('names the organization field after the chosen role', async () => {
+    it('names the five steps of the journey', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      await userEvent.click(screen.getByRole('radio', { name: /^company/i }));
-      expect(screen.getByLabelText(/company name/i)).toBeInTheDocument();
+      const [rail] = screen.getAllByRole('list', { name: 'Setting up your account' });
+      const steps = within(rail!).getAllByRole('listitem');
+      expect(steps.map((step) => step.textContent)).toEqual([
+        expect.stringContaining('Create account'),
+        expect.stringContaining('Confirm email'),
+        expect.stringContaining('Business type'),
+        expect.stringContaining('Business details'),
+        expect.stringContaining('Verification'),
+      ]);
+      expect(steps[0]).toHaveAttribute('aria-current', 'step');
+      expect(steps[1]).not.toHaveAttribute('aria-current');
     });
 
     it('validates fields as the user leaves them', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      await userEvent.click(screen.getByLabelText(/store name/i));
+      await userEvent.click(screen.getByLabelText(/full name/i));
       await userEvent.tab();
       expect(await screen.findByText('Enter at least 2 characters.')).toBeInTheDocument();
       await userEvent.type(screen.getByLabelText(/^email/i), 'nope');
@@ -176,6 +200,7 @@ describe('auth screens (CR-001: email)', () => {
   });
 
   describe('verify email', () => {
+    // `/verify-email` is the pre-Phase-D address of step 2 and still renders it, for links already sent out.
     it('asks for the 6-digit code when opened without state', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/verify-email');
@@ -206,7 +231,7 @@ describe('auth screens (CR-001: email)', () => {
   });
 
   describe('email registration flow (IAM-001, IAM-002, P01 §6)', () => {
-    it('registers with the IAM-001 fields plus the onboarding intent and continues to /verify-email', async () => {
+    it('registers with the IAM-001 fields only and continues to step 2', async () => {
       const { calls } = mockApi([
         { path: '/meta', body: META_EMAIL },
         { method: 'POST', path: '/auth/register', status: 202 },
@@ -215,23 +240,52 @@ describe('auth screens (CR-001: email)', () => {
       await fillRegistration();
       await userEvent.click(await screen.findByRole('button', { name: 'Create account' }));
 
-      await waitFor(() => expect(current.location?.pathname).toBe('/verify-email'));
+      await waitFor(() => expect(current.location?.pathname).toBe('/register/verify'));
       const [register] = nonMetaCalls(calls);
       expect(register).toMatchObject({ method: 'POST', path: '/api/v1/auth/register' });
+      // Phase D: no org_type / org_name. Both are optional on RegisterRequest, and the Company/Store question
+      // is step 3, where the answer creates the organization instead of being parked on the user record.
       expect(register!.body).toEqual({
         email: 'nigina@example.tj',
         password: 'Dushanbe2026x',
         full_name: 'Nigina Karimova',
         language: 'en',
-        // P01 §10 onboarding intent: remembered by the server, never an organization by itself.
-        org_type: 'STORE',
-        org_name: 'Corner Market',
       });
-      expect(await screen.findByText(/we sent a 6-digit code to nigina@example\.tj/i)).toBeInTheDocument();
+      // The destination is named, with the local part masked.
+      expect(await screen.findByText(/we sent a 6-digit code to n••••a@example\.tj/i)).toBeInTheDocument();
+      expect(screen.getByText('Step 2 of 5')).toBeInTheDocument();
+      expect(screen.queryByText(/nigina@example\.tj/)).not.toBeInTheDocument();
       // Registration has just sent an email: the 60 s resend cooldown is already running.
       expect(screen.getByRole('button', { name: /send a new code in (59|60) s/i })).toBeDisabled();
-      expect(screen.getByLabelText(/^email/i)).toHaveValue('nigina@example.tj');
       expect(screen.getByLabelText('Verification code')).toHaveValue('');
+    });
+
+    it('verifies the handed-over address without asking for it again, then hands it to /login', async () => {
+      const { calls } = mockApi([
+        { path: '/meta', body: META_EMAIL },
+        { method: 'POST', path: '/auth/register', status: 202 },
+        { method: 'POST', path: '/auth/email/verify', status: 204 },
+      ]);
+      const { current } = renderRoutes(routes, '/register');
+      await fillRegistration();
+      await userEvent.click(await screen.findByRole('button', { name: 'Create account' }));
+      await waitFor(() => expect(current.location?.pathname).toBe('/register/verify'));
+
+      // Step 2 asks for the code and nothing else.
+      const code = await screen.findByLabelText('Verification code');
+      expect(screen.queryByLabelText(/^email/i)).not.toBeInTheDocument();
+      await userEvent.type(code, '482913');
+      await userEvent.click(screen.getByRole('button', { name: 'Verify email' }));
+
+      await waitFor(() => expect(current.location?.pathname).toBe('/login'));
+      expect(nonMetaCalls(calls)[1]).toMatchObject({
+        path: '/api/v1/auth/email/verify',
+        body: { email: 'nigina@example.tj', code: '482913' },
+      });
+      // No session is issued by verification, so /login is the honest next step: it opens confirmed and prefilled.
+      expect(await screen.findByText('Email confirmed')).toBeInTheDocument();
+      expect(screen.getByText(/sign in to finish setting up your business/i)).toBeInTheDocument();
+      expect(screen.getByLabelText('Email')).toHaveValue('nigina@example.tj');
     });
 
     it('sends one registration at a time', async () => {
@@ -292,11 +346,12 @@ describe('auth screens (CR-001: email)', () => {
         { path: '/meta', body: META_EMAIL },
         { method: 'POST', path: '/auth/email/verify', status: 204 },
       ]);
-      const { current } = renderRoutes(routes, '/verify-email');
+      const { current } = renderRoutes(routes, '/register/verify');
       await userEvent.type(screen.getByLabelText(/^email/i), ' Nigina@Example.TJ');
       await userEvent.type(screen.getByLabelText('Verification code'), '482913');
       await userEvent.click(await screen.findByRole('button', { name: 'Verify email' }));
 
+      await waitFor(() => expect(current.location?.pathname).toBe('/login'), REDIRECT_TIMEOUT);
       expect(await screen.findByText('Email confirmed')).toBeInTheDocument();
       expect(nonMetaCalls(calls)).toEqual([
         expect.objectContaining({
@@ -305,9 +360,6 @@ describe('auth screens (CR-001: email)', () => {
           body: { email: 'nigina@example.tj', code: '482913' },
         }),
       ]);
-      expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/login');
-      await waitFor(() => expect(current.location?.pathname).toBe('/login'), REDIRECT_TIMEOUT);
-      expect(nonMetaCalls(calls)).toHaveLength(1);
     });
 
     it('accepts digits only, at most six, even when pasted with other characters', async () => {
@@ -491,9 +543,9 @@ describe('auth screens (CR-001: email)', () => {
       expect(await screen.findByText('Confirm your email first')).toBeInTheDocument();
       expect(screen.getByText('Confirm your email before signing in.')).toBeInTheDocument();
       await userEvent.click(screen.getByRole('link', { name: 'Enter your code or get a new one' }));
-      await waitFor(() => expect(current.location?.pathname).toBe('/verify-email'));
-      // The login card animates out first; then the verify page opens with the address filled in.
-      expect(await screen.findByDisplayValue('nigina@example.tj', {}, REDIRECT_TIMEOUT)).toBeInTheDocument();
+      await waitFor(() => expect(current.location?.pathname).toBe('/register/verify'));
+      // Step 2 opens knowing the address, so it asks for the code only and can resend straight away.
+      expect(await screen.findByText(/n••••a@example\.tj/, {}, REDIRECT_TIMEOUT)).toBeInTheDocument();
       expect(await screen.findByRole('button', { name: 'Send a new code' })).toBeEnabled();
     });
 
