@@ -21,7 +21,10 @@ const coordinate = (min: number, max: number) =>
   z
     .string()
     .trim()
-    .refine((value) => !value || (/^-?\d{1,3}(\.\d{1,6})?$/.test(value) && Number(value) >= min && Number(value) <= max), 'validation.coordinate');
+    .refine(
+      (value) => !value || (/^-?\d{1,3}(\.\d{1,6})?$/.test(value) && Number(value) >= min && Number(value) <= max),
+      'validation.coordinate',
+    );
 
 /** P02 §1: the same rules the server applies (it validates again). */
 const schema = z
@@ -29,12 +32,18 @@ const schema = z
     type: z.enum(['COMPANY', 'STORE']),
     name: z.string().trim().min(2, 'validation.nameTooShort').max(200, 'validation.tooLong'),
     legal_name: z.string().trim().min(2, 'validation.nameTooShort').max(255, 'validation.tooLong'),
-    tax_identifier: z.string().trim().refine((value) => !value || /^\d{9,12}$/.test(value), 'validation.taxIdentifier'),
+    tax_identifier: z
+      .string()
+      .trim()
+      .refine((value) => !value || /^\d{9,12}$/.test(value), 'validation.taxIdentifier'),
     phone: z
       .string()
       .trim()
       .refine((value) => /^\+[1-9]\d{7,14}$/.test(value.replace(/[\s()-]/g, '')), 'validation.phone'),
-    email: z.string().trim().refine((value) => !value || z.string().email().safeParse(value).success, 'validation.email'),
+    email: z
+      .string()
+      .trim()
+      .refine((value) => !value || z.string().email().safeParse(value).success, 'validation.email'),
     city: z.string().trim().min(2, 'validation.nameTooShort').max(100, 'validation.tooLong'),
     address: z.string().trim().min(3, 'validation.addressTooShort').max(500, 'validation.tooLong'),
     latitude: coordinate(-90, 90),
@@ -176,15 +185,22 @@ export function BusinessSetupPage({ me, type }: { me: Me; type: OrgType }) {
 
   return (
     <AuthFrame step="setup" width="wide" actions={<AccountMenu me={me} compact />}>
-      <AuthPage
-        title={isCompany ? t('onboarding.setupCompany') : t('onboarding.setupStore')}
-        lead={t('onboarding.setup.lead')}
-      >
+      <AuthPage title={isCompany ? t('onboarding.setupCompany') : t('onboarding.setupStore')} lead={t('onboarding.setup.lead')}>
         <AuthForm onSubmit={toConfirm}>
-          {field('name', isCompany ? t('onboarding.companyName') : t('onboarding.storeName'), { autoComplete: 'organization', maxLength: 200 }, t('onboarding.nameHint'))}
+          {field(
+            'name',
+            isCompany ? t('onboarding.companyName') : t('onboarding.storeName'),
+            { autoComplete: 'organization', maxLength: 200 },
+            t('onboarding.nameHint'),
+          )}
           {field('legal_name', t('onboarding.fields.legalName'), { maxLength: 255 }, t('onboarding.fields.legalNameHint'))}
           {isCompany
-            ? field('tax_identifier', t('onboarding.fields.taxIdentifier'), { inputMode: 'numeric', maxLength: 12 }, t('onboarding.fields.taxIdentifierHint'))
+            ? field(
+                'tax_identifier',
+                t('onboarding.fields.taxIdentifier'),
+                { inputMode: 'numeric', maxLength: 12 },
+                t('onboarding.fields.taxIdentifierHint'),
+              )
             : null}
           {field('phone', t('onboarding.fields.phone'), { type: 'tel', autoComplete: 'tel', maxLength: 20 })}
           <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
@@ -200,14 +216,27 @@ export function BusinessSetupPage({ me, type }: { me: Me; type: OrgType }) {
               className="flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left text-body font-semibold"
             >
               {t('onboarding.setup.optionalTitle')}
-              <ChevronDown className={showOptional ? 'size-4 rotate-180 transition-transform' : 'size-4 transition-transform'} aria-hidden="true" />
+              <ChevronDown
+                className={showOptional ? 'size-4 rotate-180 transition-transform' : 'size-4 transition-transform'}
+                aria-hidden="true"
+              />
             </button>
             {showOptional ? (
               <div className="space-y-5 border-t px-3.5 py-4">
-                {field('email', t('onboarding.fields.email'), { type: 'email', autoComplete: 'email', maxLength: 254 }, t('onboarding.setup.emailHint'))}
+                {field(
+                  'email',
+                  t('onboarding.fields.email'),
+                  { type: 'email', autoComplete: 'email', maxLength: 254 },
+                  t('onboarding.setup.emailHint'),
+                )}
                 {isCompany
                   ? null
-                  : field('tax_identifier', t('onboarding.fields.taxIdentifier'), { inputMode: 'numeric', maxLength: 12 }, t('onboarding.fields.taxIdentifierHint'))}
+                  : field(
+                      'tax_identifier',
+                      t('onboarding.fields.taxIdentifier'),
+                      { inputMode: 'numeric', maxLength: 12 },
+                      t('onboarding.fields.taxIdentifierHint'),
+                    )}
                 {isCompany ? null : (
                   <div className="space-y-2.5">
                     <div className="grid gap-5 sm:grid-cols-2">

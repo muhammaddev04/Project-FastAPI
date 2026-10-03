@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def commands(task: str, name: str | None = None) -> list[tuple[Path, list[str]]]:
-    python = sys.executable
+    interpreter = ROOT / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+    python = str(interpreter) if interpreter.exists() else sys.executable
     npm = "npm.cmd" if os.name == "nt" else "npm"
     backend, frontend = ROOT / "backend", ROOT / "frontend"
     tasks = {
@@ -21,22 +22,59 @@ def commands(task: str, name: str | None = None) -> list[tuple[Path, list[str]]]
         "lint": [
             (backend, [python, "-m", "ruff", "check", "."]),
             (backend, [python, "-m", "ruff", "format", "--check", "."]),
+            (backend, [python, "-m", "mypy", "--strict", "app"]),
             (ROOT, [python, "-m", "ruff", "check", "scripts", "--line-length", "120"]),
-            (ROOT, [python, "-m", "ruff", "format", "--check", "scripts", "--line-length", "120"]),
+            (
+                ROOT,
+                [
+                    python,
+                    "-m",
+                    "ruff",
+                    "format",
+                    "--check",
+                    "scripts",
+                    "--line-length",
+                    "120",
+                ],
+            ),
         ],
         "fe-test": [(frontend, [npm, "test"])],
-        "fe-lint": [(frontend, [npm, "run", "lint"]), (frontend, [npm, "run", "typecheck"])],
+        "fe-e2e": [(frontend, [npm, "run", "test:e2e"])],
+        "fe-lint": [
+            (frontend, [npm, "run", "lint"]),
+            (frontend, [npm, "run", "typecheck"]),
+        ],
         "fe-build": [(frontend, [npm, "run", "build"])],
-        "traceability": [(ROOT, [python, "scripts/check_traceability.py"])],
+        "fe-format-check": [(frontend, [npm, "run", "format:check"])],
+        "traceability": [(ROOT, [python, "scripts/check_traceability.py", "--complete-p00"])],
+        "seed": [(backend, [python, "-m", "app.seed"])],
+        "hooks": [(ROOT, [python, "-X", "utf8", "-m", "pre_commit", "install"])],
+        "api-types": [
+            (ROOT, [python, "scripts/export_openapi.py"]),
+            (frontend, [npm, "run", "api:types"]),
+        ],
     }
     if task == "makemigration":
         if not name:
             raise ValueError("makemigration requires --name")
-        return [(backend, [python, "-m", "alembic", "revision", "--autogenerate", "-m", name])]
+        return [
+            (
+                backend,
+                [python, "-m", "alembic", "revision", "--autogenerate", "-m", name],
+            )
+        ]
     if task == "verify":
         return [
             command
-            for part in ("lint", "test", "fe-lint", "fe-test", "fe-build", "traceability")
+            for part in (
+                "lint",
+                "test",
+                "fe-lint",
+                "fe-format-check",
+                "fe-test",
+                "fe-build",
+                "traceability",
+            )
             for command in tasks[part]
         ]
     if task not in tasks:

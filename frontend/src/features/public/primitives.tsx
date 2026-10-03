@@ -136,7 +136,8 @@ export function Split({
   className?: string;
   children: ReactNode;
 }) {
-  const columns = weight === 'text-minor' ? 'lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]' : 'lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]';
+  const columns =
+    weight === 'text-minor' ? 'lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]' : 'lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]';
   return (
     <div className={cn('grid items-start gap-12 lg:gap-16', columns, className)}>
       <div className={cn('min-w-0', reverse && 'lg:order-2')}>{children}</div>

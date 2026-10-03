@@ -116,7 +116,14 @@ export function LoginPage() {
 
       <AuthForm onSubmit={onSubmit}>
         <FormField size="lg" label={t('auth.fields.email')} error={message(errors.email?.message)}>
-          <Input size="lg" type="email" inputMode="email" autoComplete="username" placeholder="name@company.tj" {...form.register('email')} />
+          <Input
+            size="lg"
+            type="email"
+            inputMode="email"
+            autoComplete="username"
+            placeholder="name@company.tj"
+            {...form.register('email')}
+          />
         </FormField>
         <FormField
           size="lg"

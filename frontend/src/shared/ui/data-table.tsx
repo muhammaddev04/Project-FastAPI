@@ -125,106 +125,106 @@ export function DataTable<T>({
         )
       ) : (
         <>
-        {sort && sortable.length > 0 ? (
-          <div className="border-b p-3 md:hidden">
-            <Select
-              aria-label={t('table.sort')}
-              value={`${sort.key}:${sort.direction}`}
-              disabled={busy}
-              onChange={(event) => {
-                const [key = '', direction] = event.target.value.split(':');
-                sort.onChange({ key, direction: direction === 'desc' ? 'desc' : 'asc' });
-              }}
-            >
-              {sortable.flatMap((column) =>
-                (['asc', 'desc'] as const).map((direction) => (
-                  <option key={`${column.key}:${direction}`} value={`${column.key}:${direction}`}>
-                    {t('table.sortOption', { column: column.header, direction: t(`table.${direction}`) })}
-                  </option>
-                )),
-              )}
-            </Select>
-          </div>
-        ) : null}
-        {/* The card clips overflow, so a table wider than its container needs its own scroll region. */}
-        <div className="md:overflow-x-auto">
-        <table aria-busy={busy || undefined} className="w-full text-left text-label max-md:block">
-          {caption ? <caption className="sr-only">{caption}</caption> : null}
-          <thead className="border-b bg-subtle/70 text-caption font-medium text-muted-foreground max-md:sr-only">
-            <tr>
-              {columns.map((column) => {
-                const active = sort && column.sortable && sort.key === column.key ? sort.direction : null;
-                const Icon = active === 'asc' ? ArrowUp : active === 'desc' ? ArrowDown : ArrowUpDown;
-                return (
-                  <th
-                    key={column.key}
-                    scope="col"
-                    aria-sort={sort && column.sortable ? (active ? ARIA_SORT[active] : 'none') : undefined}
-                    className={cn(
-                      density === 'compact' ? 'px-4 py-2' : 'px-5 py-2.5',
-                      column.numeric && 'text-right',
-                      column.className,
-                    )}
-                  >
-                    {sort && column.sortable ? (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => toggle(column.key)}
+          {sort && sortable.length > 0 ? (
+            <div className="border-b p-3 md:hidden">
+              <Select
+                aria-label={t('table.sort')}
+                value={`${sort.key}:${sort.direction}`}
+                disabled={busy}
+                onChange={(event) => {
+                  const [key = '', direction] = event.target.value.split(':');
+                  sort.onChange({ key, direction: direction === 'desc' ? 'desc' : 'asc' });
+                }}
+              >
+                {sortable.flatMap((column) =>
+                  (['asc', 'desc'] as const).map((direction) => (
+                    <option key={`${column.key}:${direction}`} value={`${column.key}:${direction}`}>
+                      {t('table.sortOption', { column: column.header, direction: t(`table.${direction}`) })}
+                    </option>
+                  )),
+                )}
+              </Select>
+            </div>
+          ) : null}
+          {/* The card clips overflow, so a table wider than its container needs its own scroll region. */}
+          <div className="md:overflow-x-auto">
+            <table aria-busy={busy || undefined} className="w-full text-left text-label max-md:block">
+              {caption ? <caption className="sr-only">{caption}</caption> : null}
+              <thead className="border-b bg-subtle/70 text-caption font-medium text-muted-foreground max-md:sr-only">
+                <tr>
+                  {columns.map((column) => {
+                    const active = sort && column.sortable && sort.key === column.key ? sort.direction : null;
+                    const Icon = active === 'asc' ? ArrowUp : active === 'desc' ? ArrowDown : ArrowUpDown;
+                    return (
+                      <th
+                        key={column.key}
+                        scope="col"
+                        aria-sort={sort && column.sortable ? (active ? ARIA_SORT[active] : 'none') : undefined}
                         className={cn(
-                          '-mx-1 inline-flex items-center gap-1 rounded px-1 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60',
-                          column.numeric && 'flex-row-reverse',
-                          active && 'text-foreground',
+                          density === 'compact' ? 'px-4 py-2' : 'px-5 py-2.5',
+                          column.numeric && 'text-right',
+                          column.className,
                         )}
                       >
-                        {column.header}
-                        <Icon className="size-3.5" aria-hidden="true" />
-                      </button>
-                    ) : (
-                      column.header
-                    )}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody className="divide-y max-md:block max-md:space-y-3 max-md:divide-y-0 max-md:p-3">
-            {rows.map((row) => {
-              const key = rowKey(row);
-              return (
-                <tr
-                  key={key}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  className={cn(
-                    'transition-colors max-md:block max-md:rounded-xl max-md:border max-md:bg-surface max-md:p-3.5',
-                    onRowClick && 'cursor-pointer hover:bg-primary/[0.04]',
-                    !onRowClick && 'hover:bg-subtle/50',
-                    selectedKey === key && 'bg-primary/[0.06] max-md:border-primary/40',
-                  )}
-                >
-                  {columns.map((column) => (
-                    <td
-                      key={column.key}
-                      data-label={column.header}
+                        {sort && column.sortable ? (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => toggle(column.key)}
+                            className={cn(
+                              '-mx-1 inline-flex items-center gap-1 rounded px-1 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60',
+                              column.numeric && 'flex-row-reverse',
+                              active && 'text-foreground',
+                            )}
+                          >
+                            {column.header}
+                            <Icon className="size-3.5" aria-hidden="true" />
+                          </button>
+                        ) : (
+                          column.header
+                        )}
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody className="divide-y max-md:block max-md:space-y-3 max-md:divide-y-0 max-md:p-3">
+                {rows.map((row) => {
+                  const key = rowKey(row);
+                  return (
+                    <tr
+                      key={key}
+                      onClick={onRowClick ? () => onRowClick(row) : undefined}
                       className={cn(
-                        'align-middle max-md:px-0',
-                        density === 'compact' ? 'px-4 py-2 max-md:py-1.5' : 'px-5 py-3 max-md:py-1.5',
-                        column.numeric && 'text-right font-numeric max-md:text-left',
-                        column.primary
-                          ? 'max-md:block max-md:pb-2 max-md:pt-0'
-                          : 'max-md:flex max-md:items-center max-md:justify-between max-md:gap-3 max-md:py-1.5 max-md:before:text-caption max-md:before:text-muted-foreground max-md:before:content-[attr(data-label)]',
-                        column.className,
+                        'transition-colors max-md:block max-md:rounded-xl max-md:border max-md:bg-surface max-md:p-3.5',
+                        onRowClick && 'cursor-pointer hover:bg-primary/[0.04]',
+                        !onRowClick && 'hover:bg-subtle/50',
+                        selectedKey === key && 'bg-primary/[0.06] max-md:border-primary/40',
                       )}
                     >
-                      {column.cell(row)}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        </div>
+                      {columns.map((column) => (
+                        <td
+                          key={column.key}
+                          data-label={column.header}
+                          className={cn(
+                            'align-middle max-md:px-0',
+                            density === 'compact' ? 'px-4 py-2 max-md:py-1.5' : 'px-5 py-3 max-md:py-1.5',
+                            column.numeric && 'text-right font-numeric max-md:text-left',
+                            column.primary
+                              ? 'max-md:block max-md:pb-2 max-md:pt-0'
+                              : 'max-md:flex max-md:items-center max-md:justify-between max-md:gap-3 max-md:py-1.5 max-md:before:text-caption max-md:before:text-muted-foreground max-md:before:content-[attr(data-label)]',
+                            column.className,
+                          )}
+                        >
+                          {column.cell(row)}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
       {pagination && rows && rows.length > 0 && !loading && !error ? (

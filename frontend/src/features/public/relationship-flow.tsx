@@ -90,13 +90,7 @@ function Connectors() {
 export function RelationshipFlow() {
   const { t } = useTranslation();
   /** The exchange, in the order it happens. Only the agreement itself is in the product today. */
-  const steps = [
-    { key: 'partnership', live: true },
-    { key: 'catalog' },
-    { key: 'order' },
-    { key: 'delivery' },
-    { key: 'ledger' },
-  ];
+  const steps = [{ key: 'partnership', live: true }, { key: 'catalog' }, { key: 'order' }, { key: 'delivery' }, { key: 'ledger' }];
 
   return (
     <div className="relative">
@@ -116,7 +110,10 @@ export function RelationshipFlow() {
             {steps.map(({ key, live }, index) => (
               <motion.li
                 key={key}
-                className={cn('flex flex-wrap items-center justify-between gap-3 bg-background px-4 py-3 sm:flex-nowrap', live && 'bg-primary/[0.07]')}
+                className={cn(
+                  'flex flex-wrap items-center justify-between gap-3 bg-background px-4 py-3 sm:flex-nowrap',
+                  live && 'bg-primary/[0.07]',
+                )}
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: '-60px' }}

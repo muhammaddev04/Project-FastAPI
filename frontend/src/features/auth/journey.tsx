@@ -27,17 +27,10 @@ export function JourneyRail({ current }: { current: JourneyStep }) {
       {JOURNEY_STEPS.map((step, index) => {
         const state = stateOf(index, currentIndex);
         return (
-          <li
-            key={step}
-            aria-current={state === 'current' ? 'step' : undefined}
-            className="flex items-baseline gap-4 border-b py-3.5"
-          >
+          <li key={step} aria-current={state === 'current' ? 'step' : undefined} className="flex items-baseline gap-4 border-b py-3.5">
             <span
               aria-hidden="true"
-              className={cn(
-                'font-data text-caption tabular-nums',
-                state === 'current' ? 'text-primary' : 'text-muted-foreground/70',
-              )}
+              className={cn('font-data text-caption tabular-nums', state === 'current' ? 'text-primary' : 'text-muted-foreground/70')}
             >
               {String(index + 1).padStart(2, '0')}
             </span>

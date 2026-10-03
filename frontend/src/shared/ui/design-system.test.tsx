@@ -77,7 +77,14 @@ describe('design system components (FND-035, CR-002)', () => {
           <button type="button" onClick={() => setOpen(true)}>
             Remove
           </button>
-          <ConfirmDialog open={open} onOpenChange={setOpen} tone="danger" title="Remove member?" confirmLabel="Remove member" onConfirm={onConfirm} />
+          <ConfirmDialog
+            open={open}
+            onOpenChange={setOpen}
+            tone="danger"
+            title="Remove member?"
+            confirmLabel="Remove member"
+            onConfirm={onConfirm}
+          />
         </>
       );
     }
@@ -96,7 +103,17 @@ describe('design system components (FND-035, CR-002)', () => {
   it('Tabs are keyboard operable; LinkTabs mark the current route', async () => {
     function Harness() {
       const [value, setValue] = useState<'a' | 'b'>('a');
-      return <Tabs label="Sections" value={value} onChange={setValue} items={[{ value: 'a', label: 'First' }, { value: 'b', label: 'Second' }]} />;
+      return (
+        <Tabs
+          label="Sections"
+          value={value}
+          onChange={setValue}
+          items={[
+            { value: 'a', label: 'First' },
+            { value: 'b', label: 'Second' },
+          ]}
+        />
+      );
     }
     render(<Harness />);
     screen.getByRole('tab', { name: 'First' }).focus();
@@ -105,7 +122,13 @@ describe('design system components (FND-035, CR-002)', () => {
 
     render(
       <MemoryRouter initialEntries={['/company/settings/profile']}>
-        <LinkTabs label="Settings" items={[{ to: '/company/settings/profile', label: 'Profile' }, { to: '/company/settings/verification', label: 'Verification' }]} />
+        <LinkTabs
+          label="Settings"
+          items={[
+            { to: '/company/settings/profile', label: 'Profile' },
+            { to: '/company/settings/verification', label: 'Verification' },
+          ]}
+        />
       </MemoryRouter>,
     );
     expect(screen.getByRole('link', { name: 'Profile' })).toHaveAttribute('aria-current', 'page');

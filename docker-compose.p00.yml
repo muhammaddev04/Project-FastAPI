@@ -1,0 +1,94 @@
+# Isolated local acceptance stack: no development volumes, credentials or ports reused.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tezfarmo_p00
+      POSTGRES_USER: tezfarmo
+      POSTGRES_PASSWORD: tezfarmo
+    ports: ["127.0.0.1:15433:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tezfarmo -d tezfarmo_p00"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis:7-alpine
+    ports: ["127.0.0.1:16380:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  storage:
+    image: chrislusf/seaweedfs:latest
+    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -ip.bind=0.0.0.0 -volume.max=100 -master.volumeSizeLimitMB=64
+    ports: ["127.0.0.1:19000:8333"]
+    volumes: ["./infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro"]
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "--output", "/dev/null", "http://localhost:8333/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  backend:
+    build: ./backend
+    volumes: ["./backend/app:/app/app:ro", "./backend/migrations:/app/migrations:ro"]
+    environment: &backend-env
+      APP_ENV: development
+      EMAIL_PROVIDER: console
+      DATABASE_URL: postgresql+asyncpg://tezfarmo:tezfarmo@postgres:5432/tezfarmo_p00
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      S3_ENDPOINT: storage:8333
+      S3_BUCKET_PRIVATE: tezfarmo-p00
+      CORS_ORIGINS: http://127.0.0.1:15174
+    command: sh -c "alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports: ["127.0.0.1:18001:8000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      storage: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/ready')"]
+      interval: 5s
+      timeout: 8s
+      retries: 30
+  celery-worker:
+    build: ./backend
+    volumes: ["./backend/app:/app/app:ro"]
+    environment: *backend-env
+    command: celery -A app.celery_app:celery_app worker --loglevel=WARNING -Q default,notifications,heavy
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.celery_app:celery_app inspect ping --destination celery@$$HOSTNAME --timeout 5 | grep -q pong"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    depends_on:
+      backend: {condition: service_healthy}
+  celery-beat:
+    build: ./backend
+    volumes: ["./backend/app:/app/app:ro"]
+    environment: *backend-env
+    command: celery -A app.celery_app:celery_app beat --loglevel=INFO --schedule=/tmp/celerybeat-schedule --pidfile=/tmp/celerybeat.pid
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; os.kill(int(open('/tmp/celerybeat.pid').read()), 0)"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    depends_on:
+      backend: {condition: service_healthy}
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes: ["./frontend/src:/app/src:ro"]
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8000
+    ports: ["127.0.0.1:15174:5174"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5174/').then(r => {if (!r.ok) process.exit(1)}).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      backend: {condition: service_healthy}

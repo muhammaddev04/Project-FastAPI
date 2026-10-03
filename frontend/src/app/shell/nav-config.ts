@@ -122,10 +122,7 @@ export function navFor(area: Area, membership: Membership): NavSection[] {
  *
  * Both halves keep their routes: a planned path still resolves to its placeholder page if opened directly.
  */
-export function navByAvailability(
-  area: Area,
-  membership: Membership,
-): { available: NavSection[]; planned: NavItem[] } {
+export function navByAvailability(area: Area, membership: Membership): { available: NavSection[]; planned: NavItem[] } {
   const sections = navFor(area, membership);
   return {
     available: sections

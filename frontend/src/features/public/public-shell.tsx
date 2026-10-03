@@ -38,7 +38,9 @@ function Header() {
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') return;
     const desktop = window.matchMedia('(min-width: 1024px)');
-    const closeOnDesktop = () => { if (desktop.matches) setOpen(false); };
+    const closeOnDesktop = () => {
+      if (desktop.matches) setOpen(false);
+    };
     desktop.addEventListener('change', closeOnDesktop);
     return () => desktop.removeEventListener('change', closeOnDesktop);
   }, []);
@@ -89,15 +91,17 @@ function Header() {
               <Button asChild size="md" className="hidden sm:inline-flex">
                 <Link to="/register">{t('site.nav.createAccount')}</Link>
               </Button>
-              <DialogPrimitive.Trigger asChild><button
-                type="button"
-                aria-expanded={open}
-                aria-controls="public-menu"
-                aria-label={open ? t('common.close') : t('site.nav.menu')}
+              <DialogPrimitive.Trigger asChild>
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  aria-controls="public-menu"
+                  aria-label={open ? t('common.close') : t('site.nav.menu')}
                   className="flex size-10 items-center justify-center rounded-xl border text-foreground transition-colors duration-fast hover:bg-subtle lg:hidden"
-              >
-                {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
-              </button></DialogPrimitive.Trigger>
+                >
+                  {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
+                </button>
+              </DialogPrimitive.Trigger>
             </div>
           </div>
         </Frame>
@@ -109,13 +113,20 @@ function Header() {
        * target on screen.
        */}
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Content id="public-menu" className="paper daylight-site public-mobile-menu fixed inset-0 z-50 flex flex-col bg-background font-sans text-foreground lg:hidden">
+        <DialogPrimitive.Content
+          id="public-menu"
+          className="paper daylight-site public-mobile-menu fixed inset-0 z-50 flex flex-col bg-background font-sans text-foreground lg:hidden"
+        >
           <DialogPrimitive.Title className="sr-only">{t('site.nav.menu')}</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">{t('site.nav.label')}</DialogPrimitive.Description>
           <Frame className="flex h-16 shrink-0 items-center justify-between border-b">
-            <Link to="/" aria-label={t('common.appName')} onClick={() => setOpen(false)}><BrandMark /></Link>
+            <Link to="/" aria-label={t('common.appName')} onClick={() => setOpen(false)}>
+              <BrandMark />
+            </Link>
             <DialogPrimitive.Close asChild>
-              <button type="button" aria-label={t('common.close')} className="flex size-11 items-center justify-center rounded-xl border"><X aria-hidden="true" className="size-5" /></button>
+              <button type="button" aria-label={t('common.close')} className="flex size-11 items-center justify-center rounded-xl border">
+                <X aria-hidden="true" className="size-5" />
+              </button>
             </DialogPrimitive.Close>
           </Frame>
           <Frame className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto py-6">
@@ -182,7 +193,9 @@ function Footer() {
               </ul>
             </div>
             <div>
-              <h2 className="text-label font-semibold uppercase tracking-[0.08em] text-muted-foreground">{t('site.footer.accountTitle')}</h2>
+              <h2 className="text-label font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                {t('site.footer.accountTitle')}
+              </h2>
               <ul className="mt-3 space-y-2">
                 <li>
                   <Link to="/login" className="link-grow text-body text-foreground/90 hover:text-foreground">
@@ -226,7 +239,9 @@ export function PublicShell({ children }: { children?: ReactNode }) {
         <PaperGrain />
         <Header />
         {/* `/` is not a child route: it decides between the homepage and a signed-in user's destination first. */}
-        <main ref={motionRef} className="relative z-10 flex-1">{children ?? <Outlet />}</main>
+        <main ref={motionRef} className="relative z-10 flex-1">
+          {children ?? <Outlet />}
+        </main>
         <Footer />
       </div>
     </MotionConfig>

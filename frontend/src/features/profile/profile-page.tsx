@@ -15,7 +15,21 @@ import type { Me, Membership } from '@/shared/auth/types';
 import { setLanguage } from '@/shared/i18n';
 import { formatDate } from '@/shared/lib/datetime';
 import { ImagePicker } from '@/shared/images/image-picker';
-import { Alert, Avatar, Badge, Button, Card, FormField, Input, MetaChip, ProfileHeader, SectionHeader, Select, StatCard, StatusBadge } from '@/shared/ui';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  FormField,
+  Input,
+  MetaChip,
+  ProfileHeader,
+  SectionHeader,
+  Select,
+  StatCard,
+  StatusBadge,
+} from '@/shared/ui';
 import { ConnectedAccounts } from './connected-accounts';
 import { useGoogleLinkState } from './google-link-api';
 import { PasswordChangeCard } from './password-change-card';
@@ -66,7 +80,12 @@ function MembershipsCard({ me }: { me: Me }) {
               >
                 <div className="flex min-w-0 items-center gap-3">
                   {membership.org_type === 'STORE' || membership.org_type === 'COMPANY' ? (
-                    <Avatar kind={membership.org_type === 'STORE' ? 'store' : 'company'} size="md" src={membership.logo_url} className="rounded-xl" />
+                    <Avatar
+                      kind={membership.org_type === 'STORE' ? 'store' : 'company'}
+                      size="md"
+                      src={membership.logo_url}
+                      className="rounded-xl"
+                    />
                   ) : (
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                       <Icon className="size-5" aria-hidden="true" />
@@ -81,7 +100,12 @@ function MembershipsCard({ me }: { me: Me }) {
                     </div>
                   </div>
                 </div>
-                <Button variant="secondary" size="sm" onClick={() => open(membership)} aria-label={t('profile.memberships.openNamed', { name: membership.org_name })}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => open(membership)}
+                  aria-label={t('profile.memberships.openNamed', { name: membership.org_name })}
+                >
                   {membership.organization_id === activeOrgId ? t('profile.memberships.current') : t('profile.memberships.open')}
                   <ArrowRight aria-hidden="true" />
                 </Button>
@@ -111,7 +135,8 @@ export function ProfilePage({ me }: { me: Me }) {
   // A phone problem the server reports (taken, or not E.164) belongs to the field, not to a generic alert.
   const phoneFailure =
     update.error instanceof ApiError &&
-    (update.error.code === 'phone_taken' || (update.error.code === 'validation_error' && update.error.fieldErrors.some((f) => f.field === 'phone')));
+    (update.error.code === 'phone_taken' ||
+      (update.error.code === 'validation_error' && update.error.fieldErrors.some((f) => f.field === 'phone')));
 
   const onSubmit = form.handleSubmit(async (values) => {
     const phone = normalizePhone(values.phone);
@@ -135,21 +160,33 @@ export function ProfilePage({ me }: { me: Me }) {
   });
 
   const phoneStatus = me.phone ? (
-    <Badge tone={me.phone_verified_at ? 'success' : 'neutral'}>{me.phone_verified_at ? t('profile.verified') : t('profile.unverified')}</Badge>
+    <Badge tone={me.phone_verified_at ? 'success' : 'neutral'}>
+      {me.phone_verified_at ? t('profile.verified') : t('profile.unverified')}
+    </Badge>
   ) : null;
 
   return (
     <StandaloneLayout back={homePath(me, activeOrgId)} actions={<AccountMenu me={me} compact />}>
       <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
         <ProfileHeader
-          mark={<Avatar name={me.full_name} size="xl" verified={me.email_verified} src={me.avatar_url} alt={t('images.avatar.alt', { name: me.full_name })} />}
+          mark={
+            <Avatar
+              name={me.full_name}
+              size="xl"
+              verified={me.email_verified}
+              src={me.avatar_url}
+              alt={t('images.avatar.alt', { name: me.full_name })}
+            />
+          }
           title={me.full_name}
           subtitle={t('profile.subtitle')}
           chips={
             <>
               <span className="inline-flex min-w-0 items-center gap-2">
                 <MetaChip icon={Mail}>{me.email}</MetaChip>
-                <Badge tone={me.email_verified ? 'success' : 'warning'}>{me.email_verified ? t('profile.verified') : t('profile.unverified')}</Badge>
+                <Badge tone={me.email_verified ? 'success' : 'warning'}>
+                  {me.email_verified ? t('profile.verified') : t('profile.unverified')}
+                </Badge>
               </span>
               <span className="inline-flex min-w-0 items-center gap-2">
                 <MetaChip icon={Phone}>
@@ -195,7 +232,14 @@ export function ProfilePage({ me }: { me: Me }) {
                     error={errors.phone?.message && t(errors.phone.message)}
                     action={phoneStatus}
                   >
-                    <Input type="tel" inputMode="tel" autoComplete="tel" placeholder="+992 90 123 4567" maxLength={24} {...form.register('phone')} />
+                    <Input
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      placeholder="+992 90 123 4567"
+                      maxLength={24}
+                      {...form.register('phone')}
+                    />
                   </FormField>
                   <FormField label={t('auth.fields.language')} hint={t('profile.languageHint')}>
                     <Select {...form.register('language')}>

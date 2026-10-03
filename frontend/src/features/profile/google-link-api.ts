@@ -3,7 +3,12 @@ import { apiRequest } from '@/shared/api/client';
 import { markGoogleLink } from '@/shared/auth/google-intent';
 
 /** Contract of GET /api/v1/auth/google/link and POST /api/v1/auth/google/link/callback. */
-export type GoogleLinkState = { connected: boolean; status: 'linked' | 'already_linked' | null; email: string | null; linked_at: string | null };
+export type GoogleLinkState = {
+  connected: boolean;
+  status: 'linked' | 'already_linked' | null;
+  email: string | null;
+  linked_at: string | null;
+};
 
 export const googleLinkQueryKey = ['google-link'] as const;
 

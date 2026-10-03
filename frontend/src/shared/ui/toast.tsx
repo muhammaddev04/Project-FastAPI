@@ -4,7 +4,12 @@ import { cn } from '@/shared/lib/cn';
 import { useToasts } from './toast-store';
 
 const ICON = { success: CheckCircle2, info: Info, warning: AlertTriangle, danger: XCircle } as const;
-const ICON_CLASS = { success: 'bg-success/10 text-success', info: 'bg-primary/10 text-primary', warning: 'bg-warning/10 text-warning', danger: 'bg-danger/10 text-danger' };
+const ICON_CLASS = {
+  success: 'bg-success/10 text-success',
+  info: 'bg-primary/10 text-primary',
+  warning: 'bg-warning/10 text-warning',
+  danger: 'bg-danger/10 text-danger',
+};
 
 /** Glass toasts bottom-right (bottom-center on phones), announced politely to screen readers. */
 export function Toaster() {
@@ -12,7 +17,10 @@ export function Toaster() {
   const items = useToasts((state) => state.items);
   const dismiss = useToasts((state) => state.dismiss);
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-end sm:p-6">
+    <div
+      aria-live="polite"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:items-end sm:p-6"
+    >
       {items.map((item) => {
         const Icon = ICON[item.tone];
         return (

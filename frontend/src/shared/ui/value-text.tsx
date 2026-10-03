@@ -18,7 +18,15 @@ export function QuantityText({ value, className }: { value: DecimalValue; classN
 }
 
 /** FND-035 DateText: `dd.MM.yyyy HH:mm` in Asia/Dushanbe, or `dd.MM.yyyy` with `dateOnly` (GLOBAL §12). */
-export function DateText({ value, dateOnly = false, className }: { value: string | null | undefined; dateOnly?: boolean; className?: string }) {
+export function DateText({
+  value,
+  dateOnly = false,
+  className,
+}: {
+  value: string | null | undefined;
+  dateOnly?: boolean;
+  className?: string;
+}) {
   const text = dateOnly ? formatDate(value) : formatDateTime(value);
   if (!text || !value) return <span className={className}>{EMPTY}</span>;
   return (

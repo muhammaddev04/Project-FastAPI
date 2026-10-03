@@ -196,7 +196,6 @@ export function ShellFrame({
 
   return (
     <div className="workspace relative min-h-screen bg-background">
-
       {hideSidebar ? null : (
         <aside className="chrome fixed inset-y-0 left-0 z-30 hidden w-[17rem] flex-col border-y-0 border-l-0 border-r text-sidebar-foreground lg:flex">
           <SidebarBody areaLabel={areaLabel} context={context} sections={sections} navFooter={navFooter} />
@@ -213,16 +212,28 @@ export function ShellFrame({
                 (event.currentTarget as HTMLElement | null)?.focus();
               }}
               tabIndex={-1}
-              className="chrome fixed inset-y-0 left-0 z-50 flex w-[18rem] max-w-[85vw] animate-fade flex-col border-y-0 border-l-0 border-r text-sidebar-foreground shadow-pop focus:outline-none lg:hidden">
+              className="chrome fixed inset-y-0 left-0 z-50 flex w-[18rem] max-w-[85vw] animate-fade flex-col border-y-0 border-l-0 border-r text-sidebar-foreground shadow-pop focus:outline-none lg:hidden"
+            >
               <DialogPrimitive.Title className="sr-only">{t('shell.mainNavigation')}</DialogPrimitive.Title>
               <DialogPrimitive.Description className="sr-only">{areaLabel}</DialogPrimitive.Description>
-              <SidebarBody areaLabel={areaLabel} context={context} sections={sections} navFooter={navFooter} onNavigate={() => setDrawerOpen(false)} />
+              <SidebarBody
+                areaLabel={areaLabel}
+                context={context}
+                sections={sections}
+                navFooter={navFooter}
+                onNavigate={() => setDrawerOpen(false)}
+              />
               <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-sidebar-border px-4 py-3">
                 <LanguageSwitcher />
                 <ThemeSwitcher />
               </div>
               <DialogPrimitive.Close asChild>
-                <Button variant="ghost" size="icon" className="absolute right-2 top-3 size-9 text-sidebar-muted" aria-label={t('shell.closeMenu')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-3 size-9 text-sidebar-muted"
+                  aria-label={t('shell.closeMenu')}
+                >
                   <X />
                 </Button>
               </DialogPrimitive.Close>
@@ -249,10 +260,7 @@ export function ShellFrame({
                 {crumbs.map((crumb, index) => {
                   const last = index === crumbs.length - 1;
                   return (
-                    <li
-                      key={`${crumb.label}-${index}`}
-                      className={cn('min-w-0 items-center gap-1', last ? 'flex' : 'hidden sm:flex')}
-                    >
+                    <li key={`${crumb.label}-${index}`} className={cn('min-w-0 items-center gap-1', last ? 'flex' : 'hidden sm:flex')}>
                       {index > 0 ? <ChevronRight className="hidden size-3 shrink-0 opacity-60 sm:block" aria-hidden="true" /> : null}
                       {crumb.to && !last ? (
                         <Link to={crumb.to} className="truncate transition-colors duration-fast hover:text-primary">

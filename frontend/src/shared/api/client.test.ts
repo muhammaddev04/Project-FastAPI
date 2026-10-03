@@ -69,9 +69,12 @@ describe('API client (FND-034)', () => {
   it('reports timeouts separately from network errors', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn((_input: RequestInfo | URL, init?: RequestInit) => new Promise((_resolve, reject) => {
-        init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
-      })),
+      vi.fn(
+        (_input: RequestInfo | URL, init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')));
+          }),
+      ),
     );
     await expect(apiRequest('/meta', { timeoutMs: 10 })).rejects.toMatchObject({ code: 'timeout' });
   });
@@ -87,9 +90,7 @@ describe('API client (FND-034)', () => {
   it('maps error codes to translated messages and hides unknown codes (FE-006)', () => {
     setLanguage('en');
     const t = i18n.t.bind(i18n);
-    expect(errorMessage(new ApiError({ status: 403, code: 'permission_denied' }), t)).toBe(
-      "You don't have permission for this action.",
-    );
+    expect(errorMessage(new ApiError({ status: 403, code: 'permission_denied' }), t)).toBe("You don't have permission for this action.");
     expect(errorMessage(new ApiError({ status: 500, code: 'some_new_code' }), t)).toBe('Something went wrong. Please try again.');
     expect(errorMessage(new Error('boom'), t)).toBe('Something went wrong. Please try again.');
   });

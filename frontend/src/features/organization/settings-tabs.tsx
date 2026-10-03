@@ -11,7 +11,12 @@ export function SettingsTabs() {
   const base = `/${areaFor(membership)}/settings`;
   const tabs = [
     { to: `${base}/profile`, icon: IdCard, label: t('orgProfile.tabs.profile'), visible: membership.permissions.includes('org.view') },
-    { to: `${base}/verification`, icon: FileBadge2, label: t('orgProfile.tabs.verification'), visible: membership.permissions.includes('verification.view') },
+    {
+      to: `${base}/verification`,
+      icon: FileBadge2,
+      label: t('orgProfile.tabs.verification'),
+      visible: membership.permissions.includes('verification.view'),
+    },
   ].filter((tab) => tab.visible);
   return <LinkTabs label={t('orgProfile.tabs.label')} items={tabs} className="workspace-settings-tabs" />;
 }

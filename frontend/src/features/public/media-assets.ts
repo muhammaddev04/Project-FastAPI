@@ -51,4 +51,3 @@ const AVAILABLE = new Map<string, string>([
 export function assetSrc(file: string): string | undefined {
   return AVAILABLE.get(file);
 }
-

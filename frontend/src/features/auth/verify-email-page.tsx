@@ -103,7 +103,14 @@ export function VerifyEmailPage() {
           <input type="hidden" {...form.register('email')} />
         ) : (
           <FormField size="lg" label={t('auth.fields.email')} error={message(errors.email?.message)}>
-            <Input size="lg" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
+            <Input
+              size="lg"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="name@company.tj"
+              {...form.register('email')}
+            />
           </FormField>
         )}
         <FormField size="lg" label={t('auth.verify.codeLabel')} hint={t('auth.verify.codeHint')} error={message(errors.code?.message)}>

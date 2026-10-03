@@ -125,7 +125,11 @@ export function Tabs<T extends string>({
             aria-selected={active}
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(itemValue)}
-            className={cn(tab, 'flex-1 sm:flex-none', active ? 'text-white' : 'text-muted-foreground hover:bg-surface/70 hover:text-foreground')}
+            className={cn(
+              tab,
+              'flex-1 sm:flex-none',
+              active ? 'text-white' : 'text-muted-foreground hover:bg-surface/70 hover:text-foreground',
+            )}
           >
             {active ? <Plate layoutId={layoutId} /> : null}
             {Icon ? <Icon className="relative size-4" aria-hidden="true" /> : null}

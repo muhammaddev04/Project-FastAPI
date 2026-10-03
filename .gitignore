@@ -41,6 +41,9 @@ frontend/dist/
 frontend/.vite/
 /.vite/
 frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+frontend/openapi.json
 
 # OS
 .DS_Store

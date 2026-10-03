@@ -17,8 +17,20 @@ creates an Alembic revision. With no GNU Make installed on Windows, the equivale
 is `.venv/Scripts/python.exe scripts/dev.py <task>`; pass `--name "add items"` for makemigration.
 `verify` stops at the first failed check and never migrates or stops the development database.
 Tests use the separate test services; start them with `docker compose -f docker-compose.test.yml up -d`.
-`lint` currently runs Ruff; the required strict mypy gate, seed and API type-generation targets
-remain pending and are not represented as completed commands.
+`lint` runs Ruff and strict mypy. `make seed` creates repeatable development demo accounts
+and refuses staging/production. `make api-types` regenerates the frontend API schema types.
+Install commit hooks with `make hooks` or `.venv/Scripts/python.exe scripts/dev.py hooks`
+after installing dev dependencies. The installer uses UTF-8 for Windows paths containing Cyrillic.
+
+For the isolated P00 acceptance stack, run
+`docker compose -p tezfarmo-p00 -f docker-compose.p00.yml up -d --build --wait`.
+Open `http://127.0.0.1:15174`; the API is on `http://127.0.0.1:18001`.
+Demo accounts are `p00-{company,store,courier,admin}@example.tj`, password `P00Demo2026!`.
+These are disposable local fixtures. Run `make fe-e2e` (or `scripts/dev.py fe-e2e` with
+the virtual-environment Python) after `cd frontend && npx playwright install chromium`.
+The browser suite exercises the real API, all four areas, responsive widths and WCAG AA checks.
+`verify` covers unit/integration checks; the browser suite and live service checks are separate.
+See [P00 acceptance](docs/P00_ACCEPTANCE.md) for the exact evidence and remote CI gate.
 
 ```bash
 # services: PostgreSQL :5433, Redis :6380

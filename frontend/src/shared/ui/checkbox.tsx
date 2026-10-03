@@ -16,9 +16,9 @@ export const Checkbox = forwardRef<HTMLInputElement, Omit<InputHTMLAttributes<HT
 );
 Checkbox.displayName = 'Checkbox';
 
-export const Radio = forwardRef<HTMLInputElement, Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>>(
-  ({ className, ...props }, ref) => <input ref={ref} type="radio" className={cn(control, 'rounded-full', className)} {...props} />,
-);
+export const Radio = forwardRef<HTMLInputElement, Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>>(({ className, ...props }, ref) => (
+  <input ref={ref} type="radio" className={cn(control, 'rounded-full', className)} {...props} />
+));
 Radio.displayName = 'Radio';
 
 /**

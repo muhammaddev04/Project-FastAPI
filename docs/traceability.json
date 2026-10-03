@@ -1,4 +1,7 @@
 {
+  "FND-000": [
+    "scripts/test_p00_tooling.py::test_foundation_hooks_and_git_hygiene"
+  ],
   "FND-001": [
     "scripts/test_dev.py::test_migration_name_is_one_argument",
     "scripts/test_dev.py::test_invalid_command_and_missing_name"
@@ -30,6 +33,8 @@
     "backend/tests/core/test_foundation_contracts.py::test_fnd_007_clock_is_aware_utc"
   ],
   "FND-008": [
+    "backend/tests/core/test_monitoring.py::test_fnd_008_monitoring_optional_and_excludes_request_data",
+    "backend/tests/core/test_errors.py::test_fnd_008_integrity_error_mapping",
     "backend/tests/core/test_errors.py::test_fnd_008_app_error_format",
     "backend/tests/core/test_errors.py::test_fnd_008_default_language_is_tajik",
     "backend/tests/core/test_errors.py::test_fnd_008_validation_error_fields",
@@ -112,6 +117,7 @@
     "backend/tests/core/test_audit.py::test_fnd_015_audit_redacts_sensitive_fields"
   ],
   "FND-016": [
+    "backend/tests/core/test_rate_limit.py::test_fnd_016_parallel_requests_obey_limit",
     "backend/tests/core/test_rate_limit.py::test_fnd_016_rate_limit_429_retry_after"
   ],
   "FND-017": [
@@ -121,6 +127,7 @@
     "backend/tests/core/test_errors.py::test_fnd_008_default_language_is_tajik"
   ],
   "FND-019": [
+    "backend/tests/core/test_request_actor.py::test_fnd_019_actor_context_isolated_and_reset",
     "backend/tests/core/test_errors.py::test_fnd_019_unsafe_request_id_is_replaced"
   ],
   "FND-020": [
@@ -134,11 +141,17 @@
   "FND-022": [
     "backend/tests/core/test_foundation_contracts.py::test_fnd_022_worker_queues_and_recovery_configuration"
   ],
+  "FND-023": [
+    "backend/tests/core/test_openapi.py::test_fnd_023_openapi_error_contract"
+  ],
   "FND-024": [
     "backend/tests/core/test_sequences.py::test_fnd_024_first_value_is_one_then_increments",
     "backend/tests/core/test_sequences.py::test_fnd_024_scopes_and_keys_are_independent",
     "backend/tests/core/test_sequences.py::test_fnd_024_sequence_concurrent_unique",
     "backend/tests/core/test_sequences.py::test_fnd_024_value_is_used_only_when_the_callers_transaction_commits"
+  ],
+  "FND-030": [
+    "scripts/test_p00_tooling.py::test_frontend_tooling_contract"
   ],
   "FND-031": [
     "frontend/src/app/router.test.tsx::renders a 404 page for unknown paths",
@@ -161,6 +174,13 @@
     "frontend/src/shared/lib/money.test.ts::rounds half up like the backend q2, without float error"
   ],
   "FND-037": [
-    "frontend/src/shared/i18n/i18n.test.ts::has identical keys in tg, ru and en"
+    "frontend/src/shared/i18n/i18n.test.ts::has identical keys in tg, ru and en",
+    "scripts/test_p00_tooling.py::test_error_catalog_covers_every_language"
+  ],
+  "FND-038": [
+    "frontend/e2e/foundation.spec.ts::P00 ${area} area works against the real API"
+  ],
+  "FND-040": [
+    "scripts/test_p00_tooling.py::test_ci_enforces_foundation_gates"
   ]
 }

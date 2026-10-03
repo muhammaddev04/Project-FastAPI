@@ -21,16 +21,51 @@ function detail(status: string, extra: Record<string, unknown> = {}) {
     review_started_at: null,
     rejection_reason: null,
     legal_snapshot: { legal_name: 'IE Karimova N.', tax_identifier: null, address: 'Lenin St 4' },
-    current_profile: { name: 'Corner Market', legal_name: 'IE Karimova N.', phone: '+992901112233', city: 'Khujand', address: 'Lenin St 4' },
+    current_profile: {
+      name: 'Corner Market',
+      legal_name: 'IE Karimova N.',
+      phone: '+992901112233',
+      city: 'Khujand',
+      address: 'Lenin St 4',
+    },
     org_verification_status: 'PENDING',
-    documents: [{ id: 'doc-1', doc_type: 'REGISTRATION_CERTIFICATE', file: { id: 'f-1', display_name: 'reg.pdf', size_bytes: 2048, content_type: 'application/pdf', category: 'VERIFICATION', created_at: '2026-09-26T10:00:00Z' } }],
+    documents: [
+      {
+        id: 'doc-1',
+        doc_type: 'REGISTRATION_CERTIFICATE',
+        file: {
+          id: 'f-1',
+          display_name: 'reg.pdf',
+          size_bytes: 2048,
+          content_type: 'application/pdf',
+          category: 'VERIFICATION',
+          created_at: '2026-09-26T10:00:00Z',
+        },
+      },
+    ],
     history: [],
     version: 1,
     ...extra,
   };
 }
 
-const QUEUE = { count: 1, limit: 100, offset: 0, results: [{ id: 'req-1', organization_id: 'org-1', org_type: 'STORE', org_name: 'Corner Market', status: 'SUBMITTED', submitted_at: '2026-09-26T10:00:00Z', reviewer_id: null, reviewed_at: null }] };
+const QUEUE = {
+  count: 1,
+  limit: 100,
+  offset: 0,
+  results: [
+    {
+      id: 'req-1',
+      organization_id: 'org-1',
+      org_type: 'STORE',
+      org_name: 'Corner Market',
+      status: 'SUBMITTED',
+      submitted_at: '2026-09-26T10:00:00Z',
+      reviewer_id: null,
+      reviewed_at: null,
+    },
+  ],
+};
 
 describe('admin verification queue (P02 §5/§8)', () => {
   beforeEach(() => useSessionStore.setState({ accessToken: 'token', activeOrgId: null, endedReason: null, restoring: false }));
@@ -49,7 +84,10 @@ describe('admin verification queue (P02 §5/§8)', () => {
       { path: '/admin/verifications/req-1', body: detail('SUBMITTED') },
       { method: 'POST', path: '/admin/verifications/req-1/start-review', body: detail('UNDER_REVIEW') },
       { method: 'POST', path: '/admin/verifications/req-1/approve', body: detail('APPROVED', { org_verification_status: 'APPROVED' }) },
-      { path: '/admin/verifications/req-1/documents/doc-1/url', body: { url: 'https://storage.example/signed', expires_at: '2026-09-26T10:05:00Z' } },
+      {
+        path: '/admin/verifications/req-1/documents/doc-1/url',
+        body: { url: 'https://storage.example/signed', expires_at: '2026-09-26T10:05:00Z' },
+      },
     ]);
     renderRoutes(routes, '/admin/verifications');
 
@@ -74,7 +112,10 @@ describe('admin verification queue (P02 §5/§8)', () => {
       { path: '/admin/verifications', body: { count: 45, limit: 20, offset: 0, results } },
     ]);
     renderRoutes(routes, '/admin/verifications');
-    const queueCalls = () => calls.filter((call) => call.path === '/api/v1/admin/verifications').map((call) => Object.fromEntries(new URLSearchParams(call.query)));
+    const queueCalls = () =>
+      calls
+        .filter((call) => call.path === '/api/v1/admin/verifications')
+        .map((call) => Object.fromEntries(new URLSearchParams(call.query)));
     const last = () => queueCalls().at(-1);
 
     await screen.findByRole('button', { name: 'Org 0' });
@@ -94,7 +135,9 @@ describe('admin verification queue (P02 §5/§8)', () => {
 
     // so does changing a filter; the chosen order stays
     await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Type' }), 'STORE');
-    await waitFor(() => expect(last()).toEqual({ status: 'SUBMITTED', org_type: 'STORE', ordering: '-submitted_at', limit: '20', offset: '0' }));
+    await waitFor(() =>
+      expect(last()).toEqual({ status: 'SUBMITTED', org_type: 'STORE', ordering: '-submitted_at', limit: '20', offset: '0' }),
+    );
 
     // FND-011: "Reset filters" returns to the working queue (SUBMITTED, any type), keeps the order, first page
     await userEvent.click(screen.getByRole('button', { name: 'Next page' }));
@@ -110,7 +153,14 @@ describe('admin verification queue (P02 §5/§8)', () => {
       {
         path: '/admin/verifications',
         status: 422,
-        body: { error: { code: 'validation_error', message: 'Some fields are invalid.', details: { fields: [{ field: 'limit', code: 'less_than_equal', message: 'This value is too large.' }] }, request_id: 'r' } },
+        body: {
+          error: {
+            code: 'validation_error',
+            message: 'Some fields are invalid.',
+            details: { fields: [{ field: 'limit', code: 'less_than_equal', message: 'This value is too large.' }] },
+            request_id: 'r',
+          },
+        },
       },
     ]);
     renderRoutes(routes, '/admin/verifications');
@@ -123,7 +173,11 @@ describe('admin verification queue (P02 §5/§8)', () => {
       { path: '/me', body: ADMIN },
       { path: '/admin/verifications', body: QUEUE },
       { path: '/admin/verifications/req-1', body: detail('UNDER_REVIEW') },
-      { method: 'POST', path: '/admin/verifications/req-1/reject', body: detail('REJECTED', { rejection_reason: 'Document is unreadable.' }) },
+      {
+        method: 'POST',
+        path: '/admin/verifications/req-1/reject',
+        body: detail('REJECTED', { rejection_reason: 'Document is unreadable.' }),
+      },
     ]);
     renderRoutes(routes, '/admin/verifications');
     await userEvent.click(await screen.findByRole('button', { name: 'Corner Market' }));
@@ -136,7 +190,9 @@ describe('admin verification queue (P02 §5/§8)', () => {
     await userEvent.click(confirm);
 
     await waitFor(() =>
-      expect(calls.find((call) => call.path === '/api/v1/admin/verifications/req-1/reject')?.body).toEqual({ reason: 'too short — unreadable' }),
+      expect(calls.find((call) => call.path === '/api/v1/admin/verifications/req-1/reject')?.body).toEqual({
+        reason: 'too short — unreadable',
+      }),
     );
   });
 

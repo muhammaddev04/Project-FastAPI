@@ -126,7 +126,12 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
         </div>
       ) : null}
       <AuthForm onSubmit={onSubmit}>
-        <FormField size="lg" label={t('auth.fields.email')} hint={t('auth.forgot.emailHint')} error={message(form.formState.errors.email?.message)}>
+        <FormField
+          size="lg"
+          label={t('auth.fields.email')}
+          hint={t('auth.forgot.emailHint')}
+          error={message(form.formState.errors.email?.message)}
+        >
           <Input size="lg" type="email" inputMode="email" autoComplete="email" placeholder="name@company.tj" {...form.register('email')} />
         </FormField>
         {failure ? (
@@ -194,7 +199,12 @@ function CodeStep({ email, onVerified, onChangeEmail }: { email: string; onVerif
       footer={<AuthSwitch question={t('auth.reset.remembered')} to="/login" link={t('auth.register.signIn')} />}
     >
       <AuthForm onSubmit={onSubmit}>
-        <FormField size="lg" label={t('auth.verify.codeLabel')} hint={t('auth.verify.codeHint')} error={message(form.formState.errors.code?.message)}>
+        <FormField
+          size="lg"
+          label={t('auth.verify.codeLabel')}
+          hint={t('auth.verify.codeHint')}
+          error={message(form.formState.errors.code?.message)}
+        >
           <CodeInput length={CODE_LENGTH} autoFocus {...codeField} />
         </FormField>
         {failure ? (

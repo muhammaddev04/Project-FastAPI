@@ -44,10 +44,13 @@ describe('support', () => {
   });
 
   it('appends multiple images, removes one, and sends the rest without text', async () => {
-    vi.stubGlobal('URL', class extends URL {
-      static createObjectURL = vi.fn((file: File) => `blob:${file.name}`);
-      static revokeObjectURL = vi.fn();
-    });
+    vi.stubGlobal(
+      'URL',
+      class extends URL {
+        static createObjectURL = vi.fn((file: File) => `blob:${file.name}`);
+        static revokeObjectURL = vi.fn();
+      },
+    );
     useSessionStore.setState({ accessToken: 'access-1', restoring: false, activeOrgId: null });
     const { calls } = mockApi([
       { path: '/me', body: meFixture([membershipFixture()]) },
@@ -78,7 +81,12 @@ describe('support', () => {
     useSessionStore.setState({ accessToken: 'access-1', restoring: false, activeOrgId: null });
     mockApi([
       { path: '/me', body: meFixture([membershipFixture()]) },
-      { path: '/support', body: [{ id: 'ticket-1', kind: 'BUG', message: '', has_image: true, image_count: 2, status: 'OPEN', created_at: '2026-10-03T08:00:00Z' }] },
+      {
+        path: '/support',
+        body: [
+          { id: 'ticket-1', kind: 'BUG', message: '', has_image: true, image_count: 2, status: 'OPEN', created_at: '2026-10-03T08:00:00Z' },
+        ],
+      },
       { path: '/support/ticket-1/image', body: { url: 'https://storage.test/image' } },
     ]);
     renderRoutes(routes, '/support');
@@ -89,7 +97,17 @@ describe('support', () => {
 
   it('lets an administrator reply and resolve a report', async () => {
     useSessionStore.setState({ accessToken: 'access-1', restoring: false, activeOrgId: null });
-    const ticket = { id: 'ticket-1', user_id: 'user-1', kind: 'BUG', subject: 'Broken button', message: 'Clicking does nothing.', page_url: null, status: 'OPEN', reply: null, created_at: '2026-10-03T08:00:00Z' };
+    const ticket = {
+      id: 'ticket-1',
+      user_id: 'user-1',
+      kind: 'BUG',
+      subject: 'Broken button',
+      message: 'Clicking does nothing.',
+      page_url: null,
+      status: 'OPEN',
+      reply: null,
+      created_at: '2026-10-03T08:00:00Z',
+    };
     const { calls } = mockApi([
       { path: '/me', body: meFixture([], { is_superadmin: true }) },
       { path: '/admin/support', body: [ticket] },
@@ -116,8 +134,11 @@ describe('support', () => {
     expect(screen.queryByLabelText('Page (optional)')).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Send' }));
     expect(await screen.findByText('Your message has been sent.')).toBeInTheDocument();
-    await waitFor(() => expect(calls.find((call) => call.method === 'POST' && call.path === '/api/v1/support')?.body).toEqual({
-      kind: 'BUG', message: 'Help',
-    }));
+    await waitFor(() =>
+      expect(calls.find((call) => call.method === 'POST' && call.path === '/api/v1/support')?.body).toEqual({
+        kind: 'BUG',
+        message: 'Help',
+      }),
+    );
   });
 });

@@ -94,11 +94,25 @@ export function ImagePicker({
           {canEdit ? (
             <>
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                <Button type="button" variant="secondary" size="sm" loading={busy === 'upload'} disabled={busy !== null} onClick={() => input.current?.click()}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  loading={busy === 'upload'}
+                  disabled={busy !== null}
+                  onClick={() => input.current?.click()}
+                >
                   <ImagePlus aria-hidden="true" /> {src ? t(key('change')) : t(key('upload'))}
                 </Button>
                 {src ? (
-                  <Button type="button" variant="danger-outline" size="sm" loading={busy === 'remove'} disabled={busy !== null} onClick={() => setConfirmRemove(true)}>
+                  <Button
+                    type="button"
+                    variant="danger-outline"
+                    size="sm"
+                    loading={busy === 'remove'}
+                    disabled={busy !== null}
+                    onClick={() => setConfirmRemove(true)}
+                  >
                     <Trash2 aria-hidden="true" /> {t(key('remove'))}
                   </Button>
                 ) : null}

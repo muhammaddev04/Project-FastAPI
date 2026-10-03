@@ -67,7 +67,11 @@ export function OrgHero({ greeting }: { greeting: string }) {
           {canMembers ? <StatCard icon={Users} label={t('entity.team')} value={members.data ? members.data.count : '…'} /> : null}
           {status ? <StatCard icon={FileText} label={t('entity.verification')} value={t(`verification.status.${status}`)} /> : null}
           {profile?.public_code ? (
-            <StatCard icon={Hash} label={t('orgProfile.publicCode')} value={<span className="font-data tracking-widest">{profile.public_code}</span>} />
+            <StatCard
+              icon={Hash}
+              label={t('orgProfile.publicCode')}
+              value={<span className="font-data tracking-widest">{profile.public_code}</span>}
+            />
           ) : profile ? (
             <StatCard icon={MapPin} label={t('onboarding.fields.city')} value={profile.city} />
           ) : null}

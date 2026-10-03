@@ -14,7 +14,16 @@ const COLUMNS: Column<Row>[] = [
 ];
 
 function renderTable(props: Partial<Parameters<typeof DataTable<Row>>[0]> = {}) {
-  return render(<DataTable<Row> columns={COLUMNS} rows={ROWS} rowKey={(row) => row.id} caption="Queue" empty={{ title: 'Nothing to review' }} {...props} />);
+  return render(
+    <DataTable<Row>
+      columns={COLUMNS}
+      rows={ROWS}
+      rowKey={(row) => row.id}
+      caption="Queue"
+      empty={{ title: 'Nothing to review' }}
+      {...props}
+    />,
+  );
 }
 
 describe('FND-035 DataTable: server-side sorting and pagination', () => {
@@ -36,7 +45,16 @@ describe('FND-035 DataTable: server-side sorting and pagination', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Submitted' }));
     expect(onChange).toHaveBeenLastCalledWith({ key: 'submitted', direction: 'desc' });
 
-    rerender(<DataTable<Row> columns={COLUMNS} rows={ROWS} rowKey={(row) => row.id} caption="Queue" empty={{ title: 'x' }} sort={{ key: 'submitted', direction: 'desc', onChange }} />);
+    rerender(
+      <DataTable<Row>
+        columns={COLUMNS}
+        rows={ROWS}
+        rowKey={(row) => row.id}
+        caption="Queue"
+        empty={{ title: 'x' }}
+        sort={{ key: 'submitted', direction: 'desc', onChange }}
+      />,
+    );
     expect(screen.getByRole('columnheader', { name: 'Submitted' })).toHaveAttribute('aria-sort', 'descending');
     await userEvent.click(screen.getByRole('button', { name: 'Submitted' }));
     expect(onChange).toHaveBeenLastCalledWith({ key: 'submitted', direction: 'asc' });
@@ -54,7 +72,11 @@ describe('FND-035 DataTable: server-side sorting and pagination', () => {
     const onChange = vi.fn<(sort: SortState) => void>();
     renderTable({ sort: { key: 'submitted', direction: 'asc', onChange } });
     const select = screen.getByRole('combobox', { name: 'Sort order' });
-    expect(within(select).getAllByRole('option').map((option) => option.textContent)).toEqual(['Submitted: ascending', 'Submitted: descending']);
+    expect(
+      within(select)
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['Submitted: ascending', 'Submitted: descending']);
     await userEvent.selectOptions(select, 'submitted:desc');
     expect(onChange).toHaveBeenCalledWith({ key: 'submitted', direction: 'desc' });
   });
@@ -70,7 +92,7 @@ describe('FND-035 DataTable: server-side sorting and pagination', () => {
     expect(onChange).toHaveBeenLastCalledWith(40);
   });
 
-  it('disables the last page\'s Next button and the first page\'s Previous button', () => {
+  it("disables the last page's Next button and the first page's Previous button", () => {
     renderTable({ pagination: { offset: 40, limit: 20, count: 42, onChange: vi.fn() } });
     expect(screen.getByRole('button', { name: 'Next page' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeEnabled();
@@ -99,12 +121,32 @@ describe('FND-035 DataTable: server-side sorting and pagination', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
     expect(screen.getByText('Loading…')).toBeInTheDocument();
 
-    rerender(<DataTable<Row> columns={COLUMNS} rows={undefined} rowKey={(row) => row.id} empty={{ title: 'Nothing to review' }} error="Could not load" onRetry={onRetry} pagination={pagination} sort={sort} />);
+    rerender(
+      <DataTable<Row>
+        columns={COLUMNS}
+        rows={undefined}
+        rowKey={(row) => row.id}
+        empty={{ title: 'Nothing to review' }}
+        error="Could not load"
+        onRetry={onRetry}
+        pagination={pagination}
+        sort={sort}
+      />,
+    );
     expect(screen.getByText('Could not load')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
     expect(onRetry).toHaveBeenCalled();
 
-    rerender(<DataTable<Row> columns={COLUMNS} rows={[]} rowKey={(row) => row.id} empty={{ title: 'Nothing to review' }} pagination={pagination} sort={sort} />);
+    rerender(
+      <DataTable<Row>
+        columns={COLUMNS}
+        rows={[]}
+        rowKey={(row) => row.id}
+        empty={{ title: 'Nothing to review' }}
+        pagination={pagination}
+        sort={sort}
+      />,
+    );
     expect(screen.getByText('Nothing to review')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Next page' })).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: 'Sort order' })).not.toBeInTheDocument();
@@ -113,20 +155,54 @@ describe('FND-035 DataTable: server-side sorting and pagination', () => {
   it('offers "Reset filters" only while filters differ from the default, in the toolbar and the empty state', async () => {
     const onReset = vi.fn();
     const { rerender } = render(
-      <DataTable<Row> columns={COLUMNS} rows={ROWS} rowKey={(row) => row.id} toolbar={<span>tools</span>} empty={{ title: 'Nothing to review' }} filters={{ changed: false, onReset }} />,
+      <DataTable<Row>
+        columns={COLUMNS}
+        rows={ROWS}
+        rowKey={(row) => row.id}
+        toolbar={<span>tools</span>}
+        empty={{ title: 'Nothing to review' }}
+        filters={{ changed: false, onReset }}
+      />,
     );
     expect(screen.queryByRole('button', { name: 'Reset filters' })).not.toBeInTheDocument();
 
-    rerender(<DataTable<Row> columns={COLUMNS} rows={ROWS} rowKey={(row) => row.id} toolbar={<span>tools</span>} empty={{ title: 'Nothing to review' }} filters={{ changed: true, onReset }} />);
+    rerender(
+      <DataTable<Row>
+        columns={COLUMNS}
+        rows={ROWS}
+        rowKey={(row) => row.id}
+        toolbar={<span>tools</span>}
+        empty={{ title: 'Nothing to review' }}
+        filters={{ changed: true, onReset }}
+      />,
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Reset filters' }));
     expect(onReset).toHaveBeenCalledTimes(1);
 
-    rerender(<DataTable<Row> columns={COLUMNS} rows={[]} rowKey={(row) => row.id} toolbar={<span>tools</span>} empty={{ title: 'Nothing to review' }} filters={{ changed: true, onReset }} />);
+    rerender(
+      <DataTable<Row>
+        columns={COLUMNS}
+        rows={[]}
+        rowKey={(row) => row.id}
+        toolbar={<span>tools</span>}
+        empty={{ title: 'Nothing to review' }}
+        filters={{ changed: true, onReset }}
+      />,
+    );
     expect(screen.getByText('Nothing matches these filters')).toBeInTheDocument();
     expect(screen.queryByText('Nothing to review')).not.toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Reset filters' })).toHaveLength(2);
 
-    rerender(<DataTable<Row> columns={COLUMNS} rows={[]} rowKey={(row) => row.id} toolbar={<span>tools</span>} empty={{ title: 'Nothing to review' }} filters={{ changed: false, onReset }} />);
+    rerender(
+      <DataTable<Row>
+        columns={COLUMNS}
+        rows={[]}
+        rowKey={(row) => row.id}
+        toolbar={<span>tools</span>}
+        empty={{ title: 'Nothing to review' }}
+        filters={{ changed: false, onReset }}
+      />,
+    );
     expect(screen.getByText('Nothing to review')).toBeInTheDocument();
   });
 

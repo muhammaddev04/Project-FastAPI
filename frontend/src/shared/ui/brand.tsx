@@ -7,7 +7,11 @@ export function LogoMark({ className, inverted = false }: { className?: string; 
       <svg viewBox="57 212 1146 893" className={cn('h-full w-auto', !inverted && 'dark:hidden')} aria-hidden="true">
         <image href={inverted ? '/brand/tezfarmo-reference-dark.png' : '/brand/tezfarmo-reference-light.png'} width="1254" height="1254" />
       </svg>
-      {!inverted ? <svg viewBox="52 191 1151 913" className="hidden h-full w-auto dark:block" aria-hidden="true"><image href="/brand/tezfarmo-reference-dark.png" width="1254" height="1254" /></svg> : null}
+      {!inverted ? (
+        <svg viewBox="52 191 1151 913" className="hidden h-full w-auto dark:block" aria-hidden="true">
+          <image href="/brand/tezfarmo-reference-dark.png" width="1254" height="1254" />
+        </svg>
+      ) : null}
     </span>
   );
 }

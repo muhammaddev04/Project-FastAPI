@@ -77,12 +77,7 @@ export function ProductPage() {
 
   return (
     <>
-      <PageHero
-        eyebrow={t('site.nav.product')}
-        title={t('site.product.title')}
-        lead={t('site.product.lead')}
-        image="product"
-      />
+      <PageHero eyebrow={t('site.nav.product')} title={t('site.product.title')} lead={t('site.product.lead')} image="product" />
 
       {/* Available today: two full stories, each with its own visual and its own direction. */}
       {stories.map(({ entry, aside, reverse }, index) => (
@@ -105,9 +100,7 @@ export function ProductPage() {
                 <h3 className="font-serif text-section-sm font-semibold">{t(`site.modules.${entry.key}.title`)}</h3>
                 <Availability state="live" />
               </div>
-              <p className="mt-2.5 max-w-measure text-body leading-relaxed text-muted-foreground">
-                {t(`site.modules.${entry.key}.text`)}
-              </p>
+              <p className="mt-2.5 max-w-measure text-body leading-relaxed text-muted-foreground">{t(`site.modules.${entry.key}.text`)}</p>
             </Reveal>
           ))}
         </div>
@@ -135,9 +128,7 @@ export function ProductPage() {
                   <Availability state="planned" />
                 </div>
                 <div className="min-w-0">
-                  <p className="max-w-measure text-body leading-relaxed text-muted-foreground">
-                    {t(`site.modules.${entry.key}.text`)}
-                  </p>
+                  <p className="max-w-measure text-body leading-relaxed text-muted-foreground">{t(`site.modules.${entry.key}.text`)}</p>
                   <p className="mt-1.5 text-caption text-muted-foreground">{t(`site.product.for.${entry.side}`)}</p>
                 </div>
               </li>

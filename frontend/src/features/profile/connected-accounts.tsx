@@ -50,24 +50,30 @@ export function ConnectedAccounts() {
                 <GoogleMark />
               </span>
               <div className="min-w-0">
-              <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                Google
-                <Badge tone={state.data.connected ? 'success' : 'neutral'}>
-                  {state.data.connected ? t('profile.connected.connected') : t('profile.connected.notConnected')}
-                </Badge>
-              </p>
-              {state.data.connected ? (
-                <p className="mt-0.5 truncate text-label text-muted-foreground">
-                  {state.data.email ?? '—'}
-                  {state.data.linked_at ? ` · ${t('profile.connected.since', { date: formatDate(state.data.linked_at) })}` : null}
+                <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                  Google
+                  <Badge tone={state.data.connected ? 'success' : 'neutral'}>
+                    {state.data.connected ? t('profile.connected.connected') : t('profile.connected.notConnected')}
+                  </Badge>
                 </p>
-              ) : (
-                <p className="mt-0.5 text-label text-muted-foreground">{t('profile.connected.hint')}</p>
-              )}
+                {state.data.connected ? (
+                  <p className="mt-0.5 truncate text-label text-muted-foreground">
+                    {state.data.email ?? '—'}
+                    {state.data.linked_at ? ` · ${t('profile.connected.since', { date: formatDate(state.data.linked_at) })}` : null}
+                  </p>
+                ) : (
+                  <p className="mt-0.5 text-label text-muted-foreground">{t('profile.connected.hint')}</p>
+                )}
               </div>
             </div>
             {state.data.connected ? null : (
-              <Button variant="outline" size="sm" disabled={!googleEnabled} loading={connect.isPending || meta.isPending} onClick={() => connect.mutate()}>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!googleEnabled}
+                loading={connect.isPending || meta.isPending}
+                onClick={() => connect.mutate()}
+              >
                 <Link2 /> {t('profile.connected.connect')}
               </Button>
             )}

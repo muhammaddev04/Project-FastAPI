@@ -22,7 +22,16 @@ function state(status: string, extra: Record<string, unknown> = {}) {
 }
 
 function profile(status: string) {
-  return { id: 'org-company', type: 'COMPANY', name: 'Pamir Distribution', legal_name: 'Pamir LLC', tax_identifier: '510012345', verification_status: status, legal_locked: status !== 'NOT_SUBMITTED' && status !== 'REJECTED', version: 1 };
+  return {
+    id: 'org-company',
+    type: 'COMPANY',
+    name: 'Pamir Distribution',
+    legal_name: 'Pamir LLC',
+    tax_identifier: '510012345',
+    verification_status: status,
+    legal_locked: status !== 'NOT_SUBMITTED' && status !== 'REJECTED',
+    version: 1,
+  };
 }
 
 function open(membership: Membership, status: string, extra: MockRoute[] = [], stateExtra: Record<string, unknown> = {}) {
@@ -43,14 +52,39 @@ describe('verification page (P02 §8, VER-001/003)', () => {
   it('explains the status, requires both company documents and submits after confirmation', async () => {
     let n = 0;
     const { calls, fetchMock } = open(owner, 'NOT_SUBMITTED', [
-      { method: 'POST', path: '/verification', status: 201, body: state('PENDING', { latest_request: { id: 'r1', status: 'SUBMITTED', submitted_at: '2026-09-26T10:00:00Z', review_started_at: null, reviewed_at: null, rejection_reason: null, documents: [] } }) },
+      {
+        method: 'POST',
+        path: '/verification',
+        status: 201,
+        body: state('PENDING', {
+          latest_request: {
+            id: 'r1',
+            status: 'SUBMITTED',
+            submitted_at: '2026-09-26T10:00:00Z',
+            review_started_at: null,
+            reviewed_at: null,
+            rejection_reason: null,
+            documents: [],
+          },
+        }),
+      },
     ]);
     const answer = fetchMock.getMockImplementation()!;
     fetchMock.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
       if (String(input).endsWith('/files')) {
         n += 1;
         calls.push({ method: 'POST', path: '/api/v1/files', headers: {}, body: init?.body });
-        return new Response(JSON.stringify({ id: `file-${n}`, display_name: `doc${n}.pdf`, size_bytes: 2048, content_type: 'application/pdf', category: 'VERIFICATION', created_at: '2026-09-26T10:00:00Z' }), { status: 201 });
+        return new Response(
+          JSON.stringify({
+            id: `file-${n}`,
+            display_name: `doc${n}.pdf`,
+            size_bytes: 2048,
+            content_type: 'application/pdf',
+            category: 'VERIFICATION',
+            created_at: '2026-09-26T10:00:00Z',
+          }),
+          { status: 201 },
+        );
       }
       return answer(input, init);
     });
@@ -74,7 +108,9 @@ describe('verification page (P02 §8, VER-001/003)', () => {
     const upload = calls.find((call) => call.path === '/api/v1/files');
     expect(upload?.body).toBeInstanceOf(FormData);
     expect((upload?.body as FormData).get('category')).toBe('VERIFICATION');
-    expect(calls.find((call) => call.path === '/api/v1/verification' && call.method === 'POST')?.headers['Idempotency-Key']).toMatch(/^[0-9a-f-]{36}$/i);
+    expect(calls.find((call) => call.path === '/api/v1/verification' && call.method === 'POST')?.headers['Idempotency-Key']).toMatch(
+      /^[0-9a-f-]{36}$/i,
+    );
     expect(calls.find((call) => call.path === '/api/v1/verification' && call.method === 'POST')?.body).toEqual({
       documents: [
         { doc_type: 'REGISTRATION_CERTIFICATE', file_id: 'file-1' },
@@ -89,7 +125,9 @@ describe('verification page (P02 §8, VER-001/003)', () => {
     const { calls } = open(owner, 'NOT_SUBMITTED');
     await screen.findByRole('heading', { name: 'Verification' });
 
-    await userEvent.upload(screen.getByLabelText('Registration certificate'), new File(['x'], 'photo.gif', { type: 'image/gif' }), { applyAccept: false });
+    await userEvent.upload(screen.getByLabelText('Registration certificate'), new File(['x'], 'photo.gif', { type: 'image/gif' }), {
+      applyAccept: false,
+    });
 
     expect(await screen.findByText('Upload a PDF, JPEG or PNG file.')).toBeInTheDocument();
     expect(calls.some((call) => call.path === '/api/v1/files')).toBe(false);
@@ -97,7 +135,15 @@ describe('verification page (P02 §8, VER-001/003)', () => {
 
   it('shows the rejection reason and lets the owner submit again', async () => {
     open(owner, 'REJECTED', [], {
-      latest_request: { id: 'r1', status: 'REJECTED', submitted_at: '2026-09-20T10:00:00Z', review_started_at: '2026-09-21T10:00:00Z', reviewed_at: '2026-09-21T11:00:00Z', rejection_reason: 'The tax certificate is unreadable.', documents: [] },
+      latest_request: {
+        id: 'r1',
+        status: 'REJECTED',
+        submitted_at: '2026-09-20T10:00:00Z',
+        review_started_at: '2026-09-21T10:00:00Z',
+        reviewed_at: '2026-09-21T11:00:00Z',
+        rejection_reason: 'The tax certificate is unreadable.',
+        documents: [],
+      },
     });
 
     expect(await screen.findByText('Reason for rejection')).toBeInTheDocument();

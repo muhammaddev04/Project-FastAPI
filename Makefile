@@ -5,9 +5,9 @@ else
 PYTHON ?= .venv/bin/python
 endif
 
-.PHONY: up down migrate makemigration test lint fe-test fe-lint fe-build traceability verify
+.PHONY: up down migrate makemigration test lint fe-test fe-lint fe-build fe-e2e traceability verify seed api-types hooks
 
-up down migrate test lint fe-test fe-lint fe-build traceability verify:
+up down migrate test lint fe-test fe-lint fe-build fe-e2e traceability verify seed api-types hooks:
 	"$(PYTHON)" scripts/dev.py $@
 
 makemigration:

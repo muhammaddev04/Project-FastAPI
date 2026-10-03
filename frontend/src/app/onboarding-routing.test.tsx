@@ -50,13 +50,21 @@ describe('homePath: where a signed-in user lands (server state only)', () => {
     ['intent COMPANY, no organization', companyIntent, '/welcome/company'],
     ['intent STORE, no organization', storeIntent, '/welcome/store'],
     ['no intent, no organization', meFixture([]), '/welcome'],
-    ['company OWNER not submitted', meFixture([membershipFixture({ verification_status: 'NOT_SUBMITTED' })]), '/company/settings/verification'],
+    [
+      'company OWNER not submitted',
+      meFixture([membershipFixture({ verification_status: 'NOT_SUBMITTED' })]),
+      '/company/settings/verification',
+    ],
     ['company OWNER pending', meFixture([membershipFixture({ verification_status: 'PENDING' })]), '/company/settings/verification'],
     ['company OWNER rejected', meFixture([membershipFixture({ verification_status: 'REJECTED' })]), '/company/settings/verification'],
     ['company OWNER approved', meFixture([membershipFixture({ verification_status: 'APPROVED' })]), '/company'],
     ['company MANAGER of a pending org', meFixture([membershipFixture({ role: 'MANAGER', verification_status: 'PENDING' })]), '/company'],
     ['store OWNER pending', meFixture([storeMembership({ verification_status: 'PENDING' })]), '/store/settings/verification'],
-    ['intent COMPANY but already owns an approved company', meFixture([membershipFixture()], { onboarding: { org_type: 'COMPANY', org_name: 'X' } }), '/company'],
+    [
+      'intent COMPANY but already owns an approved company',
+      meFixture([membershipFixture()], { onboarding: { org_type: 'COMPANY', org_name: 'X' } }),
+      '/company',
+    ],
   ])('%s → %s', (_case, me, expected) => {
     expect(homePath(me, null)).toBe(expected);
   });
@@ -136,12 +144,36 @@ describe('onboarding routing after login, reload, Google and on / (no second Com
   });
 
   it('a pending company owner lands on verification, not on create', async () => {
-    const owner = meFixture([membershipFixture({ verification_status: 'PENDING', permissions: ['org.view', 'verification.view', 'verification.submit'] })], {
-      onboarding: { org_type: 'COMPANY', org_name: 'Pamir Distribution' },
-    });
+    const owner = meFixture(
+      [membershipFixture({ verification_status: 'PENDING', permissions: ['org.view', 'verification.view', 'verification.submit'] })],
+      {
+        onboarding: { org_type: 'COMPANY', org_name: 'Pamir Distribution' },
+      },
+    );
     const page = await passwordLogin(owner, [
-      { path: '/organization', body: { id: 'org-company', type: 'COMPANY', name: 'Pamir Distribution', legal_name: 'Pamir LLC', tax_identifier: '510012345', verification_status: 'PENDING', legal_locked: true, version: 2 } },
-      { path: '/verification', body: { verification_status: 'PENDING', verified_at: null, required_documents: ['REGISTRATION_CERTIFICATE', 'TAX_CERTIFICATE'], can_submit: false, latest_request: null } },
+      {
+        path: '/organization',
+        body: {
+          id: 'org-company',
+          type: 'COMPANY',
+          name: 'Pamir Distribution',
+          legal_name: 'Pamir LLC',
+          tax_identifier: '510012345',
+          verification_status: 'PENDING',
+          legal_locked: true,
+          version: 2,
+        },
+      },
+      {
+        path: '/verification',
+        body: {
+          verification_status: 'PENDING',
+          verified_at: null,
+          required_documents: ['REGISTRATION_CERTIFICATE', 'TAX_CERTIFICATE'],
+          can_submit: false,
+          latest_request: null,
+        },
+      },
     ]);
 
     await waitFor(() => expect(page.current.location?.pathname).toBe('/company/settings/verification'));

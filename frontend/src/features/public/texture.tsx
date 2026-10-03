@@ -17,7 +17,10 @@
  */
 export function PaperGrain() {
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 opacity-[0.025] mix-blend-multiply dark:opacity-[0.04] dark:mix-blend-screen">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-0 opacity-[0.025] mix-blend-multiply dark:opacity-[0.04] dark:mix-blend-screen"
+    >
       <svg className="size-full" xmlns="http://www.w3.org/2000/svg">
         <filter id="tf-grain">
           {/* Fractal noise at a high frequency: visible as tooth, not as a pattern. */}

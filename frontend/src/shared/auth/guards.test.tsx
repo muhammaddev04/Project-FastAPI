@@ -9,7 +9,14 @@ function routesFor() {
     { path: '/login', element: <p>login page</p> },
     { path: '/welcome', element: <p>welcome page</p> },
     { path: '/403', element: <p>forbidden page</p> },
-    { path: '/guest', element: <RequireGuest><p>guest only</p></RequireGuest> },
+    {
+      path: '/guest',
+      element: (
+        <RequireGuest>
+          <p>guest only</p>
+        </RequireGuest>
+      ),
+    },
     {
       path: '/company',
       element: <RequireArea area="company">{({ membership }) => <p>company app for {membership.org_name}</p>}</RequireArea>,

@@ -7,6 +7,8 @@ export function createSubmissionKey() {
       if (!pending || pending.signature !== signature) pending = { signature, key: crypto.randomUUID() };
       return pending.key;
     },
-    complete() { pending = undefined; },
+    complete() {
+      pending = undefined;
+    },
   };
 }

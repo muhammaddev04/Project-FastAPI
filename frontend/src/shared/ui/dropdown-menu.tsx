@@ -12,7 +12,10 @@ export const DropdownMenuContent = forwardRef<ElementRef<typeof Menu.Content>, C
       <Menu.Content
         ref={ref}
         sideOffset={sideOffset}
-        className={cn('chrome z-50 min-w-56 animate-fade-in overflow-hidden rounded-2xl border p-1.5 text-foreground shadow-pop', className)}
+        className={cn(
+          'chrome z-50 min-w-56 animate-fade-in overflow-hidden rounded-2xl border p-1.5 text-foreground shadow-pop',
+          className,
+        )}
         {...props}
       />
     </Menu.Portal>
@@ -35,7 +38,12 @@ export const DropdownMenuItem = forwardRef<ElementRef<typeof Menu.Item>, Compone
 DropdownMenuItem.displayName = 'DropdownMenuItem';
 
 export function DropdownMenuLabel({ className, ...props }: ComponentPropsWithoutRef<typeof Menu.Label>) {
-  return <Menu.Label className={cn('px-2.5 py-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground', className)} {...props} />;
+  return (
+    <Menu.Label
+      className={cn('px-2.5 py-1.5 text-2xs font-semibold uppercase tracking-wide text-muted-foreground', className)}
+      {...props}
+    />
+  );
 }
 
 export function DropdownMenuSeparator({ className, ...props }: ComponentPropsWithoutRef<typeof Menu.Separator>) {

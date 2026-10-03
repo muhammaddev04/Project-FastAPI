@@ -92,7 +92,12 @@ function SignInCallback({ returned }: { returned: Returned }) {
               {t('auth.google.tryAgain')}
             </Button>
           )}
-          <Button asChild variant={code && TERMINAL.includes(code) ? 'primary' : 'ghost'} block size={code && TERMINAL.includes(code) ? 'xl' : 'lg'}>
+          <Button
+            asChild
+            variant={code && TERMINAL.includes(code) ? 'primary' : 'ghost'}
+            block
+            size={code && TERMINAL.includes(code) ? 'xl' : 'lg'}
+          >
             <Link to="/login">{conflict ? t('auth.google.signInWithPassword') : t('auth.reset.back')}</Link>
           </Button>
         </AuthActions>

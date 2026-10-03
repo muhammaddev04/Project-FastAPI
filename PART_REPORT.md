@@ -1,3 +1,39 @@
+# P00 local acceptance ? 2026-10-03
+
+P00 local implementation is complete and tested. Formal status remains PARTIAL until the
+owner pushes these commits and the required remote CI run succeeds. No push or done tag
+was performed. [Full acceptance evidence and all 35 requirement/test mappings](docs/P00_ACCEPTANCE.md).
+
+Completed: strict mypy across 68 source files, typed authorization dependencies and database
+helpers, OpenAPI error envelopes and generated frontend types, development-only repeatable
+seed, localized coverage of the full error catalog, formatting/hooks and full-P00 traceability.
+Database constraint and append-only failures produce sanitized API errors. Request actor/org
+context is isolated across concurrent requests and reset afterward; logging and audit use it.
+Optional Sentry sends bug codes without request bodies or SQL parameters. Redis rate-limit
+admission is atomic. The mobile alert action overflow found by browser acceptance is fixed.
+
+Validation: full backend suite 738 passed; final foundation suite 19 passed, including four
+additional cases (742 distinct backend cases). Frontend suite 347 passed. Nine tooling tests,
+Ruff, strict mypy, ESLint, TypeScript, Prettier, production build and commit hooks passed.
+Seven isolated Docker services are healthy. A real Redis outage produced ready=503/live=200;
+restart restored ready=200. Alembic model check is clean and tests exercised migration reversal.
+Browser acceptance covers all four areas against the real API, responsive layouts, WCAG AA,
+visible focus, actual RU/TG switching/persistence and 403/404. CI now repeats these gates and
+rejects generated API type drift and unmapped P00 requirements.
+
+Remaining P00 gate: remote green CI for the final commits, which requires the owner's push.
+P03/P11 async business consumers, production deployment and monitoring collector are outside
+P00 local foundation acceptance. Earlier progress entries below are historical snapshots;
+the linked acceptance report is the current source of truth.
+
+## Local commits
+
+Commit list is recorded after the implementation commits are created.
+
+---
+
+## Historical progress (superseded by the acceptance above)
+
 # Current progress — 2026-10-03
 
 P00 remains PARTIAL. Added FND-010/012/013/022 infrastructure: transactional EventBus,

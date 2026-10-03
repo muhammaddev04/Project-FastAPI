@@ -7,7 +7,15 @@ import { useToasts } from '@/shared/ui/toast-store';
 import { meFixture, membershipFixture, storeMembership } from '@/test/fixtures';
 import { mockApi, renderRoutes, type MockRoute } from '@/test/render';
 
-const OWNER_PERMS = ['org.view', 'org.edit_contacts', 'org.edit_legal', 'org.edit_branding', 'verification.submit', 'verification.view', 'members.view'];
+const OWNER_PERMS = [
+  'org.view',
+  'org.edit_contacts',
+  'org.edit_legal',
+  'org.edit_branding',
+  'verification.submit',
+  'verification.view',
+  'members.view',
+];
 const LOGO = 'https://storage.test/private/org-company/org_logo/a.webp?X-Amz-Expires=300&X-Amz-Signature=a';
 const NEW_LOGO = 'https://storage.test/private/org-company/org_logo/b.webp?X-Amz-Expires=300&X-Amz-Signature=b';
 const STORE_IMAGE = 'https://storage.test/private/org-store/org_logo/s.webp?X-Amz-Expires=300&X-Amz-Signature=s';
@@ -56,7 +64,10 @@ function open(area: 'company' | 'store', membership: Membership, org: Record<str
   const api = mockApi([
     meRoute,
     { path: '/organization', body: org },
-    { path: '/verification', body: { verification_status: 'APPROVED', verified_at: null, required_documents: [], can_submit: false, latest_request: null } },
+    {
+      path: '/verification',
+      body: { verification_status: 'APPROVED', verified_at: null, required_documents: [], can_submit: false, latest_request: null },
+    },
     { path: '/members', body: EMPTY_PAGE },
     ...extra,
   ]);
@@ -128,7 +139,9 @@ describe('organization image (CR-003 PUT/DELETE /organization/logo)', () => {
   });
 
   it('removes the logo after confirmation and shows the mark again', async () => {
-    const { calls, container } = open('company', owner, profile({ logo_url: LOGO }), [{ method: 'DELETE', path: '/organization/logo', body: profile() }]);
+    const { calls, container } = open('company', owner, profile({ logo_url: LOGO }), [
+      { method: 'DELETE', path: '/organization/logo', body: profile() },
+    ]);
     await userEvent.click(await screen.findByRole('button', { name: 'Remove logo' }));
     const dialog = await screen.findByRole('dialog', { name: 'Remove the company logo?' });
     await userEvent.click(within(dialog).getByRole('button', { name: 'Remove logo' }));
@@ -146,11 +159,19 @@ describe('organization image (CR-003 PUT/DELETE /organization/logo)', () => {
     ['STORE', 'SELLER', ['org.view']],
   ] as const)('a %s %s may view the picture but gets no branding editor', async (type, role, permissions) => {
     const isStore = type === 'STORE';
-    const membership = isStore ? storeMembership({ role, permissions: [...permissions] }) : membershipFixture({ role, permissions: [...permissions] });
-    const { calls } = open(isStore ? 'store' : 'company', membership, isStore ? storeProfile({ logo_url: STORE_IMAGE }) : profile({ logo_url: LOGO }));
+    const membership = isStore
+      ? storeMembership({ role, permissions: [...permissions] })
+      : membershipFixture({ role, permissions: [...permissions] });
+    const { calls } = open(
+      isStore ? 'store' : 'company',
+      membership,
+      isStore ? storeProfile({ logo_url: STORE_IMAGE }) : profile({ logo_url: LOGO }),
+    );
     const alt = isStore ? 'Image of Corner Market' : 'Logo of Pamir Distribution';
     expect((await screen.findAllByRole('img', { name: alt })).length).toBeGreaterThan(0);
-    expect(screen.getByText(isStore ? 'Only the owner can change the store image.' : 'Only the owner can change the company logo.')).toBeInTheDocument();
+    expect(
+      screen.getByText(isStore ? 'Only the owner can change the store image.' : 'Only the owner can change the company logo.'),
+    ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /^(Upload|Change|Remove) (logo|image)$/ })).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/^(Upload|Change) (logo|image)$/, { selector: 'input' })).not.toBeInTheDocument();
     expect(calls.some((call) => call.method === 'PUT' || call.method === 'DELETE')).toBe(false);
@@ -176,9 +197,18 @@ describe('membership chips (CR-003 memberships[].logo_url)', () => {
   it('uses the organization picture in the switcher and falls back to the mark when null', async () => {
     useSessionStore.setState({ accessToken: 'token', activeOrgId: 'org-company', endedReason: null, restoring: false });
     mockApi([
-      { path: '/me', body: meFixture([membershipFixture({ permissions: OWNER_PERMS, logo_url: LOGO }), storeMembership({ permissions: OWNER_PERMS, logo_url: null })]) },
+      {
+        path: '/me',
+        body: meFixture([
+          membershipFixture({ permissions: OWNER_PERMS, logo_url: LOGO }),
+          storeMembership({ permissions: OWNER_PERMS, logo_url: null }),
+        ]),
+      },
       { path: '/organization', body: profile({ logo_url: LOGO }) },
-      { path: '/verification', body: { verification_status: 'APPROVED', verified_at: null, required_documents: [], can_submit: false, latest_request: null } },
+      {
+        path: '/verification',
+        body: { verification_status: 'APPROVED', verified_at: null, required_documents: [], can_submit: false, latest_request: null },
+      },
       { path: '/members', body: EMPTY_PAGE },
     ]);
     const { container } = renderRoutes(routes, '/company/settings/profile');

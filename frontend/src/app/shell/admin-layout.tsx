@@ -11,7 +11,10 @@ import type { AdminContext } from './use-admin-context';
  * queue is built; the P12 screens are listed with their phase and open an honest "planned" page.
  */
 type AdminItem = { key: string; icon: LucideIcon; phase?: 'P12' };
-const REVIEW: AdminItem[] = [{ key: 'verifications', icon: ClipboardCheck }, { key: 'support', icon: Headset }];
+const REVIEW: AdminItem[] = [
+  { key: 'verifications', icon: ClipboardCheck },
+  { key: 'support', icon: Headset },
+];
 const PLATFORM: AdminItem[] = [
   { key: 'dashboard', icon: LayoutDashboard, phase: 'P12' },
   { key: 'users', icon: Users, phase: 'P12' },
@@ -25,7 +28,13 @@ export function AdminLayout({ me }: { me: Me }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const toLinks = (items: AdminItem[]) =>
-    items.map((item) => ({ key: item.key, to: `/admin/${item.key}`, icon: item.icon, label: t(`nav.admin.${item.key}`), phase: item.phase }));
+    items.map((item) => ({
+      key: item.key,
+      to: `/admin/${item.key}`,
+      icon: item.icon,
+      label: t(`nav.admin.${item.key}`),
+      phase: item.phase,
+    }));
   // Only the built screen is navigation; the five P12 screens are the roadmap (C8).
   const sections: ShellSection[] = [{ key: 'review', label: t('nav.sections.review'), links: toLinks(REVIEW) }];
   const current = ALL.find((item) => pathname.startsWith(`/admin/${item.key}`)) ?? REVIEW[0]!;
@@ -68,7 +77,12 @@ export function AdminPlannedPage() {
         actions={<PhaseBadge phase={item.phase} />}
       />
       <Card className="relative overflow-hidden">
-        <EmptyState icon={item.icon} title={t('planned.title', { phase: item.phase })} description={t('planned.description')} className="relative py-16 sm:py-20" />
+        <EmptyState
+          icon={item.icon}
+          title={t('planned.title', { phase: item.phase })}
+          description={t('planned.description')}
+          className="relative py-16 sm:py-20"
+        />
       </Card>
     </div>
   );

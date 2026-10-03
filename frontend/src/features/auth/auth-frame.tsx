@@ -34,12 +34,17 @@ export function AuthFrame({
     return (
       <div className="paper daylight-auth auth-access min-h-screen font-sans text-foreground">
         <header className="auth-access-header">
-          <Link to="/" aria-label={t('common.appName')} className="w-fit rounded-xl"><BrandMark /></Link>
+          <Link to="/" aria-label={t('common.appName')} className="w-fit rounded-xl">
+            <BrandMark />
+          </Link>
           <div className="flex flex-wrap items-center justify-end gap-3">
             <Link to="/" className="auth-back-link">
-              <ArrowLeft className="size-4" aria-hidden="true" />{t('site.backToSite')}
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              {t('site.backToSite')}
             </Link>
-            <LanguageSwitcher /><ThemeSwitcher />{actions}
+            <LanguageSwitcher />
+            <ThemeSwitcher />
+            {actions}
           </div>
         </header>
         <div className="auth-access-content">
@@ -47,14 +52,24 @@ export function AuthFrame({
             <p className="auth-statement font-serif">{t('auth.aside.statement')}</p>
             <TwoSides />
           </aside>
-          <main><div className="auth-access-column">{children}</div></main>
+          <main>
+            <div className="auth-access-column">{children}</div>
+          </main>
         </div>
-        <footer className="auth-access-footer"><SupportLink className="auth-support-link" /><span className="font-data">v{meta.data?.version ?? '-'}</span></footer>
+        <footer className="auth-access-footer">
+          <SupportLink className="auth-support-link" />
+          <span className="font-data">v{meta.data?.version ?? '-'}</span>
+        </footer>
       </div>
     );
   }
   return (
-    <div className={cn(accountForm && 'auth-access', "paper daylight-auth min-h-screen bg-background font-sans text-foreground lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]")}>
+    <div
+      className={cn(
+        accountForm && 'auth-access',
+        'paper daylight-auth min-h-screen bg-background font-sans text-foreground lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]',
+      )}
+    >
       <aside className="hidden lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:gap-12 lg:border-r lg:px-12 lg:py-12 xl:px-16">
         <Link to="/" aria-label={t('common.appName')} className="w-fit rounded-xl">
           <BrandMark />
@@ -100,10 +115,17 @@ export function AuthFrame({
         </div>
 
         <main className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-8 lg:px-12 lg:py-12 xl:px-20">
-          <div className={cn('w-full', width === 'wide' ? 'max-w-[32rem]' : accountForm ? 'auth-access-column max-w-[30rem]' : 'max-w-[26rem]')}>
+          <div
+            className={cn(
+              'w-full',
+              width === 'wide' ? 'max-w-[32rem]' : accountForm ? 'auth-access-column max-w-[30rem]' : 'max-w-[26rem]',
+            )}
+          >
             {/* The one line of editorial copy the phone layout keeps. */}
             {step && !accountForm ? null : (
-              <p className="auth-mobile-statement mb-8 font-serif text-title font-semibold leading-snug lg:hidden">{t('auth.aside.statement')}</p>
+              <p className="auth-mobile-statement mb-8 font-serif text-title font-semibold leading-snug lg:hidden">
+                {t('auth.aside.statement')}
+              </p>
             )}
             {step && !accountForm ? <JourneyProgress current={step} className="mb-8" /> : null}
             {children}

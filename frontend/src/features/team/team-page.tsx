@@ -93,7 +93,12 @@ export function TeamPage() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
-              <Select aria-label={t('team.roleFilter')} value={role} onChange={(event) => setRole(event.target.value as Role | '')} className="sm:w-40">
+              <Select
+                aria-label={t('team.roleFilter')}
+                value={role}
+                onChange={(event) => setRole(event.target.value as Role | '')}
+                className="sm:w-40"
+              >
                 <option value="">{t('team.allRoles')}</option>
                 {ROLES[membership.org_type].map((value) => (
                   <option key={value} value={value}>

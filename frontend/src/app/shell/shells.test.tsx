@@ -10,8 +10,24 @@ const MEMBERS = {
   limit: 20,
   offset: 0,
   results: [
-    { id: 'm1', user_id: 'u1', full_name: 'Dilshod Rahimov', phone: '+992900000001', role: 'OWNER', status: 'ACTIVE', joined_at: '2026-09-01T08:00:00Z' },
-    { id: 'm2', user_id: 'u2', full_name: 'Farrukh Nazarov', phone: '+992900000002', role: 'OPERATOR', status: 'SUSPENDED', joined_at: '2026-09-10T08:00:00Z' },
+    {
+      id: 'm1',
+      user_id: 'u1',
+      full_name: 'Dilshod Rahimov',
+      phone: '+992900000001',
+      role: 'OWNER',
+      status: 'ACTIVE',
+      joined_at: '2026-09-01T08:00:00Z',
+    },
+    {
+      id: 'm2',
+      user_id: 'u2',
+      full_name: 'Farrukh Nazarov',
+      phone: '+992900000002',
+      role: 'OPERATOR',
+      status: 'SUSPENDED',
+      joined_at: '2026-09-10T08:00:00Z',
+    },
   ],
 };
 
@@ -54,7 +70,10 @@ describe('Company application', () => {
   });
 
   it('opens a planned module as an explicit "arrives in" page', async () => {
-    mockApi([{ path: '/me', body: meFixture([membershipFixture()]) }, { path: '/members', body: MEMBERS }]);
+    mockApi([
+      { path: '/me', body: meFixture([membershipFixture()]) },
+      { path: '/members', body: MEMBERS },
+    ]);
     signIn();
     renderRoutes(routes, '/company/orders');
     expect(await screen.findByRole('heading', { name: 'Orders' })).toBeInTheDocument();
@@ -69,7 +88,10 @@ describe('Company application', () => {
   });
 
   it('lists the team from the API with statuses', async () => {
-    mockApi([{ path: '/me', body: meFixture([membershipFixture()]) }, { path: '/members', body: MEMBERS }]);
+    mockApi([
+      { path: '/me', body: meFixture([membershipFixture()]) },
+      { path: '/members', body: MEMBERS },
+    ]);
     signIn();
     renderRoutes(routes, '/company/team');
     const table = await screen.findByRole('table');
@@ -92,7 +114,10 @@ describe('Company application', () => {
 
 describe('Store application', () => {
   it('shows the store home with repeat-order and supplier panels', async () => {
-    mockApi([{ path: '/me', body: meFixture([storeMembership()]) }, { path: '/members', body: MEMBERS }]);
+    mockApi([
+      { path: '/me', body: meFixture([storeMembership()]) },
+      { path: '/members', body: MEMBERS },
+    ]);
     signIn();
     renderRoutes(routes, '/store');
     expect(await screen.findByRole('heading', { name: 'Corner Market' })).toBeInTheDocument();
@@ -120,7 +145,10 @@ describe('Store application', () => {
 
 describe('organization switcher and profile', () => {
   it('switches from the company to the store application', async () => {
-    mockApi([{ path: '/me', body: meFixture([membershipFixture(), storeMembership()]) }, { path: '/members', body: MEMBERS }]);
+    mockApi([
+      { path: '/me', body: meFixture([membershipFixture(), storeMembership()]) },
+      { path: '/members', body: MEMBERS },
+    ]);
     signIn('org-company');
     renderRoutes(routes, '/company');
     await screen.findByRole('heading', { name: 'Pamir Distribution' });
@@ -168,7 +196,10 @@ describe('application shell (FND-032, CR-002)', () => {
   });
 
   it('opens the mobile menu as a dialog and closes it with Escape', async () => {
-    mockApi([{ path: '/me', body: meFixture([membershipFixture()]) }, { path: '/members', body: MEMBERS }]);
+    mockApi([
+      { path: '/me', body: meFixture([membershipFixture()]) },
+      { path: '/members', body: MEMBERS },
+    ]);
     signIn();
     renderRoutes(routes, '/company');
     await userEvent.click(await screen.findByRole('button', { name: 'Open menu' }));

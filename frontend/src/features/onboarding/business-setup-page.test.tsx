@@ -47,7 +47,7 @@ describe('onboarding step 4: business setup (/welcome/company, /welcome/store)',
     expect(screen.getByText('Your business will be verified')).toBeInTheDocument();
   });
 
-  it('keeps a Store\'s tax identifier and coordinates optional, behind the disclosure', async () => {
+  it("keeps a Store's tax identifier and coordinates optional, behind the disclosure", async () => {
     mockApi([{ path: '/me', body: meFixture([]) }]);
     renderRoutes(routes, '/welcome/store');
 
@@ -89,7 +89,10 @@ describe('onboarding step 4: business setup (/welcome/company, /welcome/store)',
         method: 'POST',
         path: '/organizations/companies',
         status: 201,
-        body: { organization: { id: 'org-new', type: 'COMPANY', name: 'Pamir Trade', verification_status: 'NOT_SUBMITTED' }, membership: created },
+        body: {
+          organization: { id: 'org-new', type: 'COMPANY', name: 'Pamir Trade', verification_status: 'NOT_SUBMITTED' },
+          membership: created,
+        },
       },
     ]);
     renderRoutes(withCompanyArea, '/welcome/company');

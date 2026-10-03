@@ -1,6 +1,16 @@
 import { Frame } from './primitives';
 
-export function PageHero({ eyebrow, title, lead, image }: { eyebrow: string; title: string; lead: string; image: 'distribution' | 'delivery' | 'product' | 'journey' }) {
+export function PageHero({
+  eyebrow,
+  title,
+  lead,
+  image,
+}: {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  image: 'distribution' | 'delivery' | 'product' | 'journey';
+}) {
   return (
     <section className={`day-page-hero day-page-hero--${image}`}>
       <div className="day-page-hero-image" aria-hidden="true" />

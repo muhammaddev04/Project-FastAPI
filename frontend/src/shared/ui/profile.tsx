@@ -40,14 +40,18 @@ export function ProfileHeader({
               {mark}
               <div className="w-full min-w-0 sm:flex-1">
                 {eyebrow ? <div className="mb-2 flex flex-wrap items-center gap-2">{eyebrow}</div> : null}
-                <h1 className="break-words font-display text-title-lg font-semibold leading-tight text-foreground sm:text-[2rem]">{title}</h1>
+                <h1 className="break-words font-display text-title-lg font-semibold leading-tight text-foreground sm:text-[2rem]">
+                  {title}
+                </h1>
                 {subtitle ? <p className="mt-1 text-body text-muted-foreground">{subtitle}</p> : null}
                 {chips ? <div className="workspace-meta mt-3 flex flex-wrap gap-x-4 gap-y-2">{chips}</div> : null}
               </div>
             </div>
             {actions ? <div className="workspace-actions flex shrink-0 flex-col gap-2 sm:items-stretch">{actions}</div> : null}
           </div>
-          {stats ? <div className="workspace-stats grid grid-cols-[repeat(auto-fit,minmax(min(100%,11.5rem),1fr))] gap-3">{stats}</div> : null}
+          {stats ? (
+            <div className="workspace-stats grid grid-cols-[repeat(auto-fit,minmax(min(100%,11.5rem),1fr))] gap-3">{stats}</div>
+          ) : null}
         </div>
         {aside ? <div className="xl:w-72 xl:shrink-0">{aside}</div> : null}
       </div>
@@ -66,7 +70,19 @@ export function MetaChip({ icon: Icon, children }: { icon: LucideIcon; children:
 }
 
 /** Statistic tile: icon, readable caption, value and optional hint. */
-export function StatCard({ icon: Icon, label, value, hint, className }: { icon: LucideIcon; label: ReactNode; value: ReactNode; hint?: ReactNode; className?: string }) {
+export function StatCard({
+  icon: Icon,
+  label,
+  value,
+  hint,
+  className,
+}: {
+  icon: LucideIcon;
+  label: ReactNode;
+  value: ReactNode;
+  hint?: ReactNode;
+  className?: string;
+}) {
   return (
     <div className={cn('workspace-stat flex items-start gap-3 rounded-xl border bg-subtle px-4 py-3.5', className)}>
       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">

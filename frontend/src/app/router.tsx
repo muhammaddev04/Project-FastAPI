@@ -74,7 +74,11 @@ export const routes: RouteObject[] = [
   },
   {
     // Auth layout route: the brand panel stays mounted while the card animates between pages.
-    element: <RequireGuest><AuthShell /></RequireGuest>,
+    element: (
+      <RequireGuest>
+        <AuthShell />
+      </RequireGuest>
+    ),
     children: [
       { path: '/login', element: <LoginPage /> },
       // Phase D steps 1 and 2. `/verify-email` is the pre-Phase-D address of step 2 and renders the same page,
@@ -101,7 +105,11 @@ export const routes: RouteObject[] = [
     element: (
       <RequireAuth>
         {(me) =>
-          usableMemberships(me).length === 0 && me.onboarding?.org_type ? <Navigate to={onboardingPath(me)} replace /> : <BusinessTypePage me={me} />
+          usableMemberships(me).length === 0 && me.onboarding?.org_type ? (
+            <Navigate to={onboardingPath(me)} replace />
+          ) : (
+            <BusinessTypePage me={me} />
+          )
         }
       </RequireAuth>
     ),

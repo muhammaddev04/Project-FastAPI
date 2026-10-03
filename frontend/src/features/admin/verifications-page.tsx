@@ -34,7 +34,18 @@ import {
 } from './api';
 
 const SNAPSHOT_FIELDS = ['legal_name', 'tax_identifier', 'address'] as const;
-const PROFILE_FIELDS = ['name', 'legal_name', 'tax_identifier', 'phone', 'email', 'city', 'address', 'latitude', 'longitude', 'public_code'] as const;
+const PROFILE_FIELDS = [
+  'name',
+  'legal_name',
+  'tax_identifier',
+  'phone',
+  'email',
+  'city',
+  'address',
+  'latitude',
+  'longitude',
+  'public_code',
+] as const;
 const MIN_REASON = 10;
 /** The working queue: requests waiting for a decision, any organization type. "Reset filters" returns here. */
 const DEFAULT_FILTER: QueueFilter = { status: 'SUBMITTED', org_type: '' };
@@ -63,7 +74,12 @@ function DocumentLink({ requestId, documentId, label }: { requestId: string; doc
   return (
     <span className="flex flex-wrap items-center gap-2">
       {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-primary hover:underline">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+        >
           {label} <ExternalLink className="size-3.5" aria-hidden="true" />
         </a>
       ) : (
@@ -146,7 +162,10 @@ function RequestDetail({ id, adminId }: { id: string; adminId: string }) {
       <DetailSection icon={FileText} title={t('admin.verifications.documentsTitle')}>
         <ul className="space-y-2">
           {data.documents.map((document) => (
-            <li key={document.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-subtle/40 px-3.5 py-2.5 text-label">
+            <li
+              key={document.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-subtle/40 px-3.5 py-2.5 text-label"
+            >
               <span className="font-semibold">{t(`verification.docTypes.${document.doc_type}`)}</span>
               <DocumentLink requestId={data.id} documentId={document.id} label={document.file.display_name} />
             </li>
@@ -176,7 +195,11 @@ function RequestDetail({ id, adminId }: { id: string; adminId: string }) {
         </DetailSection>
       ) : null}
 
-      {data.rejection_reason ? <Alert tone="danger" title={t('admin.verifications.rejectionReason')}>{data.rejection_reason}</Alert> : null}
+      {data.rejection_reason ? (
+        <Alert tone="danger" title={t('admin.verifications.rejectionReason')}>
+          {data.rejection_reason}
+        </Alert>
+      ) : null}
       {act.isError ? <Alert tone="danger">{errorMessage(act.error, t)}</Alert> : null}
 
       <div className="border-t pt-4">
@@ -273,7 +296,14 @@ export function VerificationsPage() {
           onReset: () => setFilter(() => DEFAULT_FILTER),
         }}
         pagination={
-          data ? { offset: page.offset, limit: QUEUE_PAGE_SIZE, count: data.count, onChange: (offset) => setPage((current) => ({ ...current, offset })) } : undefined
+          data
+            ? {
+                offset: page.offset,
+                limit: QUEUE_PAGE_SIZE,
+                count: data.count,
+                onChange: (offset) => setPage((current) => ({ ...current, offset })),
+              }
+            : undefined
         }
         sort={{
           key: 'submitted',
@@ -316,14 +346,22 @@ export function VerificationsPage() {
             cell: (item) => (
               <div className="flex items-center gap-3">
                 <Avatar kind={item.org_type === 'STORE' ? 'store' : 'company'} size="md" className="rounded-xl" />
-                <button type="button" className="min-w-0 truncate text-left font-semibold text-foreground hover:text-primary" onClick={() => setOpenId(item.id)}>
+                <button
+                  type="button"
+                  className="min-w-0 truncate text-left font-semibold text-foreground hover:text-primary"
+                  onClick={() => setOpenId(item.id)}
+                >
                   {item.org_name}
                 </button>
               </div>
             ),
           },
           { key: 'type', header: t('admin.verifications.columns.type'), cell: (item) => t(`orgTypes.${item.org_type}`) },
-          { key: 'status', header: t('admin.verifications.columns.status'), cell: (item) => <StatusBadge kind="request" value={item.status} /> },
+          {
+            key: 'status',
+            header: t('admin.verifications.columns.status'),
+            cell: (item) => <StatusBadge kind="request" value={item.status} />,
+          },
           {
             key: 'submitted',
             header: t('admin.verifications.columns.submitted'),

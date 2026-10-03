@@ -3,8 +3,8 @@ import type { Role } from '@/shared/auth/types';
 import { navByAvailability, navFor } from './nav-config';
 
 const keys = (area: 'company' | 'store' | 'courier', role: Role, permissions: string[] = []) =>
-  navFor(area, area === 'store' ? storeMembership({ role, permissions }) : membershipFixture({ role, permissions })).flatMap(
-    (section) => section.items.map((item) => item.key),
+  navFor(area, area === 'store' ? storeMembership({ role, permissions }) : membershipFixture({ role, permissions })).flatMap((section) =>
+    section.items.map((item) => item.key),
   );
 
 const OWNER_PERMS = ['members.change_role', 'members.invite', 'members.revoke', 'members.suspend', 'members.view'];
@@ -12,8 +12,18 @@ const OWNER_PERMS = ['members.change_role', 'members.invite', 'members.revoke', 
 describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
   it('gives the company owner the whole console', () => {
     expect(keys('company', 'OWNER', OWNER_PERMS)).toEqual([
-      'dashboard', 'orders', 'catalog', 'inventory', 'partners', 'delivery', 'finance', 'returns', 'reports',
-      'team', 'subscription', 'settings',
+      'dashboard',
+      'orders',
+      'catalog',
+      'inventory',
+      'partners',
+      'delivery',
+      'finance',
+      'returns',
+      'reports',
+      'team',
+      'subscription',
+      'settings',
     ]);
   });
 
@@ -33,7 +43,15 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
 
   it('keeps debt, disputes, team and settings from store sellers', () => {
     expect(keys('store', 'OWNER', OWNER_PERMS)).toEqual([
-      'dashboard', 'suppliers', 'catalog', 'cart', 'orders', 'debt', 'returns', 'team', 'settings',
+      'dashboard',
+      'suppliers',
+      'catalog',
+      'cart',
+      'orders',
+      'debt',
+      'returns',
+      'team',
+      'settings',
     ]);
     expect(keys('store', 'SELLER')).toEqual(['dashboard', 'suppliers', 'catalog', 'cart', 'orders']);
   });
@@ -60,7 +78,15 @@ describe('honest navigation (Phase C8)', () => {
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
     expect(planned.map((item) => item.key)).toEqual([
-      'orders', 'catalog', 'inventory', 'partners', 'delivery', 'finance', 'returns', 'reports', 'subscription',
+      'orders',
+      'catalog',
+      'inventory',
+      'partners',
+      'delivery',
+      'finance',
+      'returns',
+      'reports',
+      'subscription',
     ]);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });

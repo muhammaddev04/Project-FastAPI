@@ -36,7 +36,10 @@ export function SupportButton({ className }: { className?: string }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${t('common.support')} @${SUPPORT_TELEGRAM}`}
-      className={cn('group items-center gap-2.5 rounded-full text-body font-medium text-foreground/85 transition-colors hover:text-foreground', className)}
+      className={cn(
+        'group items-center gap-2.5 rounded-full text-body font-medium text-foreground/85 transition-colors hover:text-foreground',
+        className,
+      )}
     >
       <span className="flex size-10 items-center justify-center rounded-full border bg-surface/50 text-primary transition-colors duration-base group-hover:border-primary/50">
         <Send className="size-4" aria-hidden="true" />

@@ -47,7 +47,10 @@ export function TeamCard({ membership }: { membership: Membership }) {
         icon={<Users />}
         title={t('dashboard.team.title')}
         action={
-          <Link to={`/${area}/team`} className="link-grow inline-flex items-center gap-1 text-label font-semibold text-primary hover:text-primary-hover">
+          <Link
+            to={`/${area}/team`}
+            className="link-grow inline-flex items-center gap-1 text-label font-semibold text-primary hover:text-primary-hover"
+          >
             {t('dashboard.team.open')} <ArrowRight className="size-3.5" aria-hidden="true" />
           </Link>
         }

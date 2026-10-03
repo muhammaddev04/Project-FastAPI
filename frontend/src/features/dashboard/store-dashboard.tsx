@@ -55,7 +55,7 @@ export function StoreDashboard() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <PlannedPanel
-            emptyTitle={t('dashboard.pending.title')}
+          emptyTitle={t('dashboard.pending.title')}
           icon={Building2}
           title={t('dashboard.store.suppliers')}
           description={t('dashboard.store.suppliersEmpty')}

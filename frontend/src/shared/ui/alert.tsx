@@ -32,16 +32,22 @@ export function Alert({
   return (
     <div
       role={tone === 'danger' ? 'alert' : 'status'}
-      className={cn('flex animate-fade-in flex-wrap items-start gap-3 rounded-xl border px-3.5 py-3 text-label leading-5 text-foreground', box, className)}
+      className={cn(
+        'flex animate-fade-in flex-wrap items-start gap-3 rounded-xl border px-3.5 py-3 text-label leading-5 text-foreground',
+        box,
+        className,
+      )}
     >
       <span className={cn('flex size-7 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4', iconClass)}>
         {icon ?? <Icon aria-hidden="true" />}
       </span>
       <div className="min-w-0 flex-1 basis-0 space-y-0.5 pt-0.5">
         {title ? <p className="font-semibold">{title}</p> : null}
-        {children ? <div className={cn(tone === 'brand' ? 'text-foreground/85' : 'text-muted-foreground', 'break-words')}>{children}</div> : null}
+        {children ? (
+          <div className={cn(tone === 'brand' ? 'text-foreground/85' : 'text-muted-foreground', 'break-words')}>{children}</div>
+        ) : null}
       </div>
-      {action ? <div className="shrink-0 self-center max-sm:ml-10 max-sm:basis-full">{action}</div> : null}
+      {action ? <div className="min-w-0 self-center max-sm:basis-full max-sm:pl-10 sm:shrink-0">{action}</div> : null}
     </div>
   );
 }

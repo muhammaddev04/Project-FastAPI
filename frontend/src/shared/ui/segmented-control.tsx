@@ -23,7 +23,8 @@ export function SegmentedControl<T extends string>({
   const layoutId = useId();
   const move = (event: KeyboardEvent<HTMLDivElement>) => {
     const index = options.findIndex((option) => option.value === value);
-    const step = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0;
+    const step =
+      event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0;
     if (!step) return;
     event.preventDefault();
     const next = options[(index + step + options.length) % options.length];

@@ -39,7 +39,12 @@ export const DialogContent = forwardRef<
         {children}
         {hideClose ? null : (
           <DialogPrimitive.Close asChild>
-            <Button variant="ghost" size="icon" className="absolute right-3 top-3 size-9 text-muted-foreground" aria-label={t('common.close')}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-3 top-3 size-9 text-muted-foreground"
+              aria-label={t('common.close')}
+            >
               <X />
             </Button>
           </DialogPrimitive.Close>
@@ -50,14 +55,28 @@ export const DialogContent = forwardRef<
 });
 DialogContent.displayName = 'DialogContent';
 
-export function DialogHeader({ icon: Icon, tone = 'primary', title, description }: { icon?: LucideIcon; tone?: 'primary' | 'danger' | 'warning'; title: ReactNode; description?: ReactNode }) {
+export function DialogHeader({
+  icon: Icon,
+  tone = 'primary',
+  title,
+  description,
+}: {
+  icon?: LucideIcon;
+  tone?: 'primary' | 'danger' | 'warning';
+  title: ReactNode;
+  description?: ReactNode;
+}) {
   return (
     <div className="flex items-start gap-3 pr-8">
       {Icon ? (
         <span
           className={cn(
             'flex size-10 shrink-0 items-center justify-center rounded-xl',
-            tone === 'danger' ? 'bg-danger/10 text-danger' : tone === 'warning' ? 'bg-warning/10 text-warning' : 'bg-primary/10 text-primary',
+            tone === 'danger'
+              ? 'bg-danger/10 text-danger'
+              : tone === 'warning'
+                ? 'bg-warning/10 text-warning'
+                : 'bg-primary/10 text-primary',
           )}
         >
           <Icon className="size-5" aria-hidden="true" />
@@ -66,7 +85,9 @@ export function DialogHeader({ icon: Icon, tone = 'primary', title, description 
       <div className="min-w-0">
         <DialogPrimitive.Title className="font-display text-lg font-bold leading-snug">{title}</DialogPrimitive.Title>
         {description ? (
-          <DialogPrimitive.Description className="mt-1 text-body leading-relaxed text-muted-foreground">{description}</DialogPrimitive.Description>
+          <DialogPrimitive.Description className="mt-1 text-body leading-relaxed text-muted-foreground">
+            {description}
+          </DialogPrimitive.Description>
         ) : (
           <DialogPrimitive.Description className="sr-only">{title}</DialogPrimitive.Description>
         )}

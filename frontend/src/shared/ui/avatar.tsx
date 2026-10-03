@@ -86,7 +86,12 @@ export function Avatar({
         <span className={s.text}>{initialsOf(name ?? '')}</span>
       )}
       {verified ? (
-        <span className={cn('absolute -bottom-1 -right-1 flex items-center justify-center rounded-full border-2 border-surface bg-success text-white', s.badge)}>
+        <span
+          className={cn(
+            'absolute -bottom-1 -right-1 flex items-center justify-center rounded-full border-2 border-surface bg-success text-white',
+            s.badge,
+          )}
+        >
           <ShieldCheck />
         </span>
       ) : null}

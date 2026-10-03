@@ -192,7 +192,11 @@ describe('contact phone (CR-003 PATCH /me phone)', () => {
     await userEvent.type(field, '+992 (90) 000-00-99');
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     expect(await screen.findByText('Your profile was saved.')).toBeInTheDocument();
-    expect(calls.find((call) => call.method === 'PATCH')?.body).toEqual({ full_name: 'Dilshod Rahimov', language: 'en', phone: '+992900000099' });
+    expect(calls.find((call) => call.method === 'PATCH')?.body).toEqual({
+      full_name: 'Dilshod Rahimov',
+      language: 'en',
+      phone: '+992900000099',
+    });
     await waitFor(() => expect(field).toHaveValue('+992900000099'));
   });
 
@@ -207,13 +211,17 @@ describe('contact phone (CR-003 PATCH /me phone)', () => {
   });
 
   it('does not send the phone when only the name changes', async () => {
-    const { calls } = openProfile(me({ phone: '+992900000001' }), [{ method: 'PATCH', path: '/me', body: me({ full_name: 'Nigina Karimova' }) }]);
+    const { calls } = openProfile(me({ phone: '+992900000001' }), [
+      { method: 'PATCH', path: '/me', body: me({ full_name: 'Nigina Karimova' }) },
+    ]);
     const name = await screen.findByLabelText('Full name');
     await waitFor(() => expect(name).toHaveValue('Dilshod Rahimov'));
     await userEvent.clear(name);
     await userEvent.type(name, 'Nigina Karimova');
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
-    await waitFor(() => expect(calls.find((call) => call.method === 'PATCH')?.body).toEqual({ full_name: 'Nigina Karimova', language: 'en' }));
+    await waitFor(() =>
+      expect(calls.find((call) => call.method === 'PATCH')?.body).toEqual({ full_name: 'Nigina Karimova', language: 'en' }),
+    );
   });
 
   it('shows phone_taken on the phone field instead of a generic error', async () => {

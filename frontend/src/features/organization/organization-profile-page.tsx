@@ -12,7 +12,25 @@ import { errorMessage } from '@/shared/api/errors';
 import { formatDate } from '@/shared/lib/datetime';
 import { useMembers } from '@/shared/auth/api';
 import { areaFor } from '@/shared/auth/context';
-import { Alert, Avatar, Badge, Button, Card, ErrorState, FormField, InfoRow, Input, MetaChip, Pill, PlannedPanel, ProfileHeader, SectionHeader, Skeleton, StatCard, StatusBadge } from '@/shared/ui';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  ErrorState,
+  FormField,
+  InfoRow,
+  Input,
+  MetaChip,
+  Pill,
+  PlannedPanel,
+  ProfileHeader,
+  SectionHeader,
+  Skeleton,
+  StatCard,
+  StatusBadge,
+} from '@/shared/ui';
 import { ImagePicker } from '@/shared/images/image-picker';
 import { useRemoveOrganizationImage, useUpdateOrganization, useUploadOrganizationImage, type OrganizationChanges } from './api';
 import { SettingsTabs } from './settings-tabs';
@@ -21,17 +39,26 @@ const coordinate = (min: number, max: number) =>
   z
     .string()
     .trim()
-    .refine((value) => !value || (/^-?\d{1,3}(\.\d{1,6})?$/.test(value) && Number(value) >= min && Number(value) <= max), 'validation.coordinate');
+    .refine(
+      (value) => !value || (/^-?\d{1,3}(\.\d{1,6})?$/.test(value) && Number(value) >= min && Number(value) <= max),
+      'validation.coordinate',
+    );
 
 const schema = z.object({
   name: z.string().trim().min(2, 'validation.nameTooShort').max(200, 'validation.tooLong'),
   legal_name: z.string().trim().min(2, 'validation.nameTooShort').max(255, 'validation.tooLong'),
-  tax_identifier: z.string().trim().refine((value) => !value || /^\d{9,12}$/.test(value), 'validation.taxIdentifier'),
+  tax_identifier: z
+    .string()
+    .trim()
+    .refine((value) => !value || /^\d{9,12}$/.test(value), 'validation.taxIdentifier'),
   phone: z
     .string()
     .trim()
     .refine((value) => /^\+[1-9]\d{7,14}$/.test(value.replace(/[\s()-]/g, '')), 'validation.phone'),
-  email: z.string().trim().refine((value) => !value || z.string().email().safeParse(value).success, 'validation.email'),
+  email: z
+    .string()
+    .trim()
+    .refine((value) => !value || z.string().email().safeParse(value).success, 'validation.email'),
   city: z.string().trim().min(2, 'validation.nameTooShort').max(100, 'validation.tooLong'),
   address: z.string().trim().min(3, 'validation.addressTooShort').max(500, 'validation.tooLong'),
   latitude: coordinate(-90, 90),
@@ -150,7 +177,9 @@ export function OrganizationProfilePage() {
   const canContacts = perms.includes('org.edit_contacts');
   const editable = new Set<Field>([
     ...(perms.includes('org.edit_legal') ? (['name'] as Field[]) : []),
-    ...(canLegal ? LEGAL : []), ...(canContacts ? CONTACTS.filter((f) => isStore || (f !== 'latitude' && f !== 'longitude')) : [])]);
+    ...(canLegal ? LEGAL : []),
+    ...(canContacts ? CONTACTS.filter((f) => isStore || (f !== 'latitude' && f !== 'longitude')) : []),
+  ]);
   const date = (value: string | null) => formatDate(value) ?? '—';
   const message = (field: Field) => {
     const key = errors[field]?.message;
@@ -231,7 +260,11 @@ export function OrganizationProfilePage() {
               hint={data.verification_status === 'APPROVED' ? date(data.verified_at) : undefined}
             />
             {data.public_code ? (
-              <StatCard icon={Hash} label={t('orgProfile.publicCode')} value={<span className="font-data tracking-widest">{data.public_code}</span>} />
+              <StatCard
+                icon={Hash}
+                label={t('orgProfile.publicCode')}
+                value={<span className="font-data tracking-widest">{data.public_code}</span>}
+              />
             ) : null}
           </>
         }
@@ -247,22 +280,36 @@ export function OrganizationProfilePage() {
               icon={FileText}
               title={t('orgProfile.requisites')}
               subtitle={t('orgProfile.requisitesHint')}
-              chip={data.legal_locked ? <Badge tone="neutral"><Lock className="size-3" aria-hidden="true" /> {t('orgProfile.locked')}</Badge> : null}
+              chip={
+                data.legal_locked ? (
+                  <Badge tone="neutral">
+                    <Lock className="size-3" aria-hidden="true" /> {t('orgProfile.locked')}
+                  </Badge>
+                ) : null
+              }
             />
             {data.legal_locked ? (
-              <Alert tone="info">{t(data.verification_status === 'APPROVED' ? 'orgProfile.lockedApproved' : 'orgProfile.lockedPending')}</Alert>
+              <Alert tone="info">
+                {t(data.verification_status === 'APPROVED' ? 'orgProfile.lockedApproved' : 'orgProfile.lockedPending')}
+              </Alert>
             ) : !perms.includes('org.edit_legal') ? (
               <Alert tone="info">{t('orgProfile.legalOwnerOnly')}</Alert>
             ) : null}
             <div className="grid gap-5 sm:grid-cols-2">
-              <div className="sm:col-span-2">{field('name', isStore ? t('onboarding.storeName') : t('onboarding.companyName'), { maxLength: 200 })}</div>
+              <div className="sm:col-span-2">
+                {field('name', isStore ? t('onboarding.storeName') : t('onboarding.companyName'), { maxLength: 200 })}
+              </div>
               {field('legal_name', t('onboarding.fields.legalName'), { maxLength: 255 })}
               {field('tax_identifier', t('onboarding.fields.taxIdentifier'), { inputMode: 'numeric', maxLength: 12 })}
             </div>
           </Card>
 
           <Card className="space-y-4 p-5 sm:p-6">
-            <SectionHeader icon={Phone} title={t('orgProfile.contacts')} subtitle={canContacts ? t('orgProfile.contactsHint') : t('orgProfile.readOnly')} />
+            <SectionHeader
+              icon={Phone}
+              title={t('orgProfile.contacts')}
+              subtitle={canContacts ? t('orgProfile.contactsHint') : t('orgProfile.readOnly')}
+            />
             <div className="grid gap-4 sm:grid-cols-2">
               {field('phone', t('onboarding.fields.phone'), { type: 'tel', maxLength: 20 })}
               {field('email', t('onboarding.fields.email'), { type: 'email', maxLength: 254 })}
@@ -310,7 +357,11 @@ export function OrganizationProfilePage() {
 
           {canViewVerification ? (
             <Card className="p-5 sm:p-6">
-              <SectionHeader icon={FileText} title={t('orgProfile.documents')} chip={<StatusBadge kind="verification" value={data.verification_status} />} />
+              <SectionHeader
+                icon={FileText}
+                title={t('orgProfile.documents')}
+                chip={<StatusBadge kind="verification" value={data.verification_status} />}
+              />
               {verification.isPending ? (
                 <Skeleton className="mt-4 h-16" />
               ) : verification.data?.latest_request?.documents.length ? (
@@ -339,11 +390,18 @@ export function OrganizationProfilePage() {
               <SectionHeader icon={MapPin} title={t('orgProfile.location')} />
               <dl className="mt-3 divide-y">
                 <InfoRow label={t('onboarding.fields.address')} value={`${data.city}, ${data.address}`} />
-                <InfoRow label={t('onboarding.fields.coordinates')} value={data.latitude ? `${data.latitude}, ${data.longitude}` : t('onboarding.notProvided')} />
+                <InfoRow
+                  label={t('onboarding.fields.coordinates')}
+                  value={data.latitude ? `${data.latitude}, ${data.longitude}` : t('onboarding.notProvided')}
+                />
               </dl>
               {data.latitude && data.longitude ? (
                 <Button asChild variant="secondary" block className="mt-3">
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     {t('orgProfile.openMap')}
                   </a>
                 </Button>

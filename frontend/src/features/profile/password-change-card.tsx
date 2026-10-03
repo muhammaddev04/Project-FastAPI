@@ -36,7 +36,10 @@ export function PasswordChangeCard() {
     mutationFn: (values: Values) =>
       apiRequest<void>('/auth/password/change', { method: 'POST', body: { current_password: values.current, new_password: values.next } }),
   });
-  const failure = change.error instanceof ApiError && ['invalid_credentials', 'weak_password', 'validation_error'].includes(change.error.code) ? null : change.error;
+  const failure =
+    change.error instanceof ApiError && ['invalid_credentials', 'weak_password', 'validation_error'].includes(change.error.code)
+      ? null
+      : change.error;
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {

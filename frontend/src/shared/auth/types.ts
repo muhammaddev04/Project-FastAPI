@@ -4,7 +4,8 @@ export type CompanyRole = 'OWNER' | 'MANAGER' | 'OPERATOR' | 'WAREHOUSE' | 'COUR
 export type StoreRole = 'OWNER' | 'SELLER';
 export type Role = CompanyRole | StoreRole;
 export type MembershipStatus = 'ACTIVE' | 'SUSPENDED' | 'REVOKED';
-export type Language = 'tg' | 'ru' | 'en';
+import type { components } from '@/shared/api/schema';
+export type Language = components['schemas']['MeResponse']['language'];
 
 export type Membership = {
   id: string;

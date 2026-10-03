@@ -3,6 +3,7 @@
 The manifest is incremental: passing this check does not imply full TZ coverage.
 """
 
+import argparse
 import ast
 import json
 import re
@@ -11,10 +12,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def check(root: Path) -> list[str]:
+def check(root: Path, complete_p00: bool = False) -> list[str]:
     manifest = json.loads((root / "docs/traceability.json").read_text(encoding="utf-8"))
     requirements = set(re.findall(r"\b[A-Z]{2,8}-\d{3}\b", (root / "TZ.md").read_text(encoding="utf-8")))
     errors = []
+    if complete_p00:
+        specification = (root / "TZ.md").read_text(encoding="utf-8")
+        section = specification.split("## [P00_foundation]", 1)[1].split("## [P01_identity_access]", 1)[0]
+        required = set(re.findall(r"\bFND-\d{3}\b", section))
+        errors.extend(f"Unmapped P00 requirement: {item}" for item in sorted(required - manifest.keys()))
     for requirement, references in manifest.items():
         if requirement not in requirements:
             errors.append(f"Unknown requirement: {requirement}")
@@ -36,9 +42,9 @@ def check(root: Path) -> list[str]:
                     }
                     if not function.startswith("test_") or function not in names:
                         raise ValueError("test function not found")
-                elif path.suffix in {".ts", ".tsx"} and ".test." in path.name:
+                elif path.suffix in {".ts", ".tsx"} and any(s in path.name for s in (".test.", ".spec.")):
                     # Static Vitest titles only; no imports or execution of frontend code.
-                    pattern = r"\b(?:it|test)\s*\(\s*(['\"])" + re.escape(function) + r"\1"
+                    pattern = r"\b(?:it|test)\s*\(\s*(['\"`])" + re.escape(function) + r"\1"
                     if not re.search(pattern, source):
                         raise ValueError("test title not found")
                 else:
@@ -49,9 +55,12 @@ def check(root: Path) -> list[str]:
 
 
 if __name__ == "__main__":
-    problems = check(ROOT)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--complete-p00", action="store_true")
+    args = parser.parse_args()
+    problems = check(ROOT, complete_p00=args.complete_p00)
     for problem in problems:
         print(problem)
     if not problems:
-        print("Tracked requirements have valid test references (incremental coverage only).")
+        print("P00 references complete." if args.complete_p00 else "Tracked references valid (incremental coverage).")
     raise SystemExit(bool(problems))

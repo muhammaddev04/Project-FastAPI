@@ -50,7 +50,7 @@ export function CompanyDashboard() {
           />
         ) : null}
         <PlannedPanel
-            emptyTitle={t('dashboard.pending.title')}
+          emptyTitle={t('dashboard.pending.title')}
           icon={Bell}
           title={t('dashboard.notifications.title')}
           description={t('dashboard.notifications.empty')}
@@ -68,7 +68,7 @@ export function CompanyDashboard() {
             <ReadinessChecklist membership={membership} steps={READINESS} />
           ) : (
             <PlannedPanel
-            emptyTitle={t('dashboard.pending.title')}
+              emptyTitle={t('dashboard.pending.title')}
               icon={ClipboardList}
               title={t(`dashboard.company.roleFocus.${membership.role}.title`)}
               description={t(`dashboard.company.roleFocus.${membership.role}.text`)}

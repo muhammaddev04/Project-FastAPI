@@ -8,7 +8,17 @@ import { cn } from '@/shared/lib/cn';
  * card badge ("B2B PLATFORM") and the hero tag ("B2B platform for Tajikistan"), both of which are gone: the
  * first restated the brand lockup beside it, the second was a marketing line on a sign-in screen.
  */
-export function Pill({ children, size = 'sm', live = false, className }: { children: ReactNode; size?: 'sm' | 'md'; live?: boolean; className?: string }) {
+export function Pill({
+  children,
+  size = 'sm',
+  live = false,
+  className,
+}: {
+  children: ReactNode;
+  size?: 'sm' | 'md';
+  live?: boolean;
+  className?: string;
+}) {
   return (
     <span
       className={cn(

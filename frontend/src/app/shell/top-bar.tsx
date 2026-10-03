@@ -13,17 +13,7 @@ import { SupportButton } from '@/shared/ui';
  * every control one step at 2xl to match a screenshot. The authentication screens have their own frame now,
  * and nothing else ever asked for either, so the bar has one appearance.
  */
-export function TopBar({
-  start,
-  center,
-  end,
-  className,
-}: {
-  start: ReactNode;
-  center?: ReactNode;
-  end?: ReactNode;
-  className?: string;
-}) {
+export function TopBar({ start, center, end, className }: { start: ReactNode; center?: ReactNode; end?: ReactNode; className?: string }) {
   return (
     <header className={cn('chrome sticky top-0 z-20 border-x-0 border-t-0 border-b', className)}>
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-4 sm:px-6 lg:h-[4.5rem] lg:px-10">

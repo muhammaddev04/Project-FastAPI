@@ -47,9 +47,7 @@ export function FormField({
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <Label htmlFor={id} className={cn(size === 'lg' && 'text-body-lg', labelClassName)}>
           {label}
-          {requirement === 'optional' ? (
-            <span className="ml-1.5 font-normal text-muted-foreground">{t('common.optional')}</span>
-          ) : null}
+          {requirement === 'optional' ? <span className="ml-1.5 font-normal text-muted-foreground">{t('common.optional')}</span> : null}
           {requirement === 'required' ? (
             <span className="ml-1 text-danger" aria-hidden="true">
               *

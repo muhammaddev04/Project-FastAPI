@@ -7,12 +7,14 @@ export function CourierHome() {
   const { t } = useTranslation();
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <PageHeader
-        title={t('dashboard.courier.title')}
-        actions={<PhaseBadge phase="P08" />}
-      />
+      <PageHeader title={t('dashboard.courier.title')} actions={<PhaseBadge phase="P08" />} />
       <Card>
-        <EmptyState icon={Truck} title={t('dashboard.courier.emptyTitle')} description={t('dashboard.courier.emptyText')} className="py-16" />
+        <EmptyState
+          icon={Truck}
+          title={t('dashboard.courier.emptyTitle')}
+          description={t('dashboard.courier.emptyText')}
+          className="py-16"
+        />
       </Card>
     </div>
   );

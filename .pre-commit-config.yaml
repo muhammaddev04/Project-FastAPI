@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+  - repo: local
+    hooks:
+      - id: backend-ruff
+        name: Backend Ruff
+        entry: python scripts/hooks.py check
+        language: system
+        files: ^backend/.*\.py$
+      - id: backend-format
+        name: Backend format
+        entry: python scripts/hooks.py format
+        language: system
+        files: ^backend/.*\.py$
+      - id: backend-mypy
+        name: Backend strict typing
+        entry: python scripts/dev.py lint
+        language: system
+        pass_filenames: false
+        files: ^backend/(app/.*\.py|pyproject\.toml|requirements\.txt)$
+      - id: frontend-eslint
+        name: Frontend lint
+        entry: python scripts/dev.py fe-lint
+        language: system
+        pass_filenames: false
+        files: ^frontend/.*\.(ts|tsx|js)$
+      - id: frontend-prettier
+        name: Frontend format
+        entry: python scripts/dev.py fe-format-check
+        language: system
+        pass_filenames: false
+        files: ^frontend/.*\.(ts|tsx|js|json|css)$

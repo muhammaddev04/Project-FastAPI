@@ -47,7 +47,9 @@ export function CardHeader({
     <div className={cn('workspace-card-heading flex flex-wrap items-start justify-between gap-4 border-b px-5 py-4', className)}>
       <div className="flex min-w-0 items-start gap-3">
         {icon ? (
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary [&_svg]:size-4">{icon}</span>
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary [&_svg]:size-4">
+            {icon}
+          </span>
         ) : null}
         <div className="min-w-0">
           <h2 className="text-body-lg font-semibold text-foreground">{title}</h2>

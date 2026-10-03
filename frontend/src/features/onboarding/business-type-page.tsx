@@ -33,10 +33,7 @@ export function BusinessTypePage({ me }: { me: Me }) {
   return (
     <AuthFrame step="type" actions={<AccountMenu me={me} compact />}>
       <AuthPage title={t('onboarding.type.title')} lead={t('onboarding.type.lead')}>
-        <form
-          className="space-y-6"
-          onSubmit={form.handleSubmit(({ type }) => navigate(`/welcome/${type.toLowerCase()}`))}
-        >
+        <form className="space-y-6" onSubmit={form.handleSubmit(({ type }) => navigate(`/welcome/${type.toLowerCase()}`))}>
           <OrgTypeChoice selected={selected} field={form.register('type')} legend={t('onboarding.type.legend')} />
           <Button type="submit" block size="xl">
             {t('common.continue')}

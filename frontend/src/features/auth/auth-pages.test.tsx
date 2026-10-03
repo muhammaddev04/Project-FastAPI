@@ -102,7 +102,9 @@ describe('auth screens (CR-001: email)', () => {
     });
 
     it('shows a retryable error when sign-in options cannot be loaded', async () => {
-      mockApi([{ path: '/meta', status: 503, body: { error: { code: 'service_unavailable', message: '', details: {}, request_id: 'r' } } }]);
+      mockApi([
+        { path: '/meta', status: 503, body: { error: { code: 'service_unavailable', message: '', details: {}, request_id: 'r' } } },
+      ]);
       renderRoutes(routes, '/login');
       // One automatic retry for 5xx happens first (query-client.ts), so allow for its back-off.
       expect(await screen.findByText("Couldn't load sign-in options", {}, { timeout: 4000 })).toBeInTheDocument();

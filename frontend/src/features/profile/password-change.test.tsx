@@ -12,7 +12,9 @@ const META = {
   currency: 'TJS',
   auth: { password_login: true, registration: true, password_reset: true, email_verification: true, google: true },
 };
-const ME = meFixture([membershipFixture(), storeMembership({ role: 'SELLER', verification_status: 'PENDING' })], { last_login_at: '2026-09-26T08:00:00Z' });
+const ME = meFixture([membershipFixture(), storeMembership({ role: 'SELLER', verification_status: 'PENDING' })], {
+  last_login_at: '2026-09-26T08:00:00Z',
+});
 
 function apiError(code: string, details: Record<string, unknown> = {}) {
   return { error: { code, message: code, details, request_id: 'r' } };

@@ -67,29 +67,44 @@ function DocumentSlot({
     <div className={cn('rounded-xl border px-4 py-3.5 transition-colors', value ? 'border-success/40 bg-success-soft/40' : 'bg-subtle/40')}>
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
-          <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-xl', value ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary')}>
-            {value ? <FileCheck2 className="size-[1.125rem]" aria-hidden="true" /> : <FileText className="size-[1.125rem]" aria-hidden="true" />}
+          <span
+            className={cn(
+              'flex size-10 shrink-0 items-center justify-center rounded-xl',
+              value ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary',
+            )}
+          >
+            {value ? (
+              <FileCheck2 className="size-[1.125rem]" aria-hidden="true" />
+            ) : (
+              <FileText className="size-[1.125rem]" aria-hidden="true" />
+            )}
           </span>
           <div className="min-w-0">
-          <p className="text-sm font-medium">
-            {t(`verification.docTypes.${docType}`)}
-            {optional ? <span className="ml-1.5 text-caption font-normal text-muted-foreground">{t('verification.optional')}</span> : null}
-          </p>
-          {value ? (
-            <p className="mt-0.5 flex items-center gap-1.5 truncate text-label text-muted-foreground">
-              <FileCheck2 className="size-3.5 shrink-0 text-success" aria-hidden="true" />
-              <span className="truncate">{value.display_name}</span> · {formatBytes(value.size_bytes)}
+            <p className="text-sm font-medium">
+              {t(`verification.docTypes.${docType}`)}
+              {optional ? (
+                <span className="ml-1.5 text-caption font-normal text-muted-foreground">{t('verification.optional')}</span>
+              ) : null}
             </p>
-          ) : (
-            <p className="mt-0.5 text-label text-muted-foreground">{t('verification.fileHint')}</p>
-          )}
+            {value ? (
+              <p className="mt-0.5 flex items-center gap-1.5 truncate text-label text-muted-foreground">
+                <FileCheck2 className="size-3.5 shrink-0 text-success" aria-hidden="true" />
+                <span className="truncate">{value.display_name}</span> · {formatBytes(value.size_bytes)}
+              </p>
+            ) : (
+              <p className="mt-0.5 text-label text-muted-foreground">{t('verification.fileHint')}</p>
+            )}
           </div>
         </div>
         <label
           htmlFor={inputId}
           className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/40 bg-surface/60 px-3.5 py-2 text-label font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/5 sm:min-h-9"
         >
-          {upload.isPending ? <Spinner className="size-4" label={t('verification.uploading')} /> : <FileUp className="size-4" aria-hidden="true" />}
+          {upload.isPending ? (
+            <Spinner className="size-4" label={t('verification.uploading')} />
+          ) : (
+            <FileUp className="size-4" aria-hidden="true" />
+          )}
           {value ? t('verification.replaceFile') : t('verification.chooseFile')}
         </label>
         <input
@@ -212,7 +227,12 @@ export function VerificationPage() {
               >
                 {step.done ? <Check className="size-3.5" aria-hidden="true" /> : index + 1}
               </span>
-              <span className={cn('min-w-0 text-caption font-semibold leading-tight sm:text-label', step.done || step.current ? 'text-foreground' : 'text-muted-foreground')}>
+              <span
+                className={cn(
+                  'min-w-0 text-caption font-semibold leading-tight sm:text-label',
+                  step.done || step.current ? 'text-foreground' : 'text-muted-foreground',
+                )}
+              >
                 {t(`verification.steps.${step.key}`)}
               </span>
             </li>
@@ -251,9 +271,19 @@ export function VerificationPage() {
             subtitle={t('verification.documentsHelp')}
           />
           {required.map((docType) => (
-            <DocumentSlot key={docType} docType={docType} value={files[docType]} onUploaded={(file) => setFiles((current) => ({ ...current, [docType]: file }))} />
+            <DocumentSlot
+              key={docType}
+              docType={docType}
+              value={files[docType]}
+              onUploaded={(file) => setFiles((current) => ({ ...current, [docType]: file }))}
+            />
           ))}
-          <DocumentSlot docType="OTHER" optional value={files.OTHER} onUploaded={(file) => setFiles((current) => ({ ...current, OTHER: file }))} />
+          <DocumentSlot
+            docType="OTHER"
+            optional
+            value={files.OTHER}
+            onUploaded={(file) => setFiles((current) => ({ ...current, OTHER: file }))}
+          />
           {submit.isError ? (
             <Alert tone="danger">
               {submit.error instanceof ApiError && submit.error.code === 'verification_documents_missing'

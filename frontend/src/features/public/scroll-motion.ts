@@ -28,36 +28,49 @@ export function useScrollMotion(route: string) {
           if (animation) animation.currentTime = progress * 1000;
         }
       };
-      const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
-      const observer = new IntersectionObserver((entries) => {
-        for (const entry of entries) {
-          const element = entry.target as HTMLElement;
-          if (media.has(element)) {
-            if (entry.isIntersecting) active.add(element);
-            else active.delete(element);
-            schedule();
-          } else if (entry.isIntersecting) {
-            const direction = Number(element.dataset.scrollDirection) || 1;
-            const animation = element.animate([
-              { opacity: 0, translate: '0 32px', rotate: `${direction * 3}deg` },
-              { opacity: 1, translate: '0 0', rotate: '0deg' },
-            ], { duration: 850, delay: Number(element.dataset.scrollDelay) || 0, easing: 'cubic-bezier(.2,.75,.25,1)' });
-            animations.add(animation);
-            animation.onfinish = () => animations.delete(animation);
-            observer.unobserve(element);
+      const schedule = () => {
+        if (!frame) frame = requestAnimationFrame(update);
+      };
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const element = entry.target as HTMLElement;
+            if (media.has(element)) {
+              if (entry.isIntersecting) active.add(element);
+              else active.delete(element);
+              schedule();
+            } else if (entry.isIntersecting) {
+              const direction = Number(element.dataset.scrollDirection) || 1;
+              const animation = element.animate(
+                [
+                  { opacity: 0, translate: '0 32px', rotate: `${direction * 3}deg` },
+                  { opacity: 1, translate: '0 0', rotate: '0deg' },
+                ],
+                { duration: 850, delay: Number(element.dataset.scrollDelay) || 0, easing: 'cubic-bezier(.2,.75,.25,1)' },
+              );
+              animations.add(animation);
+              animation.onfinish = () => animations.delete(animation);
+              observer.unobserve(element);
+            }
           }
-        }
-      }, { threshold: 0.12 });
+        },
+        { threshold: 0.12 },
+      );
       const discover = () => {
-        for (const element of root.querySelectorAll<HTMLElement>('h1, h2, h3, p, main figure img, figure img, .day-page-hero-image, .day-hero-landscape, .day-sun, .day-feature-art > svg')) {
+        for (const element of root.querySelectorAll<HTMLElement>(
+          'h1, h2, h3, p, main figure img, figure img, .day-page-hero-image, .day-hero-landscape, .day-sun, .day-feature-art > svg',
+        )) {
           if (seen.has(element)) continue;
           seen.add(element);
           if (element.matches('img, .day-page-hero-image, .day-hero-landscape, svg')) {
             const icon = element.matches('svg');
-            const animation = element.animate([
-              { translate: icon ? '0 8px' : '0 18px', rotate: icon ? '-35deg' : '-1.5deg', scale: icon ? '1' : '1.07' },
-              { translate: icon ? '0 -8px' : '0 -18px', rotate: icon ? '35deg' : '1.5deg', scale: icon ? '1' : '1.07' },
-            ], { duration: 1000, fill: 'both' });
+            const animation = element.animate(
+              [
+                { translate: icon ? '0 8px' : '0 18px', rotate: icon ? '-35deg' : '-1.5deg', scale: icon ? '1' : '1.07' },
+                { translate: icon ? '0 -8px' : '0 -18px', rotate: icon ? '35deg' : '1.5deg', scale: icon ? '1' : '1.07' },
+              ],
+              { duration: 1000, fill: 'both' },
+            );
             animation.pause();
             media.set(element, animation);
           } else {
@@ -84,7 +97,10 @@ export function useScrollMotion(route: string) {
     };
     setup();
     preference.addEventListener('change', setup);
-    return () => { dispose(); preference.removeEventListener('change', setup); };
+    return () => {
+      dispose();
+      preference.removeEventListener('change', setup);
+    };
   }, [route]);
 
   return ref;

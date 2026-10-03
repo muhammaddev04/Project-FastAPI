@@ -9,7 +9,14 @@ export type OrgVerificationStatus = 'NOT_SUBMITTED' | 'PENDING' | 'APPROVED' | '
 export type RequestStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED';
 export type DocType = 'REGISTRATION_CERTIFICATE' | 'TAX_CERTIFICATE' | 'OTHER';
 
-export type StoredFileOut = { id: string; display_name: string; size_bytes: number; content_type: string; category: string; created_at: string };
+export type StoredFileOut = {
+  id: string;
+  display_name: string;
+  size_bytes: number;
+  content_type: string;
+  category: string;
+  created_at: string;
+};
 export type VerificationDocument = { id: string; doc_type: DocType; file: StoredFileOut };
 
 export type VerificationRequestOut = {
@@ -95,7 +102,9 @@ export function useSubmitVerification(orgId: string | null) {
   return useMutation({
     mutationFn: (documents: { doc_type: DocType; file_id: string }[]) =>
       apiRequest<VerificationState>('/verification', {
-        method: 'POST', body: { documents }, orgScoped: true,
+        method: 'POST',
+        body: { documents },
+        orgScoped: true,
         idempotencyKey: submission.forPayload({ orgId, documents }),
       }),
     onSuccess: (state) => {

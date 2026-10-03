@@ -84,6 +84,9 @@ jobs:
       - name: Ruff (format)
         run: ruff format --check .
 
+      - name: Strict typecheck
+        run: mypy --strict app
+
       - name: Wait for SeaweedFS
         run: |
           set -euo pipefail
@@ -105,8 +108,9 @@ jobs:
 
       - name: Tracked requirement references
         run: |
-          python ../scripts/check_traceability.py
+          python ../scripts/check_traceability.py --complete-p00
           python -m unittest discover -s ../scripts -p 'test_*.py'
+          python ../scripts/sync_error_catalog.py
 
   frontend:
     name: Frontend (eslint, tsc, vitest, build)
@@ -127,8 +131,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Generated API types match the backend
+        run: |
+          pip install ../backend
+          python ../scripts/export_openapi.py
+          npm run api:types
+          git diff --exit-code -- src/shared/api/schema.d.ts
+
       - name: ESLint
         run: npm run lint
+
+      - name: Prettier
+        run: npm run format:check
 
       - name: Typecheck
         run: npm run typecheck
@@ -138,6 +155,34 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+  foundation-browser:
+    name: P00 browser acceptance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install browser dependencies
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Start isolated acceptance services
+        run: docker compose -p tezfarmo-p00 -f docker-compose.p00.yml up -d --build --wait --wait-timeout 180
+      - name: Four areas, responsive layouts and accessibility
+        working-directory: frontend
+        run: npm run test:e2e
+      - name: Acceptance logs
+        if: failure()
+        run: docker compose -p tezfarmo-p00 -f docker-compose.p00.yml logs --tail=100
+      - name: Stop acceptance services
+        if: always()
+        run: docker compose -p tezfarmo-p00 -f docker-compose.p00.yml down
 
   deployment-config:
     name: Deployment config (compose, images, deploy script)

@@ -44,7 +44,18 @@ const VERIFICATION = {
     reviewed_at: '2026-09-20T10:00:00Z',
     rejection_reason: null,
     documents: [
-      { id: 'd1', doc_type: 'REGISTRATION_CERTIFICATE', file: { id: 'f1', display_name: 'registration.pdf', size_bytes: 1, content_type: 'application/pdf', category: 'VERIFICATION', created_at: '2026-09-19T10:00:00Z' } },
+      {
+        id: 'd1',
+        doc_type: 'REGISTRATION_CERTIFICATE',
+        file: {
+          id: 'f1',
+          display_name: 'registration.pdf',
+          size_bytes: 1,
+          content_type: 'application/pdf',
+          category: 'VERIFICATION',
+          created_at: '2026-09-19T10:00:00Z',
+        },
+      },
     ],
   },
 };
@@ -53,7 +64,18 @@ const OWNERS = {
   count: 1,
   limit: 1,
   offset: 0,
-  results: [{ id: 'm1', user_id: 'u1', full_name: 'Dilshod Rahimov', email: 'dilshod@pamir.tj', phone: null, role: 'OWNER', status: 'ACTIVE', joined_at: '2026-09-01T08:00:00Z' }],
+  results: [
+    {
+      id: 'm1',
+      user_id: 'u1',
+      full_name: 'Dilshod Rahimov',
+      email: 'dilshod@pamir.tj',
+      phone: null,
+      role: 'OWNER',
+      status: 'ACTIVE',
+      joined_at: '2026-09-01T08:00:00Z',
+    },
+  ],
 };
 
 function apiError(code: string, status: number) {
@@ -110,7 +132,11 @@ describe('organization profile (P02 §8 settings/profile)', () => {
   it('lets the owner edit legal details before verification', async () => {
     const draft = company({ verification_status: 'NOT_SUBMITTED', verified_at: null, legal_locked: false });
     const { calls } = open('/company/settings/profile', owner, draft, [
-      { method: 'PATCH', path: '/organization', body: company({ verification_status: 'NOT_SUBMITTED', legal_locked: false, tax_identifier: '510099999', version: 4 }) },
+      {
+        method: 'PATCH',
+        path: '/organization',
+        body: company({ verification_status: 'NOT_SUBMITTED', legal_locked: false, tax_identifier: '510099999', version: 4 }),
+      },
     ]);
     const inn = await screen.findByLabelText('Tax identifier (INN)');
     expect(inn).not.toHaveAttribute('readonly');
@@ -122,14 +148,18 @@ describe('organization profile (P02 §8 settings/profile)', () => {
   });
 
   it('explains a version conflict and reloads the latest profile', async () => {
-    const { calls } = open('/company/settings/profile', owner, company(), [{ method: 'PATCH', path: '/organization', ...apiError('version_conflict', 409) }]);
+    const { calls } = open('/company/settings/profile', owner, company(), [
+      { method: 'PATCH', path: '/organization', ...apiError('version_conflict', 409) },
+    ]);
     const city = await screen.findByLabelText('City');
     await waitFor(() => expect(city).toHaveValue('Dushanbe'));
     await userEvent.clear(city);
     await userEvent.type(city, 'Khujand');
     await userEvent.click(screen.getByRole('button', { name: 'Save profile' }));
     expect(await screen.findByText(/Someone else changed this profile/)).toBeInTheDocument();
-    await waitFor(() => expect(calls.filter((call) => call.method === 'GET' && call.path === '/api/v1/organization').length).toBeGreaterThan(1));
+    await waitFor(() =>
+      expect(calls.filter((call) => call.method === 'GET' && call.path === '/api/v1/organization').length).toBeGreaterThan(1),
+    );
   });
 
   it('shows a taken INN as the server explains it', async () => {
