@@ -27,7 +27,7 @@
   "validation.literal_error": "Выберите одно из допустимых значений.",
   "validation.extra_forbidden": "Это поле не допускается.",
   "validation.invalid_phone": "Введите номер в международном формате, например +992900000000.",
-  "validation.password_too_short": "Минимум 8 символов.",
+  "validation.password_too_short": "Минимум 4 символа.",
   "validation.password_too_long": "Максимум 128 символов.",
   "validation.password_needs_letter_and_digit": "Нужна хотя бы одна буква и одна цифра.",
   "validation.password_too_common": "Этот пароль слишком распространён.",

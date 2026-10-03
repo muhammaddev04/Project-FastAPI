@@ -161,9 +161,9 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
     await _send_verification(session, user)
 
 
-async def verify_email(session: AsyncSession, payload: VerifyEmailRequest) -> None:
+async def verify_email(session: AsyncSession, payload: VerifyEmailRequest) -> tuple[LoginResponse, IssuedSession]:
     """IAM-002 with a 6-digit code: the current, unused, unexpired code of that email's account confirms the address
-    once; the caller answers 204.
+    once, then starts a session so registration continues without a second login.
 
     A code has only a million values, so wrong guesses are capped per email (`auth_email_code`, 5 per 15 minutes,
     whatever the IP) on top of the per-IP `auth_email_verify` limit. An unknown address and a wrong code give the
@@ -191,6 +191,17 @@ async def verify_email(session: AsyncSession, payload: VerifyEmailRequest) -> No
         await audit.record(
             session, "user.email_verified", "user", user_id, actor_id=user_id, new={"email_verified": True}
         )
+    user = await session.scalar(select(User).where(User.id == user_id).with_for_update())
+    assert user is not None
+    if user.status != "ACTIVE":
+        raise AppError("user_blocked", 403)
+    issued = await start_session(session, user)
+    user.last_login_at = utcnow()
+    await audit.record(session, "auth.login", "user", user.id, actor_id=user.id, new={"method": "email_verification"})
+    await session.flush()
+    return LoginResponse(
+        access_token=issued.access_token, expires_in=issued.expires_in, user=await build_me(session, user)
+    ), issued
 
 
 async def resend_verification(session: AsyncSession, payload: ResendVerificationRequest) -> None:

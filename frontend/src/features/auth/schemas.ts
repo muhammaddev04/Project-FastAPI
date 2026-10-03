@@ -9,15 +9,16 @@ export const emailSchema = z
   .email('validation.email')
   .transform((value) => value.toLowerCase());
 
-/** IAM-003 as enforced by backend app/modules/auth/password_policy.py (the common-password list is server-side). */
-export const PASSWORD_MIN = 8;
+/** Acceptance limits match the backend; strength recommendations are advisory. */
+export const PASSWORD_MIN = 4;
+export const PASSWORD_RECOMMENDED_MIN = 8;
 export const PASSWORD_MAX = 128;
 
 export type PasswordRule = 'length' | 'letter' | 'digit';
 
 export function passwordRules(password: string): Record<PasswordRule, boolean> {
   return {
-    length: password.length >= PASSWORD_MIN && password.length <= PASSWORD_MAX,
+    length: password.length >= PASSWORD_RECOMMENDED_MIN && password.length <= PASSWORD_MAX,
     letter: /\p{L}/u.test(password),
     digit: /\d/.test(password),
   };
@@ -35,8 +36,7 @@ export const PASSWORD_PROBLEMS: Record<string, string> = {
 export const newPasswordSchema = z
   .string()
   .min(PASSWORD_MIN, 'validation.passwordTooShort')
-  .max(PASSWORD_MAX, 'validation.passwordTooLong')
-  .refine((value) => passwordRules(value).letter && passwordRules(value).digit, 'validation.passwordLetterDigit');
+  .max(PASSWORD_MAX, 'validation.passwordTooLong');
 
 export const loginSchema = z.object({
   email: emailSchema,

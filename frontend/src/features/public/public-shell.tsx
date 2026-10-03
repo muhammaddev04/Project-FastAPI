@@ -6,10 +6,12 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useMeta } from '@/shared/api/meta';
 import { LanguageSwitcher } from '@/shared/i18n/language-switcher';
 import { cn } from '@/shared/lib/cn';
-import { ThemeSwitcher } from '@/shared/theme/theme-switcher';
 import { BrandMark, Button, SupportLink } from '@/shared/ui';
+import { ThemeSwitcher } from '@/shared/theme/theme-switcher';
 import { Frame } from './primitives';
 import { PaperGrain } from './texture';
+import './daylight.css';
+import { useScrollMotion } from './scroll-motion';
 
 /** The three public pages, in the order the argument is made. */
 export const PUBLIC_NAV = [
@@ -197,13 +199,15 @@ function Footer() {
  * Phase C system unchanged.
  */
 export function PublicShell({ children }: { children?: ReactNode }) {
+  const { pathname } = useLocation();
+  const motionRef = useScrollMotion(pathname);
   return (
     <MotionConfig reducedMotion="user">
-      <div className="paper relative flex min-h-screen flex-col bg-background font-sans text-foreground">
+      <div className="paper daylight-site relative flex min-h-screen flex-col bg-background font-sans text-foreground">
         <PaperGrain />
         <Header />
         {/* `/` is not a child route: it decides between the homepage and a signed-in user's destination first. */}
-        <main className="relative z-10 flex-1">{children ?? <Outlet />}</main>
+        <main ref={motionRef} className="relative z-10 flex-1">{children ?? <Outlet />}</main>
         <Footer />
       </div>
     </MotionConfig>

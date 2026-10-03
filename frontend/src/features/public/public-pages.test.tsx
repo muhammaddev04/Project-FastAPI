@@ -24,7 +24,7 @@ describe('public site', () => {
      */
     it.each([
       ['/', 9],
-      ['/how-it-works', 8],
+      ['/how-it-works', 7],
       ['/product', 6],
     ])('%s is a sequence of bands, not one repeated section', async (path, atLeast) => {
       mockApi([{ path: '/meta', body: META }]);
@@ -149,13 +149,13 @@ describe('public site', () => {
       expect(document.querySelectorAll('.surface-card')).toHaveLength(0);
     });
 
-    it('shows the numbered journey rail on the registration steps', async () => {
+    it('shows the numbered journey rail on the email verification step', async () => {
       mockApi([{ path: '/meta', body: META }]);
-      renderRoutes(routes, '/register');
+      renderRoutes(routes, '/register/verify');
 
       const rail = within(await screen.findByRole('list', { name: 'Setting up your account' }));
       expect(rail.getAllByRole('listitem')).toHaveLength(5);
-      expect(rail.getAllByRole('listitem')[0]).toHaveAttribute('aria-current', 'step');
+      expect(rail.getAllByRole('listitem')[1]).toHaveAttribute('aria-current', 'step');
     });
   });
 });

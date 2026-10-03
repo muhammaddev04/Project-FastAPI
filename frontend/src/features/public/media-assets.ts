@@ -1,10 +1,9 @@
 /**
  * The visual assets the public site is composed for (Phase E4).
  *
- * The repository ships no photography, and inventing it is not an option: a stock photo of strangers in a
- * warehouse is the generic corporate filler this redesign exists to avoid, and a fabricated product screenshot
- * would be a lie a visitor could catch after signing up. So each slot below has a designed graphic composition
- * standing in for it, and dropping the named file into `public/media/` is the only work needed to light it up.
+ * The Daylight-inspired redesign includes generated illustrations of wholesale distribution and delivery.
+ * These depict the business context, not actual customers or a working product screen. Slots without an asset
+ * retain their existing interface composition.
  *
  * This file holds no components, so it can be imported by anything without costing a hot reload.
  */
@@ -43,10 +42,13 @@ export const ASSET_MANIFEST: AssetSlot[] = [
   },
 ];
 
-/** A slot is lit when the asset exists; absent, the designed fallback is the composition. */
-const AVAILABLE = new Set<string>();
+/** Explicit slot-to-file mapping; absent assets keep the designed fallback. */
+const AVAILABLE = new Map<string, string>([
+  ['media/shop-counter.jpg', '/media/tezfarmo-distribution.png'],
+  ['media/delivery-run.jpg', '/media/tezfarmo-delivery.png'],
+]);
 
 export function assetSrc(file: string): string | undefined {
-  return AVAILABLE.has(file) ? `/${file}` : undefined;
+  return AVAILABLE.get(file);
 }
 

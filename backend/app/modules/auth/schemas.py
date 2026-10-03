@@ -34,7 +34,7 @@ class RegisterRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     email: NormalizedEmail
-    # The IAM-003 policy (8-128, letter + digit, not common) is applied by the service as `weak_password`;
+    # The IAM-003 policy (4-128 characters, no composition requirement) is applied by the service as `weak_password`;
     # this bound only keeps absurd inputs away from the password hasher.
     password: str = Field(max_length=1024)
     full_name: str = Field(min_length=2, max_length=150)

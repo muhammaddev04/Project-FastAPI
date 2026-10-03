@@ -27,7 +27,7 @@
   "validation.literal_error": "Choose one of the allowed values.",
   "validation.extra_forbidden": "This field is not allowed.",
   "validation.invalid_phone": "Enter the phone number in international format, e.g. +992900000000.",
-  "validation.password_too_short": "Use at least 8 characters.",
+  "validation.password_too_short": "Use at least 4 characters.",
   "validation.password_too_long": "Use at most 128 characters.",
   "validation.password_needs_letter_and_digit": "Use at least one letter and one digit.",
   "validation.password_too_common": "This password is too common.",

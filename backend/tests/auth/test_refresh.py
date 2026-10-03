@@ -115,7 +115,7 @@ async def test_register_verify_login_refresh_chain(client: AsyncClient, outbox: 
         json={"email": email, "password": password, "full_name": "Nigina Karimova", "language": "tg"},
     )
     emailed = CODE_IN_EMAIL.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
-    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": emailed})).status_code == 204
+    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": emailed})).status_code == 200
     first = await login(client, email, password)
     assert (await client.get(ME, headers={"Authorization": f"Bearer {first.access}"})).status_code == 200
 

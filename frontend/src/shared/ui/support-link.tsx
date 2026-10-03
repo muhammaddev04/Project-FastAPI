@@ -13,14 +13,16 @@ export function SupportLink({ className, tone = 'default' }: { className?: strin
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'inline-flex items-center gap-1.5 text-label font-medium transition-colors',
-        tone === 'inverted' ? 'text-sidebar-muted hover:text-sidebar-foreground' : 'text-primary hover:text-primary-hover',
+        'inline-flex flex-wrap items-center gap-1.5 rounded-xl border px-3 py-2 text-label font-semibold shadow-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        tone === 'inverted'
+          ? 'border-white/25 bg-white/10 text-sidebar-foreground hover:bg-white/20'
+          : 'border-primary/30 bg-surface text-primary hover:border-primary/60 hover:bg-primary/10 hover:text-primary-hover',
         className,
       )}
     >
       <Headset className="size-4" aria-hidden="true" />
       <span>{t('common.support')}</span>
-      <span className="font-data text-2xs">@{SUPPORT_TELEGRAM}</span>
+      <span className="font-data text-xs">@{SUPPORT_TELEGRAM}</span>
     </a>
   );
 }

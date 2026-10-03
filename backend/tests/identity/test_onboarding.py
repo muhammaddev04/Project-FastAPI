@@ -54,7 +54,7 @@ async def register_and_sign_in(
     body = {"email": email, "password": PASSWORD, "full_name": "Nigina Karimova", "language": "en", **intent}
     assert (await client.post(REGISTER, json=body)).status_code == 202
     code = CODE_IN_EMAIL.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
-    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": code})).status_code == 204
+    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": code})).status_code == 200
     return await sign_in(client, email)
 
 

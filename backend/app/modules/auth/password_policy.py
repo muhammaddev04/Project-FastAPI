@@ -1,15 +1,11 @@
-"""IAM-003 password rules, shared by every flow that sets a password.
-
-Rules: at least 8 and at most 128 characters, at least one letter and one digit, and not one of the 10k most
-common passwords (SecLists `10k-most-common.txt`, MIT licence), compared case-insensitively.
-"""
+"""Password acceptance policy: 4-128 characters, without composition requirements."""
 
 from __future__ import annotations
 
 from functools import cache
 from pathlib import Path
 
-MIN_LENGTH = 8
+MIN_LENGTH = 4
 MAX_LENGTH = 128
 _COMMON_FILE = Path(__file__).with_name("common_passwords.txt")
 
@@ -27,8 +23,4 @@ def password_problems(password: str) -> list[str]:
         problems.append("password_too_short")
     if len(password) > MAX_LENGTH:
         problems.append("password_too_long")
-    if not any(ch.isalpha() for ch in password) or not any(ch.isdigit() for ch in password):
-        problems.append("password_needs_letter_and_digit")
-    if password.lower() in common_passwords():
-        problems.append("password_too_common")
     return problems

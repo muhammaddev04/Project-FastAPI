@@ -1,11 +1,9 @@
+import { PageHero } from './page-hero';
 import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui';
-import { HandoverFragment, VerificationFragment } from './fragments';
-import { ASSET_MANIFEST } from './media-assets';
-import { Figure, Oversized } from './media';
 import { Availability, Band, Display, Eyebrow, Index, Lead, Reveal, Split, Statement } from './primitives';
 import { RelationshipFlow } from './relationship-flow';
 
@@ -41,12 +39,12 @@ const PIPELINE = ['new', 'confirmed', 'assembling', 'transit', 'delivered'] as c
 function CompanyPath() {
   const { t } = useTranslation();
   return (
-    <ol>
+    <ol className="how-step-grid">
       {JOURNEY.company.map(({ key, live }, index) => (
         <Reveal key={key}>
-          <li className="grid gap-x-8 gap-y-2 border-t py-7 sm:grid-cols-[auto_minmax(0,16rem)_minmax(0,1fr)] sm:items-baseline">
+          <li className="how-step">
             <Index n={index + 1} className="sm:pt-1" />
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <div className="how-step-heading">
               <h3 className="font-serif text-section-sm font-semibold">{t(`site.how.company.steps.${key}.title`)}</h3>
               <Availability state={live ? 'live' : 'planned'} />
             </div>
@@ -67,10 +65,10 @@ function CompanyPath() {
 function StorePath() {
   const { t } = useTranslation();
   return (
-    <ol className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+    <ol className="how-step-grid">
       {JOURNEY.store.map(({ key, live }, index) => (
         <Reveal key={key} delay={index * 0.04}>
-          <li>
+          <li className="how-step">
             <div className="flex items-center gap-3">
               <Index n={index + 1} />
               <span aria-hidden="true" className="h-px flex-1 bg-border" />
@@ -89,67 +87,44 @@ export function HowItWorksPage() {
   const { t } = useTranslation();
   return (
     <>
-      {/* Opens on a statement, not on a heading and a lead. */}
-      {/* One band, not a section wrapping a band: the hero is a band like every other. */}
-      <Band space="tight" className="pt-16 sm:pt-24 lg:pt-32">
-          <div className="max-w-[48rem]">
-            <Display as="h1" size="hero">
-              {t('site.how.title')}
-            </Display>
-            <Lead className="mt-10 text-body-lg sm:text-lead">{t('site.how.lead')}</Lead>
-          </div>
-      </Band>
+      <PageHero
+        eyebrow={t('site.nav.howItWorks')}
+        title={t('site.how.title')}
+        lead={t('site.how.lead')}
+        image="journey"
+      />
 
-      {/* Company: text in the minority column, the sequence carrying the width. */}
-      <Band tone="sunk" hairline>
-        <Split aside={<CompanyPath />}>
+      <Band tone="sunk" hairline className="how-story">
+        <Split weight="text-minor" aside={
+          <figure className="how-photo">
+            <img src="/media/tezfarmo-warehouse.png" alt={t('site.how.photos.company')} loading="lazy" decoding="async" />
+            <figcaption>{t('site.how.company.subtitle')}</figcaption>
+          </figure>
+        }>
           <Eyebrow>{t('site.how.company.eyebrow')}</Eyebrow>
           <Display className="mt-5">{t('site.how.company.title')}</Display>
-          <p className="mt-3 text-label uppercase tracking-[0.06em] text-muted-foreground">
-            {t('site.how.company.subtitle')}
-          </p>
-          <Lead className="mt-6 text-body-lg">{t('site.how.company.lead')}</Lead>
+          <Lead className="mt-6">{t('site.how.company.lead')}</Lead>
         </Split>
+        <CompanyPath />
       </Band>
 
-      {/* Air between the two sides, so they read as two stories rather than one list. */}
-      <Band space="air">
-        <Reveal>
-          <Statement>{t('site.how.between')}</Statement>
-        </Reveal>
+      <Band space="tight" className="how-bridge">
+        <Statement align="center">{t('site.how.between')}</Statement>
       </Band>
 
-      {/*
-       * Store: reversed, a grid rather than a column, and an image in the text column. The two sides differ in
-       * medium as well as in layout, which is the point: one is a sequence of work, the other a place of work.
-       */}
-      <Band tone="sunk" hairline>
-        <Split reverse weight="text-minor" aside={<StorePath />}>
+      <Band hairline className="how-story">
+        <Split reverse weight="text-minor" aside={
+          <figure className="how-photo">
+            <img src="/media/tezfarmo-shop-order.png" alt={t('site.how.photos.store')} loading="lazy" decoding="async" />
+            <figcaption>{t('site.how.store.subtitle')}</figcaption>
+          </figure>
+        }>
           <Eyebrow>{t('site.how.store.eyebrow')}</Eyebrow>
           <Display className="mt-5">{t('site.how.store.title')}</Display>
-          <p className="mt-3 text-label uppercase tracking-[0.06em] text-muted-foreground">
-            {t('site.how.store.subtitle')}
-          </p>
-          <Lead className="mt-6 text-body-lg">{t('site.how.store.lead')}</Lead>
-          <Figure slot={ASSET_MANIFEST[1]!} className="mt-10">
-            <VerificationFragment />
-          </Figure>
+          <Lead className="mt-6">{t('site.how.store.lead')}</Lead>
         </Split>
+        <StorePath />
       </Band>
-
-      {/*
-       * Full-bleed image band on the way into the order pipeline. Until the delivery photograph exists the slot
-       * renders the handover as oversized type, the stages running off the edge.
-       */}
-      <section className="relative overflow-hidden bg-foreground">
-        <Figure slot={ASSET_MANIFEST[2]!} bleed className="border-0 bg-foreground">
-          <Oversized className="h-full">
-            <div className="mx-auto h-full max-w-frame px-5 sm:px-8 lg:px-12">
-              <HandoverFragment className="h-full" />
-            </div>
-          </Oversized>
-        </Figure>
-      </section>
 
       {/* One order, as a horizontal progression. Hairline-separated cells, not five cards. */}
       <Band hairline>

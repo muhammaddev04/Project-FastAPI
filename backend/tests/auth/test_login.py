@@ -86,7 +86,7 @@ async def test_register_verify_login_chain(
     assert await refresh_rows(session) == []
 
     emailed = CODE_IN_EMAIL.search(outbox[-1].text).group(1)  # type: ignore[union-attr]
-    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": emailed})).status_code == 204
+    assert (await client.post("/api/v1/auth/email/verify", json={"email": email, "code": emailed})).status_code == 200
 
     response = await client.post(LOGIN, json={"email": "  Nigina@Example.TJ ", "password": password})
 

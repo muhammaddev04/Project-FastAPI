@@ -1,0 +1,4 @@
+Mode: built-in image_gen
+Asset: frontend/public/media/tezfarmo-auth-truck.png
+
+Use case: photorealistic-natural. Asset: full-width background photograph for a business login page. A single modern unbranded cargo truck actively driving along a paved highway through a natural Central Asian countryside. Three-quarter front view, truck positioned in the lower left half, road receding into distant hills. Subtle motion blur on wheels and roadside conveys movement; truck stays crisp. Wide panoramic framing with open softly lit sky in the upper third for overlaid text, and calm landscape on the right for a transparent login form. Warm natural morning light, muted sand and olive colors, realistic editorial transport photography. Only one truck; no people, no other vehicles, no buildings, no lettering, no logos, no watermarks. Landscape 1536x1024.

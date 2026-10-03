@@ -25,11 +25,13 @@ export function useRegister() {
   });
 }
 
-/** POST /api/v1/auth/email/verify `{email, code}` (the 6-digit code from the email) → 204 (IAM-002). */
+/** Confirms the email and starts a session using the same response as login. */
 export function useVerifyEmail() {
+  const startSession = useStartSession();
   return useMutation({
     mutationFn: (payload: { email: string; code: string }) =>
-      apiRequest<void>('/auth/email/verify', { method: 'POST', body: payload }),
+      apiRequest<LoginResponse>('/auth/email/verify', { method: 'POST', body: payload, authEndpoint: true }),
+    onSuccess: startSession,
   });
 }
 

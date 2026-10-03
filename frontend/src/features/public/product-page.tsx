@@ -1,3 +1,4 @@
+import { PageHero } from './page-hero';
 import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -76,15 +77,12 @@ export function ProductPage() {
 
   return (
     <>
-      {/* One band, not a section wrapping a band: the hero is a band like every other. */}
-      <Band space="tight" className="pt-16 sm:pt-24 lg:pt-32">
-          <div className="max-w-[48rem]">
-            <Display as="h1" size="hero">
-              {t('site.product.title')}
-            </Display>
-            <Lead className="mt-10 text-body-lg sm:text-lead">{t('site.product.lead')}</Lead>
-          </div>
-      </Band>
+      <PageHero
+        eyebrow={t('site.nav.product')}
+        title={t('site.product.title')}
+        lead={t('site.product.lead')}
+        image="product"
+      />
 
       {/* Available today: two full stories, each with its own visual and its own direction. */}
       {stories.map(({ entry, aside, reverse }, index) => (
@@ -130,7 +128,7 @@ export function ProductPage() {
         <ul>
           {PLANNED_MODULES.map((entry, index) => (
             <Reveal key={entry.key}>
-              <li className="grid gap-x-8 gap-y-2 border-t py-7 sm:grid-cols-[auto_minmax(0,18rem)_minmax(0,1fr)] sm:items-baseline">
+              <li className="grid gap-x-8 gap-y-2 border-t py-7 md:grid-cols-[auto_minmax(0,16rem)_minmax(0,1fr)] sm:items-baseline">
                 <Index n={index + 1} className="sm:pt-1" />
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h3 className="font-serif text-section-sm font-semibold">{t(`site.modules.${entry.key}.title`)}</h3>

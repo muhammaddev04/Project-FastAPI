@@ -50,11 +50,11 @@ async def register(payload: RegisterRequest, session: SessionDep) -> Response:
 
 @router.post(
     "/email/verify",
-    status_code=status.HTTP_204_NO_CONTENT,
-    response_class=Response,
+    response_model=LoginResponse,
     summary="Confirm the email address with the 6-digit code from the verification email (IAM-002, CR-001)",
     responses={
-        204: {"description": "The email is confirmed; the code can no longer be used."},
+        200: {"description": "The email is confirmed and a session is started; the code can no longer be used."},
+        403: {"description": "`user_blocked`: blocked users cannot start a session."},
         422: {
             "description": "`validation_error` (email, or a code that is not exactly 6 digits), `email_token_invalid` "
             "(wrong, already used, or unknown address - indistinguishable) or `email_token_expired`."
@@ -65,9 +65,10 @@ async def register(payload: RegisterRequest, session: SessionDep) -> Response:
         },
     },
 )
-async def verify_email(payload: VerifyEmailRequest, session: SessionDep) -> Response:
-    await service.verify_email(session, payload)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+async def verify_email(payload: VerifyEmailRequest, session: SessionDep, response: Response) -> LoginResponse:
+    body, issued = await service.verify_email(session, payload)
+    _set_session_cookies(response, issued)
+    return body
 
 
 @router.post(

@@ -17,7 +17,6 @@ from app.core.email import EmailDeliveryError, MemoryEmailProvider, OutgoingEmai
 from app.core.security import verify_password
 from app.core.time import utcnow
 from app.modules.auth.models import EmailToken
-from app.modules.auth.password_policy import common_passwords
 from app.modules.auth.tokens import hash_code
 from app.modules.identity.models import User
 
@@ -155,9 +154,7 @@ async def test_iam_016_verification_email_is_sent_through_the_email_port(
 @pytest.mark.parametrize(
     ("password", "codes"),
     [
-        ("short1", ["password_too_short"]),
-        ("onlyletters", ["password_needs_letter_and_digit"]),
-        ("12345678", ["password_needs_letter_and_digit", "password_too_common"]),
+        ("ab1", ["password_too_short"]),
         ("x" * 129 + "1", ["password_too_long"]),
     ],
 )
@@ -174,16 +171,14 @@ async def test_iam_003_weak_password_rejected(
     assert await users(session) == [] and outbox == []
 
 
-async def test_iam_003_common_password_rejected(
-    client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
+@pytest.mark.parametrize("password", ["1234", "abcd", "!!!!", "password1"])
+async def test_four_character_passwords_are_accepted(
+    client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail], password: str
 ) -> None:
-    common = "password1"
-    assert common in common_passwords()
-    response = await client.post(URL, json=body(password=common))
-
-    assert response.status_code == 422
-    assert [f["code"] for f in response.json()["error"]["details"]["fields"]] == ["password_too_common"]
-    assert await users(session) == [] and outbox == []
+    response = await client.post(URL, json=body(password=password))
+    assert response.status_code == 202
+    assert len(await users(session)) == 1
+    assert len(outbox) == 1
 
 
 @pytest.mark.parametrize(

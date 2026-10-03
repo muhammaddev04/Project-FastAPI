@@ -98,7 +98,7 @@ async def test_unverified_account_gets_a_new_working_code_and_the_old_one_stops_
     if old_raw != new_raw:  # the same random code twice is a one-in-a-million event
         stale = await client.post(VERIFY, json={"email": EMAIL, "code": old_raw})
         assert stale.status_code == 422 and stale.json()["error"]["code"] == "email_token_expired"
-    assert (await client.post(VERIFY, json={"email": EMAIL, "code": new_raw})).status_code == 204
+    assert (await client.post(VERIFY, json={"email": EMAIL, "code": new_raw})).status_code == 200
     assert (await the_user(session)).email_verified_at is not None
 
 
@@ -145,7 +145,7 @@ async def test_unknown_and_verified_addresses_get_the_same_answer_and_nothing_el
     await cooldown_passes()
     unverified = await client.post(RESEND, json={"email": EMAIL})
     await cooldown_passes()
-    assert (await client.post(VERIFY, json={"email": EMAIL, "code": email_code(outbox[-1])})).status_code == 204
+    assert (await client.post(VERIFY, json={"email": EMAIL, "code": email_code(outbox[-1])})).status_code == 200
     verified_at = (await the_user(session)).email_verified_at
     sent, token_count = len(outbox), len(await tokens(session))
     audit_count = await session.scalar(select(func.count()).select_from(AuditLog))
@@ -238,7 +238,7 @@ async def test_delivery_failure_answers_503_and_keeps_the_previous_code_valid(
     user_id = (await the_user(session)).id
     [only] = await tokens(session)
     assert only.token_hash == hash_code(user_id, "VERIFY_EMAIL", old_raw) and only.expires_at > utcnow()
-    assert (await client.post(VERIFY, json={"email": EMAIL, "code": old_raw})).status_code == 204
+    assert (await client.post(VERIFY, json={"email": EMAIL, "code": old_raw})).status_code == 200
 
 
 async def test_raw_token_and_address_stay_out_of_logs_and_audit(

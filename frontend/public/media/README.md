@@ -1,5 +1,14 @@
 # Public site imagery
 
+## Daylight-inspired redesign
+
+- `tezfarmo-distribution.png`: generated wholesale depot, box truck, store and goods handover. Used in the homepage hero, trade section, authentication background and store story.
+- `tezfarmo-delivery.png`: generated box truck, shipment check and warehouse. Used in the delivery story.
+
+These are illustrative AI-generated scenes, not photographs of real TezFarmo customers. They contain no product screenshots or business statistics. The direction is urban wholesale commerce and logistics, with warm natural light; agricultural and mountain imagery is excluded.
+
+The `AVAILABLE` map in `src/features/public/media-assets.ts` maps the existing story slots to these files. The remaining slot descriptions below are retained as future photography briefs.
+
 The public pages are composed around the slots below. Each one currently renders a designed graphic composition
 built from real interface parts, so no page is blank or broken while they are missing.
 

@@ -1,42 +1,46 @@
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import type { FormEvent, ReactNode } from 'react';
-import { Link, useLocation, useOutlet } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation, useNavigate, useOutlet } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
 import { AuthFrame } from './auth-frame';
 import { AUTH_FORM, journeyStepFor } from './journey-steps';
 
-/**
- * Authentication screens (Phase D).
- *
- * What this replaced: a centred, translucent card floating over a page-sized radial gradient with two slowly
- * drifting outlined circles and two blurred colour blobs, next to a desktop hero column holding a pill badge,
- * a three-line 60px display headline, two feature cards that lifted and glowed on hover, and a cluster of
- * three invented avatars ("TF", "B2B", a shop icon) above the line "companies and stores start trading once
- * their organization is verified". Signing in competed for attention with a landing page.
- *
- * What it is now: the shared two-plane `JourneyShell`. A navy aside carries the brand, one sentence about the
- * product and the position in the registration journey; the form sits on the plain canvas beside it with no
- * card around it. Removing the card is the change that makes the screen read as an application rather than a
- * promotion: a form that sits on the page does not need to be introduced.
- */
-/** Layout route for every guest screen: the aside stays mounted while the working column cross-fades. */
+/** Guest forms retain their routes and backend behavior inside the rotating card. */
 export function AuthShell() {
   const location = useLocation();
   const outlet = useOutlet();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const accountForm = ['/login', '/register', '/forgot-password'].includes(location.pathname);
+  const registering = location.pathname === '/register';
   return (
     <MotionConfig reducedMotion="user">
-      <AuthFrame step={journeyStepFor(location.pathname)}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-          >
-            {outlet}
-          </motion.div>
-        </AnimatePresence>
+      <AuthFrame step={journeyStepFor(location.pathname)} accountForm={accountForm}>
+        {accountForm ? (
+          <div className="auth-mode-switch" role="group" aria-label={`${t('auth.register.signIn')} / ${t('auth.login.createAccount')}`}>
+            <button type="button" aria-pressed={!registering} onClick={() => navigate('/login')}>
+              {t('auth.register.signIn')}
+            </button>
+            <button type="button" aria-pressed={registering} onClick={() => navigate('/register')}>
+              {t('auth.login.createAccount')}
+            </button>
+          </div>
+        ) : null}
+        <div className={accountForm ? 'auth-card-stage' : undefined}>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              className={accountForm ? 'auth-form-card' : undefined}
+              initial={accountForm ? { opacity: 0, rotateY: registering ? -90 : 90 } : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, rotateY: 0, y: 0 }}
+              exit={accountForm ? { opacity: 0, rotateY: registering ? -90 : 90 } : { opacity: 0 }}
+              transition={{ duration: accountForm ? 0.6 : 0.18, ease: [0.23, 1, 0.32, 1] }}
+            >
+              {outlet}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </AuthFrame>
     </MotionConfig>
   );
@@ -71,8 +75,8 @@ export function AuthPage({
     <div>
       {above ? <div className="mb-5">{above}</div> : null}
       {/* The same serif display face as the public site, so /login continues the page it came from. */}
-      <h1 className="font-serif text-section-sm font-semibold leading-snug sm:text-section">{title}</h1>
-      {lead ? <p className="mt-3 text-body leading-relaxed text-muted-foreground">{lead}</p> : null}
+      <h1 className="auth-heading font-serif text-section-sm font-semibold leading-snug sm:text-section">{title}</h1>
+      {lead ? <p className="auth-lead mt-3 text-body leading-relaxed text-muted-foreground">{lead}</p> : null}
       <div className="mt-8">{children}</div>
       {footer ? <div className="mt-8 border-t pt-5 text-label text-muted-foreground">{footer}</div> : null}
     </div>

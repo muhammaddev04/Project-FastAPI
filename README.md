@@ -25,6 +25,22 @@ cd backend && ../.venv/Scripts/python -m alembic upgrade head
 cd frontend && npm ci && npm run dev
 ```
 
+## Google sign-in
+
+Create an OAuth client with application type **Web application** in Google Cloud's Google Auth Platform.
+Configure its consent screen and add your Google account as a test user while the app is in testing.
+Add `http://localhost:5174/auth/google/callback` as an authorized redirect URI, exactly matching
+`GOOGLE_REDIRECT_URI` in `backend/.env`. Put the client's `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+in that file and restart the backend. Keep the secret on the backend; `.env.example` contains no credentials.
+`GET /api/v1/meta` should report `auth.google: true`, enabling **Continue with Google** on login and registration.
+For deployment, use the site's HTTPS callback URL in both Google Cloud and the backend configuration.
+
+Email registration starts a session automatically after the six-digit verification code is accepted.
+`POST /api/v1/auth/email/verify` returns the same `{access_token, expires_in, user}` response and session cookies
+as login; new users continue to business onboarding without entering their password again.
+
+Google setup reference: <https://developers.google.com/identity/openid-connect/openid-connect>.
+
 ## Tests
 
 ```bash

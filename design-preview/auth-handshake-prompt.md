@@ -1,0 +1,4 @@
+Mode: built-in image_gen
+Asset: frontend/public/media/tezfarmo-auth-handshake.png
+
+Use case: photorealistic-natural. Create a wide landscape background photograph for TezFarmo business login page. Two adult Central Asian men, one company representative wearing a beige blazer and one shop owner wearing a clean olive overshirt, smiling naturally and shaking hands. Exactly two people. Both faces and their joined hands clearly visible, anatomically correct hands. Modern small wholesale showroom, subtle shelves softly out of focus. Composition: people grouped in left half and center-left, right half calm softly blurred cream wall with empty space for a form overlay. Warm natural daylight, restrained cream, sand and olive palette, authentic editorial business photography. No text, no logos, no watermark. Landscape 1536x1024.

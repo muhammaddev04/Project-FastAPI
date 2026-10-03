@@ -1,14 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ApiError } from '@/shared/api/client';
 import { errorMessage } from '@/shared/api/errors';
 import { Alert, Button, CodeInput, FormField, Input } from '@/shared/ui';
 import { useResendVerification, useVerifyEmail } from './api';
 import { AuthActions, AuthForm, AuthPage, AuthSwitch } from './auth-layout';
 import { MethodUnavailable } from './availability';
-import type { LoginState, VerifyEmailState } from './handover';
+import type { VerifyEmailState } from './handover';
 import { maskEmail } from './mask';
 import { verifyEmailSchema, type VerifyEmailValues } from './schemas';
 import { useAuthMethod } from './use-auth-method';
@@ -34,13 +34,10 @@ function verifyError(error: unknown, t: (key: string) => string): string {
  * state), it also asks for the address, because verification happens before any session exists and a bare
  * 6-digit code can never be matched against every user's codes.
  *
- * On success it goes straight to /login with the address and a success banner rather than showing a
- * congratulations screen for 2.5 seconds and then moving on. The backend issues no session here, so signing in
- * is genuinely the next step; the shortest honest path is to arrive on the sign-in form with one field left.
+ * On success the backend starts a session and RequireGuest sends the user to onboarding or their home page.
  */
 export function VerifyEmailPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const state = useLocation().state as VerifyEmailState;
   const handedOver = state?.email;
   const { available, meta } = useAuthMethod('email_verification');
@@ -74,8 +71,6 @@ export function VerifyEmailPage() {
       }
       return;
     }
-    const next: LoginState = { email: values.email, justVerified: true };
-    navigate('/login', { replace: true, state: next });
   });
 
   const onResend = async () => {

@@ -160,12 +160,9 @@ async def test_wrong_current_password_is_invalid_credentials(client: AsyncClient
 @pytest.mark.parametrize(
     ("password", "problems"),
     [
-        ("short1", {"password_too_short"}),
-        ("onlyletters", {"password_needs_letter_and_digit"}),
-        ("58302917465", {"password_needs_letter_and_digit"}),
-        ("password1", {"password_too_common"}),
+        ("ab1", {"password_too_short"}),
         ("a1" * 70, {"password_too_long"}),
-        ("", {"password_too_short", "password_needs_letter_and_digit"}),
+        ("", {"password_too_short"}),
     ],
 )
 async def test_weak_new_password_is_rejected(
@@ -329,12 +326,12 @@ async def test_secrets_stay_out_of_responses_logs_and_audit(
 
     with caplog.at_level(logging.DEBUG):
         wrong = await change(client, device.access, "Wrong2026pass", "Weak")
-        weak = await change(client, device.access, PASSWORD, "short1")
+        weak = await change(client, device.access, PASSWORD, "x!1")
         done = await change(client, device.access)
 
     assert done.status_code == 204
     new_hash = (await the_user(session)).password_hash
-    secrets = [PASSWORD, NEW_PASSWORD, "Wrong2026pass", "short1", old_hash, new_hash, device.access, device.refresh]
+    secrets = [PASSWORD, NEW_PASSWORD, "Wrong2026pass", "x!1", old_hash, new_hash, device.access, device.refresh]
     body = wrong.text + weak.text + done.text
     for secret in secrets:
         assert secret not in caplog.text

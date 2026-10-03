@@ -80,7 +80,7 @@ def error_code(response: Response) -> object:
     return response.json()["error"]["code"]
 
 
-async def test_iam_002_valid_code_confirms_the_email_and_answers_204(
+async def test_iam_002_valid_code_confirms_the_email_and_answers_200(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     code = await register(client, outbox)
@@ -91,8 +91,14 @@ async def test_iam_002_valid_code_confirms_the_email_and_answers_204(
 
     response = await verify(client, code)
 
-    assert response.status_code == 204
-    assert response.content == b""
+    assert response.status_code == 200
+    body = response.json()
+    assert body["access_token"] and body["expires_in"] > 0
+    assert body["user"]["email_verified"] is True
+    assert "refresh_token" in response.cookies
+    assert "csrf_token" in response.cookies
+    me = await client.get("/api/v1/me", headers={"Authorization": f"Bearer {body['access_token']}"})
+    assert me.status_code == 200 and me.json()["email"] == EMAIL
     user = await the_user(session)
     assert user.email_verified_at is not None
     assert started - timedelta(seconds=5) <= user.email_verified_at <= utcnow() + timedelta(seconds=5)
@@ -101,12 +107,36 @@ async def test_iam_002_valid_code_confirms_the_email_and_answers_204(
     assert (await code_row(session, user_id, code)).consumed_at is not None
 
 
+async def test_verification_session_can_be_restored_without_password(
+    client: AsyncClient, outbox: list[OutgoingEmail]
+) -> None:
+    code = await register(client, outbox)
+    response = await verify(client, code)
+    assert response.status_code == 200
+    restored = await client.post("/api/v1/auth/refresh", headers={"X-CSRF-Token": response.cookies["csrf_token"]})
+    assert restored.status_code == 200
+    me = await client.get("/api/v1/me", headers={"Authorization": f"Bearer {restored.json()['access_token']}"})
+    assert me.status_code == 200 and me.json()["email"] == EMAIL
+
+
+async def test_verification_does_not_sign_in_a_blocked_user(
+    client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
+) -> None:
+    code = await register(client, outbox)
+    await session.execute(update(User).where(User.email == EMAIL).values(status="BLOCKED"))
+    await session.commit()
+    response = await verify(client, code)
+    assert response.status_code == 403 and error_code(response) == "user_blocked"
+    assert "refresh_token" not in response.cookies
+    assert "access_token" not in response.json()
+
+
 async def test_email_is_trimmed_and_lowercased_like_everywhere_else(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     code = await register(client, outbox)
 
-    assert (await verify(client, code, "  Nigina@EXAMPLE.tj ")).status_code == 204
+    assert (await verify(client, code, "  Nigina@EXAMPLE.tj ")).status_code == 200
     assert (await the_user(session)).email_verified_at is not None
 
 
@@ -140,7 +170,7 @@ async def test_iam_002_code_is_single_use(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail]
 ) -> None:
     code = await register(client, outbox)
-    assert (await verify(client, code)).status_code == 204
+    assert (await verify(client, code)).status_code == 200
     first_confirmation = (await the_user(session)).email_verified_at
 
     again = await verify(client, code)
@@ -158,7 +188,7 @@ async def test_wrong_code_is_invalid_and_leaves_the_right_one_usable(
 
     assert wrong.status_code == 422 and error_code(wrong) == "email_token_invalid"
     assert (await the_user(session)).email_verified_at is None
-    assert (await verify(client, code)).status_code == 204
+    assert (await verify(client, code)).status_code == 200
 
 
 async def test_iam_002_expired_code_is_rejected_and_not_consumed(
@@ -190,7 +220,7 @@ async def test_a_code_only_works_for_the_account_it_was_sent_to(
 
     assert response.status_code == 422 and error_code(response) == "email_token_invalid"
     assert (await the_user(session, "dilshod@pamir.tj")).email_verified_at is None
-    assert (await verify(client, code)).status_code == 204
+    assert (await verify(client, code)).status_code == 200
 
 
 async def test_unknown_address_looks_exactly_like_a_wrong_code(
@@ -215,7 +245,7 @@ async def test_iam_002_reset_token_is_not_a_verification_code(
     await session.commit()
 
     # The verification code keeps working for its own purpose.
-    assert (await verify(client, code)).status_code == 204
+    assert (await verify(client, code)).status_code == 200
 
 
 async def test_newer_code_supersedes_the_older_one(
@@ -232,7 +262,7 @@ async def test_newer_code_supersedes_the_older_one(
 
     assert stale.status_code == 422 and error_code(stale) == "email_token_expired"
     assert (await the_user(session)).email_verified_at is None
-    assert (await verify(client, new)).status_code == 204
+    assert (await verify(client, new)).status_code == 200
 
 
 async def test_already_verified_user_keeps_the_first_confirmation_time(
@@ -247,8 +277,8 @@ async def test_already_verified_user_keeps_the_first_confirmation_time(
 
     response = await verify(client, code)
 
-    # The documented contract: a valid code answers 204 and is used up; the state is not rewritten.
-    assert response.status_code == 204
+    # The documented contract: a valid code answers 200 and is used up; the state is not rewritten.
+    assert response.status_code == 200
     assert (await the_user(session)).email_verified_at == confirmed_at
     audit = (await session.scalars(select(AuditLog).where(AuditLog.action == "user.email_verified"))).all()
     assert audit == []
@@ -262,7 +292,7 @@ async def test_concurrent_requests_consume_the_code_once(
     responses = await asyncio.gather(*(verify(client, code) for _ in range(4)))
 
     statuses = sorted(response.status_code for response in responses)
-    assert statuses == [204, 422, 422, 422]
+    assert statuses == [200, 422, 422, 422]
     assert {error_code(r) for r in responses if r.status_code == 422} == {"email_token_invalid"}
     audit = (await session.scalars(select(AuditLog).where(AuditLog.action == "user.email_verified"))).all()
     assert len(audit) == 1
@@ -319,7 +349,7 @@ async def test_raw_code_is_never_stored_logged_or_audited(
         response = await verify(client, code)
         again = await verify(client, code)  # the failing path shows nothing secret either
 
-    assert response.status_code == 204
+    assert response.status_code == 200
     assert code not in caplog.text and code not in again.text
     session.expire_all()
     for row in (await session.scalars(select(EmailToken))).all():

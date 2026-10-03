@@ -96,7 +96,7 @@
   },
   "validation": {
     "required": "This field is required.",
-    "passwordTooShort": "Use at least 8 characters.",
+    "passwordTooShort": "Use at least 4 characters.",
     "passwordTooLong": "Use at most 128 characters.",
     "passwordLetterDigit": "Use at least one letter and one digit.",
     "passwordsMismatch": "Passwords don't match.",
@@ -202,12 +202,14 @@
       "language": "Preferred language"
     },
     "password": {
+      "advice": "Passwords with 4 or more characters are accepted. Follow these recommendations for better security.",
       "weak": "Very weak",
       "fair": "Good",
       "strong": "Strong",
-      "met": "requirement met",
-      "notMet": "requirement not met",
+      "met": "recommendation met",
+      "notMet": "recommendation not met",
       "rules": {
+        "symbol": "Special character (!, @, #)",
         "length": "At least 8 characters",
         "letterDigit": "Letter and digit"
       },
@@ -912,6 +914,31 @@
     }
   },
   "site": {
+    "daylight": {
+      "kicker": "Wholesale, with a human touch",
+      "title": "Better trade.",
+      "titleAccent": "Closer together.",
+      "free": "Free for stores. One account for your team.",
+      "location": "Made for trade in Tajikistan",
+      "discover": "Discover TezFarmo",
+      "introLabel": "Less paperwork. More possibility.",
+      "introTitle": "Good business begins with",
+      "introAccent": "a clear connection.",
+      "introText": "A Company and a Store. One Partnership. TezFarmo brings the everyday work of wholesale into a shared space, so people can focus on growing their business.",
+      "audienceLabel": "Two sides. One shared space.",
+      "audienceTitle": "Built around your day.",
+      "company": { "first": "A workspace for your company and team", "second": "Verified stores and clear partnership terms", "third": "Catalogue, orders and finance on the roadmap" },
+      "store": { "first": "Your own store, your own workspace", "second": "A direct connection to your suppliers", "third": "Ordering and transparent debt on the roadmap" },
+      "preview": "A look at the product",
+      "safe": "Trust begins with verification",
+      "concept": "Design preview · modules are being developed",
+      "featuresLabel": "The everyday essentials",
+      "featuresTitle": "From the first order to the last mile.",
+      "landscapeAlt": "Wholesale company depot, delivery truck and a shopkeeper receiving packaged goods",
+      "landscapeTitle": "Real goods. Real people. Better connections.",
+      "landscapeText": "From the distributor’s warehouse to the neighbourhood store, every step deserves a clear record.",
+      "closingLabel": "Your next chapter starts here"
+    },
     "backToSite": "Back to TezFarmo",
     "availability": {
       "live": "available",
@@ -1037,6 +1064,10 @@
       }
     },
     "how": {
+      "photos": {
+        "company": "A warehouse operator checks packed cartons for an order.",
+        "store": "A shopkeeper checks stock on a tablet at the counter."
+      },
       "title": "From two strangers to a settled order.",
       "lead": "TezFarmo follows the way wholesale already works in Tajikistan, and writes each step down. Here is that path, from both sides, with an honest note on which parts are in the product today.",
       "partnership": {
@@ -1226,7 +1257,7 @@
         "alt": "The counter of a neighbourhood shop, with stock on the shelves behind it."
       },
       "delivery-run": {
-        "alt": "Crates being carried from a loaded van into a shop during a delivery run."
+        "alt": "A delivery truck at a distribution depot, with a driver checking a tablet beside packed cartons."
       }
     }
   }

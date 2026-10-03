@@ -43,8 +43,9 @@ describe('auth screens (CR-001: email)', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/login');
       expect(screen.getByRole('heading', { level: 1, name: 'Sign in' })).toBeInTheDocument();
-      // Phase D: registration is a five-step journey, not the other half of this screen, so there is no tab plate.
-      expect(screen.queryByRole('navigation', { name: 'Sign in or register' })).not.toBeInTheDocument();
+      // The large mode buttons reflect the active route; existing form links still work.
+      expect(screen.getByRole('button', { name: 'Log in' })).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByRole('button', { name: 'Sign up' })).toHaveAttribute('aria-pressed', 'false');
       expect(screen.getByLabelText('Email')).toHaveAttribute('type', 'email');
       expect(screen.queryByLabelText(/phone/i)).not.toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/register');
@@ -110,11 +111,10 @@ describe('auth screens (CR-001: email)', () => {
   });
 
   describe('registration', () => {
-    it('is step 1 of 5 and asks only for the account: name, email, password, terms', () => {
+    it('asks only for the account: name, email, password, terms', () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
       expect(screen.getByRole('heading', { level: 1, name: 'Create your account' })).toBeInTheDocument();
-      expect(screen.getByText('Step 1 of 5')).toBeInTheDocument();
       expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^email/i)).toHaveAttribute('type', 'email');
       expect(screen.getByLabelText(/create a password/i)).toBeInTheDocument();
@@ -126,20 +126,15 @@ describe('auth screens (CR-001: email)', () => {
       expect(screen.queryByLabelText(/mobile|phone|repeat the password|preferred language/i)).not.toBeInTheDocument();
     });
 
-    it('names the five steps of the journey', () => {
+    it('switches from registration to login with the large mode buttons', async () => {
       mockApi([{ path: '/meta', body: META_DISABLED }]);
       renderRoutes(routes, '/register');
-      const [rail] = screen.getAllByRole('list', { name: 'Setting up your account' });
-      const steps = within(rail!).getAllByRole('listitem');
-      expect(steps.map((step) => step.textContent)).toEqual([
-        expect.stringContaining('Create account'),
-        expect.stringContaining('Confirm email'),
-        expect.stringContaining('Business type'),
-        expect.stringContaining('Business details'),
-        expect.stringContaining('Verification'),
-      ]);
-      expect(steps[0]).toHaveAttribute('aria-current', 'step');
-      expect(steps[1]).not.toHaveAttribute('aria-current');
+      expect(screen.getByRole('button', { name: 'Sign up' })).toHaveAttribute('aria-pressed', 'true');
+      const login = screen.getByRole('button', { name: 'Log in' });
+      expect(login).toHaveAttribute('aria-pressed', 'false');
+      await userEvent.click(login);
+      expect(await screen.findByRole('heading', { level: 1, name: 'Sign in' }, { timeout: 2500 })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Log in' })).toHaveAttribute('aria-pressed', 'true');
     });
 
     it('validates fields as the user leaves them', async () => {
@@ -231,6 +226,22 @@ describe('auth screens (CR-001: email)', () => {
   });
 
   describe('email registration flow (IAM-001, IAM-002, P01 §6)', () => {
+    it('submits a four-digit password while displaying advisory strength', async () => {
+      const { calls } = mockApi([
+        { path: '/meta', body: META_EMAIL },
+        { method: 'POST', path: '/auth/register', status: 202 },
+      ]);
+      const { current } = renderRoutes(routes, '/register');
+      await fillRegistration();
+      const password = screen.getByLabelText(/create a password/i);
+      await userEvent.clear(password);
+      await userEvent.type(password, '1234');
+      expect(screen.getByText('Very weak')).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
+      await waitFor(() => expect(current.location?.pathname).toBe('/register/verify'));
+      expect(nonMetaCalls(calls)[0]!.body).toMatchObject({ password: '1234' });
+    });
+
     it('registers with the IAM-001 fields only and continues to step 2', async () => {
       const { calls } = mockApi([
         { path: '/meta', body: META_EMAIL },
@@ -260,11 +271,11 @@ describe('auth screens (CR-001: email)', () => {
       expect(screen.getByLabelText('Verification code')).toHaveValue('');
     });
 
-    it('verifies the handed-over address without asking for it again, then hands it to /login', async () => {
+    it('verifies the handed-over address without asking for it again, then signs in and continues to onboarding', async () => {
       const { calls } = mockApi([
         { path: '/meta', body: META_EMAIL },
         { method: 'POST', path: '/auth/register', status: 202 },
-        { method: 'POST', path: '/auth/email/verify', status: 204 },
+        { method: 'POST', path: '/auth/email/verify', body: { access_token: 'verified-access', expires_in: 900, user: meFixture([]) } },
       ]);
       const { current } = renderRoutes(routes, '/register');
       await fillRegistration();
@@ -277,15 +288,13 @@ describe('auth screens (CR-001: email)', () => {
       await userEvent.type(code, '482913');
       await userEvent.click(screen.getByRole('button', { name: 'Verify email' }));
 
-      await waitFor(() => expect(current.location?.pathname).toBe('/login'));
+      await waitFor(() => expect(current.location?.pathname).toBe('/welcome'));
       expect(nonMetaCalls(calls)[1]).toMatchObject({
         path: '/api/v1/auth/email/verify',
         body: { email: 'nigina@example.tj', code: '482913' },
       });
-      // No session is issued by verification, so /login is the honest next step: it opens confirmed and prefilled.
-      expect(await screen.findByText('Email confirmed')).toBeInTheDocument();
-      expect(screen.getByText(/sign in to finish setting up your business/i)).toBeInTheDocument();
-      expect(screen.getByLabelText('Email')).toHaveValue('nigina@example.tj');
+      expect(useSessionStore.getState().accessToken).toBe('verified-access');
+      expect(nonMetaCalls(calls).some((call) => call.path.endsWith('/auth/login'))).toBe(false);
     });
 
     it('sends one registration at a time', async () => {
@@ -341,18 +350,18 @@ describe('auth screens (CR-001: email)', () => {
       expect(current.location?.pathname).toBe('/register');
     });
 
-    it('verifies with the 6-digit code, never needing a link, and moves on to /login', async () => {
+    it('verifies with the 6-digit code, never needing a link, and starts a session for onboarding', async () => {
       const { calls } = mockApi([
         { path: '/meta', body: META_EMAIL },
-        { method: 'POST', path: '/auth/email/verify', status: 204 },
+        { method: 'POST', path: '/auth/email/verify', body: { access_token: 'verified-access', expires_in: 900, user: meFixture([]) } },
       ]);
       const { current } = renderRoutes(routes, '/register/verify');
       await userEvent.type(screen.getByLabelText(/^email/i), ' Nigina@Example.TJ');
       await userEvent.type(screen.getByLabelText('Verification code'), '482913');
       await userEvent.click(await screen.findByRole('button', { name: 'Verify email' }));
 
-      await waitFor(() => expect(current.location?.pathname).toBe('/login'), REDIRECT_TIMEOUT);
-      expect(await screen.findByText('Email confirmed')).toBeInTheDocument();
+      await waitFor(() => expect(current.location?.pathname).toBe('/welcome'), REDIRECT_TIMEOUT);
+      expect(useSessionStore.getState().accessToken).toBe('verified-access');
       expect(nonMetaCalls(calls)).toEqual([
         expect.objectContaining({
           method: 'POST',
