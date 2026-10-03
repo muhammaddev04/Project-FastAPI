@@ -118,8 +118,10 @@ cp infra/seaweedfs/s3.prod.json.example infra/seaweedfs/s3.prod.json
 chmod 600 infra/seaweedfs/s3.prod.json
 ```
 
-If this file is missing when Compose starts `storage`, Docker creates an **empty directory** at that
-path and SeaweedFS fails to start. The deploy script refuses to run in that state.
+The production bind mount refuses to start if this file is missing. Older configurations could
+create an **empty directory** at that path, causing SeaweedFS to fail with `s3.json: is a directory`.
+The deploy script refuses to run in that state; see the recovery commands in
+[infra/seaweedfs/README.md](../infra/seaweedfs/README.md#recover-an-existing-directory-mount).
 
 ### GitHub repository configuration
 
