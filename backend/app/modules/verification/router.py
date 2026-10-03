@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Query, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.core.idempotency import IdempotentRoute, idempotent
 from app.modules.files.schemas import SignedUrlOut
-from app.modules.identity.deps import SessionDep, SuperadminDep, require_permission
+from app.modules.identity.deps import OrgContext, SessionDep, SuperadminDep, require_permission
 from app.modules.verification import service
 from app.modules.verification.filters import QueueQuery
 from app.modules.verification.schemas import (
@@ -21,10 +21,10 @@ from app.modules.verification.schemas import (
 router = APIRouter(prefix="/api/v1", tags=["verification"], route_class=IdempotentRoute)
 admin_router = APIRouter(prefix="/api/v1/admin/verifications", tags=["admin"])
 
-VerificationViewer = require_permission("verification.view")
-VerificationSubmitter = require_permission("verification.submit")
+VerificationViewer = Annotated[OrgContext, Depends(require_permission("verification.view"))]
+VerificationSubmitter = Annotated[OrgContext, Depends(require_permission("verification.submit"))]
 
-_ADMIN_ERRORS = {
+_ADMIN_ERRORS: dict[int | str, dict[str, Any]] = {
     401: {"description": "`not_authenticated` / `token_invalid` / `token_expired`."},
     403: {"description": "`permission_denied`: SUPERADMIN only (no `X-Org-Id` needed)."},
     404: {"description": "`not_found`."},
@@ -36,8 +36,8 @@ _ADMIN_ERRORS = {
     response_model=VerificationState,
     summary="Verification state of the active organization with its latest request (verification.view)",
 )
-async def get_verification(session: SessionDep, context: VerificationViewer) -> VerificationState:  # type: ignore[valid-type]
-    return await service.get_state(session, context)  # type: ignore[arg-type]
+async def get_verification(session: SessionDep, context: VerificationViewer) -> VerificationState:
+    return await service.get_state(session, context)
 
 
 @router.post(
@@ -61,9 +61,9 @@ async def get_verification(session: SessionDep, context: VerificationViewer) -> 
 async def submit_verification(
     payload: VerificationSubmit,
     session: SessionDep,
-    context: VerificationSubmitter,  # type: ignore[valid-type]
+    context: VerificationSubmitter,
 ) -> VerificationState:
-    return await service.submit(session, context, payload)  # type: ignore[arg-type]
+    return await service.submit(session, context, payload)
 
 
 @admin_router.get(

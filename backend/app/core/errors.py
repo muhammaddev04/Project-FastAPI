@@ -6,12 +6,52 @@ from typing import Any
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.i18n import resolve_language, translate
+from app.core.monitoring import report_bug
 from app.core.request_context import get_request_id
 
 logger = logging.getLogger("tezfarmo.errors")
+
+
+class ErrorDetail(BaseModel):
+    code: str
+    message: str
+    details: dict[str, Any] = Field(default_factory=dict)
+    request_id: str | None = None
+
+
+class ErrorResponse(BaseModel):
+    error: ErrorDetail
+
+
+def install_error_contract(app: FastAPI) -> None:
+    """FND-023: document the actual error envelope, retaining route-specific descriptions."""
+    original = app.openapi
+
+    def contract() -> dict[str, Any]:
+        schema = original()
+        models = schema.setdefault("components", {}).setdefault("schemas", {})
+        envelope = ErrorResponse.model_json_schema(ref_template="#/components/schemas/{model}")
+        models.update(envelope.pop("$defs", {}))
+        models["ErrorResponse"] = envelope
+        for path in schema["paths"].values():
+            for method, operation in path.items():
+                if method not in {"get", "post", "put", "patch", "delete", "options", "head"}:
+                    continue
+                for status in (400, 401, 403, 404, 409, 422, 429, 500, 503):
+                    response = operation.setdefault("responses", {}).setdefault(
+                        str(status), {"description": "API error"}
+                    )
+                    response["content"] = {
+                        "application/json": {"schema": {"$ref": "#/components/schemas/ErrorResponse"}}
+                    }
+        return schema
+
+    app.__dict__["openapi"] = contract
 
 
 class AppError(Exception):
@@ -23,20 +63,24 @@ class AppError(Exception):
         http_status: int,
         details: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        message_key: str | None = None,
     ) -> None:
         super().__init__(code)
         self.code = code
         self.http_status = http_status
         self.details = details or {}
         self.headers = headers
+        self.message_key = message_key
 
 
-def error_body(request: Request, code: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
+def error_body(
+    request: Request, code: str, details: dict[str, Any] | None = None, message_key: str | None = None
+) -> dict[str, Any]:
     language = resolve_language(request.headers.get("accept-language"))
     return {
         "error": {
             "code": code,
-            "message": translate(f"errors.{code}", language),
+            "message": translate(message_key or f"errors.{code}", language),
             "details": details or {},
             "request_id": get_request_id(),
         }
@@ -62,9 +106,27 @@ def _field_path(location: tuple[Any, ...]) -> str:
 
 
 def register_error_handlers(app: FastAPI) -> None:
+    @app.exception_handler(DBAPIError)
+    async def _database_error(request: Request, exc: DBAPIError) -> JSONResponse:
+        sqlstate = getattr(exc.orig, "sqlstate", None) or getattr(exc.orig, "pgcode", None)
+        if sqlstate == "P0001":
+            logger.error("immutable table mutation rejected")
+            report_bug("ledger_immutable")
+            return JSONResponse(error_body(request, "ledger_immutable"), status_code=409)
+        if isinstance(exc, IntegrityError):
+            for constraint, code in {
+                "tax_identifier": "tax_identifier_taken",
+                "uq_products_company_sku": "sku_taken",
+            }.items():
+                if constraint in str(exc.orig):
+                    return JSONResponse(error_body(request, code), status_code=409)
+        logger.error("database operation failed", extra={"sqlstate": sqlstate})
+        report_bug("database_internal_error")
+        return JSONResponse(error_body(request, "internal_error"), status_code=500)
+
     @app.exception_handler(AppError)
     async def _app_error(request: Request, exc: AppError) -> JSONResponse:
-        body = error_body(request, exc.code, exc.details)
+        body = error_body(request, exc.code, exc.details, exc.message_key)
         return JSONResponse(body, status_code=exc.http_status, headers=exc.headers)
 
     @app.exception_handler(RequestValidationError)
@@ -90,4 +152,5 @@ def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(Exception)
     async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
         logger.exception("unhandled error")
+        report_bug("internal_error")
         return JSONResponse(error_body(request, "internal_error"), status_code=500)

@@ -12,7 +12,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from app.core.errors import AppError
 
 requests: Counter[tuple[str, str, int]] = Counter()
-duration: Counter[tuple[str, str]] = Counter()
+duration: dict[tuple[str, str], float] = {}
 metrics_router = APIRouter()
 
 
@@ -44,7 +44,7 @@ class MetricsMiddleware:
                 else "OTHER"
             )
             requests[method, route, status] += 1
-            duration[method, route] += time.perf_counter() - started
+            duration[method, route] = duration.get((method, route), 0.0) + time.perf_counter() - started
 
 
 @metrics_router.get("/metrics", include_in_schema=False)

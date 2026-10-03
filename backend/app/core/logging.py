@@ -5,7 +5,7 @@ import logging
 import re
 from datetime import UTC, datetime
 
-from app.core.request_context import get_request_id
+from app.core.request_context import get_actor, get_request_id
 
 _PHONE = re.compile(r"\+(\d{3})\d{3,8}(\d{4})")
 
@@ -19,12 +19,15 @@ class JsonFormatter(logging.Formatter):
     """FND-019: one JSON object per line with request_id; phone numbers are masked."""
 
     def format(self, record: logging.LogRecord) -> str:
+        user_id, org_id = get_actor()
         payload = {
             "ts": datetime.fromtimestamp(record.created, UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": mask_phone(record.getMessage()),
             "request_id": get_request_id(),
+            "user_id": str(user_id) if user_id else None,
+            "org_id": str(org_id) if org_id else None,
         }
         if record.exc_info:
             payload["exc"] = mask_phone(self.formatException(record.exc_info))

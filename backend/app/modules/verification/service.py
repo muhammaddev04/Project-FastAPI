@@ -8,7 +8,7 @@ approves anything automatically. Every transition is audited as `verification.<s
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, cast
 from uuid import UUID
 
 from sqlalchemy import select
@@ -82,11 +82,14 @@ async def _request_out(session: AsyncSession, request: VerificationRequest) -> R
 
 
 async def _latest(session: AsyncSession, organization_id: UUID) -> VerificationRequest | None:
-    return await session.scalar(
-        select(VerificationRequest)
-        .where(VerificationRequest.organization_id == organization_id)
-        .order_by(VerificationRequest.submitted_at.desc())
-        .limit(1)
+    return cast(
+        VerificationRequest | None,
+        await session.scalar(
+            select(VerificationRequest)
+            .where(VerificationRequest.organization_id == organization_id)
+            .order_by(VerificationRequest.submitted_at.desc())
+            .limit(1)
+        ),
     )
 
 
@@ -118,7 +121,9 @@ async def submit(session: AsyncSession, context: OrgContext, payload: Verificati
         raise AppError("organization_blocked", 403)
     model: type[Company] | type[Store] = Company if organization.type == "COMPANY" else Store
     # Lock the profile row: concurrent submissions for one organization are serialized here.
-    profile = await session.get(model, organization.id, with_for_update=True, populate_existing=True)
+    profile = cast(
+        Company | Store | None, await session.get(model, organization.id, with_for_update=True, populate_existing=True)
+    )
     if profile is None:
         raise AppError("not_found", 404)
     if profile.verification_status == "APPROVED":
@@ -237,9 +242,9 @@ async def list_requests(session: AsyncSession, query: QueueQuery) -> AdminReques
             AdminRequestSummary(
                 id=request.id,
                 organization_id=organization.id,
-                org_type=organization.type,  # type: ignore[arg-type]
+                org_type=organization.type,
                 org_name=organization.name,
-                status=request.status,  # type: ignore[arg-type]
+                status=request.status,
                 submitted_at=request.submitted_at,
                 reviewer_id=request.reviewer_id,
                 reviewed_at=request.reviewed_at,

@@ -15,7 +15,7 @@ import logging
 import warnings
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Protocol
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from fastapi import UploadFile
@@ -23,7 +23,6 @@ from minio.error import S3Error
 from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Mapped
 
 from app.core import audit
 from app.core.errors import AppError
@@ -263,14 +262,15 @@ async def image_url(session: AsyncSession, file_id: UUID | None) -> str | None:
     return (await active_image_urls(session, [file_id])).get(file_id) if file_id else None
 
 
-class _ImageHolder(Protocol):
-    id: Mapped[UUID]
+if TYPE_CHECKING:
+    from app.modules.identity.models import User
+    from app.modules.organizations.models import Company, Store
 
 
 async def swap_profile_image(
     session: AsyncSession,
     *,
-    holder_model: type[_ImageHolder],
+    holder_model: type[User] | type[Company] | type[Store],
     holder_id: UUID,
     category: str,
     image: NormalizedImage | None,

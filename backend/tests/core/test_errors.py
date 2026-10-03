@@ -6,6 +6,7 @@ import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from pydantic import BaseModel, Field
+from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from app.core.config import Settings
 from app.core.errors import AppError, register_error_handlers
@@ -78,6 +79,33 @@ async def test_fnd_008_internal_error_hides_details() -> None:
         response = await http.get("/crash")
     assert response.status_code == 500
     assert response.json()["error"]["code"] == "internal_error"
+    assert "secret" not in response.text
+
+
+@pytest.mark.parametrize(
+    ("state", "constraint", "status", "code"),
+    [
+        ("23505", "uq_products_company_sku", 409, "sku_taken"),
+        ("23505", "companies_tax_identifier_key", 409, "tax_identifier_taken"),
+        ("P0001", "append-only table", 409, "ledger_immutable"),
+        ("23505", "unknown_constraint", 500, "internal_error"),
+    ],
+)
+async def test_fnd_008_integrity_error_mapping(state: str, constraint: str, status: int, code: str) -> None:
+    app = _probe_app()
+
+    class DatabaseFailure(Exception):
+        sqlstate = state
+
+    @app.get("/database")
+    async def database() -> None:
+        error = IntegrityError if state == "23505" else DBAPIError
+        raise error("secret SQL", {"password": "secret"}, DatabaseFailure(constraint))
+
+    async with AsyncClient(transport=ASGITransport(app=app, raise_app_exceptions=False), base_url="https://t") as http:
+        response = await http.get("/database")
+    assert response.status_code == status
+    assert response.json()["error"]["code"] == code
     assert "secret" not in response.text
 
 

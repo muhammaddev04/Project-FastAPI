@@ -4,10 +4,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
-from app.core.errors import register_error_handlers
+from app.core.errors import install_error_contract, register_error_handlers
 from app.core.health import health_router, meta_router
 from app.core.logging import configure_logging
 from app.core.metrics import MetricsMiddleware, metrics_router
+from app.core.monitoring import configure_monitoring
 from app.core.request_context import RequestContextMiddleware
 from app.modules.auth.router import router as auth_router
 from app.modules.files.router import router as files_router
@@ -21,6 +22,7 @@ from app.modules.verification.router import router as verification_router
 def create_app() -> FastAPI:
     settings = get_settings()
     configure_logging(settings.log_level)
+    configure_monitoring()
     app = FastAPI(
         title="TezFarmo API",
         version=settings.app_version,
@@ -59,6 +61,7 @@ def create_app() -> FastAPI:
     app.include_router(files_router)
     app.include_router(verification_router)
     app.include_router(admin_verification_router)
+    install_error_contract(app)
     return app
 
 

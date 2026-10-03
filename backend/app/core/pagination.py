@@ -19,6 +19,7 @@ from fastapi import Depends, Query
 from pydantic import BaseModel
 from sqlalchemy import Result, Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.sql.elements import ColumnElement
 
 DEFAULT_LIMIT = 20
@@ -61,8 +62,8 @@ async def fetch_page(
     query: Select[Any],
     params: PageParams,
     *,
-    order_by: Sequence[ColumnElement[Any]],
-    tie_breaker: ColumnElement[Any],
+    order_by: Sequence[ColumnElement[Any] | InstrumentedAttribute[Any]],
+    tie_breaker: ColumnElement[Any] | InstrumentedAttribute[Any],
 ) -> tuple[int, Result[Any]]:
     """Run `query` as one page: `(count, rows)`. `tie_breaker` must be a unique column (normally the primary key)."""
     count = (await session.execute(select(func.count()).select_from(query.order_by(None).subquery()))).scalar_one()

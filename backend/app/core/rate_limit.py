@@ -3,9 +3,16 @@ from __future__ import annotations
 import time
 import uuid
 from dataclasses import dataclass
+from typing import Protocol, cast
 
 from app.core.errors import AppError
 from app.core.redis import get_redis
+
+
+class ScriptExecutor(Protocol):
+    """Typed boundary for redis-py's Lua API, which its stubs leave untyped."""
+
+    async def eval(self, script: str, numkeys: int, *args: str | int | float) -> int: ...
 
 
 @dataclass(frozen=True)
@@ -58,6 +65,23 @@ async def record(rule: RateLimit, key: str) -> None:
 
 
 async def hit(rule: RateLimit, key: str) -> None:
-    """FND-016: Redis sliding window - check, then count this request."""
-    await check(rule, key)
-    await record(rule, key)
+    """FND-016: atomically admit/count a request; parallel callers cannot overfill the window."""
+    script = """
+    local now = tonumber(ARGV[1])
+    local window = tonumber(ARGV[2])
+    redis.call('ZREMRANGEBYSCORE', KEYS[1], 0, now - window)
+    if redis.call('ZCARD', KEYS[1]) >= tonumber(ARGV[3]) then
+        local oldest = redis.call('ZRANGE', KEYS[1], 0, 0, 'WITHSCORES')
+        return math.max(1, math.ceil(window - (now - tonumber(oldest[2]))))
+    end
+    redis.call('ZADD', KEYS[1], now, ARGV[4])
+    redis.call('EXPIRE', KEYS[1], window)
+    return 0
+    """
+    retry_after = int(
+        await cast(ScriptExecutor, get_redis()).eval(
+            script, 1, _bucket(rule, key), time.time(), rule.window_seconds, rule.limit, uuid.uuid4().hex
+        )
+    )
+    if retry_after:
+        raise AppError(rule.error_code, 429, {"retry_after": retry_after}, headers={"Retry-After": str(retry_after)})

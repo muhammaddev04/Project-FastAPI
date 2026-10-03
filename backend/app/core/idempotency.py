@@ -126,12 +126,12 @@ async def claim(scope: str, key: UUID, body_hash: str, ttl: timedelta = DEFAULT_
                 "expires_at": now + ttl,
             }
             statement = insert(IdempotencyRecord).values(**values)
-            statement = statement.on_conflict_do_update(
+            returning_statement = statement.on_conflict_do_update(
                 index_elements=[IdempotencyRecord.scope, IdempotencyRecord.key],
                 set_={name: statement.excluded[name] for name in values if name not in ("key", "scope")},
                 where=IdempotencyRecord.expires_at <= now,
             ).returning(IdempotencyRecord.id)
-            record_id = (await session.execute(statement)).scalar_one_or_none()
+            record_id = (await session.execute(returning_statement)).scalar_one_or_none()
             if record_id is not None:
                 await session.commit()
                 return record_id
@@ -257,7 +257,7 @@ class IdempotentRoute(APIRoute):
                 await _abandon(idempotency_claim)
                 return response
             try:
-                body = json.loads(response.body) if response.body else None
+                body = json.loads(bytes(response.body)) if response.body else None
                 await mark_completed(idempotency_claim.session, idempotency_claim.record_id, response.status_code, body)
                 await idempotency_claim.session.commit()
             except BaseException:

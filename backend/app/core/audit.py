@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, CreatedAtMixin, IdMixin
-from app.core.request_context import get_client_ip, get_request_id, get_user_agent
+from app.core.request_context import get_actor, get_client_ip, get_request_id, get_user_agent
 
 # FND-015: never stored in old_data/new_data.
 REDACTED_FIELDS = frozenset(
@@ -61,6 +61,9 @@ async def record(
     reason: str | None = None,
 ) -> None:
     """AUD-001: added to the caller's transaction; actor, IP, user agent and request id come from context."""
+    context_actor, context_org = get_actor()
+    actor_id = actor_id or context_actor
+    org_id = org_id or context_org
     session.add(
         AuditLog(
             actor_id=actor_id,

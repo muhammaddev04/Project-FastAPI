@@ -33,11 +33,13 @@ from typing import Any, ClassVar
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import Result, Select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.sql.elements import ColumnElement
 
 from app.core.pagination import DEFAULT_LIMIT, MAX_LIMIT, PageParams, fetch_page
 
 _LIKE_ESCAPE = "\\"
+QueryColumn = ColumnElement[Any] | InstrumentedAttribute[Any]
 
 
 def _literal_pattern(text: str) -> str:
@@ -54,13 +56,13 @@ class ListQuery(BaseModel):
     offset: int = Field(0, ge=0, description="Rows to skip.")
 
     #: query field -> column compared for equality.
-    filter_columns: ClassVar[Mapping[str, ColumnElement[Any]]] = {}
+    filter_columns: ClassVar[Mapping[str, QueryColumn]] = {}
     #: columns matched by `search` (requires a `search` field).
-    search_columns: ClassVar[Sequence[ColumnElement[Any]]] = ()
+    search_columns: ClassVar[Sequence[QueryColumn]] = ()
     #: ordering name -> column (requires an `ordering` field whose values are exactly `name` and `-name`).
-    ordering_columns: ClassVar[Mapping[str, ColumnElement[Any]]] = {}
+    ordering_columns: ClassVar[Mapping[str, QueryColumn]] = {}
     #: the order of an endpoint without an `ordering` parameter.
-    fixed_ordering: ClassVar[Sequence[ColumnElement[Any]]] = ()
+    fixed_ordering: ClassVar[Sequence[QueryColumn]] = ()
 
     @classmethod
     def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
@@ -96,7 +98,7 @@ class ListQuery(BaseModel):
             query = query.where(or_(*(column.ilike(pattern, escape=_LIKE_ESCAPE) for column in self.search_columns)))
         return query
 
-    def order_by(self) -> list[ColumnElement[Any]]:
+    def order_by(self) -> list[QueryColumn]:
         ordering: str | None = getattr(self, "ordering", None)
         if not ordering:
             return list(self.fixed_ordering)
@@ -104,7 +106,7 @@ class ListQuery(BaseModel):
         return [column.desc() if ordering.startswith("-") else column.asc()]
 
     async def fetch(
-        self, session: AsyncSession, query: Select[Any], *, tie_breaker: ColumnElement[Any]
+        self, session: AsyncSession, query: Select[Any], *, tie_breaker: QueryColumn
     ) -> tuple[int, Result[Any]]:
         """Filter, order and page `query` through FND-009 `fetch_page` (count + stable page)."""
         filtered = self.apply(query)

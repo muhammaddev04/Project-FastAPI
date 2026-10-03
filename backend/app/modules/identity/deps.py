@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Annotated
 from uuid import UUID
@@ -13,6 +14,7 @@ from app.core.db import get_session
 from app.core.errors import AppError
 from app.core.permissions import permissions_for
 from app.core.rate_limit import DEFAULT_AUTHENTICATED, hit
+from app.core.request_context import bind_actor
 from app.core.security import TokenError, decode_access_token
 from app.modules.identity.models import Membership, Organization, User
 
@@ -41,6 +43,7 @@ async def get_current_user(
     if user.status != "ACTIVE":
         raise AppError("user_blocked", 403)
     await hit(DEFAULT_AUTHENTICATED, str(user.id))
+    bind_actor(user.id)
     return user
 
 
@@ -95,13 +98,14 @@ async def get_org_context(
         raise AppError("membership_inactive", 403)
     if membership.organization.status == "BLOCKED":
         raise AppError("organization_blocked", 403)
+    bind_actor(user.id, org_id)
     return OrgContext(user=user, membership=membership, organization=membership.organization)
 
 
 OrgContextDep = Annotated[OrgContext, Depends(get_org_context)]
 
 
-def require_permission(code: str) -> type[OrgContext]:
+def require_permission(code: str) -> Callable[[OrgContext], Awaitable[OrgContext]]:
     """P01 §5 `require(permission)`: 403 permission_denied when the active role lacks `code`."""
 
     async def dependency(context: OrgContextDep) -> OrgContext:
@@ -109,4 +113,4 @@ def require_permission(code: str) -> type[OrgContext]:
             raise AppError("permission_denied", 403)
         return context
 
-    return Annotated[OrgContext, Depends(dependency)]  # type: ignore[return-value]
+    return dependency

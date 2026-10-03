@@ -4,12 +4,23 @@ import ipaddress
 import re
 import uuid
 from contextvars import ContextVar
+from uuid import UUID
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 _request_id: ContextVar[str | None] = ContextVar("request_id", default=None)
 _client_ip: ContextVar[str | None] = ContextVar("client_ip", default=None)
 _user_agent: ContextVar[str | None] = ContextVar("user_agent", default=None)
+_actor: ContextVar[tuple[UUID | None, UUID | None]] = ContextVar("actor", default=(None, None))
+
+
+def get_actor() -> tuple[UUID | None, UUID | None]:
+    return _actor.get()
+
+
+def bind_actor(user_id: UUID, org_id: UUID | None = None) -> None:
+    _actor.set((user_id, org_id))
+
 
 _SAFE_REQUEST_ID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
 
@@ -52,6 +63,7 @@ class RequestContextMiddleware:
             _client_ip.set(_valid_ip(client[0]) if client else None),
             _user_agent.set(headers.get("user-agent", "")[:512] or None),
         )
+        actor_token = _actor.set((None, None))
 
         async def send_with_id(message: Message) -> None:
             if message["type"] == "http.response.start":
@@ -62,6 +74,7 @@ class RequestContextMiddleware:
         try:
             await self.app(scope, receive, send_with_id)
         finally:
+            _actor.reset(actor_token)
             _request_id.reset(tokens[0])
             _client_ip.reset(tokens[1])
             _user_agent.reset(tokens[2])

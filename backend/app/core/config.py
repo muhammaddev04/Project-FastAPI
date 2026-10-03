@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     app_debug: bool = False
     app_version: str = "0.1.0"
     log_level: str = "INFO"
+    sentry_dsn: SecretStr = SecretStr("")
 
     database_url: str = "postgresql+asyncpg://tezfarmo:tezfarmo@localhost:5433/tezfarmo"
     redis_url: str = "redis://localhost:6380/0"

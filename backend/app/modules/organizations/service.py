@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import secrets
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from fastapi import UploadFile
@@ -90,7 +90,7 @@ def profile_out(organization: Organization, profile: Company | Store) -> Organiz
 
 async def load_profile(session: AsyncSession, organization: Organization) -> Company | Store:
     model: type[Company] | type[Store] = Company if organization.type == "COMPANY" else Store
-    profile = await session.get(model, organization.id)
+    profile = cast(Company | Store | None, await session.get(model, organization.id))
     if profile is None:  # every organization is created together with its profile
         raise AppError("not_found", 404)
     return profile

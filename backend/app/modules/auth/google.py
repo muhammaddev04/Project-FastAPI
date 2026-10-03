@@ -296,9 +296,11 @@ class GoogleLink:
 
 
 async def _identity_of(session: AsyncSession, user_id: UUID) -> OAuthIdentity | None:
-    return await session.scalar(
-        select(OAuthIdentity).where(OAuthIdentity.provider == "google", OAuthIdentity.user_id == user_id)
-    )
+    return (
+        await session.scalars(
+            select(OAuthIdentity).where(OAuthIdentity.provider == "google", OAuthIdentity.user_id == user_id)
+        )
+    ).first()
 
 
 async def link_status(session: AsyncSession, user: User) -> GoogleLink | None:
