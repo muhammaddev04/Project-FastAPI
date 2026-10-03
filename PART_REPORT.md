@@ -28,7 +28,17 @@ the linked acceptance report is the current source of truth.
 
 ## Local commits
 
-Commit list is recorded after the implementation commits are created.
+Implementation commits (local, no push):
+
+```text
+6091755 feat(foundation): add transactional events and submission idempotency
+7798a24 feat(foundation): add unit of work metrics and traceability gate
+3040c2b build(foundation): add portable commands and expand acceptance coverage
+089041d feat(foundation): complete typed backend contracts and development seed
+5f8c0bb build(foundation): complete P00 tooling and browser acceptance
+```
+
+This acceptance record is finalized by a separate `docs(foundation)` commit.
 
 ---
 
