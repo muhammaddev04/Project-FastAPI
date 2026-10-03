@@ -11,6 +11,15 @@ B2B wholesale platform connecting **Companies** (suppliers/distributors) with **
 
 ## Local development
 
+Use `make up`, `make migrate`, `make test`, `make lint`, `make fe-test`, `make fe-lint`,
+`make fe-build`, `make traceability` or `make verify`. `make makemigration name="add items"`
+creates an Alembic revision. With no GNU Make installed on Windows, the equivalent command
+is `.venv/Scripts/python.exe scripts/dev.py <task>`; pass `--name "add items"` for makemigration.
+`verify` stops at the first failed check and never migrates or stops the development database.
+Tests use the separate test services; start them with `docker compose -f docker-compose.test.yml up -d`.
+`lint` currently runs Ruff; the required strict mypy gate, seed and API type-generation targets
+remain pending and are not represented as completed commands.
+
 ```bash
 # services: PostgreSQL :5433, Redis :6380
 docker compose up -d

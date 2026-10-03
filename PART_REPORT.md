@@ -49,7 +49,25 @@ its negative-case unittest passed; Ruff lint/format passed for backend and scrip
 | FND-020 | tests/core/test_health.py::test_fnd_020_s3_unavailable_returns_503 |
 | FND-021 | tests/core/test_metrics.py::test_fnd_021_metrics_internal_only |
 
-Other outstanding P00 work includes full traceability coverage, Makefile, production metrics
+Makefile and a portable scripts/dev.py runner now provide up/down, migrations, backend
+tests/lint, frontend tests/lint/build, traceability and verify. GNU Make is not installed in
+the current Windows environment; the Python equivalents were exercised directly. Commands
+use argument lists and explicit working directories, including migration names with spaces.
+Strict mypy, dev seed and generated API types remain missing; lint does not pretend to run them.
+
+Traceability now maps 30 P00 requirement IDs to 104 existing test references, including
+static Vitest titles. Reference checks catch renamed Python tests and frontend titles.
+Full-clause acceptance remains separate; five P00 IDs still have no references. See
+docs/P00_ACCEPTANCE.md for the checkpoint and limitations. The Redis-down readiness test
+returns 503 while liveness remains 200 without stopping the developer's Redis service.
+
+Latest tooling checks: four unittest cases passed; full frontend suite 347 passed;
+frontend ESLint and TypeScript checks passed; backend/scripts Ruff lint and format passed.
+Full backend suite: 727 passed. Four additional foundation-contract tests (settings cache,
+UUIDv7 uniqueness, UTC clock and Celery recovery configuration) were added after that suite
+was collected and passed in a separate run. Total distinct backend tests verified: 731.
+
+Other outstanding P00 work includes full traceability coverage, production metrics
 configuration, and the remaining typecheck/acceptance gates. No production
 migration or deployment was performed for this change.
 Organization creation and verification submission now require Idempotency-Key and use the

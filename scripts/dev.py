@@ -1,0 +1,60 @@
+"""Portable local commands. Invoke with the project's virtual-environment Python."""
+
+import argparse
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def commands(task: str, name: str | None = None) -> list[tuple[Path, list[str]]]:
+    python = sys.executable
+    npm = "npm.cmd" if os.name == "nt" else "npm"
+    backend, frontend = ROOT / "backend", ROOT / "frontend"
+    tasks = {
+        "up": [(ROOT, ["docker", "compose", "up", "-d"])],
+        "down": [(ROOT, ["docker", "compose", "down"])],
+        "migrate": [(backend, [python, "-m", "alembic", "upgrade", "head"])],
+        "test": [(backend, [python, "-m", "pytest", "-p", "no:cacheprovider"])],
+        "lint": [
+            (backend, [python, "-m", "ruff", "check", "."]),
+            (backend, [python, "-m", "ruff", "format", "--check", "."]),
+            (ROOT, [python, "-m", "ruff", "check", "scripts", "--line-length", "120"]),
+            (ROOT, [python, "-m", "ruff", "format", "--check", "scripts", "--line-length", "120"]),
+        ],
+        "fe-test": [(frontend, [npm, "test"])],
+        "fe-lint": [(frontend, [npm, "run", "lint"]), (frontend, [npm, "run", "typecheck"])],
+        "fe-build": [(frontend, [npm, "run", "build"])],
+        "traceability": [(ROOT, [python, "scripts/check_traceability.py"])],
+    }
+    if task == "makemigration":
+        if not name:
+            raise ValueError("makemigration requires --name")
+        return [(backend, [python, "-m", "alembic", "revision", "--autogenerate", "-m", name])]
+    if task == "verify":
+        return [
+            command
+            for part in ("lint", "test", "fe-lint", "fe-test", "fe-build", "traceability")
+            for command in tasks[part]
+        ]
+    if task not in tasks:
+        raise ValueError(f"Unknown command: {task}")
+    return tasks[task]
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("task")
+    parser.add_argument("--name")
+    args = parser.parse_args()
+    try:
+        selected = commands(args.task, args.name)
+    except ValueError as exc:
+        parser.error(str(exc))
+    for cwd, command in selected:
+        print(f"Running {args.task} in {cwd.name}", flush=True)
+        result = subprocess.run(command, cwd=cwd, check=False)
+        if result.returncode:
+            raise SystemExit(result.returncode)

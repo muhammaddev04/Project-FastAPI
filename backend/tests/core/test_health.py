@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 from httpx import AsyncClient
 
+from app.core.redis import get_redis
 from app.core.storage import get_storage
 
 
@@ -36,4 +37,15 @@ async def test_fnd_020_s3_unavailable_returns_503(
     response = await client.get("/api/health/ready")
     assert response.status_code == 503
     assert response.json()["details"]["s3"] == "unavailable"
+    assert (await client.get("/api/health/live")).status_code == 200
+
+
+async def test_fnd_020_ready_503_when_redis_down(client: AsyncClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    async def offline() -> None:
+        raise ConnectionError("Redis offline")
+
+    monkeypatch.setattr(get_redis(), "ping", offline)
+    response = await client.get("/api/health/ready")
+    assert response.status_code == 503
+    assert response.json()["details"]["redis"] == "unavailable"
     assert (await client.get("/api/health/live")).status_code == 200

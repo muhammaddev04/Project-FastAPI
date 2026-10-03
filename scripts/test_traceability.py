@@ -20,3 +20,8 @@ class TraceabilityTests(unittest.TestCase):
             self.assertIn("test function not found", check(root)[0])
             manifest.write_text(json.dumps({"FAKE-999": []}), encoding="utf-8")
             self.assertEqual(len(check(root)), 2)
+            (root / "feature.test.ts").write_text("it('sends headers', () => {});", encoding="utf-8")
+            manifest.write_text(json.dumps({"FND-004": ["feature.test.ts::sends headers"]}), encoding="utf-8")
+            self.assertEqual(check(root), [])
+            (root / "feature.test.ts").write_text("it('renamed', () => {});", encoding="utf-8")
+            self.assertIn("test title not found", check(root)[0])

@@ -26,12 +26,23 @@ def check(root: Path) -> list[str]:
                 path = (root / filename).resolve()
                 if not path.is_relative_to(root.resolve()):
                     raise ValueError("test outside repository")
-                tree = ast.parse(path.read_text(encoding="utf-8"))
-                names = {
-                    node.name for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                }
-                if not function.startswith("test_") or function not in names:
-                    raise ValueError("test function not found")
+                source = path.read_text(encoding="utf-8")
+                if path.suffix == ".py":
+                    tree = ast.parse(source)
+                    names = {
+                        node.name
+                        for node in ast.walk(tree)
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    }
+                    if not function.startswith("test_") or function not in names:
+                        raise ValueError("test function not found")
+                elif path.suffix in {".ts", ".tsx"} and ".test." in path.name:
+                    # Static Vitest titles only; no imports or execution of frontend code.
+                    pattern = r"\b(?:it|test)\s*\(\s*(['\"])" + re.escape(function) + r"\1"
+                    if not re.search(pattern, source):
+                        raise ValueError("test title not found")
+                else:
+                    raise ValueError("unsupported test file")
             except (ValueError, OSError, SyntaxError) as exc:
                 errors.append(f"{requirement}: {reference}: {exc}")
     return errors
