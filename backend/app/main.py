@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.core.errors import register_error_handlers
 from app.core.health import health_router, meta_router
 from app.core.logging import configure_logging
+from app.core.metrics import MetricsMiddleware, metrics_router
 from app.core.request_context import RequestContextMiddleware
 from app.modules.auth.router import router as auth_router
 from app.modules.files.router import router as files_router
@@ -46,9 +47,11 @@ def create_app() -> FastAPI:
         expose_headers=["X-Request-Id", "Retry-After"],
     )
     app.add_middleware(RequestContextMiddleware)
+    app.add_middleware(MetricsMiddleware)
     register_error_handlers(app)
     app.include_router(health_router)
     app.include_router(meta_router)
+    app.include_router(metrics_router)
     app.include_router(support_router)
     app.include_router(auth_router)
     app.include_router(identity_router)

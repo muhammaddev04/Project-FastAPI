@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from datetime import datetime
 from functools import lru_cache
+from types import TracebackType
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import DateTime, MetaData, func
@@ -51,12 +53,56 @@ def get_sessionmaker() -> async_sessionmaker[AsyncSession]:
     return async_sessionmaker(get_engine(), expire_on_commit=False, autoflush=False)
 
 
-async def get_session() -> AsyncIterator[AsyncSession]:
-    """Request-scoped unit of work: commit at the end, rollback on any exception (01_GLOBAL §9.1)."""
-    async with get_sessionmaker()() as session:
+class TransactionEvents:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def publish(self, event: Any) -> None:
+        from app.core.events import event_bus
+
+        await event_bus.publish(self.session, event)
+
+
+class TransactionAudit:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def record(self, action: str, entity_type: str, entity_id: UUID, **kwargs: Any) -> None:
+        from app.core.audit import record
+
+        await record(self.session, action, entity_type, entity_id, **kwargs)
+
+
+class UnitOfWork:
+    """FND-004: owns one session and commits business changes, events and audit together."""
+
+    session: AsyncSession
+    events: TransactionEvents
+    audit: TransactionAudit
+
+    async def __aenter__(self) -> UnitOfWork:
+        self.session = get_sessionmaker()()
+        self.events = TransactionEvents(self.session)
+        self.audit = TransactionAudit(self.session)
+        return self
+
+    async def __aexit__(
+        self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: TracebackType | None
+    ) -> None:
         try:
-            yield session
-            await session.commit()
-        except BaseException:
-            await session.rollback()
-            raise
+            if exc_type is not None:
+                await self.session.rollback()
+            else:
+                try:
+                    await self.session.commit()
+                except BaseException:
+                    await self.session.rollback()
+                    raise
+        finally:
+            await self.session.close()
+
+
+async def get_session() -> AsyncIterator[AsyncSession]:
+    """Request-scoped transaction (01_GLOBAL §9.1)."""
+    async with UnitOfWork() as uow:
+        yield uow.session

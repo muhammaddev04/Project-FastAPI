@@ -26,8 +26,31 @@ logout/logout-all, password recovery/change, Google OAuth). Team mutations and i
 remain missing. P02 organization profiles, files and verification workflow exist; complete
 acceptance remains pending. P03–P13 business modules remain planned.
 
-Other outstanding P00 work includes metrics, explicit UnitOfWork helpers,
-traceability tooling, Makefile, and the remaining typecheck/acceptance gates. No production
+UnitOfWork now owns the request session and provides bound events.publish and audit.record
+helpers; commit/rollback and close are centralized. HTTP counters and accumulated durations
+are available on /metrics for internal clients only, with an Nginx public-deny template.
+The live Nginx configuration and metrics collector have not been installed.
+
+The incremental traceability manifest and CI checker are implemented for seven foundation
+requirements. Unknown IDs and missing/renamed test references fail the check. Full TZ
+requirement coverage remains pending; this gate only checks tracked references, not behavior.
+
+Latest foundation validation: 292 backend tests passed (core, identity, organizations and
+verification), including transaction and internal-metrics tests. The traceability check and
+its negative-case unittest passed; Ruff lint/format passed for backend and scripts.
+
+| Requirement | Test reference |
+|---|---|
+| FND-004 | tests/core/test_unit_of_work.py::test_fnd_004_uow_commits_events_and_audit; test_fnd_004_uow_exception_rolls_back |
+| FND-010 | tests/core/test_events.py::test_fnd_010_outbox_immutable |
+| FND-012 | tests/core/test_events.py::test_fnd_012_handler_failure_rolls_back |
+| FND-013 | tests/core/test_events.py::test_fnd_013_concurrent_workers_do_not_duplicate |
+| FND-014 | tests/organizations/test_events.py::test_org_idempotent_replay_does_not_publish_again |
+| FND-020 | tests/core/test_health.py::test_fnd_020_s3_unavailable_returns_503 |
+| FND-021 | tests/core/test_metrics.py::test_fnd_021_metrics_internal_only |
+
+Other outstanding P00 work includes full traceability coverage, Makefile, production metrics
+configuration, and the remaining typecheck/acceptance gates. No production
 migration or deployment was performed for this change.
 Organization creation and verification submission now require Idempotency-Key and use the
 transactional IdempotentRoute. Verification rechecks current org access and permission before

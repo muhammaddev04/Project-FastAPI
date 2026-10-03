@@ -56,6 +56,8 @@ Google setup reference: <https://developers.google.com/identity/openid-connect/o
 
 ## Background jobs (P00)
 
+Local commits are authorized for coherent, tested changes; the owner pushes them (see `AGENTS.md`).
+
 Apply migration `0016` before starting jobs. Start the local worker and scheduler with
 `docker compose --profile jobs up -d celery-worker celery-beat`. The worker dispatches durable
 outbox events every five seconds, with eight attempts and exponential backoff. Event data cannot
@@ -71,6 +73,16 @@ their records. Celery Beat also purges expired idempotency records daily.
 using readiness as a deployment gate; the probe does not create it.
 
 ## Tests
+
+`python scripts/check_traceability.py` checks the incremental requirement/test map in
+`docs/traceability.json`; CI fails if a tracked requirement has a missing or renamed test.
+This currently covers selected foundation requirements and does not establish full TZ coverage.
+
+`GET /metrics` exposes per-process HTTP counters and accumulated request duration in Prometheus
+text format. Labels use route templates; unmatched paths share one label. Direct requests are
+restricted to loopback/private addresses. Install `infra/nginx/metrics.conf.example` in the public
+Nginx configuration to block public proxy access; an optional loopback listener is shown for scraping.
+This change does not modify the live Nginx configuration or install a metrics collector.
 
 Organization creation (`POST /api/v1/organizations/companies`, `/stores`) and verification
 submission (`POST /api/v1/verification`) require a UUID `Idempotency-Key` header. Retrying the

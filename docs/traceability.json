@@ -1,0 +1,18 @@
+{
+  "FND-004": [
+    "backend/tests/core/test_unit_of_work.py::test_fnd_004_uow_commits_events_and_audit",
+    "backend/tests/core/test_unit_of_work.py::test_fnd_004_uow_exception_rolls_back"
+  ],
+  "FND-010": ["backend/tests/core/test_events.py::test_fnd_010_outbox_immutable"],
+  "FND-012": [
+    "backend/tests/core/test_events.py::test_fnd_012_publish_is_transactional",
+    "backend/tests/core/test_events.py::test_fnd_012_handler_failure_rolls_back"
+  ],
+  "FND-013": [
+    "backend/tests/core/test_events.py::test_fnd_013_retry_and_failed_after_eight",
+    "backend/tests/core/test_events.py::test_fnd_013_concurrent_workers_do_not_duplicate"
+  ],
+  "FND-014": ["backend/tests/organizations/test_events.py::test_org_idempotent_replay_does_not_publish_again"],
+  "FND-020": ["backend/tests/core/test_health.py::test_fnd_020_s3_unavailable_returns_503"],
+  "FND-021": ["backend/tests/core/test_metrics.py::test_fnd_021_metrics_internal_only"]
+}

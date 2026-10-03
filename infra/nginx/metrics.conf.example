@@ -1,0 +1,11 @@
+# Include in the PUBLIC server block: do not expose /metrics through a trusted proxy.
+location = /metrics {
+    deny all;
+}
+
+# For scraping on the host's loopback interface, add a separate server block instead:
+# server {
+#     listen 127.0.0.1:8213;
+#     location = /metrics { proxy_pass http://127.0.0.1:8211/metrics; }
+#     location / { return 404; }
+# }
