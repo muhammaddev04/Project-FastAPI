@@ -309,13 +309,18 @@ async def test_id_token_claims_are_checked(
     assert await users(session) == 0
 
 
-async def test_refused_code_is_oauth_failed(client: AsyncClient) -> None:
+@pytest.mark.parametrize("reason", ["invalid_client", "invalid_grant", "secret-value-must-not-be-logged"])
+async def test_refused_code_is_oauth_failed(client: AsyncClient, caplog: pytest.LogCaptureFixture, reason: str) -> None:
     started = await start(client)
-    google_answers(lambda _r: httpx.Response(400, json={"error": "invalid_grant"}))
+    google_answers(lambda _r: httpx.Response(400, json={"error": reason}))
 
     response = await callback(client, started)
 
     assert response.status_code == 400 and code(response) == "oauth_failed"
+    if reason in ("invalid_client", "invalid_grant"):
+        assert reason in caplog.text
+    else:
+        assert reason not in caplog.text and "unknown_error" in caplog.text
 
 
 async def test_unreachable_google_is_service_unavailable(client: AsyncClient) -> None:

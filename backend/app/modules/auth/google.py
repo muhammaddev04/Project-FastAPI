@@ -137,11 +137,19 @@ async def _exchange(code: str, verifier: str) -> str:
         logger.warning("google token exchange unreachable (%s)", type(exc).__name__)
         raise AppError("service_unavailable", 503) from exc
     if response.status_code != 200:
-        # Google's error body names the problem (e.g. invalid_grant); never the secret. Log only the status.
-        logger.warning("google token exchange refused (HTTP %s)", response.status_code)
+        # Log only known OAuth error codes, never Google's free-form body or request credentials.
+        try:
+            body = response.json()
+        except ValueError:
+            body = {}
+        reason = body.get("error") if isinstance(body, dict) else None
+        if reason not in ("invalid_client", "invalid_grant", "invalid_request", "unauthorized_client"):
+            reason = "unknown_error"
+        logger.warning("google token exchange refused (HTTP %s, %s)", response.status_code, reason)
         raise AppError("oauth_failed", 400)
     id_token = response.json().get("id_token")
     if not isinstance(id_token, str):
+        logger.warning("google token exchange returned no id_token")
         raise AppError("oauth_failed", 400)
     return id_token
 
@@ -163,8 +171,10 @@ def _claims(id_token: str, nonce: str) -> dict[str, object]:
             algorithms=["RS256"],
         )
     except jwt.PyJWTError as exc:
+        logger.warning("google id_token validation failed (%s)", type(exc).__name__)
         raise AppError("oauth_failed", 400) from exc
     if claims.get("iss") not in ISSUERS or not hmac.compare_digest(str(claims.get("nonce", "")), nonce):
+        logger.warning("google id_token issuer or nonce mismatch")
         raise AppError("oauth_failed", 400)
     return claims
 
