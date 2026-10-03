@@ -437,7 +437,8 @@
       "users": "Users",
       "organizations": "Organizations",
       "audit": "Audit log",
-      "ops": "Operations"
+      "ops": "Operations",
+      "support": "Support"
     }
   },
   "planned": {
@@ -1259,6 +1260,43 @@
       "delivery-run": {
         "alt": "A delivery truck at a distribution depot, with a driver checking a tablet beside packed cartons."
       }
+    }
+  },
+  "support": {
+    "attachImage": "Attach screenshot",
+    "imageHint": "Send text, images, or both. Select multiple images or add more later. PNG, JPEG or WebP, up to 5 MB each. Click an image to enlarge it.",
+    "imageError": "Choose a PNG, JPEG or WebP image up to 5 MB.",
+    "screenshot": "Bug screenshot",
+    "removeImage": "Remove image",
+    "hint": "Report a bug or share feedback. Our team will review your message.",
+    "adminHint": "Review user reports, reply, and update their status.",
+    "kind": "Type",
+    "subject": "Subject",
+    "message": "Description",
+    "messageHint": "Describe what happened, how to reproduce it, and what you expected.",
+    "page": "Page (optional)",
+    "send": "Send",
+    "sent": "Your message has been sent.",
+    "mine": "My reports",
+    "all": "User reports",
+    "empty": "No reports yet.",
+    "loading": "Loading...",
+    "retry": "Try again",
+    "status": "Status",
+    "reply": "Reply from support",
+    "save": "Save",
+    "saved": "Changes saved.",
+    "previous": "Previous",
+    "next": "Next",
+    "author": "User",
+    "kinds": {
+      "BUG": "Bug report",
+      "FEEDBACK": "Feedback / suggestion"
+    },
+    "statuses": {
+      "OPEN": "Open",
+      "IN_PROGRESS": "In progress",
+      "RESOLVED": "Resolved"
     }
   }
 }

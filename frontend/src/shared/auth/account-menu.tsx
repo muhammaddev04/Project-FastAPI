@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut, ShieldCheck, UserRound } from 'lucide-react';
+import { ChevronsUpDown, Headset, LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/lib/cn';
@@ -47,6 +47,9 @@ export function AccountMenu({ me, compact = false, className }: { me: Me; compac
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => navigate('/profile')}>
           <UserRound /> {t('account.profile')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate('/support')}>
+          <Headset /> {t('common.support')}
         </DropdownMenuItem>
         {me.is_superadmin ? (
           <DropdownMenuItem onSelect={() => navigate('/admin/verifications')}>

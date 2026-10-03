@@ -85,7 +85,7 @@ def _dimensions_invalid() -> AppError:
     return AppError("image_dimensions_invalid", 422, dict(_DIMENSION_LIMITS))
 
 
-def normalize_image(content_type: str, data: bytes) -> NormalizedImage:
+def normalize_image(content_type: str, data: bytes, *, output_side: int = OUTPUT_SIDE) -> NormalizedImage:
     """Validate an uploaded picture and return it re-encoded (WebP, <= 512x512, no metadata).
 
     `content_type` is the client's declaration and is only trusted to pick the one decoder that may be used; the bytes
@@ -115,7 +115,7 @@ def normalize_image(content_type: str, data: bytes) -> NormalizedImage:
             with Image.open(io.BytesIO(data), formats=[image_format]) as source:
                 if image_format == "JPEG":
                     # libjpeg may decode at 1/2..1/8 scale (never below 2x the output size): bounds memory for photos.
-                    source.draft("RGB", (OUTPUT_SIDE * 2, OUTPUT_SIDE * 2))
+                    source.draft("RGB", (output_side * 2, output_side * 2))
                 source.load()
                 picture = ImageOps.exif_transpose(source)
                 if picture.mode == "I" or picture.mode.startswith("I;16"):
@@ -124,7 +124,7 @@ def normalize_image(content_type: str, data: bytes) -> NormalizedImage:
                 # Palette/greyscale images with a transparent colour carry it in `info`, not in an alpha band.
                 transparent = "A" in picture.getbands() or "transparency" in picture.info
                 picture = picture.convert("RGBA" if transparent else "RGB")
-                picture.thumbnail((OUTPUT_SIDE, OUTPUT_SIDE), Image.Resampling.LANCZOS)
+                picture.thumbnail((output_side, output_side), Image.Resampling.LANCZOS)
                 output = io.BytesIO()
                 # No `exif=`/`icc_profile=`/`xmp=` arguments: the new file carries pixels only.
                 picture.save(output, "WEBP", quality=_WEBP_QUALITY, method=4)

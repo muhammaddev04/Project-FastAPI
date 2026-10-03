@@ -1,4 +1,4 @@
-import { Activity, ClipboardCheck, Database, LayoutDashboard, ScrollText, Store, Users, type LucideIcon } from 'lucide-react';
+import { Activity, Headset, ClipboardCheck, Database, LayoutDashboard, ScrollText, Store, Users, type LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import type { Me } from '@/shared/auth/types';
@@ -11,7 +11,7 @@ import type { AdminContext } from './use-admin-context';
  * queue is built; the P12 screens are listed with their phase and open an honest "planned" page.
  */
 type AdminItem = { key: string; icon: LucideIcon; phase?: 'P12' };
-const REVIEW: AdminItem[] = [{ key: 'verifications', icon: ClipboardCheck }];
+const REVIEW: AdminItem[] = [{ key: 'verifications', icon: ClipboardCheck }, { key: 'support', icon: Headset }];
 const PLATFORM: AdminItem[] = [
   { key: 'dashboard', icon: LayoutDashboard, phase: 'P12' },
   { key: 'users', icon: Users, phase: 'P12' },

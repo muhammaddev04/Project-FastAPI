@@ -25,6 +25,16 @@ cd backend && ../.venv/Scripts/python -m alembic upgrade head
 cd frontend && npm ci && npm run dev
 ```
 
+## Support and feedback
+
+The account menu offers **Support** beside Profile and Logout. Signed-in users can report bugs or send
+feedback at `/support` using a type and description, optionally attaching a PNG, JPEG or WebP screenshot
+(up to 5 MB). Screenshots are stored privately and visible to the author and platform superadmins.
+Users see their own reports, status, and the support team's reply. Platform superadmins
+review reports, reply, and set Open / In progress / Resolved at `/admin/support`.
+Run `alembic upgrade head` in the backend environment to create the support table and multiple-image fields (migration `0015`). Existing screenshots are preserved. Each support report accepts multiple screenshots, with a 5 MB limit per image.
+No additional environment variables are needed.
+
 ## Google sign-in
 
 Create an OAuth client with application type **Web application** in Google Cloud's Google Auth Platform.
