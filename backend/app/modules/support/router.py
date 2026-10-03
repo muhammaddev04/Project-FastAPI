@@ -59,7 +59,8 @@ async def create_ticket(payload: TicketIn, session: SessionDep, user: CurrentUse
 
 @router.post("/support/with-image", response_model=TicketOut, status_code=201)
 async def create_ticket_with_image(
-    session: SessionDep, user: CurrentUser,
+    session: SessionDep,
+    user: CurrentUser,
     kind: Annotated[Literal["BUG", "FEEDBACK"], Form()],
     image: Annotated[list[UploadFile], File()],
     message: Annotated[ImageMessage, Form()] = "",
@@ -74,8 +75,12 @@ async def create_ticket_with_image(
             keys.append(key)
             await storage.put_private(key, normalized.data, normalized.content_type)
         ticket = SupportTicket(
-            user_id=user.id, kind=kind, subject=message[:160] or "Screenshot", message=message,
-            image_key=keys[0], additional_image_keys=keys[1:],
+            user_id=user.id,
+            kind=kind,
+            subject=message[:160] or "Screenshot",
+            message=message,
+            image_key=keys[0],
+            additional_image_keys=keys[1:],
         )
         session.add(ticket)
         await session.flush()
@@ -89,7 +94,9 @@ async def create_ticket_with_image(
 
 @router.get("/support/{ticket_id}/image", response_model=SignedUrlOut)
 async def ticket_image(
-    ticket_id: UUID, session: SessionDep, user: CurrentUser,
+    ticket_id: UUID,
+    session: SessionDep,
+    user: CurrentUser,
     index: Annotated[int, Query(ge=0)] = 0,
 ) -> SignedUrlOut:
     ticket = await session.get(SupportTicket, ticket_id)
@@ -101,31 +108,43 @@ async def ticket_image(
 
 @router.get("/support", response_model=list[TicketOut])
 async def my_tickets(
-    session: SessionDep, user: CurrentUser,
+    session: SessionDep,
+    user: CurrentUser,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> list[SupportTicket]:
-    rows = await session.scalars(select(SupportTicket).where(SupportTicket.user_id == user.id)
-                                 .order_by(SupportTicket.created_at.desc(), SupportTicket.id.desc())
-                                 .offset(offset).limit(limit))
+    rows = await session.scalars(
+        select(SupportTicket)
+        .where(SupportTicket.user_id == user.id)
+        .order_by(SupportTicket.created_at.desc(), SupportTicket.id.desc())
+        .offset(offset)
+        .limit(limit)
+    )
     return list(rows)
 
 
 @router.get("/admin/support", response_model=list[TicketOut])
 async def all_tickets(
-    session: SessionDep, _admin: SuperadminDep,
+    session: SessionDep,
+    _admin: SuperadminDep,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> list[SupportTicket]:
-    rows = await session.scalars(select(SupportTicket)
-                                 .order_by(SupportTicket.created_at.desc(), SupportTicket.id.desc())
-                                 .offset(offset).limit(limit))
+    rows = await session.scalars(
+        select(SupportTicket)
+        .order_by(SupportTicket.created_at.desc(), SupportTicket.id.desc())
+        .offset(offset)
+        .limit(limit)
+    )
     return list(rows)
 
 
 @router.patch("/admin/support/{ticket_id}", response_model=TicketOut)
 async def update_ticket(
-    ticket_id: UUID, payload: TicketUpdate, session: SessionDep, _admin: SuperadminDep,
+    ticket_id: UUID,
+    payload: TicketUpdate,
+    session: SessionDep,
+    _admin: SuperadminDep,
 ) -> SupportTicket:
     ticket = await session.get(SupportTicket, ticket_id, with_for_update=True)
     if ticket is None:

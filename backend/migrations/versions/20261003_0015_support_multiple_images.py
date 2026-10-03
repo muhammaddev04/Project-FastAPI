@@ -1,4 +1,5 @@
 """Multiple private screenshots per support report."""
+
 import sqlalchemy as sa
 from alembic import op
 
@@ -9,9 +10,15 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column("support_tickets", sa.Column(
-        "additional_image_keys", sa.JSON(), nullable=False, server_default="[]",
-    ))
+    op.add_column(
+        "support_tickets",
+        sa.Column(
+            "additional_image_keys",
+            sa.JSON(),
+            nullable=False,
+            server_default="[]",
+        ),
+    )
 
 
 def downgrade() -> None:

@@ -1,4 +1,5 @@
 """Private screenshots for support reports."""
+
 import sqlalchemy as sa
 from alembic import op
 

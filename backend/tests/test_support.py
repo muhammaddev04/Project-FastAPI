@@ -38,14 +38,22 @@ async def test_support_requires_login_and_valid_content(client: AsyncClient, ses
     assert (await client.get("/api/v1/support")).status_code == 401
     user = await make_user(session)
     await session.commit()
-    response = await client.post("/api/v1/support", headers=auth(user), json={
-        "kind": "BUG", "subject": "   ", "message": "          ",
-    })
+    response = await client.post(
+        "/api/v1/support",
+        headers=auth(user),
+        json={
+            "kind": "BUG",
+            "subject": "   ",
+            "message": "          ",
+        },
+    )
     assert response.status_code == 422
 
 
 async def test_support_screenshot_is_private_and_validated(
-    client: AsyncClient, session: AsyncSession, monkeypatch: pytest.MonkeyPatch,
+    client: AsyncClient,
+    session: AsyncSession,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from app.core.storage import SignedUrl
     from app.core.time import utcnow
@@ -73,10 +81,13 @@ async def test_support_screenshot_is_private_and_validated(
     image = io.BytesIO()
     Image.new("RGB", (1800, 1000), "white").save(image, format="PNG")
     response = await client.post(
-        "/api/v1/support/with-image", headers=auth(user),
+        "/api/v1/support/with-image",
+        headers=auth(user),
         data={"kind": "BUG"},
-        files=[("image", ("screenshot.png", image.getvalue(), "image/png")),
-               ("image", ("second.png", image.getvalue(), "image/png"))],
+        files=[
+            ("image", ("screenshot.png", image.getvalue(), "image/png")),
+            ("image", ("second.png", image.getvalue(), "image/png")),
+        ],
     )
     assert response.status_code == 201
     ticket = response.json()
@@ -95,10 +106,13 @@ async def test_support_screenshot_is_private_and_validated(
     assert (await client.get(endpoint + "?index=1", headers=auth(other))).status_code == 404
     assert (await client.get(endpoint + "?index=2", headers=auth(user))).status_code == 404
     invalid = await client.post(
-        "/api/v1/support/with-image", headers=auth(user),
+        "/api/v1/support/with-image",
+        headers=auth(user),
         data={"kind": "BUG", "message": "The page layout is broken."},
-        files=[("image", ("valid.png", image.getvalue(), "image/png")),
-               ("image", ("fake.png", b"not an image", "image/png"))],
+        files=[
+            ("image", ("valid.png", image.getvalue(), "image/png")),
+            ("image", ("fake.png", b"not an image", "image/png")),
+        ],
     )
     assert invalid.status_code == 422
     assert len(objects) == 2
@@ -107,9 +121,14 @@ async def test_support_screenshot_is_private_and_validated(
 async def test_support_accepts_description_without_subject(client: AsyncClient, session: AsyncSession) -> None:
     user = await make_user(session)
     await session.commit()
-    response = await client.post("/api/v1/support", headers=auth(user), json={
-        "kind": "FEEDBACK", "message": "Hi",
-    })
+    response = await client.post(
+        "/api/v1/support",
+        headers=auth(user),
+        json={
+            "kind": "FEEDBACK",
+            "message": "Hi",
+        },
+    )
     assert response.status_code == 201
     assert response.json()["subject"] == "Hi"
     assert response.json()["has_image"] is False
