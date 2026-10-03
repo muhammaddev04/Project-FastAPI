@@ -121,9 +121,25 @@ describe('public site', () => {
       const toggle = await screen.findByRole('button', { name: 'Menu' });
       expect(toggle).toHaveAttribute('aria-expanded', 'false');
       await userEvent.click(toggle);
-      expect(screen.getByRole('button', { name: 'Close' })).toHaveAttribute('aria-expanded', 'true');
+      const menu = screen.getByRole('dialog', { name: 'Menu' });
+      expect(menu.parentElement).toBe(document.body);
+      expect(within(menu).getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/login');
       expect(document.body.style.overflow).toBe('hidden');
       await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+      expect(document.body.style.overflow).not.toBe('hidden');
+      expect(toggle).toHaveFocus();
+    });
+
+    it('closes the mobile menu when selecting the current page or pressing Escape', async () => {
+      mockApi([{ path: '/meta', body: META }]);
+      renderRoutes(routes, '/');
+      const toggle = await screen.findByRole('button', { name: 'Menu' });
+      await userEvent.click(toggle);
+      await userEvent.click(within(screen.getByRole('dialog')).getByRole('link', { name: 'Home' }));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      await userEvent.click(toggle);
+      await userEvent.keyboard('{Escape}');
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
       expect(document.body.style.overflow).not.toBe('hidden');
     });
 

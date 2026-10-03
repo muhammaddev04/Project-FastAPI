@@ -217,6 +217,10 @@ export function ShellFrame({
               <DialogPrimitive.Title className="sr-only">{t('shell.mainNavigation')}</DialogPrimitive.Title>
               <DialogPrimitive.Description className="sr-only">{areaLabel}</DialogPrimitive.Description>
               <SidebarBody areaLabel={areaLabel} context={context} sections={sections} navFooter={navFooter} onNavigate={() => setDrawerOpen(false)} />
+              <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-sidebar-border px-4 py-3">
+                <LanguageSwitcher />
+                <ThemeSwitcher />
+              </div>
               <DialogPrimitive.Close asChild>
                 <Button variant="ghost" size="icon" className="absolute right-2 top-3 size-9 text-sidebar-muted" aria-label={t('shell.closeMenu')}>
                   <X />

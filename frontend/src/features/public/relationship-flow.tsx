@@ -24,7 +24,7 @@ function Party({ side, icon: Icon, className }: { side: 'company' | 'store'; ico
   const { t } = useTranslation();
   return (
     <motion.div
-      className={cn('relative z-10 rounded-2xl border bg-surface p-5 shadow-[0_1px_0_0_hsl(var(--border))] sm:p-6', className)}
+      className={cn('relative z-10 min-w-0 rounded-2xl border bg-surface p-5 shadow-[0_1px_0_0_hsl(var(--border))] sm:p-6', className)}
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
@@ -35,8 +35,8 @@ function Party({ side, icon: Icon, className }: { side: 'company' | 'store'; ico
           <Icon className="size-[1.125rem]" aria-hidden="true" />
         </span>
         <div className="min-w-0">
-          <p className="truncate text-body font-semibold">{t(`site.flow.${side}.title`)}</p>
-          <p className="truncate text-caption text-muted-foreground">{t(`site.flow.${side}.role`)}</p>
+          <p className="break-words text-body font-semibold">{t(`site.flow.${side}.title`)}</p>
+          <p className="break-words text-caption text-muted-foreground">{t(`site.flow.${side}.role`)}</p>
         </div>
       </div>
       <dl className="mt-5 space-y-2.5 border-t pt-4">
@@ -102,11 +102,11 @@ export function RelationshipFlow() {
     <div className="relative">
       <Connectors />
       {/* Offset heights on desktop: the composition runs on a diagonal, not a centre line. */}
-      <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)] lg:items-center lg:gap-10">
+      <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)] lg:items-center lg:gap-10">
         <Party side="company" icon={Building2} className="lg:-translate-y-10" />
 
         <motion.div
-          className="relative z-10"
+          className="relative z-10 min-w-0"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
@@ -116,7 +116,7 @@ export function RelationshipFlow() {
             {steps.map(({ key, live }, index) => (
               <motion.li
                 key={key}
-                className={cn('flex items-center justify-between gap-3 bg-background px-4 py-3', live && 'bg-primary/[0.07]')}
+                className={cn('flex flex-wrap items-center justify-between gap-3 bg-background px-4 py-3 sm:flex-nowrap', live && 'bg-primary/[0.07]')}
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: '-60px' }}
@@ -127,11 +127,11 @@ export function RelationshipFlow() {
                     aria-hidden="true"
                     className={cn('size-1.5 shrink-0 rounded-full', live ? 'bg-primary' : 'border border-muted-foreground/50')}
                   />
-                  <span className="min-w-0">
-                    <span className={cn('block truncate text-body font-medium', live && 'text-primary-ink')}>
+                  <span className="min-w-0 break-words">
+                    <span className={cn('block text-body font-medium', live && 'text-primary-ink')}>
                       {t(`site.flow.steps.${key}.title`)}
                     </span>
-                    <span className="block truncate text-caption text-muted-foreground">{t(`site.flow.steps.${key}.text`)}</span>
+                    <span className="block text-caption text-muted-foreground">{t(`site.flow.steps.${key}.text`)}</span>
                   </span>
                 </span>
                 {live ? <Availability state="live" /> : null}

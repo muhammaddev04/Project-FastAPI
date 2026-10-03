@@ -1,3 +1,4 @@
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { MotionConfig } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -30,10 +31,17 @@ export const PUBLIC_NAV = [
 function Header() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const { pathname } = useLocation();
+  const location = useLocation();
 
   // A route change closes the sheet, including a hash link to a section of the page already shown.
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => setOpen(false), [location]);
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = () => { if (desktop.matches) setOpen(false); };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => desktop.removeEventListener('change', closeOnDesktop);
+  }, []);
   // The sheet covers the page, so the page must not scroll behind it, and Escape must close it.
   useEffect(() => {
     if (!open) return undefined;
@@ -56,58 +64,68 @@ function Header() {
     );
 
   return (
-    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-[2px]">
-      <Frame>
-        <div className="flex h-14 items-center justify-between gap-4 lg:h-16">
-          <Link to="/" aria-label={t('common.appName')} className="rounded-xl">
-            <BrandMark />
-          </Link>
+    <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
+      <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-[2px]">
+        <Frame>
+          <div className="flex h-14 items-center justify-between gap-4 lg:h-16">
+            <Link to="/" aria-label={t('common.appName')} className="rounded-xl">
+              <BrandMark />
+            </Link>
 
-          <nav aria-label={t('site.nav.label')} className="hidden items-center gap-7 lg:flex">
-            {PUBLIC_NAV.map(({ to, key }) => (
-              <NavLink key={to} to={to} end={to === '/'} className={link}>
-                {t(`site.nav.${key}`)}
-              </NavLink>
-            ))}
-          </nav>
+            <nav aria-label={t('site.nav.label')} className="hidden items-center gap-7 lg:flex">
+              {PUBLIC_NAV.map(({ to, key }) => (
+                <NavLink key={to} to={to} end={to === '/'} className={link}>
+                  {t(`site.nav.${key}`)}
+                </NavLink>
+              ))}
+            </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <LanguageSwitcher className="hidden sm:inline-flex" />
-            <ThemeSwitcher className="hidden sm:inline-flex" />
-            <Button asChild variant="ghost" size="md" className="hidden sm:inline-flex">
-              <Link to="/login">{t('site.nav.signIn')}</Link>
-            </Button>
-            <Button asChild size="md" className="hidden sm:inline-flex">
-              <Link to="/register">{t('site.nav.createAccount')}</Link>
-            </Button>
-            <button
-              type="button"
-              aria-expanded={open}
-              aria-controls="public-menu"
-              aria-label={open ? t('common.close') : t('site.nav.menu')}
-              onClick={() => setOpen((value) => !value)}
-              className="flex size-10 items-center justify-center rounded-xl border text-foreground transition-colors duration-fast hover:bg-subtle lg:hidden"
-            >
-              {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
-            </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <LanguageSwitcher className="hidden sm:inline-flex" />
+              <ThemeSwitcher className="hidden sm:inline-flex" />
+              <Button asChild variant="ghost" size="md" className="hidden sm:inline-flex">
+                <Link to="/login">{t('site.nav.signIn')}</Link>
+              </Button>
+              <Button asChild size="md" className="hidden sm:inline-flex">
+                <Link to="/register">{t('site.nav.createAccount')}</Link>
+              </Button>
+              <DialogPrimitive.Trigger asChild><button
+                type="button"
+                aria-expanded={open}
+                aria-controls="public-menu"
+                aria-label={open ? t('common.close') : t('site.nav.menu')}
+                  className="flex size-10 items-center justify-center rounded-xl border text-foreground transition-colors duration-fast hover:bg-subtle lg:hidden"
+              >
+                {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
+              </button></DialogPrimitive.Trigger>
+            </div>
           </div>
-        </div>
-      </Frame>
+        </Frame>
+      </header>
 
       {/*
        * A full sheet rather than a dropdown. On a phone the three destinations and the two actions are the
        * whole header, and a 280px panel hanging off the right edge makes the primary action the smallest
        * target on screen.
        */}
-      {open ? (
-        <div id="public-menu" className="fixed inset-x-0 bottom-0 top-14 z-30 overflow-y-auto border-t bg-background lg:hidden">
-          <Frame className="flex min-h-full flex-col gap-8 py-8">
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Content id="public-menu" className="paper daylight-site public-mobile-menu fixed inset-0 z-50 flex flex-col bg-background font-sans text-foreground lg:hidden">
+          <DialogPrimitive.Title className="sr-only">{t('site.nav.menu')}</DialogPrimitive.Title>
+          <DialogPrimitive.Description className="sr-only">{t('site.nav.label')}</DialogPrimitive.Description>
+          <Frame className="flex h-16 shrink-0 items-center justify-between border-b">
+            <Link to="/" aria-label={t('common.appName')} onClick={() => setOpen(false)}><BrandMark /></Link>
+            <DialogPrimitive.Close asChild>
+              <button type="button" aria-label={t('common.close')} className="flex size-11 items-center justify-center rounded-xl border"><X aria-hidden="true" className="size-5" /></button>
+            </DialogPrimitive.Close>
+          </Frame>
+          <Frame className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto py-6">
             <nav aria-label={t('site.nav.label')} className="flex flex-col">
               {PUBLIC_NAV.map(({ to, key }) => (
                 <NavLink
                   key={to}
                   to={to}
                   end={to === '/'}
+                  onClick={() => setOpen(false)}
                   className={({ isActive }) =>
                     cn(
                       'border-b py-4 font-serif text-section-sm font-semibold transition-colors',
@@ -127,14 +145,15 @@ function Header() {
                 <Link to="/login">{t('site.nav.signIn')}</Link>
               </Button>
             </div>
-            <div className="mt-auto flex items-center justify-between gap-3 border-t pt-6">
+            <SupportLink />
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t pt-6">
               <LanguageSwitcher />
               <ThemeSwitcher />
             </div>
           </Frame>
-        </div>
-      ) : null}
-    </header>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
 
