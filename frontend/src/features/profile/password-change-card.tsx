@@ -67,7 +67,7 @@ export function PasswordChangeCard() {
           <FormField label={t('profile.password.current')} error={message(errors.current?.message)}>
             <PasswordInput autoComplete="current-password" {...form.register('current')} />
           </FormField>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
             <FormField label={t('auth.fields.newPassword')} error={message(errors.next?.message)}>
               <PasswordInput autoComplete="new-password" {...form.register('next')} />
             </FormField>

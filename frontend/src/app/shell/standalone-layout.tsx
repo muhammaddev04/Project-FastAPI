@@ -23,9 +23,9 @@ export function StandaloneLayout({
   className?: string;
 }) {
   const { t } = useTranslation();
-  const brand = <BrandMark />;
+  const brand = <BrandMark size="xs" />;
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background">
+    <div className="workspace relative min-h-screen overflow-x-hidden bg-background">
       <TopBar
         start={
           back ? (

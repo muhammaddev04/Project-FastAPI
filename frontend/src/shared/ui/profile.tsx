@@ -8,8 +8,8 @@ import { cn } from '@/shared/lib/cn';
  */
 
 /**
- * Hero of entity pages: the sign-in card's rounded chrome panel with the brand glow; identity on the left
- * (mark, eyebrow chips, Montserrat name, subtitle, meta chips), actions on the right, stat cards beneath and an
+ * Entity header: a plain raised panel with identity on the left
+ * (mark, eyebrow chips, name, subtitle, meta chips), actions on the right, stat cards beneath and an
  * optional side panel (e.g. the responsible person).
  */
 export function ProfileHeader({
@@ -32,26 +32,22 @@ export function ProfileHeader({
   aside?: ReactNode;
 }) {
   return (
-    <section className="chrome relative overflow-hidden rounded-2xl border p-5 shadow-card sm:p-6 lg:p-7">
-      <div
-        className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full border border-primary/15 bg-primary/[0.04]"
-        aria-hidden="true"
-      />
+    <section className="workspace-hero chrome relative overflow-hidden rounded-2xl border p-5 shadow-card sm:p-6 lg:p-7">
       <div className="relative flex flex-col gap-5 xl:flex-row">
         <div className="min-w-0 flex-1 space-y-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex min-w-0 items-start gap-4">
+            <div className="flex w-full min-w-0 flex-col items-start gap-4 sm:flex-row">
               {mark}
-              <div className="min-w-0">
+              <div className="w-full min-w-0 sm:flex-1">
                 {eyebrow ? <div className="mb-2 flex flex-wrap items-center gap-2">{eyebrow}</div> : null}
-                <h1 className="break-words font-display text-title-lg font-extrabold leading-tight text-foreground sm:text-[2rem]">{title}</h1>
+                <h1 className="break-words font-display text-title-lg font-semibold leading-tight text-foreground sm:text-[2rem]">{title}</h1>
                 {subtitle ? <p className="mt-1 text-body text-muted-foreground">{subtitle}</p> : null}
-                {chips ? <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">{chips}</div> : null}
+                {chips ? <div className="workspace-meta mt-3 flex flex-wrap gap-x-4 gap-y-2">{chips}</div> : null}
               </div>
             </div>
-            {actions ? <div className="flex shrink-0 flex-wrap gap-2 sm:flex-col sm:items-stretch">{actions}</div> : null}
+            {actions ? <div className="workspace-actions flex shrink-0 flex-col gap-2 sm:items-stretch">{actions}</div> : null}
           </div>
-          {stats ? <div className="grid grid-cols-[repeat(auto-fit,minmax(11.5rem,1fr))] gap-3">{stats}</div> : null}
+          {stats ? <div className="workspace-stats grid grid-cols-[repeat(auto-fit,minmax(min(100%,11.5rem),1fr))] gap-3">{stats}</div> : null}
         </div>
         {aside ? <div className="xl:w-72 xl:shrink-0">{aside}</div> : null}
       </div>
@@ -69,15 +65,15 @@ export function MetaChip({ icon: Icon, children }: { icon: LucideIcon; children:
   );
 }
 
-/** Statistic tile: icon tile, caption, Montserrat value, optional hint (the feature tiles of the sign-in hero). */
+/** Statistic tile: icon, readable caption, value and optional hint. */
 export function StatCard({ icon: Icon, label, value, hint, className }: { icon: LucideIcon; label: ReactNode; value: ReactNode; hint?: ReactNode; className?: string }) {
   return (
-    <div className={cn('flex items-start gap-3 rounded-2xl border bg-surface/70 px-4 py-3.5 dark:bg-subtle/40', className)}>
+    <div className={cn('workspace-stat flex items-start gap-3 rounded-xl border bg-subtle px-4 py-3.5', className)}>
       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
         <Icon className="size-[1.125rem]" aria-hidden="true" />
       </span>
       <div className="min-w-0">
-        <p className="text-micro font-bold uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
+        <p className="text-caption font-medium text-muted-foreground">{label}</p>
         <p className="truncate font-display text-title-sm font-bold text-foreground">{value}</p>
         {hint ? <p className="truncate text-caption text-muted-foreground">{hint}</p> : null}
       </div>
@@ -100,7 +96,7 @@ export function SectionHeader({
   as?: 'h2' | 'h3';
 }) {
   return (
-    <div className="flex items-start justify-between gap-3">
+    <div className="workspace-section-heading flex flex-wrap items-start justify-between gap-3">
       <div className="flex min-w-0 items-start gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <Icon className="size-[1.125rem]" aria-hidden="true" />
@@ -110,7 +106,7 @@ export function SectionHeader({
           {subtitle ? <p className="text-label text-muted-foreground">{subtitle}</p> : null}
         </div>
       </div>
-      {chip ? <div className="shrink-0">{chip}</div> : null}
+      {chip ? <div className="min-w-0 max-w-full">{chip}</div> : null}
     </div>
   );
 }

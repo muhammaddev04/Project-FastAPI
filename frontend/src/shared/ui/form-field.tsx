@@ -43,8 +43,8 @@ export function FormField({
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
 
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-baseline justify-between gap-3">
+    <div className="workspace-form-field min-w-0 space-y-1.5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <Label htmlFor={id} className={cn(size === 'lg' && 'text-body-lg', labelClassName)}>
           {label}
           {requirement === 'optional' ? (

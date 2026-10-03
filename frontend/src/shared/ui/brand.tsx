@@ -12,10 +12,10 @@ export function LogoMark({ className, inverted = false }: { className?: string; 
   );
 }
 
-export function BrandMark({ className, size = 'sm' }: { className?: string; size?: 'sm' | 'md' | 'lg' }) {
+export function BrandMark({ className, size = 'sm' }: { className?: string; size?: 'xs' | 'sm' | 'md' | 'lg' }) {
   return (
     <span className={cn('inline-flex shrink-0 items-center', className)}>
-      <LogoMark className={size === 'lg' ? 'h-20' : size === 'md' ? 'h-16' : 'h-12 sm:h-14'} />
+      <LogoMark className={size === 'xs' ? 'h-8 sm:h-9' : size === 'lg' ? 'h-20' : size === 'md' ? 'h-16' : 'h-12 sm:h-14'} />
       <span className="sr-only">TezFarmo</span>
     </span>
   );

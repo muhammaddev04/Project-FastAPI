@@ -37,7 +37,7 @@ function SidebarLink({ link, onNavigate }: { link: ShellLink; onNavigate?: () =>
         cn(
           'flex h-9 items-center gap-2.5 rounded-xl px-2.5 text-label transition-colors duration-fast',
           isActive
-            ? 'bg-primary-strong font-medium text-white'
+            ? 'bg-primary-strong font-medium text-primary-foreground shadow-sm'
             : 'text-sidebar-muted hover:bg-sidebar-active hover:text-sidebar-foreground',
         )
       }
@@ -139,7 +139,7 @@ export function SidebarBody({
   return (
     <>
       <div className={cn('flex h-14 shrink-0 items-center justify-between gap-2 px-4', onNavigate && 'pr-14')}>
-        <BrandMark />
+        <BrandMark size="xs" />
         {/* Which area this is, stated plainly. It was an uppercase outlined pill competing with the mark. */}
         <span className="truncate text-caption font-medium text-sidebar-muted">{areaLabel}</span>
       </div>
@@ -195,7 +195,7 @@ export function ShellFrame({
   useEffect(() => setDrawerOpen(false), [location.pathname]);
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="workspace relative min-h-screen bg-background">
 
       {hideSidebar ? null : (
         <aside className="chrome fixed inset-y-0 left-0 z-30 hidden w-[17rem] flex-col border-y-0 border-l-0 border-r text-sidebar-foreground lg:flex">
@@ -206,7 +206,7 @@ export function ShellFrame({
       {hideSidebar ? null : (
         <DialogPrimitive.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
           <DialogPrimitive.Portal>
-            <DialogPrimitive.Overlay className="fixed inset-0 z-40 animate-fade bg-brand-navy/50 backdrop-blur-[2px] lg:hidden" />
+            <DialogPrimitive.Overlay className="fixed inset-0 z-40 animate-fade bg-foreground/50 backdrop-blur-[2px] lg:hidden" />
             <DialogPrimitive.Content
               onOpenAutoFocus={(event) => {
                 event.preventDefault();

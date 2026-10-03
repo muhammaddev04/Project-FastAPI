@@ -254,9 +254,11 @@ export function OrganizationProfilePage() {
             ) : !perms.includes('org.edit_legal') ? (
               <Alert tone="info">{t('orgProfile.legalOwnerOnly')}</Alert>
             ) : null}
-            {field('name', isStore ? t('onboarding.storeName') : t('onboarding.companyName'), { maxLength: 200 })}
-            {field('legal_name', t('onboarding.fields.legalName'), { maxLength: 255 })}
-            {field('tax_identifier', t('onboarding.fields.taxIdentifier'), { inputMode: 'numeric', maxLength: 12 })}
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">{field('name', isStore ? t('onboarding.storeName') : t('onboarding.companyName'), { maxLength: 200 })}</div>
+              {field('legal_name', t('onboarding.fields.legalName'), { maxLength: 255 })}
+              {field('tax_identifier', t('onboarding.fields.taxIdentifier'), { inputMode: 'numeric', maxLength: 12 })}
+            </div>
           </Card>
 
           <Card className="space-y-4 p-5 sm:p-6">

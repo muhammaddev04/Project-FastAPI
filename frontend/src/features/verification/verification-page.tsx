@@ -65,7 +65,7 @@ function DocumentSlot({
   const problem = clientError ?? (upload.isError ? errorMessage(upload.error, t) : null);
   return (
     <div className={cn('rounded-xl border px-4 py-3.5 transition-colors', value ? 'border-success/40 bg-success-soft/40' : 'bg-subtle/40')}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
           <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-xl', value ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary')}>
             {value ? <FileCheck2 className="size-[1.125rem]" aria-hidden="true" /> : <FileText className="size-[1.125rem]" aria-hidden="true" />}
@@ -87,7 +87,7 @@ function DocumentSlot({
         </div>
         <label
           htmlFor={inputId}
-          className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-xl border border-primary/40 bg-surface/60 px-3.5 text-label font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/5"
+          className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/40 bg-surface/60 px-3.5 py-2 text-label font-semibold text-primary transition-colors hover:border-primary hover:bg-primary/5 sm:min-h-9"
         >
           {upload.isPending ? <Spinner className="size-4" label={t('verification.uploading')} /> : <FileUp className="size-4" aria-hidden="true" />}
           {value ? t('verification.replaceFile') : t('verification.chooseFile')}
@@ -195,7 +195,7 @@ export function VerificationPage() {
             ) : null}
           </div>
         </div>
-        <ol className="grid grid-cols-3 border-t bg-subtle/40" aria-label={t('verification.steps.label')}>
+        <ol className="grid grid-cols-1 border-t bg-subtle/40 sm:grid-cols-3" aria-label={t('verification.steps.label')}>
           {steps.map((step, index) => (
             <li key={step.key} className="flex items-center gap-2.5 px-3 py-3.5 sm:px-6" aria-current={step.current ? 'step' : undefined}>
               <span

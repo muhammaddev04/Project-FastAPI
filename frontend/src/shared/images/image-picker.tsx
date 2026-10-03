@@ -93,7 +93,7 @@ export function ImagePicker({
           <p className="text-label text-muted-foreground">{src ? t('images.current') : t(key('empty'))}</p>
           {canEdit ? (
             <>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <Button type="button" variant="secondary" size="sm" loading={busy === 'upload'} disabled={busy !== null} onClick={() => input.current?.click()}>
                   <ImagePlus aria-hidden="true" /> {src ? t(key('change')) : t(key('upload'))}
                 </Button>

@@ -50,7 +50,7 @@ export function ConnectedAccounts() {
                 <GoogleMark />
               </span>
               <div className="min-w-0">
-              <p className="flex items-center gap-2 text-sm font-medium">
+              <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
                 Google
                 <Badge tone={state.data.connected ? 'success' : 'neutral'}>
                   {state.data.connected ? t('profile.connected.connected') : t('profile.connected.notConnected')}

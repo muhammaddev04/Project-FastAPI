@@ -41,7 +41,7 @@ export function PlannedPanel({
   className?: string;
 }) {
   return (
-    <Card className={cn('flex flex-col', className)}>
+    <Card className={cn('workspace-planned flex flex-col', className)}>
       <div className="px-5 pt-5">
         <SectionHeader icon={Icon} title={title} chip={<PhaseBadge phase={phase} />} />
       </div>

@@ -173,25 +173,22 @@ export function ProfilePage({ me }: { me: Me }) {
           }
         />
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <Card className="p-5 sm:p-6">
+        <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="min-w-0 space-y-6 lg:col-span-2">
+            <Card className="profile-details min-w-0 p-4 sm:p-6">
               <SectionHeader icon={UserRound} title={t('profile.details')} subtitle={t('profile.detailsHint')} />
               <form onSubmit={onSubmit} noValidate className="mt-4 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField label={t('auth.fields.fullName')} error={errors.full_name?.message && t(errors.full_name.message)}>
-                    <Input autoComplete="name" {...form.register('full_name')} />
-                  </FormField>
-                  <FormField label={t('auth.fields.language')} hint={t('profile.languageHint')}>
-                    <Select {...form.register('language')}>
-                      <option value="tg">{t('languages.tg')}</option>
-                      <option value="ru">{t('languages.ru')}</option>
-                      <option value="en">{t('languages.en')}</option>
-                    </Select>
-                  </FormField>
-                  <FormField label={t('auth.fields.email')} hint={t('profile.emailHint')}>
-                    <Input value={me.email} readOnly aria-readonly />
-                  </FormField>
+                <div className="profile-details-fields grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2">
+                  <div className="min-w-0 md:col-span-2">
+                    <FormField label={t('auth.fields.fullName')} error={errors.full_name?.message && t(errors.full_name.message)}>
+                      <Input autoComplete="name" {...form.register('full_name')} />
+                    </FormField>
+                  </div>
+                  <div className="min-w-0 md:col-span-2">
+                    <FormField label={t('auth.fields.email')} hint={t('profile.emailHint')}>
+                      <Input value={me.email} readOnly aria-readonly />
+                    </FormField>
+                  </div>
                   <FormField
                     label={t('auth.fields.phone')}
                     hint={t('profile.phone.hint')}
@@ -199,6 +196,13 @@ export function ProfilePage({ me }: { me: Me }) {
                     action={phoneStatus}
                   >
                     <Input type="tel" inputMode="tel" autoComplete="tel" placeholder="+992 90 123 4567" maxLength={24} {...form.register('phone')} />
+                  </FormField>
+                  <FormField label={t('auth.fields.language')} hint={t('profile.languageHint')}>
+                    <Select {...form.register('language')}>
+                      <option value="tg">{t('languages.tg')}</option>
+                      <option value="ru">{t('languages.ru')}</option>
+                      <option value="en">{t('languages.en')}</option>
+                    </Select>
                   </FormField>
                 </div>
                 {update.isError && !phoneFailure ? <Alert tone="danger">{errorMessage(update.error, t)}</Alert> : null}
@@ -214,7 +218,7 @@ export function ProfilePage({ me }: { me: Me }) {
             <MembershipsCard me={me} />
           </div>
 
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             <ImagePicker
               subject="avatar"
               name={me.full_name}

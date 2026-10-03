@@ -20,7 +20,7 @@ export const DialogContent = forwardRef<
   const { t } = useTranslation();
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade bg-brand-navy/60 backdrop-blur-[2px]" />
+      <DialogPrimitive.Overlay className="fixed inset-0 z-50 animate-fade bg-foreground/60 backdrop-blur-[2px]" />
       <DialogPrimitive.Content
         ref={ref}
         // Focus the panel itself on open (keyboard users tab from there) instead of ringing the close button.
