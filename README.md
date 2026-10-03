@@ -34,6 +34,9 @@ Add `http://localhost:5174/auth/google/callback` as an authorized redirect URI, 
 in that file and restart the backend. Keep the secret on the backend; `.env.example` contains no credentials.
 `GET /api/v1/meta` should report `auth.google: true`, enabling **Continue with Google** on login and registration.
 For deployment, use the site's HTTPS callback URL in both Google Cloud and the backend configuration.
+Verified Gmail and Google Workspace addresses sign in to an existing account directly and link Google automatically,
+without requiring password login or a visit to the profile. Other email providers require explicit linking for existing
+accounts because Google cannot guarantee their current ownership. An existing Google identity is never replaced.
 
 Email registration starts a session automatically after the six-digit verification code is accepted.
 `POST /api/v1/auth/email/verify` returns the same `{access_token, expires_in, user}` response and session cookies

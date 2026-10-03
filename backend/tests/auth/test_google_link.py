@@ -1,6 +1,6 @@
 """Linking a Google account to the signed-in user (owner request): its own LINK_GOOGLE transaction bound to the user
 and the browser, state/nonce/PKCE like login, link by Google `sub` only, never moving a `sub` between users, and a
-plain `oauth_account_exists` for an unlinked password account until the owner links explicitly."""
+direct login for an unlinked password account with a verified Google-hosted email."""
 
 from __future__ import annotations
 
@@ -105,10 +105,6 @@ async def test_password_account_links_google_and_then_signs_in_with_it_after_log
     client: AsyncClient, session: AsyncSession
 ) -> None:
     user_id, headers = await password_user(session)
-
-    # Before linking: Continue with Google is refused for this password account (unchanged protection).
-    before = await google_login(client)
-    assert before.status_code == 409 and code(before) == "oauth_account_exists"
 
     linked = await link(client, headers)
     assert linked.status_code == 200, linked.text
@@ -342,16 +338,19 @@ async def test_link_is_audited_without_secrets(
     assert "id_token" not in response.text and "access_token" not in response.text
 
 
-async def test_unlinked_password_account_still_gets_oauth_account_exists(
+async def test_unlinked_password_account_signs_in_without_profile_linking(
     client: AsyncClient, session: AsyncSession
 ) -> None:
-    await make_user(session, email=EMAIL)
+    user = await make_user(session, email=EMAIL)
     await session.commit()
+    user_id = user.id
 
     response = await google_login(client)
 
-    assert response.status_code == 409 and code(response) == "oauth_account_exists"
-    assert await identities(session) == []
+    assert response.status_code == 200
+    assert response.json()["user"]["id"] == str(user_id)
+    [identity] = await identities(session)
+    assert identity.user_id == user_id
 
 
 async def test_google_sign_in_keeps_the_accounts_onboarding_state(client: AsyncClient, session: AsyncSession) -> None:

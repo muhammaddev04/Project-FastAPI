@@ -5,16 +5,17 @@ secret, which never leaves the backend. The one-time transaction lives in Redis 
 the starting browser by an httpOnly cookie, so a code+state pair cannot be replayed from another browser.
 
 Account rules (owner decision; TZ does not define linking):
-- a Google identity is linked by its `sub` only (`oauth_identities`), never by email alone;
+- a known Google identity is resolved by its `sub` (`oauth_identities`);
 - a known `sub` signs its user in;
 - an unknown `sub` whose verified email is new creates a user with a confirmed email (Google verified it);
-- an unknown `sub` whose email already has a TezFarmo account is refused (`oauth_account_exists`): the owner signs
-  in with email + password; nothing is linked or created;
+- an unknown `sub` with a verified Gmail or Workspace email links to the existing account and signs in;
+- an existing account with another Google identity, or a non-hosted email, requires explicit linking;
 - Google must report the email as verified.
 
 Linking (owner request): a signed-in user may link a Google account to their own account explicitly. That flow uses
-its own transaction purpose (`LINK_GOOGLE`, bound to the user id and the browser), so a login callback never links
-and a link callback never signs anyone in. The user proves control of the TezFarmo account (their session) and of the
+its own transaction purpose (`LINK_GOOGLE`, bound to the user id and the browser), so a link callback
+never signs anyone in.
+The user proves control of the TezFarmo account (their session) and of the
 Google account (the OAuth round trip); the email plays no part.
 """
 
@@ -201,9 +202,37 @@ async def _user_for(session: AsyncSession, claims: dict[str, object], language: 
     email = str(claims.get("email") or "").strip().lower()
     if not email or claims.get("email_verified") is not True:
         raise AppError("oauth_email_not_verified", 403)
-    if await session.scalar(select(User.id).where(func.lower(User.email) == email)) is not None:
-        # Never linked by email alone: the owner of this address signs in with email + password.
-        raise AppError("oauth_account_exists", 409)
+    existing_user = await session.scalar(select(User).where(func.lower(User.email) == email).with_for_update())
+    if existing_user is not None:
+        # Google guarantees current ownership only for Gmail and hosted Workspace addresses.
+        # A verified third-party email alone can be stale and must not grant account access.
+        if not (email.endswith("@gmail.com") or claims.get("hd")):
+            raise AppError("oauth_account_exists", 409)
+        if existing_user.status != "ACTIVE":
+            raise AppError("user_blocked", 403)
+        if await _identity_of(session, existing_user.id) is not None:
+            raise AppError("oauth_account_exists", 409)
+        try:
+            async with session.begin_nested():
+                session.add(
+                    OAuthIdentity(
+                        user_id=existing_user.id, provider="google", subject=subject, email=email, email_verified=True
+                    )
+                )
+                await session.flush()
+        except IntegrityError as exc:
+            raise AppError("oauth_account_exists", 409) from exc
+        if existing_user.email_verified_at is None:
+            existing_user.email_verified_at = utcnow()
+        await audit.record(
+            session,
+            "auth.google_linked",
+            "user",
+            existing_user.id,
+            actor_id=existing_user.id,
+            new={"method": "google_login"},
+        )
+        return existing_user
 
     user = User(
         email=email,

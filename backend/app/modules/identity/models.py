@@ -112,7 +112,7 @@ class Membership(IdMixin, TimestampMixin, Base):
 
 
 class OAuthIdentity(IdMixin, TimestampMixin, Base):
-    """External identity link (Google `sub`). Linked only by provider subject, never by e-mail alone."""
+    """Google identity resolved by subject after explicit or verified Google-hosted email linking."""
 
     __tablename__ = "oauth_identities"
     __table_args__ = (

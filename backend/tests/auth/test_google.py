@@ -1,5 +1,5 @@
 """Optional "Continue with Google" (F-1.9, CR-001): authorization code + state + PKCE + nonce, server-side exchange,
-link by Google `sub` only, refuse an email that already has an unlinked account, then a normal TezFarmo session.
+resolve Google `sub`, link verified Google-hosted emails to existing accounts, then a normal TezFarmo session.
 Google's token endpoint is answered by an httpx.MockTransport; nothing leaves the machine."""
 
 from __future__ import annotations
@@ -197,20 +197,58 @@ async def test_returning_google_user_signs_in_to_the_same_account(client: AsyncC
     assert len({row.family_id for row in rows}) == 2  # two separate sessions
 
 
-async def test_existing_password_account_is_not_linked_by_email(client: AsyncClient, session: AsyncSession) -> None:
-    await make_account(session, "nigina@gmail.com")
+@pytest.mark.parametrize("email,hd", [("nigina@gmail.com", None), ("nigina@company.tj", "company.tj")])
+async def test_existing_password_account_signs_in_directly_with_google(
+    client: AsyncClient, session: AsyncSession, email: str, hd: str | None
+) -> None:
+    user_id, _ = await make_account(session, email)
+    user = await session.get(User, user_id)
+    assert user is not None
+    user.email_verified_at = None
+    await session.commit()
     before = await users(session)
     started = await start(client)
-    google_answers(token_response(started.nonce))
+    google_answers(token_response(started.nonce, email=email.upper(), hd=hd))
 
     response = await callback(client, started)
 
+    assert response.status_code == 200
+    assert response.json()["user"]["id"] == str(user_id)
+    assert response.json()["user"]["email_verified"] is True
+    assert "refresh_token" in set_cookies(response)
+    assert await users(session) == before
+    [identity] = await identities(session)
+    assert identity.user_id == user_id and identity.subject == "google-sub-1"
+    assert (
+        await client.get(ME, headers={"Authorization": f"Bearer {response.json()['access_token']}"})
+    ).status_code == 200
+    assert (await client.post(LOGIN, json={"email": email, "password": PASSWORD})).status_code == 200
+    again = await google_session(client, "another-code", email=email)
+    assert again.status_code == 200 and again.json()["user"]["id"] == str(user_id)
+
+
+async def test_existing_third_party_email_requires_explicit_link(client: AsyncClient, session: AsyncSession) -> None:
+    await make_account(session, "nigina@example.tj")
+    started = await start(client)
+    google_answers(token_response(started.nonce, email="nigina@example.tj"))
+    response = await callback(client, started)
     assert response.status_code == 409 and code(response) == "oauth_account_exists"
     assert "refresh_token" not in set_cookies(response)
-    assert await users(session) == before
     assert await session.scalar(select(func.count()).select_from(OAuthIdentity)) == 0
-    # The owner still signs in with the password.
-    assert (await client.post(LOGIN, json={"email": "nigina@gmail.com", "password": PASSWORD})).status_code == 200
+
+
+async def test_blocked_password_account_cannot_link_via_google(client: AsyncClient, session: AsyncSession) -> None:
+    user_id, _ = await make_account(session, "nigina@gmail.com")
+    user = await session.get(User, user_id)
+    assert user is not None
+    user.status = "BLOCKED"
+    await session.commit()
+    started = await start(client)
+    google_answers(token_response(started.nonce))
+    response = await callback(client, started)
+    assert response.status_code == 403 and code(response) == "user_blocked"
+    assert "refresh_token" not in set_cookies(response)
+    assert await session.scalar(select(func.count()).select_from(OAuthIdentity)) == 0
 
 
 async def test_unverified_google_email_is_refused(client: AsyncClient, session: AsyncSession) -> None:
