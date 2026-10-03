@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
 from app.core.errors import AppError
+from app.core.events import DomainEvent, event_bus
 from app.core.storage import SignedUrl, get_storage
 from app.core.time import utcnow
 from app.modules.files.models import StoredFile
@@ -176,6 +177,14 @@ async def submit(session: AsyncSession, context: OrgContext, payload: Verificati
             "request_status": "SUBMITTED",
             "documents": sorted(document.doc_type for document in payload.documents),
         },
+    )
+    await event_bus.publish(
+        session,
+        DomainEvent(
+            "VERIFICATION_SUBMITTED",
+            {"request_id": str(request.id), "submitted_by": str(context.user.id)},
+            org_id=organization.id,
+        ),
     )
     return await get_state(session, context)
 
@@ -359,6 +368,10 @@ async def approve(session: AsyncSession, request_id: UUID, admin: User) -> Admin
     profile.version += 1
     await session.flush()
     await _transition_audit(session, request, admin, "UNDER_REVIEW", org_old=org_old, org_new="APPROVED")
+    await event_bus.publish(
+        session,
+        DomainEvent("VERIFICATION_APPROVED", {"request_id": str(request.id)}, org_id=organization.id),
+    )
     return await get_request(session, request.id)
 
 
@@ -381,6 +394,10 @@ async def reject(session: AsyncSession, request_id: UUID, admin: User, reason: s
     profile.version += 1
     await session.flush()
     await _transition_audit(session, request, admin, "UNDER_REVIEW", org_old=org_old, org_new="REJECTED", reason=reason)
+    await event_bus.publish(
+        session,
+        DomainEvent("VERIFICATION_REJECTED", {"request_id": str(request.id)}, org_id=organization.id),
+    )
     return await get_request(session, request.id)
 
 

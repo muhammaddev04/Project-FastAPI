@@ -19,6 +19,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.email import MemoryEmailProvider, OutgoingEmail, set_email_provider
+from app.core.time import new_id
 from app.modules.identity.models import Organization, User
 from tests.factories import auth, make_org, make_user
 
@@ -175,7 +176,7 @@ async def test_creating_the_intended_organization_ends_onboarding_without_duplic
     token = await register_and_sign_in(client, outbox, org_type="COMPANY", org_name="Pamir Trade")
     headers = {"Authorization": f"Bearer {token}"}
 
-    created = await client.post(COMPANIES, json=COMPANY, headers=headers)
+    created = await client.post(COMPANIES, json=COMPANY, headers={**headers, "Idempotency-Key": str(new_id())})
     view = await me(client, await sign_in(client))
 
     assert created.status_code == 201

@@ -21,6 +21,7 @@ from app.core.config import get_settings
 from app.core.email import EmailDeliveryError, OutgoingEmail, get_email
 from app.core.email_templates import render
 from app.core.errors import AppError
+from app.core.events import DomainEvent, event_bus
 from app.core.rate_limit import (
     AUTH_EMAIL_SEND,
     AUTH_EMAIL_VERIFY,
@@ -158,6 +159,7 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
         actor_id=user.id,
         new={"language": user.language, "email_verified": False, "onboarding_org_type": user.onboarding_org_type},
     )
+    await event_bus.publish(session, DomainEvent("USER_REGISTERED", {"user_id": str(user.id)}))
     await _send_verification(session, user)
 
 

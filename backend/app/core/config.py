@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+asyncpg://tezfarmo:tezfarmo@localhost:5433/tezfarmo"
     redis_url: str = "redis://localhost:6380/0"
+    celery_broker_url: str = "redis://localhost:6380/1"
     cors_origins: str = "http://localhost:5174"
 
     # SEC-010: general application secret; keys the HMAC of one-time email tokens (P01 §2.2).

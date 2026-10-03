@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit import AuditLog
 from app.core.email import EmailDeliveryError, MemoryEmailProvider, OutgoingEmail, set_email_provider
+from app.core.outbox import OutboxEvent
 from app.core.security import verify_password
 from app.core.time import utcnow
 from app.modules.auth.models import EmailToken
@@ -78,6 +79,8 @@ async def test_iam_001_register_creates_unverified_user_and_answers_202(
     assert verify_password(PASSWORD, user.password_hash)
     # Registration never creates an organization (ORG-001 runs later from /welcome).
     assert (await session.scalar(select(func.count()).select_from(User))) == 1
+    [event] = (await session.scalars(select(OutboxEvent))).all()
+    assert event.event_type == "USER_REGISTERED" and event.payload == {"user_id": str(user.id)}
 
 
 async def test_email_is_trimmed_and_lowercased(
@@ -104,6 +107,7 @@ async def test_iam_001_known_email_gets_the_same_answer_and_no_second_account(
     assert user.full_name == "Nigina Karimova"
     assert verify_password(PASSWORD, user.password_hash)
     assert len(await tokens(session)) == 1
+    assert await session.scalar(select(func.count()).select_from(OutboxEvent)) == 1
     # The owner of the address is told instead (IAM-001), in their own language, with no secret link.
     assert [message.template for message in outbox] == ["verification", "account_exists"]
     notice = outbox[1]

@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
 from app.core.errors import AppError
+from app.core.events import DomainEvent, event_bus
 from app.core.time import utcnow
 from app.modules.files import images
 from app.modules.identity.deps import OrgContext
@@ -164,6 +165,22 @@ async def create_organization(
         actor_id=user.id,
         org_id=organization.id,
         new={"role": "OWNER", "user_id": str(user.id)},
+    )
+    await event_bus.publish(
+        session,
+        DomainEvent(
+            f"{org_type}_CREATED",
+            {"organization_id": str(organization.id), "owner_id": str(user.id)},
+            org_id=organization.id,
+        ),
+    )
+    await event_bus.publish(
+        session,
+        DomainEvent(
+            "MEMBERSHIP_CREATED",
+            {"membership_id": str(membership.id), "user_id": str(user.id), "role": "OWNER"},
+            org_id=organization.id,
+        ),
     )
     return OrganizationCreated(
         organization=profile_out(organization, profile),

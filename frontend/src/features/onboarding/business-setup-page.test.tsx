@@ -109,6 +109,7 @@ describe('onboarding step 4: business setup (/welcome/company, /welcome/store)',
     expect(await screen.findByText('company verification page')).toBeInTheDocument();
     const post = calls.find((call) => call.method === 'POST');
     expect(post?.path).toBe('/api/v1/organizations/companies');
+    expect(post?.headers['Idempotency-Key']).toMatch(/^[0-9a-f-]{36}$/i);
     expect(post?.body).toEqual({
       name: 'Pamir Trade',
       legal_name: 'Pamir Trade LLC',

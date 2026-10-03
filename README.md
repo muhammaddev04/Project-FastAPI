@@ -54,7 +54,30 @@ as login; new users continue to business onboarding without entering their passw
 
 Google setup reference: <https://developers.google.com/identity/openid-connect/openid-connect>.
 
+## Background jobs (P00)
+
+Apply migration `0016` before starting jobs. Start the local worker and scheduler with
+`docker compose --profile jobs up -d celery-worker celery-beat`. The worker dispatches durable
+outbox events every five seconds, with eight attempts and exponential backoff. Event data cannot
+be updated or deleted; only delivery metadata can change. Events without a registered consumer
+retry and eventually fail rather than silently disappearing. External consumers must deduplicate
+side effects using `event_id`. Business modules will register their handlers as they are implemented.
+For a worker outside Docker, configure `CELERY_BROKER_URL` (default `redis://localhost:6380/1`).
+Registration, organization/OWNER membership creation and verification decisions publish events
+transactionally. Subscription and notification consumers are pending in P03/P11: starting the
+dispatcher now will retry these unhandled events and eventually mark them FAILED while keeping
+their records. Celery Beat also purges expired idempotency records daily.
+`/api/health/ready` checks PostgreSQL, Redis and the private S3 bucket. Provision the bucket before
+using readiness as a deployment gate; the probe does not create it.
+
 ## Tests
+
+Organization creation (`POST /api/v1/organizations/companies`, `/stores`) and verification
+submission (`POST /api/v1/verification`) require a UUID `Idempotency-Key` header. Retrying the
+same payload with the same key returns the original result; changing the payload with that
+key returns 409. Verification rechecks current permissions and tenant context before replay.
+The frontend keeps a submission key across retries while the form is mounted and rotates it
+after success or a changed payload. Reloading the page starts a new submission.
 
 ```bash
 # backend tests use their own PostgreSQL :5434 and Redis :6381 (SQLite is not accepted, TZ 01_GLOBAL §14)

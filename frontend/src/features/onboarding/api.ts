@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api/client';
+import { useState } from 'react';
+import { createSubmissionKey } from '@/shared/api/idempotency';
 import { meQueryKey } from '@/shared/auth/api';
 import type { Membership, OrgType } from '@/shared/auth/types';
 
@@ -26,13 +28,18 @@ export type OrganizationPayload = {
 };
 
 export function useCreateOrganization() {
+  const [submission] = useState(createSubmissionKey);
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ type, payload }: { type: OrgType; payload: OrganizationPayload }) =>
       apiRequest<OrganizationCreated>(`/organizations/${type === 'COMPANY' ? 'companies' : 'stores'}`, {
         method: 'POST',
         body: payload,
+        idempotencyKey: submission.forPayload({ type, payload }),
       }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: meQueryKey }),
+    onSuccess: () => {
+      submission.complete();
+      return queryClient.invalidateQueries({ queryKey: meQueryKey });
+    },
   });
 }

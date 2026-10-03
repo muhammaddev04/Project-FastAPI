@@ -74,6 +74,10 @@ class Storage:
             self._client.put_object, self._bucket, key, io.BytesIO(data), len(data), content_type=content_type
         )
 
+    async def ready(self) -> bool:
+        """FND-020: check the private bucket without creating it or caching health."""
+        return await asyncio.wait_for(asyncio.to_thread(self._client.bucket_exists, self._bucket), timeout=5)
+
     async def signed_url(self, key: str, ttl: timedelta = SIGNED_URL_TTL) -> SignedUrl:
         if get_settings().app_env in {"production", "staging"}:
             # The browser cannot resolve Docker's storage hostname or load HTTP images over HTTPS.

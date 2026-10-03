@@ -74,6 +74,7 @@ describe('verification page (P02 §8, VER-001/003)', () => {
     const upload = calls.find((call) => call.path === '/api/v1/files');
     expect(upload?.body).toBeInstanceOf(FormData);
     expect((upload?.body as FormData).get('category')).toBe('VERIFICATION');
+    expect(calls.find((call) => call.path === '/api/v1/verification' && call.method === 'POST')?.headers['Idempotency-Key']).toMatch(/^[0-9a-f-]{36}$/i);
     expect(calls.find((call) => call.path === '/api/v1/verification' && call.method === 'POST')?.body).toEqual({
       documents: [
         { doc_type: 'REGISTRATION_CERTIFICATE', file_id: 'file-1' },

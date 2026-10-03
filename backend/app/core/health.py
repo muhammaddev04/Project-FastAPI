@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.core.db import get_engine
 from app.core.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES
 from app.core.redis import get_redis
+from app.core.storage import get_storage
 
 health_router = APIRouter(prefix="/api/health", tags=["health"])
 meta_router = APIRouter(prefix="/api/v1", tags=["meta"])
@@ -20,7 +21,7 @@ async def live() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@health_router.get("/ready", summary="Readiness probe (PostgreSQL + Redis)")
+@health_router.get("/ready", summary="Readiness probe (PostgreSQL + Redis + S3)")
 async def ready() -> JSONResponse:
     """FND-020: 503 with per-dependency details when any dependency is down."""
     checks: dict[str, str] = {}
@@ -35,6 +36,10 @@ async def ready() -> JSONResponse:
         checks["redis"] = "ok"
     except Exception:  # noqa: BLE001
         checks["redis"] = "unavailable"
+    try:
+        checks["s3"] = "ok" if await get_storage().ready() else "unavailable"
+    except Exception:  # noqa: BLE001
+        checks["s3"] = "unavailable"
     healthy = all(value == "ok" for value in checks.values())
     body: dict[str, Any] = {"status": "ok" if healthy else "unavailable", "details": checks}
     return JSONResponse(body, status_code=200 if healthy else 503)

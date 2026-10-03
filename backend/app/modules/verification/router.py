@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, status
 
+from app.core.idempotency import IdempotentRoute, idempotent
 from app.modules.files.schemas import SignedUrlOut
 from app.modules.identity.deps import SessionDep, SuperadminDep, require_permission
 from app.modules.verification import service
@@ -17,7 +18,7 @@ from app.modules.verification.schemas import (
     VerificationSubmit,
 )
 
-router = APIRouter(prefix="/api/v1", tags=["verification"])
+router = APIRouter(prefix="/api/v1", tags=["verification"], route_class=IdempotentRoute)
 admin_router = APIRouter(prefix="/api/v1/admin/verifications", tags=["admin"])
 
 VerificationViewer = require_permission("verification.view")
@@ -41,14 +42,18 @@ async def get_verification(session: SessionDep, context: VerificationViewer) -> 
 
 @router.post(
     "/verification",
+    dependencies=[idempotent(permission="verification.submit")],
     response_model=VerificationState,
     status_code=status.HTTP_201_CREATED,
     summary="Submit the organization for verification with the required documents (OWNER, VER-001/003)",
     responses={
+        400: {"description": "`idempotency_key_required` or `org_context_required`."},
         403: {"description": "`permission_denied` (not OWNER) or `organization_blocked`."},
         404: {"description": "`not_found`: a file of another organization."},
         409: {
-            "description": "`invalid_transition` (a request is already open) or `verification_not_editable` (APPROVED)."
+            "description": (
+                "`invalid_transition`, `verification_not_editable`, `idempotency_key_reused` or `request_in_progress`."
+            )
         },
         422: {"description": "`verification_documents_missing` (`details.missing`) or `validation_error`."},
     },

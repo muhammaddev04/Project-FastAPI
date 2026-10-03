@@ -98,7 +98,7 @@ def token_for(user: User, *, ttl: timedelta = timedelta(minutes=15), token_versi
 
 
 def auth(user: User, org: Organization | None = None) -> dict[str, str]:
-    headers = {"Authorization": f"Bearer {token_for(user)}"}
+    headers = {"Authorization": f"Bearer {token_for(user)}", "Idempotency-Key": str(new_id())}
     if org is not None:
         headers["X-Org-Id"] = str(org.id)
     return headers

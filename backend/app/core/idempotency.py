@@ -189,7 +189,7 @@ async def purge_expired(session: AsyncSession, now: datetime | None = None) -> i
     return deleted
 
 
-def idempotent(ttl: timedelta = DEFAULT_TTL) -> Any:
+def idempotent(ttl: timedelta = DEFAULT_TTL, *, permission: str | None = None) -> Any:
     """FND-014 dependency: `Idempotency-Key` is required; the route must use `IdempotentRoute`."""
 
     async def dependency(
@@ -203,8 +203,17 @@ def idempotent(ttl: timedelta = DEFAULT_TTL) -> Any:
             raise RuntimeError("idempotent() requires a route served by IdempotentRoute")
         if idempotency_key is None:
             raise AppError("idempotency_key_required", 400)
+        body = await request.body()
+        if permission is not None:
+            from app.modules.identity.deps import get_org_context
+
+            context = await get_org_context(session, user, request.headers.get("X-Org-Id"))
+            if permission not in context.permissions:
+                raise AppError("permission_denied", 403)
+            # Bind a key to its tenant as well as its payload; replay never bypasses current access checks.
+            body = str(context.organization.id).encode() + b"\n" + body
         scope = f"{user.id}:{request.method}:{route.path}"
-        record_id = await claim(scope, idempotency_key, request_hash(await request.body()), ttl)
+        record_id = await claim(scope, idempotency_key, request_hash(body), ttl)
         idempotency_claim = IdempotencyClaim(record_id=record_id, session=session)
         setattr(request.state, _CLAIM_STATE, idempotency_claim)
         return idempotency_claim

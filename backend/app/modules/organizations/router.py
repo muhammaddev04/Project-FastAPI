@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, UploadFile, status
 
+from app.core.idempotency import IdempotentRoute, idempotent
 from app.modules.identity.deps import CurrentUser, SessionDep, require_permission
 from app.modules.organizations import service
 from app.modules.organizations.schemas import (
@@ -14,7 +15,7 @@ from app.modules.organizations.schemas import (
     StoreCreate,
 )
 
-router = APIRouter(prefix="/api/v1", tags=["organizations"])
+router = APIRouter(prefix="/api/v1", tags=["organizations"], route_class=IdempotentRoute)
 
 OrgViewer = require_permission("org.view")
 # CR-003: company logo / store image - OWNER only (ORG-006 does not list it among the MANAGER-editable fields).
@@ -23,9 +24,14 @@ BrandingEditor = require_permission("org.edit_branding")
 
 @router.post(
     "/organizations/companies",
+    dependencies=[idempotent()],
     response_model=OrganizationCreated,
     status_code=status.HTTP_201_CREATED,
     summary="Create a Company with its profile; the caller becomes OWNER (ORG-001)",
+    responses={
+        400: {"description": "idempotency_key_required"},
+        409: {"description": "idempotency_key_reused / request_in_progress / domain conflict"},
+    },
 )
 async def create_company(payload: CompanyCreate, session: SessionDep, user: CurrentUser) -> OrganizationCreated:
     return await service.create_organization(session, user, "COMPANY", payload)
@@ -33,9 +39,14 @@ async def create_company(payload: CompanyCreate, session: SessionDep, user: Curr
 
 @router.post(
     "/organizations/stores",
+    dependencies=[idempotent()],
     response_model=OrganizationCreated,
     status_code=status.HTTP_201_CREATED,
     summary="Create a Store with its profile; the caller becomes OWNER (ORG-002)",
+    responses={
+        400: {"description": "idempotency_key_required"},
+        409: {"description": "idempotency_key_reused / request_in_progress / domain conflict"},
+    },
 )
 async def create_store(payload: StoreCreate, session: SessionDep, user: CurrentUser) -> OrganizationCreated:
     return await service.create_organization(session, user, "STORE", payload)

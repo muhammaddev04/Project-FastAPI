@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/shared/api/client';
+import { useState } from 'react';
+import { createSubmissionKey } from '@/shared/api/idempotency';
 
 /** P02 §1.1/1.2 organization verification status (on the organization). */
 export type OrgVerificationStatus = 'NOT_SUBMITTED' | 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -88,11 +90,16 @@ export function useUploadVerificationFile() {
 
 /** POST /api/v1/verification `{documents: [{doc_type, file_id}]}` (VER-001, VER-003). */
 export function useSubmitVerification(orgId: string | null) {
+  const [submission] = useState(createSubmissionKey);
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (documents: { doc_type: DocType; file_id: string }[]) =>
-      apiRequest<VerificationState>('/verification', { method: 'POST', body: { documents }, orgScoped: true }),
+      apiRequest<VerificationState>('/verification', {
+        method: 'POST', body: { documents }, orgScoped: true,
+        idempotencyKey: submission.forPayload({ orgId, documents }),
+      }),
     onSuccess: (state) => {
+      submission.complete();
       queryClient.setQueryData(verificationQueryKey(orgId), state);
       void queryClient.invalidateQueries({ queryKey: organizationQueryKey(orgId) });
     },

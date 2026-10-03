@@ -1,4 +1,50 @@
-# P00 + P01 — FOUNDATION and IDENTITY & ACCESS
+# Current progress — 2026-10-03
+
+P00 remains PARTIAL. Added FND-010/012/013/022 infrastructure: transactional EventBus,
+immutable outbox event data (migration `0016`), concurrent dispatch with row locks,
+exponential retries and FAILED after eight attempts, Celery queues and periodic dispatch.
+Local workers are available through the Docker Compose `jobs` profile; see README.
+Consumers must deduplicate external effects by event_id. Missing consumers retry rather
+than discard events. Registration (email and new Google accounts), Company/Store creation,
+OWNER membership creation and verification submission/approval/rejection now publish events
+in the business transaction. Payloads contain identifiers, not credentials or document contents.
+Subscription and notification consumers remain pending in P03/P11; running the dispatcher
+before those consumers exist eventually marks these events FAILED without deleting them.
+S3 private-bucket readiness and daily expired-idempotency cleanup are implemented.
+
+Validation: backend core suite 174 passed; Ruff lint and format passed; Celery configuration
+loads; Docker Compose configuration validates. All seven event/outbox tests also passed,
+including concurrent-worker dispatch and retry when no consumer is registered. These checks
+do not establish a full P00 gate or a live worker/Beat deployment.
+
+Latest validation: 116 relevant auth/organization/verification/health/outbox tests passed,
+plus two organization-event tests covering duplicate requests and complete request rollback
+when a synchronous event handler fails. Ruff lint and format passed.
+
+P01 authentication is implemented (email registration/verification, login, refresh rotation,
+logout/logout-all, password recovery/change, Google OAuth). Team mutations and invitations
+remain missing. P02 organization profiles, files and verification workflow exist; complete
+acceptance remains pending. P03–P13 business modules remain planned.
+
+Other outstanding P00 work includes metrics, explicit UnitOfWork helpers,
+traceability tooling, Makefile, and the remaining typecheck/acceptance gates. No production
+migration or deployment was performed for this change.
+Organization creation and verification submission now require Idempotency-Key and use the
+transactional IdempotentRoute. Verification rechecks current org access and permission before
+replay, and binds the request hash to the org. Frontend mutation hooks retain the key for the
+same payload across retries until success, and rotate it when the payload/org changes. Keys
+are in memory for the mounted form; persistence across reloads is not implemented.
+
+Idempotency validation: 93 backend tests passed (organizations, verification, onboarding and
+core idempotency); 17 frontend tests passed, including actual outgoing headers and key
+rotation. Backend Ruff lint/format, frontend ESLint/typecheck and production build passed.
+Existing frontend test warnings about React act/router flags and the large bundle remain.
+
+---
+
+# Historical report — P00 + P01 FOUNDATION and IDENTITY & ACCESS
+
+The report below predates later authentication, storage, CI and verification work.
 
 ## Status
 

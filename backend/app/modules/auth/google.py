@@ -41,6 +41,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import audit
 from app.core.config import get_settings
 from app.core.errors import AppError
+from app.core.events import DomainEvent, event_bus
 from app.core.redis import get_redis
 from app.core.security import hash_password
 from app.core.time import utcnow
@@ -261,6 +262,7 @@ async def _user_for(session: AsyncSession, claims: dict[str, object], language: 
         actor_id=user.id,
         new={"language": language, "email_verified": True, "method": "google"},
     )
+    await event_bus.publish(session, DomainEvent("USER_REGISTERED", {"user_id": str(user.id)}))
     return user
 
 

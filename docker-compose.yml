@@ -41,6 +41,32 @@ services:
       - ./infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
       - storage_data:/data
 
+  celery-worker:
+    profiles: [jobs]
+    build: ./backend
+    command: celery -A app.celery_app:celery_app worker --loglevel=INFO -Q default,notifications,heavy
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://tezfarmo:tezfarmo@postgres:5432/tezfarmo
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      S3_ENDPOINT: storage:8333
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    profiles: [jobs]
+    build: ./backend
+    command: celery -A app.celery_app:celery_app beat --loglevel=INFO --schedule=/tmp/celerybeat-schedule
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+    depends_on:
+      redis:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   storage_data:

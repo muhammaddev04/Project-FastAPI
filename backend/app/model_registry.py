@@ -3,6 +3,7 @@
 from app.core.audit import AuditLog
 from app.core.db import Base
 from app.core.idempotency import IdempotencyRecord
+from app.core.outbox import OutboxEvent
 from app.core.sequences import NumberSequence
 from app.modules.auth.models import EmailToken, RefreshToken
 from app.modules.files.models import StoredFile
@@ -21,6 +22,7 @@ __all__ = [
     "NumberSequence",
     "OAuthIdentity",
     "Organization",
+    "OutboxEvent",
     "RefreshToken",
     "Store",
     "StoredFile",

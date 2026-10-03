@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit import AuditLog
 from app.core.errors import AppError
+from app.core.outbox import OutboxEvent
 from app.modules.files.models import StoredFile
 from app.modules.identity.models import Organization, User
 from app.modules.verification.service import ensure_approved
@@ -265,6 +266,9 @@ async def test_admin_reviews_and_approves(client: AsyncClient, session: AsyncSes
     assert entry.actor_id == admin_id and entry.org_id == org_id
     assert entry.old_data == {"request_status": "UNDER_REVIEW", "verification_status": "PENDING"}
     assert entry.new_data == {"request_status": "APPROVED", "verification_status": "APPROVED"}
+    events = (await session.scalars(select(OutboxEvent).order_by(OutboxEvent.created_at))).all()
+    assert [event.event_type for event in events] == ["VERIFICATION_SUBMITTED", "VERIFICATION_APPROVED"]
+    assert all(event.org_id == org_id and event.payload["request_id"] == rid for event in events)
 
 
 async def test_only_the_reviewer_approves(client: AsyncClient, session: AsyncSession) -> None:
