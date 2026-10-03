@@ -33,6 +33,16 @@ The frontend calls the API at the relative path `/api/v1`
 ([`API_BASE`](../frontend/src/shared/api/client.ts)), so the bundle needs no build-time API URL: the
 browser reaches the API on the same origin, and the host nginx routes it.
 
+In production and staging, private file downloads (including profile pictures) use five-minute
+signed `/api/v1/files/content/...` URLs. The backend reads the object from `S3_ENDPOINT` inside Docker;
+the browser only contacts the site's HTTPS origin. No public storage port or bucket is required.
+Downloads reject altered or expired signatures and disable caching. Existing avatars need no migration.
+
+For uploads, the host nginx `/api/` location must allow multipart requests of at least 11 MB
+(`client_max_body_size 11m;` covers the 10 MB document limit and multipart overhead).
+If uploads return HTTP 413, update this setting in the host nginx configuration and reload nginx.
+The host configuration is managed separately from deployment.
+
 | Container | Image | Data |
 | --- | --- | --- |
 | `tezfarmo-prod-postgres` | `postgres:16-alpine` | volume `tezfarmo_prod_postgres` |

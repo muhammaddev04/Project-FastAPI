@@ -7,10 +7,13 @@ Object keys never contain user-supplied names: `<org_id>/<category>/<uuid7>.<ext
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import hmac
 import io
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import lru_cache
+from urllib.parse import quote
 from uuid import UUID
 
 from minio import Minio
@@ -19,6 +22,17 @@ from app.core.config import get_settings
 from app.core.time import new_id, utcnow
 
 SIGNED_URL_TTL = timedelta(minutes=5)  # SEC-008
+
+
+def content_signature(key: str, expires: int) -> str:
+    """Bind a short-lived download grant to both its object and expiry."""
+    settings = get_settings()
+    message = f"private-file\n{settings.s3_bucket_private}\n{key}\n{expires}".encode()
+    return hmac.new(settings.app_secret_key.encode(), message, hashlib.sha256).hexdigest()
+
+
+def valid_content_signature(key: str, expires: int, signature: str) -> bool:
+    return expires > int(utcnow().timestamp()) and hmac.compare_digest(content_signature(key, expires), signature)
 
 
 @dataclass(frozen=True)
@@ -61,6 +75,14 @@ class Storage:
         )
 
     async def signed_url(self, key: str, ttl: timedelta = SIGNED_URL_TTL) -> SignedUrl:
+        if get_settings().app_env in {"production", "staging"}:
+            # The browser cannot resolve Docker's storage hostname or load HTTP images over HTTPS.
+            # Keep storage private and serve the signed download through the same-origin API.
+            expires_at = utcnow() + ttl
+            expires = int(expires_at.timestamp())
+            signature = content_signature(key, expires)
+            url = f"/api/v1/files/content/{quote(key, safe='/')}?expires={expires}&signature={signature}"
+            return SignedUrl(url=url, expires_at=expires_at)
         url = await asyncio.to_thread(self._client.presigned_get_object, self._bucket, key, expires=ttl)
         return SignedUrl(url=url, expires_at=utcnow() + ttl)
 
