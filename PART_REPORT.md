@@ -1,3 +1,18 @@
+# P03 subscriptions implementation in progress - 2026-10-04
+
+The owner approved P03. The first backend increment provides the canonical pure
+subscription lifecycle, all 60 status/action permission combinations, calendar-month
+payment periods, payment reactivation, finite/unlimited usage limits and delayed-job
+catch-up without extending original deadlines. These policies are not yet wired into
+the running application; they do not change login or registration.
+
+Validation: 114 focused backend tests passed against the isolated PostgreSQL/Redis
+test services; Ruff lint/format and strict mypy (75 application files) passed.
+
+P03 is NOT complete. Database models/migration, transactional audit/history/events,
+trial creation, service guards, API, scheduled jobs, frontend and acceptance remain.
+P04 is not authorized. Previous P02 evidence below is historical.
+
 # P02 organizations and verification acceptance - 2026-10-04
 
 P02 is locally implemented and accepted. Company/Store creation, OWNER membership,
