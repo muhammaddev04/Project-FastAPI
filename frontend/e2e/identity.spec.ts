@@ -1,5 +1,18 @@
 import { test, expect, type Page } from '@playwright/test';
 
+test('P01 duplicate registration stays on the registration page', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('tezfarmo.language', 'en'));
+  await page.goto('/register');
+  await page.getByLabel(/full name/i).fill('Duplicate Registration');
+  await page.getByLabel(/^email/i).fill('P00-Company@Example.tj');
+  await page.getByLabel(/create a password/i).fill('Another2026pass');
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('This email is already registered. Sign in with your existing account.');
+  await expect(page).toHaveURL(/\/register$/);
+  await expect(page.getByLabel('Verification code')).toHaveCount(0);
+});
+
 async function login(page: Page, area: string) {
   await page.addInitScript(() => localStorage.setItem('tezfarmo.language', 'en'));
   await page.goto('/login');

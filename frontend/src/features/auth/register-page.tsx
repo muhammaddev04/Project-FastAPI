@@ -76,7 +76,7 @@ export function RegisterPage() {
       }
       return;
     }
-    // 202 says nothing about whether the address was new (IAM-001); step 2 only needs it to verify and resend.
+    // Only a successful new registration proceeds to verification; duplicate emails stay on this form.
     const state: VerifyEmailState = { email: payload.email, justRegistered: true };
     navigate(VERIFY_PATH, { state });
   });

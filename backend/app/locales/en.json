@@ -105,7 +105,7 @@
   "errors.discount_invalid": "The operation could not be completed. Check the details and try again.",
   "errors.dispute_already_open": "The operation could not be completed. Check the details and try again.",
   "errors.dispute_window_closed": "The operation could not be completed. Check the details and try again.",
-  "errors.email_already_registered": "The operation could not be completed. Check the details and try again.",
+  "errors.email_already_registered": "This email is already registered. Sign in with your existing account.",
   "errors.export_expired": "The operation could not be completed. Check the details and try again.",
   "errors.export_not_ready": "The operation could not be completed. Check the details and try again.",
   "errors.import_file_invalid": "The operation could not be completed. Check the details and try again.",

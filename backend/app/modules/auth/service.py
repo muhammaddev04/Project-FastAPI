@@ -1,9 +1,8 @@
 """P01 registration, email verification, resend, login, refresh, logout, password reset and password change
 (IAM-001..008, IAM-015, IAM-016; CR-001).
 
-Registration only creates the user: the organization comes later from `/welcome` (ORG-001). The response never
-reveals whether an email is registered: a new address gets a verification link, a known one gets an
-"you already have an account" email, and both requests answer `202` the same way.
+Registration only creates the user: the organization comes later from `/welcome` (ORG-001).
+New addresses receive a verification code; existing addresses return email_already_registered.
 """
 
 from __future__ import annotations
@@ -115,24 +114,12 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
         raise AppError("weak_password", 422, {"fields": [{"field": "password", "code": code} for code in problems]})
 
     await hit(AUTH_EMAIL_SEND, _rate_key(payload.email))
-    # Whatever the address, an email goes out now, so the 60 s resend cooldown starts (P01 §2.2).
-    await record(EMAIL_RESEND_COOLDOWN, _rate_key(payload.email))
-    # Hash before looking the address up, so known and unknown emails cost about the same time (no enumeration).
-    password_hash = hash_password(payload.password)
-
     existing = await session.scalar(select(User).where(func.lower(User.email) == payload.email))
     if existing is not None:
-        await _deliver(
-            render(
-                "account_exists",
-                existing.language,
-                to=existing.email,
-                name=existing.full_name,
-                action_url=_link("/login"),
-                minutes=0,
-            )
-        )
-        return
+        raise AppError("email_already_registered", 409)
+
+    await record(EMAIL_RESEND_COOLDOWN, _rate_key(payload.email))
+    password_hash = hash_password(payload.password)
 
     user = User(
         email=payload.email,
@@ -148,8 +135,8 @@ async def register(session: AsyncSession, payload: RegisterRequest) -> None:
             session.add(user)
             await session.flush()
     except IntegrityError:
-        # The same address was registered concurrently; answer exactly like any known address.
-        return
+        # The uniqueness constraint also protects simultaneous registrations of the same address.
+        raise AppError("email_already_registered", 409) from None
 
     await audit.record(
         session,

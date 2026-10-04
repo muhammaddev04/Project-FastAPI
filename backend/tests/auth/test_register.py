@@ -1,4 +1,4 @@
-"""P01 registration: IAM-001 (no enumeration), IAM-003 (password policy), P01 §2.2 tokens, IAM-016 delivery."""
+"""P01 registration with owner-approved duplicate-email conflicts and existing password/code flows."""
 
 from __future__ import annotations
 
@@ -95,25 +95,21 @@ async def test_email_is_trimmed_and_lowercased(
 
 
 @pytest.mark.parametrize("second_email", ["nigina@example.tj", "NIGINA@Example.tj"])
-async def test_iam_001_known_email_gets_the_same_answer_and_no_second_account(
+async def test_known_email_returns_conflict_without_changing_account(
     client: AsyncClient, session: AsyncSession, outbox: list[OutgoingEmail], second_email: str
 ) -> None:
     first = await client.post(URL, json=body())
     second = await client.post(URL, json=body(email=second_email, password="Another2026pass", full_name="Someone Else"))
 
-    # Same status and body: the response does not reveal that the address is taken.
-    assert (second.status_code, second.content) == (first.status_code, first.content) == (202, b"")
+    assert first.status_code == 202
+    assert second.status_code == 409
+    assert second.json()["error"]["code"] == "email_already_registered"
     [user] = await users(session)
     assert user.full_name == "Nigina Karimova"
     assert verify_password(PASSWORD, user.password_hash)
     assert len(await tokens(session)) == 1
     assert await session.scalar(select(func.count()).select_from(OutboxEvent)) == 1
-    # The owner of the address is told instead (IAM-001), in their own language, with no secret link.
-    assert [message.template for message in outbox] == ["verification", "account_exists"]
-    notice = outbox[1]
-    assert notice.to == "nigina@example.tj"
-    assert "token=" not in notice.text
-    assert "/login" in notice.text
+    assert [message.template for message in outbox] == ["verification"]
 
 
 async def test_verification_code_is_stored_hashed_for_15_minutes(
@@ -236,11 +232,11 @@ async def test_rate_limit_auth_email_send_5_per_hour_per_email(
     statuses = [(await client.post(URL, json=body())).status_code for _ in range(5)]
     blocked = await client.post(URL, json=body(email="NIGINA@example.tj"))
 
-    assert statuses == [202] * 5
+    assert statuses == [202, 409, 409, 409, 409]
     assert blocked.status_code == 429
     assert blocked.json()["error"]["code"] == "rate_limited"
     assert int(blocked.headers["Retry-After"]) > 0
-    assert len(outbox) == 5
+    assert len(outbox) == 1
     # Another address is not affected.
     assert (await client.post(URL, json=body(email="other@example.tj"))).status_code == 202
 

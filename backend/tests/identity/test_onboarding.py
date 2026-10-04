@@ -144,7 +144,8 @@ async def test_registering_an_existing_email_never_changes_that_account(
         },
     )
 
-    assert again.status_code == 202  # the same neutral answer (IAM-001)
+    assert again.status_code == 409
+    assert again.json()["error"]["code"] == "email_already_registered"
     session.expire_all()
     users = (await session.scalars(select(User))).all()
     assert len(users) == 1

@@ -9,8 +9,13 @@ Validation covers 793 distinct backend cases, 359 frontend cases, ten tooling te
 five P00 browser scenarios and the new real-API P01 lifecycle. Typing, lint, formatting,
 production build and requirement reference checks passed.
 
-Overall P01 status remains PARTIAL: existing code-based auth and 4-128-character password
-policy differ from IAM-001/002/003/015; green remote CI awaits the owner's push.
+The owner approved existing code-based auth and the 4-128-character password policy on
+2026-10-04, even where TZ differs. Duplicate registration now returns a clear conflict
+on the registration page rather than proceeding to confirmation. These auth choices
+are no longer open implementation issues. Overall P01 status remains PARTIAL only because
+green remote CI awaits the owner's push.
+Duplicate-registration follow-up: 43 backend tests, 52 frontend auth/locale tests and a
+new real-browser regression passed. The total frontend coverage is now 360 distinct cases.
 No push or done tag. P02 has not started and requires the owner's approval.
 [Current P01 evidence and exact remaining differences](docs/P01_ACCEPTANCE.md).
 

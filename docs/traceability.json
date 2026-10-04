@@ -182,7 +182,9 @@
   ],
   "IAM-001": [
     "backend/tests/auth/test_register.py::test_iam_001_register_creates_unverified_user_and_answers_202",
-    "backend/tests/auth/test_register.py::test_iam_001_known_email_gets_the_same_answer_and_no_second_account"
+    "backend/tests/auth/test_register.py::test_known_email_returns_conflict_without_changing_account",
+    "frontend/src/features/auth/auth-pages.test.tsx::keeps an already registered email on the registration page with a clear message",
+    "frontend/e2e/identity.spec.ts::P01 duplicate registration stays on the registration page"
   ],
   "IAM-002": [
     "backend/tests/auth/test_verify_email.py::test_iam_002_valid_code_confirms_the_email_and_answers_200",

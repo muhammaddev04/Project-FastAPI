@@ -273,6 +273,21 @@ describe('auth screens (CR-001: email)', () => {
       expect(screen.getByLabelText('Verification code')).toHaveValue('');
     });
 
+    it('keeps an already registered email on the registration page with a clear message', async () => {
+      const { calls } = mockApi([
+        { path: '/meta', body: META_EMAIL },
+        { method: 'POST', path: '/auth/register', status: 409, body: apiError('email_already_registered') },
+      ]);
+      const { current } = renderRoutes(routes, '/register');
+      await fillRegistration();
+      await userEvent.click(await screen.findByRole('button', { name: 'Create account' }));
+      expect(await screen.findByRole('alert')).toHaveTextContent('This email is already registered. Sign in with your existing account.');
+      expect(current.location?.pathname).toBe('/register');
+      expect((screen.getByLabelText(/^email/i) as HTMLInputElement).value.trim()).toBe('Nigina@Example.TJ');
+      expect(screen.queryByLabelText('Verification code')).not.toBeInTheDocument();
+      expect(calls.some((call) => call.path.includes('/auth/email/'))).toBe(false);
+    });
+
     it('verifies the handed-over address without asking for it again, then signs in and continues to onboarding', async () => {
       const { calls } = mockApi([
         { path: '/meta', body: META_EMAIL },

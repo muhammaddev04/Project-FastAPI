@@ -153,7 +153,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register with email and password; a confirmation link is emailed (IAM-001, CR-001) */
+        /** Register with email and password; a confirmation code is emailed */
         post: operations["register_api_v1_auth_register_post"];
         delete?: never;
         options?: never;
@@ -2736,7 +2736,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Accepted. The same answer whether or not the email is already registered. */
+            /** @description New account created; a verification code was sent. */
             202: {
                 headers: {
                     [name: string]: unknown;
@@ -2779,7 +2779,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description API error */
+            /** @description `email_already_registered`: sign in with the existing account. */
             409: {
                 headers: {
                     [name: string]: unknown;
