@@ -98,6 +98,8 @@ describe('admin verification queue (P02 §5/§8)', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Open reg.pdf' }));
     expect(await screen.findByRole('link', { name: /reg\.pdf/ })).toHaveAttribute('href', 'https://storage.example/signed');
+    expect(screen.getByTitle('reg.pdf')).toHaveAttribute('src', 'https://storage.example/signed');
+    await userEvent.click(screen.getByRole('button', { name: /^Close$/ }));
 
     await userEvent.click(screen.getByRole('button', { name: 'Start review' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Approve' }));
@@ -166,6 +168,32 @@ describe('admin verification queue (P02 §5/§8)', () => {
     renderRoutes(routes, '/admin/verifications');
     expect(await screen.findByRole('button', { name: 'Try again' })).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  it('previews images and gets a fresh signed URL every time the document is reopened', async () => {
+    const document = detail('SUBMITTED').documents[0]!;
+    const { calls } = mockApi([
+      { path: '/me', body: ADMIN },
+      { path: '/admin/verifications', body: QUEUE },
+      {
+        path: '/admin/verifications/req-1',
+        body: detail('SUBMITTED', {
+          documents: [{ ...document, file: { ...document.file, display_name: 'cert.jpg', content_type: 'image/jpeg' } }],
+        }),
+      },
+      {
+        path: '/admin/verifications/req-1/documents/doc-1/url',
+        body: { url: 'https://storage.example/image', expires_at: '2026-10-04T12:05:00Z' },
+      },
+    ]);
+    renderRoutes(routes, '/admin/verifications');
+    await userEvent.click(await screen.findByRole('button', { name: 'Corner Market' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Open cert.jpg' }));
+    expect(await screen.findByRole('img', { name: 'cert.jpg' })).toHaveAttribute('src', 'https://storage.example/image');
+    await userEvent.click(screen.getByRole('button', { name: /^Close$/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Open cert.jpg' }));
+    await screen.findByRole('img', { name: 'cert.jpg' });
+    expect(calls.filter((call) => call.path.endsWith('/documents/doc-1/url'))).toHaveLength(2);
   });
 
   it('needs a reason of at least 10 characters to reject', async () => {

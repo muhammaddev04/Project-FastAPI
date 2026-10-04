@@ -56,6 +56,7 @@ async def upload_file(
 
 
 @router.get("/{file_id}/url", response_model=SignedUrlOut, summary="Short-lived signed URL for a file (5 minutes)")
-async def file_url(file_id: UUID, session: SessionDep, context: OrgContextDep) -> SignedUrlOut:
+async def file_url(file_id: UUID, session: SessionDep, context: OrgContextDep, response: Response) -> SignedUrlOut:
     signed = await service.signed_url(session, context, file_id)
+    response.headers["Cache-Control"] = "no-store"
     return SignedUrlOut(url=signed.url, expires_at=signed.expires_at)

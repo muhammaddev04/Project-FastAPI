@@ -69,7 +69,7 @@ export const organizationQueryKey = (orgId: string | null) => ['organization', o
 export function useOrganizationProfile(orgId: string | null) {
   return useQuery({
     queryKey: organizationQueryKey(orgId),
-    queryFn: () => apiRequest<OrganizationProfile>('/organization', { orgScoped: true }),
+    queryFn: () => apiRequest<OrganizationProfile>('/organization', { headers: { 'X-Org-Id': orgId! } }),
     enabled: Boolean(orgId),
     staleTime: 30_000,
   });
@@ -78,19 +78,19 @@ export function useOrganizationProfile(orgId: string | null) {
 export function useVerification(orgId: string | null) {
   return useQuery({
     queryKey: verificationQueryKey(orgId),
-    queryFn: () => apiRequest<VerificationState>('/verification', { orgScoped: true }),
+    queryFn: () => apiRequest<VerificationState>('/verification', { headers: { 'X-Org-Id': orgId! } }),
     enabled: Boolean(orgId),
   });
 }
 
 /** POST /api/v1/files (multipart, category VERIFICATION): OWNER only; PDF/JPEG/PNG up to 10 MB (VER-002). */
-export function useUploadVerificationFile() {
+export function useUploadVerificationFile(orgId: string) {
   return useMutation({
     mutationFn: (file: File) => {
       const form = new FormData();
       form.append('file', file);
       form.append('category', 'VERIFICATION');
-      return apiRequest<StoredFileOut>('/files', { method: 'POST', body: form, orgScoped: true, timeoutMs: 120_000 });
+      return apiRequest<StoredFileOut>('/files', { method: 'POST', body: form, headers: { 'X-Org-Id': orgId }, timeoutMs: 120_000 });
     },
   });
 }
@@ -104,7 +104,7 @@ export function useSubmitVerification(orgId: string | null) {
       apiRequest<VerificationState>('/verification', {
         method: 'POST',
         body: { documents },
-        orgScoped: true,
+        headers: { 'X-Org-Id': orgId! },
         idempotencyKey: submission.forPayload({ orgId, documents }),
       }),
     onSuccess: (state) => {

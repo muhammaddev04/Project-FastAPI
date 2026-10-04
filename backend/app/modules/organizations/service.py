@@ -88,9 +88,12 @@ def profile_out(organization: Organization, profile: Company | Store) -> Organiz
     )
 
 
-async def load_profile(session: AsyncSession, organization: Organization) -> Company | Store:
+async def load_profile(session: AsyncSession, organization: Organization, *, lock: bool = False) -> Company | Store:
     model: type[Company] | type[Store] = Company if organization.type == "COMPANY" else Store
-    profile = cast(Company | Store | None, await session.get(model, organization.id))
+    profile = cast(
+        Company | Store | None,
+        await session.get(model, organization.id, with_for_update=True if lock else None, populate_existing=lock),
+    )
     if profile is None:  # every organization is created together with its profile
         raise AppError("not_found", 404)
     return profile
@@ -100,6 +103,8 @@ async def create_organization(
     session: AsyncSession, user: User, org_type: str, payload: CompanyCreate | StoreCreate
 ) -> OrganizationCreated:
     """ORG-001 / ORG-002: organization + profile + ACTIVE OWNER membership in one transaction, audited."""
+    # Serialize ownership-count checks for the same creator, including company/store requests.
+    await session.execute(select(User.id).where(User.id == user.id).with_for_update())
     owned = (
         await session.execute(
             select(func.count())
@@ -133,10 +138,21 @@ async def create_organization(
     }
     profile: Company | Store
     if isinstance(payload, CompanyCreate):
-        profile = Company(**common, public_code=await _unique_public_code(session))
+        for attempt in range(10):
+            try:
+                async with session.begin_nested():
+                    profile = Company(**common, public_code=await _unique_public_code(session))
+                    session.add(profile)
+                    await session.flush()
+                break
+            except IntegrityError as exc:
+                if "public_code" not in str(exc.orig):
+                    raise _integrity_error(exc) from exc
+                if attempt == 9:
+                    raise AppError("internal_error", 500) from exc
     else:
         profile = Store(**common, latitude=payload.latitude, longitude=payload.longitude)
-    session.add(profile)
+        session.add(profile)
 
     membership = Membership(user_id=user.id, organization_id=organization.id, role="OWNER", joined_at=utcnow())
     session.add(membership)
@@ -242,7 +258,7 @@ async def update_profile(
     organization = context.organization
     if organization.status != "ACTIVE":
         raise AppError("organization_blocked", 403)
-    profile = await load_profile(session, organization)
+    profile = await load_profile(session, organization, lock=True)
     changes = payload.model_dump(exclude_unset=True, exclude={"version"})
     if not changes:
         return await profile_response(session, organization, profile)

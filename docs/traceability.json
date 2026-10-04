@@ -180,6 +180,54 @@
   "FND-038": [
     "frontend/e2e/foundation.spec.ts::P00 ${area} area works against the real API"
   ],
+  "ORG-001": [
+    "backend/tests/organizations/test_create.py::test_org_001_create_company_creates_owner_membership_and_code",
+    "backend/tests/organizations/test_concurrency.py::test_org_001_retries_insert_time_public_code_collision",
+    "backend/tests/organizations/test_concurrency.py::test_org_001_trial_starter_is_transactional_and_replay_safe",
+    "frontend/e2e/organizations.spec.ts::P02 ${type} creation and verification rejection, resubmission and approval"
+  ],
+  "ORG-002": [
+    "backend/tests/organizations/test_create.py::test_org_002_create_store_with_optional_tax_id_and_coordinates",
+    "frontend/e2e/organizations.spec.ts::P02 ${type} creation and verification rejection, resubmission and approval"
+  ],
+  "ORG-003": [
+    "backend/tests/organizations/test_create.py::test_org_003_owner_org_limit_5",
+    "backend/tests/organizations/test_concurrency.py::test_org_003_parallel_creation_cannot_exceed_five"
+  ],
+  "ORG-004": [
+    "backend/tests/organizations/test_create.py::test_org_004_tax_identifier_unique",
+    "backend/tests/organizations/test_create.py::test_org_004_company_payload_validated_server_side"
+  ],
+  "ORG-005": [
+    "backend/tests/organizations/test_create.py::test_org_005_legal_fields_locked_after_approval",
+    "backend/tests/verification/test_verification.py::test_legal_fields_are_frozen_while_pending_but_contacts_stay_editable",
+    "backend/tests/organizations/test_concurrency.py::test_org_update_parallel_versions_allow_one_writer"
+  ],
+  "ORG-006": [
+    "backend/tests/organizations/test_create.py::test_org_006_manager_cannot_edit_legal",
+    "backend/tests/verification/test_contracts.py::test_permission_matrix_p02_all_cells"
+  ],
+  "VER-001": [
+    "backend/tests/verification/test_verification.py::test_ver_001_only_the_owner_submits"
+  ],
+  "VER-002": [
+    "backend/tests/files/test_files.py::test_ver_002_upload_stores_private_file_with_hash",
+    "backend/tests/files/test_files.py::test_ver_002_file_magic_bytes_mismatch_rejected"
+  ],
+  "VER-003": [
+    "backend/tests/verification/test_verification.py::test_company_needs_both_certificates",
+    "backend/tests/verification/test_verification.py::test_documents_must_be_this_organizations_verification_files"
+  ],
+  "VER-004": [
+    "backend/tests/verification/test_verification.py::test_document_access_by_superadmin_is_signed_and_audited",
+    "frontend/src/features/admin/verifications-page.test.tsx::lists the queue, opens a request and walks it through review to approval"
+  ],
+  "VER-005": [
+    "backend/tests/verification/test_contracts.py::test_ver_005_database_preserves_documents_and_requests"
+  ],
+  "VER-006": [
+    "backend/tests/verification/test_verification.py::test_ver_006_guard_needs_an_approved_organization"
+  ],
   "IAM-001": [
     "backend/tests/auth/test_register.py::test_iam_001_register_creates_unverified_user_and_answers_202",
     "backend/tests/auth/test_register.py::test_known_email_returns_conflict_without_changing_account",

@@ -86,7 +86,7 @@ async def test_store_owner_uploads_the_store_image(
     assert data[:4] == b"RIFF" and data[8:12] == b"WEBP"
 
     url = body["logo_url"]
-    assert "X-Amz-Signature=" in url and "X-Amz-Expires=300" in url
+    assert "signature=" in url and "expires=" in url
     assert (await _download(url)).status_code == 200
     unsigned = urlsplit(url)._replace(query="").geturl()
     assert (await _download(unsigned)).status_code in (401, 403)  # private bucket

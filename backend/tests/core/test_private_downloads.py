@@ -85,10 +85,11 @@ async def test_download_handles_deleted_object_and_storage_failure(private_stora
     assert response.status_code == expected
 
 
-async def test_development_keeps_direct_s3_downloads(monkeypatch):
+async def test_development_downloads_do_not_expose_internal_s3_hosts(monkeypatch):
     monkeypatch.setattr("app.core.storage.get_settings", lambda: Settings(_env_file=None, app_env="development"))
     client = Mock()
     client.presigned_get_object.return_value = "http://localhost:9000/private/photo.webp?signature=abc"
     signed = await Storage(client, "private").signed_url("photo.webp")
-    assert signed.url == client.presigned_get_object.return_value
-    client.presigned_get_object.assert_called_once_with("private", "photo.webp", expires=timedelta(minutes=5))
+    assert signed.url.startswith("/api/v1/files/content/photo.webp?")
+    assert 0 < (signed.expires_at - utcnow()).total_seconds() <= 300
+    client.presigned_get_object.assert_not_called()

@@ -1,3 +1,27 @@
+# P02 organizations and verification acceptance - 2026-10-04
+
+P02 is locally implemented and accepted. Company/Store creation, OWNER membership,
+profiles, private uploads, verification submission, admin review, rejection/resubmission
+and approval work through API and UI. Admin previews PDF/images in a modal. Browser
+acceptance found and fixed private download URLs exposing Docker's internal S3 hostname;
+downloads now use five-minute signed same-origin API URLs in every environment.
+
+Concurrent creation respects the five-organization limit and retries public-code collisions.
+Concurrent profile edits preserve version checks; review locks legal fields. SUSPENDED
+organizations reject writes. Uploads are audited; verification records/documents retain
+their no-delete database protections. P03 has a typed transactional trial-starter contract.
+
+Validation: 848 backend cases; final storage/download/verification regression 223 passed;
+final guard/team checks 56 passed; 362 distinct frontend cases; eleven tooling tests;
+all nine real-browser P00-P02 scenarios. Typing, lint, formatting, build, migration/model
+consistency and complete requirement references passed. Seven acceptance services healthy.
+
+Formal status remains PARTIAL pending green remote CI after the owner's push. No push or
+done tag. P03 was not started and requires new approval.
+[Current P02 acceptance evidence](docs/P02_ACCEPTANCE.md).
+
+Earlier entries below are historical evidence.
+
 # P01 team and invitation acceptance - 2026-10-04
 
 Missing P01 team functionality is implemented and locally tested: invitations and inbox,

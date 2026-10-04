@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def check(root: Path, complete_p00: bool = False, complete_p01: bool = False) -> list[str]:
+def check(root: Path, complete_p00: bool = False, complete_p01: bool = False, complete_p02: bool = False) -> list[str]:
     manifest = json.loads((root / "docs/traceability.json").read_text(encoding="utf-8"))
     requirements = set(re.findall(r"\b[A-Z]{2,8}-\d{3}\b", (root / "TZ.md").read_text(encoding="utf-8")))
     errors = []
@@ -26,6 +26,11 @@ def check(root: Path, complete_p00: bool = False, complete_p01: bool = False) ->
         section = specification.split("## [P01_identity_access]", 1)[1].split("## [P02_", 1)[0]
         required = set(re.findall(r"\bIAM-\d{3}\b", section))
         errors.extend(f"Unmapped P01 requirement: {item}" for item in sorted(required - manifest.keys()))
+    if complete_p02:
+        specification = (root / "TZ.md").read_text(encoding="utf-8")
+        section = specification.split("## [P02_organizations]", 1)[1].split("## [P03_", 1)[0]
+        required = set(re.findall(r"\b(?:ORG|VER)-\d{3}\b", section))
+        errors.extend(f"Unmapped P02 requirement: {item}" for item in sorted(required - manifest.keys()))
     for requirement, references in manifest.items():
         if requirement not in requirements:
             errors.append(f"Unknown requirement: {requirement}")
@@ -63,8 +68,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--complete-p00", action="store_true")
     parser.add_argument("--complete-p01", action="store_true")
+    parser.add_argument("--complete-p02", action="store_true")
     args = parser.parse_args()
-    problems = check(ROOT, complete_p00=args.complete_p00, complete_p01=args.complete_p01)
+    problems = check(
+        ROOT, complete_p00=args.complete_p00, complete_p01=args.complete_p01, complete_p02=args.complete_p02
+    )
     for problem in problems:
         print(problem)
     if not problems:

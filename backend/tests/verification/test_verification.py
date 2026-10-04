@@ -364,7 +364,7 @@ async def test_document_access_by_superadmin_is_signed_and_audited(client: Async
     by_owner = await client.get(f"{ADMIN}/{rid}/documents/{doc_id}/url", headers=auth(owner))
     wrong_request = await client.get(f"{ADMIN}/{doc_id}/documents/{doc_id}/url", headers=auth(admin))
 
-    assert signed.status_code == 200 and signed.json()["url"].startswith("http")
+    assert signed.status_code == 200 and signed.json()["url"].startswith("/api/v1/files/content/")
     assert signed.headers["Cache-Control"] == "no-store"
     assert by_owner.status_code == 403 and wrong_request.status_code == 404
     [viewed] = (await session.scalars(select(AuditLog).where(AuditLog.action == "verification.document_viewed"))).all()

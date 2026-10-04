@@ -13,7 +13,7 @@ export function useUpdateOrganization(orgId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (changes: OrganizationChanges) =>
-      apiRequest<OrganizationProfile>('/organization', { method: 'PATCH', body: changes, orgScoped: true }),
+      apiRequest<OrganizationProfile>('/organization', { method: 'PATCH', body: changes, headers: { 'X-Org-Id': orgId! } }),
     onSuccess: (profile) => {
       queryClient.setQueryData(organizationQueryKey(orgId), profile);
       // The organization name also appears in /me memberships (switcher, headers).
@@ -41,7 +41,12 @@ export function useUploadOrganizationImage(orgId: string | null) {
     mutationFn: (file: File) => {
       const form = new FormData();
       form.append('file', file);
-      return apiRequest<OrganizationProfile>('/organization/logo', { method: 'PUT', body: form, orgScoped: true, timeoutMs: 120_000 });
+      return apiRequest<OrganizationProfile>('/organization/logo', {
+        method: 'PUT',
+        body: form,
+        headers: { 'X-Org-Id': orgId! },
+        timeoutMs: 120_000,
+      });
     },
     onSuccess,
   });
@@ -50,7 +55,7 @@ export function useUploadOrganizationImage(orgId: string | null) {
 export function useRemoveOrganizationImage(orgId: string | null) {
   const onSuccess = useImageCacheUpdate(orgId);
   return useMutation({
-    mutationFn: () => apiRequest<OrganizationProfile>('/organization/logo', { method: 'DELETE', orgScoped: true }),
+    mutationFn: () => apiRequest<OrganizationProfile>('/organization/logo', { method: 'DELETE', headers: { 'X-Org-Id': orgId! } }),
     onSuccess,
   });
 }

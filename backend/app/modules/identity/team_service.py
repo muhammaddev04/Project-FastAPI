@@ -80,7 +80,7 @@ async def lock_org(session: AsyncSession, org_id: UUID) -> Organization:
     ).one_or_none()
     if org is None:
         raise AppError("not_found", 404)
-    if org.status == "BLOCKED":
+    if org.status != "ACTIVE":
         raise AppError("organization_blocked", 403)
     return org
 

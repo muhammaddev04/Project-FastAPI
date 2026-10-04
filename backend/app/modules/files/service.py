@@ -9,6 +9,7 @@ from fastapi import UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import audit
 from app.core.errors import AppError
 from app.core.storage import SignedUrl, get_storage, object_key
 from app.modules.files.models import StoredFile
@@ -45,6 +46,8 @@ def file_out(stored: StoredFile) -> FileOut:
 
 async def upload(session: AsyncSession, context: OrgContext, upload_file: UploadFile, category: str) -> FileOut:
     """POST /files: validate type, magic bytes and size, then store privately (VER-002, FND-017)."""
+    if context.organization.status != "ACTIVE":
+        raise AppError("organization_blocked", 403)
     if category == "VERIFICATION" and "verification.submit" not in context.permissions:
         raise AppError("permission_denied", 403)
     content_type = (upload_file.content_type or "").split(";")[0].strip().lower()
@@ -73,6 +76,15 @@ async def upload(session: AsyncSession, context: OrgContext, upload_file: Upload
     )
     session.add(stored)
     await session.flush()
+    await audit.record(
+        session,
+        "file.uploaded",
+        "stored_file",
+        stored.id,
+        actor_id=context.user.id,
+        org_id=context.organization.id,
+        new={"category": category, "content_type": content_type, "size_bytes": len(data)},
+    )
     return file_out(stored)
 
 

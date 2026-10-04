@@ -79,16 +79,12 @@ class Storage:
         return await asyncio.wait_for(asyncio.to_thread(self._client.bucket_exists, self._bucket), timeout=5)
 
     async def signed_url(self, key: str, ttl: timedelta = SIGNED_URL_TTL) -> SignedUrl:
-        if get_settings().app_env in {"production", "staging"}:
-            # The browser cannot resolve Docker's storage hostname or load HTTP images over HTTPS.
-            # Keep storage private and serve the signed download through the same-origin API.
-            expires_at = utcnow() + ttl
-            expires = int(expires_at.timestamp())
-            signature = content_signature(key, expires)
-            url = f"/api/v1/files/content/{quote(key, safe='/')}?expires={expires}&signature={signature}"
-            return SignedUrl(url=url, expires_at=expires_at)
-        url = await asyncio.to_thread(self._client.presigned_get_object, self._bucket, key, expires=ttl)
-        return SignedUrl(url=url, expires_at=utcnow() + ttl)
+        # Every environment uses the browser's origin; internal S3 hostnames stay behind the API.
+        expires_at = utcnow() + ttl
+        expires = int(expires_at.timestamp())
+        signature = content_signature(key, expires)
+        url = f"/api/v1/files/content/{quote(key, safe='/')}?expires={expires}&signature={signature}"
+        return SignedUrl(url=url, expires_at=expires_at)
 
     async def read(self, key: str) -> bytes:
         def fetch() -> bytes:

@@ -14,6 +14,7 @@ from app.modules.auth.router import router as auth_router
 from app.modules.files.router import router as files_router
 from app.modules.identity.router import router as identity_router
 from app.modules.identity.team_router import router as team_router
+from app.modules.organizations.ports import install_handlers
 from app.modules.organizations.router import router as organizations_router
 from app.modules.support.router import router as support_router
 from app.modules.verification.router import admin_router as admin_verification_router
@@ -24,6 +25,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     configure_logging(settings.log_level)
     configure_monitoring()
+    install_handlers()
     app = FastAPI(
         title="TezFarmo API",
         version=settings.app_version,

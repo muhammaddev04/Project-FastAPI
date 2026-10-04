@@ -13,6 +13,7 @@ import {
   DataTable,
   Dialog,
   DialogContent,
+  DialogHeader,
   ErrorState,
   FormField,
   InfoRow,
@@ -55,7 +56,17 @@ function useDate() {
 }
 
 /** One document: the signed URL is fetched on demand (5 minutes, audited as verification.document_viewed). */
-function DocumentLink({ requestId, documentId, label }: { requestId: string; documentId: string; label: string }) {
+function DocumentLink({
+  requestId,
+  documentId,
+  label,
+  contentType,
+}: {
+  requestId: string;
+  documentId: string;
+  label: string;
+  contentType: string;
+}) {
   const { t } = useTranslation();
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -73,20 +84,32 @@ function DocumentLink({ requestId, documentId, label }: { requestId: string; doc
   };
   return (
     <span className="flex flex-wrap items-center gap-2">
-      {url ? (
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-        >
-          {label} <ExternalLink className="size-3.5" aria-hidden="true" />
-        </a>
-      ) : (
-        <Button size="sm" variant="secondary" loading={loading} onClick={() => void open()}>
-          {t('admin.verifications.openDocument', { name: label })}
-        </Button>
-      )}
+      <Button size="sm" variant="secondary" loading={loading} onClick={() => void open()}>
+        {t('admin.verifications.openDocument', { name: label })}
+      </Button>
+      <Dialog
+        open={Boolean(url)}
+        onOpenChange={(next) => {
+          if (!next) setUrl(null);
+        }}
+      >
+        <DialogContent className="max-w-5xl">
+          <DialogHeader title={label} />
+          {url && contentType === 'application/pdf' ? (
+            <iframe src={url} title={label} className="mt-4 h-[65vh] w-full rounded-lg border" referrerPolicy="no-referrer" />
+          ) : url ? (
+            <img src={url} alt={label} className="mx-auto mt-4 max-h-[65vh] max-w-full object-contain" />
+          ) : null}
+          <a
+            href={url ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+          >
+            {label} <ExternalLink className="size-3.5" aria-hidden="true" />
+          </a>
+        </DialogContent>
+      </Dialog>
       {failed ? <span className="text-label text-danger">{errorMessage(failed, t)}</span> : null}
     </span>
   );
@@ -167,7 +190,12 @@ function RequestDetail({ id, adminId }: { id: string; adminId: string }) {
               className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-subtle/40 px-3.5 py-2.5 text-label"
             >
               <span className="font-semibold">{t(`verification.docTypes.${document.doc_type}`)}</span>
-              <DocumentLink requestId={data.id} documentId={document.id} label={document.file.display_name} />
+              <DocumentLink
+                requestId={data.id}
+                documentId={document.id}
+                label={document.file.display_name}
+                contentType={document.file.content_type}
+              />
             </li>
           ))}
         </ul>

@@ -6,7 +6,7 @@ from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, PlainSerializer
+from pydantic import AfterValidator, BaseModel, ConfigDict, EmailStr, Field, PlainSerializer, field_validator
 from pydantic_core import PydanticCustomError
 
 from app.modules.identity.schemas import MembershipOut, OrgType
@@ -79,6 +79,13 @@ class OrganizationUpdate(_Strict):
     address: str | None = Field(default=None, min_length=3, max_length=500)
     latitude: Annotated[Decimal, Field(ge=-90, le=90, max_digits=9, decimal_places=6)] | None = None
     longitude: Annotated[Decimal, Field(ge=-180, le=180, max_digits=9, decimal_places=6)] | None = None
+
+    @field_validator("name", "legal_name", "phone", "city", "address")
+    @classmethod
+    def required_fields_cannot_be_cleared(cls, value: str | None) -> str:
+        if value is None:
+            raise PydanticCustomError("missing", "Field required")
+        return value
 
 
 class OrganizationProfile(BaseModel):

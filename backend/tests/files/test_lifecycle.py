@@ -65,7 +65,9 @@ async def _row(
 
 
 async def _download_status(url: str) -> int:
-    async with httpx.AsyncClient() as http:
+    from app.main import app
+
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://testserver") as http:
         return (await http.get(url)).status_code
 
 

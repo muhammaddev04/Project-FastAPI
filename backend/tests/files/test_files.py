@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 
-import httpx
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select, text
@@ -94,10 +93,10 @@ async def test_ver_004_signed_url_only_owner_and_other_org_404(client: AsyncClie
 
     signed = await client.get(f"/api/v1/files/{file_id}/url", headers=auth(owner, org))
     assert signed.status_code == 200
+    assert signed.headers["Cache-Control"] == "no-store"
     body = signed.json()
-    assert "X-Amz-Signature" in body["url"] and "X-Amz-Expires=300" in body["url"]
-    async with httpx.AsyncClient() as http:
-        downloaded = await http.get(body["url"])
+    assert body["url"].startswith("/api/v1/files/content/") and "signature=" in body["url"]
+    downloaded = await client.get(body["url"])
     assert downloaded.status_code == 200 and downloaded.content == PNG
 
     assert (await client.get(f"/api/v1/files/{file_id}/url", headers=auth(manager, org))).status_code == 403

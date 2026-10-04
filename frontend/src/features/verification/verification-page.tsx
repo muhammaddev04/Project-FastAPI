@@ -33,18 +33,20 @@ function formatBytes(size: number): string {
 
 /** One required document: choose a file, it is uploaded privately at once (VER-002 checks client- and server-side). */
 function DocumentSlot({
+  orgId,
   docType,
   optional,
   value,
   onUploaded,
 }: {
+  orgId: string;
   docType: DocType;
   optional?: boolean;
   value: StoredFileOut | undefined;
   onUploaded: (file: StoredFileOut | undefined) => void;
 }) {
   const { t } = useTranslation();
-  const upload = useUploadVerificationFile();
+  const upload = useUploadVerificationFile(orgId);
   const [clientError, setClientError] = useState<string | null>(null);
   const inputId = `doc-${docType}`;
 
@@ -272,6 +274,7 @@ export function VerificationPage() {
           />
           {required.map((docType) => (
             <DocumentSlot
+              orgId={orgId}
               key={docType}
               docType={docType}
               value={files[docType]}
@@ -279,6 +282,7 @@ export function VerificationPage() {
             />
           ))}
           <DocumentSlot
+            orgId={orgId}
             docType="OTHER"
             optional
             value={files.OTHER}

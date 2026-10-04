@@ -362,7 +362,7 @@ async def approve(session: AsyncSession, request_id: UUID, admin: User) -> Admin
     if request.reviewer_id != admin.id:
         raise AppError("permission_denied", 403, {"reason": "not_the_reviewer"})
     organization = await _organization(session, request.organization_id)
-    profile = await load_profile(session, organization)
+    profile = await load_profile(session, organization, lock=True)
     now = utcnow()
     request.status = "APPROVED"
     request.reviewed_at = now
@@ -388,7 +388,7 @@ async def reject(session: AsyncSession, request_id: UUID, admin: User, reason: s
     if request.status != "UNDER_REVIEW":
         raise AppError("invalid_transition", 409, {"status": request.status})
     organization = await _organization(session, request.organization_id)
-    profile = await load_profile(session, organization)
+    profile = await load_profile(session, organization, lock=True)
     request.status = "REJECTED"
     request.reviewed_at = utcnow()
     request.rejection_reason = reason

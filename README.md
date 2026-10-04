@@ -29,7 +29,11 @@ Demo accounts are `p00-{company,store,courier,admin}@example.tj`, password `P00D
 These are disposable local fixtures. Run `make fe-e2e` (or `scripts/dev.py fe-e2e` with
 the virtual-environment Python) after `cd frontend && npx playwright install chromium`.
 The browser suite exercises the real API, all four areas, responsive widths, WCAG AA checks,
-and P01 invitation acceptance, role changes, suspension, reactivation and revocation.
+P01 invitation acceptance, role changes, suspension, reactivation and revocation,
+and P02 company/store creation with document upload, rejection, resubmission and approval.
+P02 browser tests create fresh owners only in the isolated `tezfarmo_p00` database;
+they require the Docker CLI and refuse other environments. Private download URLs use
+the application's origin and expire after five minutes; S3 stays behind the API.
 `verify` covers unit/integration checks; the browser suite and live service checks are separate.
 
 Create a new verified superadmin from a trusted backend shell with
@@ -37,6 +41,7 @@ Create a new verified superadmin from a trusted backend shell with
 The command prompts for a password without echoing it and refuses existing accounts.
 No public API assigns superadmin privileges. Invitation expiry runs hourly in Celery Beat.
 See [P00 acceptance](docs/P00_ACCEPTANCE.md) for the exact evidence and remote CI gate.
+See [P02 acceptance](docs/P02_ACCEPTANCE.md) for organization/verification behavior and current validation.
 
 ```bash
 # services: PostgreSQL :5433, Redis :6380

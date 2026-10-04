@@ -53,7 +53,9 @@ async def _object_exists(key: str) -> bool:
 
 
 async def _download(url: str) -> httpx.Response:
-    async with httpx.AsyncClient() as http:
+    from app.main import app
+
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://testserver") as http:
         return await http.get(url)
 
 
@@ -103,13 +105,13 @@ async def test_avatar_upload_stores_normalized_private_user_file(
     assert Image.open(io.BytesIO(data)).size == (512, 256)
 
     url = body["avatar_url"]
-    assert "X-Amz-Signature=" in url and "X-Amz-Expires=300" in url  # SEC-008: 5 minutes
+    assert "signature=" in url and "expires=" in url  # SEC-008: signed five-minute download grant
     downloaded = await _download(url)
     assert downloaded.status_code == 200 and downloaded.content == data
     assert "storage_key" not in response.text and get_settings().s3_secret_key not in response.text
 
     me = (await client.get("/api/v1/me", headers=auth(user))).json()
-    assert me["avatar_url"] and "X-Amz-Expires=300" in me["avatar_url"]
+    assert me["avatar_url"] and "signature=" in me["avatar_url"]
     assert urlsplit(me["avatar_url"]).path == urlsplit(url).path
 
 
@@ -364,7 +366,7 @@ async def test_owner_uploads_logo_for_the_active_organization(
     response = await client.put(LOGO, files=_files(_image(), name="logo.png"), headers=auth(owner, org))
     assert response.status_code == 200, response.text
     body = response.json()
-    assert body["id"] == str(org.id) and "X-Amz-Expires=300" in body["logo_url"]
+    assert body["id"] == str(org.id) and "signature=" in body["logo_url"]
 
     [stored] = await _rows(session, "ORG_LOGO")
     assert stored.organization_id == org.id and stored.owner_user_id is None and stored.deleted_at is None
