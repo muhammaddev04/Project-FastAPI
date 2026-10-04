@@ -6,7 +6,13 @@ from functools import lru_cache
 from celery import Celery
 from kombu import Queue
 
+import app.model_registry  # noqa: F401 - standalone workers need every foreign-key target before flushing.
 from app.core.config import get_settings
+from app.modules.organizations.ports import install_handlers
+from app.modules.subscriptions.service import install as install_subscriptions
+
+install_handlers()
+install_subscriptions()
 
 celery_app = Celery("tezfarmo", broker=get_settings().celery_broker_url)
 celery_app.conf.update(

@@ -44,6 +44,8 @@ services:
   celery-worker:
     profiles: [jobs]
     build: ./backend
+    volumes:
+      - ./backend/app:/app/app:ro
     command: celery -A app.celery_app:celery_app worker --loglevel=INFO -Q default,notifications,heavy
     env_file: ./backend/.env
     environment:
@@ -60,6 +62,8 @@ services:
   celery-beat:
     profiles: [jobs]
     build: ./backend
+    volumes:
+      - ./backend/app:/app/app:ro
     command: celery -A app.celery_app:celery_app beat --loglevel=INFO --schedule=/tmp/celerybeat-schedule
     environment:
       CELERY_BROKER_URL: redis://redis:6379/1

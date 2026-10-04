@@ -70,6 +70,11 @@ P03 subscriptions and limits are implemented and locally accepted. Formal status
 - The actual development schema was upgraded from 0015 to 0018 without resetting data;
   Alembic check reports no schema/model differences. Existing companies now have trials.
   Development worker/Beat were built and started; inspect confirmed both P03 jobs registered.
+  A separate-process worker test exposed missing ORM foreign-key targets when API startup
+  was bypassed. Worker bootstrap now imports the complete registry and installs the real
+  subscription ports. The regression executes actual tick/reminder task bodies without
+  importing FastAPI; all five standalone-worker/foundation regression tests passed.
+  Local job containers bind development source read-only.
 
 ## Part boundaries
 

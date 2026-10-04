@@ -102,6 +102,8 @@ transactionally. P03 subscription lifecycle jobs are implemented; notification c
 pending in P11. The dispatcher retries unhandled events and eventually marks them FAILED while
 keeping their records. Celery Beat also purges expired idempotency records daily, expires invitations
 hourly, evaluates subscriptions every 15 minutes and generates hourly idempotent reminder events.
+Local job containers bind application source read-only; restart them after Python code changes
+with `docker compose --profile jobs restart celery-worker celery-beat`.
 `/api/health/ready` checks PostgreSQL, Redis and the private S3 bucket. Provision the bucket before
 using readiness as a deployment gate; the probe does not create it.
 

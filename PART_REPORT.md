@@ -12,6 +12,9 @@ were corrected and passed in the 94-case final regression. Security/idempotency 
 final billing/migration/company-event tests 30 passed; canonical policies 114 passed.
 Final cross-module regression 219 passed; last billing/idempotency/team checks 106 passed,
 including locked plan freshness and safe partial plan updates. Development jobs are running.
+Standalone workers initialize the complete ORM registry and real subscription ports;
+a separate-process regression exercises actual Celery task transitions without API startup;
+all five standalone-worker/foundation regression tests passed.
 Full frontend 376 passed, final subscription/team/shell checks 54 passed; twelve tooling
 tests and all ten P00-P03 browser scenarios passed. Build, lint, strict typing, formatting,
 API types, catalog, migration consistency and SUB-001–012 reference checks passed.
