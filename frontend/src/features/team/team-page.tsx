@@ -9,6 +9,7 @@ import type { Member, MembershipStatus, Role } from '@/shared/auth/types';
 import { Avatar, Badge, Button, DataTable, DateText, Input, PageHeader, Select, StatusBadge } from '@/shared/ui';
 import { InviteDialog, MemberActions } from './team-actions';
 import { TeamInvitations } from './invitations';
+import { useBillingQuery, type Access } from '@/features/subscriptions/api';
 
 const PAGE_SIZE = 20;
 const ROLES: Record<'COMPANY' | 'STORE', Role[]> = {
@@ -43,6 +44,7 @@ export function TeamPage() {
 
   // Without members.view the page shows "no access" and must not ask the API (which would answer 403).
   const canView = membership.permissions.includes('members.view');
+  const access = useBillingQuery<Access>('/subscription/access', membership.org_type === 'COMPANY' ? membership.organization_id : null);
   const members = useMembers(canView ? membership.organization_id : null, {
     search: debouncedSearch || undefined,
     role: role || undefined,
@@ -60,7 +62,11 @@ export function TeamPage() {
           description={t('team.description')}
           actions={
             membership.permissions.includes('members.invite') ? (
-              <Button variant="secondary" onClick={() => setInviteOpen(true)}>
+              <Button
+                variant="secondary"
+                disabled={membership.org_type === 'COMPANY' && (!access.data || !access.data.allowed_actions.includes('MEMBER_INVITE'))}
+                onClick={() => setInviteOpen(true)}
+              >
                 <UserPlus /> {t('team.invite')}
               </Button>
             ) : undefined
@@ -149,7 +155,14 @@ export function TeamPage() {
             {
               key: 'actions',
               header: t('teamActions.actions'),
-              cell: (member) => <MemberActions member={member} membership={membership} userId={me.id} />,
+              cell: (member) => (
+                <MemberActions
+                  member={member}
+                  membership={membership}
+                  userId={me.id}
+                  subscriptionAllowed={membership.org_type !== 'COMPANY' || !!access.data?.allowed_actions.includes('MEMBER_INVITE')}
+                />
+              ),
             },
           ]}
         />

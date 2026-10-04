@@ -18,6 +18,11 @@ export type Preset = { label: string; tones: Record<string, BadgeTone>; icons: R
  * not yet exist.
  */
 export const PRESETS = {
+  subscription: {
+    label: 'billing.status',
+    tones: { TRIAL: 'info', ACTIVE: 'success', GRACE: 'warning', SOFT_BLOCK: 'warning', FULL_BLOCK: 'danger', CANCELLED: 'danger' },
+    icons: { TRIAL: Clock3, ACTIVE: CheckCircle2, GRACE: Clock3, SOFT_BLOCK: PauseCircle, FULL_BLOCK: XCircle, CANCELLED: XCircle },
+  },
   /** P02 organization verification (NOT_SUBMITTED → PENDING → APPROVED | REJECTED). */
   verification: {
     label: 'verification.status',

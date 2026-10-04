@@ -43,7 +43,7 @@ async def test_org_001_create_company_creates_owner_membership_and_code(
     assert body["membership"]["role"] == "OWNER"
     assert "verification.submit" in body["membership"]["permissions"]
     actions = (await session.execute(select(AuditLog.action).order_by(AuditLog.created_at))).scalars().all()
-    assert actions == ["organization.created", "membership.created"]
+    assert actions == ["organization.created", "membership.created", "subscription.status_changed"]
 
 
 async def test_org_002_create_store_with_optional_tax_id_and_coordinates(

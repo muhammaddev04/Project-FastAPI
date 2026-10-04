@@ -24,7 +24,13 @@
     "leave": "Leave organization",
     "leaveHint": "Leave {{name}}? You will lose access. An owner must invite you again to rejoin.",
     "left": "You left the organization",
-    "statuses": { "PENDING": "Pending", "ACCEPTED": "Accepted", "DECLINED": "Declined", "REVOKED": "Revoked", "EXPIRED": "Expired" }
+    "statuses": {
+      "PENDING": "Pending",
+      "ACCEPTED": "Accepted",
+      "DECLINED": "Declined",
+      "REVOKED": "Revoked",
+      "EXPIRED": "Expired"
+    }
   },
   "common": {
     "confirm": "Confirm",
@@ -166,8 +172,8 @@
     "return_window_closed": "The operation could not be completed. Check the details and try again.",
     "run_not_editable": "The operation could not be completed. Check the details and try again.",
     "sku_taken": "The operation could not be completed. Check the details and try again.",
-    "subscription_blocked": "The operation could not be completed. Check the details and try again.",
-    "subscription_limit_reached": "The operation could not be completed. Check the details and try again.",
+    "subscription_blocked": "Your subscription restricts this action. Renew the subscription to continue.",
+    "subscription_limit_reached": "Your plan limit has been reached. Reduce usage or request a larger plan.",
     "sync_conflict": "The operation could not be completed. Check the details and try again.",
     "telegram_already_linked": "The operation could not be completed. Check the details and try again.",
     "telegram_link_invalid": "The operation could not be completed. Check the details and try again.",
@@ -512,7 +518,10 @@
       "organizations": "Organizations",
       "audit": "Audit log",
       "ops": "Operations",
-      "support": "Support"
+      "support": "Support",
+      "subscriptions": "Subscriptions",
+      "plans": "Plans",
+      "plan-requests": "Plan change requests"
     }
   },
   "planned": {
@@ -1379,6 +1388,95 @@
       "OPEN": "Open",
       "IN_PROGRESS": "In progress",
       "RESOLVED": "Resolved"
+    }
+  },
+  "billing": {
+    "title": "Subscription",
+    "month": "month",
+    "unlimited": "Unlimited",
+    "overLimit": "New additions are blocked until usage fits the plan.",
+    "cancel": "Cancel at the end of the paid period",
+    "plan": "Plan",
+    "choosePlan": "Choose a plan",
+    "requestPlan": "Request plan change",
+    "requestSent": "Your request was sent.",
+    "payments": "Payment history",
+    "amount": "Amount",
+    "method": "Method",
+    "period": "Period",
+    "reference": "Reference",
+    "noPayments": "No payments yet",
+    "adminSubscriptions": "Subscriptions",
+    "company": "Company",
+    "statusLabel": "Status",
+    "allStatuses": "All statuses",
+    "allPlans": "All plans",
+    "noSubscriptions": "No subscriptions found",
+    "recordPayment": "Record payment",
+    "months": "Months",
+    "overrideReason": "Reason for amount override",
+    "expected": "Expected amount",
+    "previewNote": "The final period uses the server time when payment is saved.",
+    "confirmPayment": "Confirm payment of {{amount}} TJS.",
+    "confirm": "Confirm",
+    "preview": "Preview payment",
+    "paymentSaved": "Payment recorded.",
+    "reason": "Reason (at least 10 characters)",
+    "days": "Days",
+    "changePlan": "Change plan",
+    "extendTrial": "Extend trial",
+    "saved": "Saved.",
+    "history": "Status history",
+    "date": "Date",
+    "planCode": "Plan code",
+    "planName": "Plan name",
+    "price": "Monthly price",
+    "emptyUnlimited": "Leave empty for unlimited.",
+    "sortOrder": "Sort order",
+    "publicPlan": "Public plan",
+    "save": "Save",
+    "close": "Close",
+    "adminPlans": "Plans",
+    "addPlan": "Add plan",
+    "yes": "Yes",
+    "no": "No",
+    "edit": "Edit",
+    "decision": "Decision",
+    "approveRequest": "Approve and change plan",
+    "dismissRequest": "Dismiss request",
+    "review": "Review",
+    "adminRequests": "Plan change requests",
+    "trial_ends_at": "Trial ends",
+    "current_period_end": "Paid period ends",
+    "grace_ends_at": "Grace period ends",
+    "soft_block_ends_at": "Soft block ends",
+    "status": {
+      "TRIAL": "Trial",
+      "ACTIVE": "Active",
+      "GRACE": "Grace period",
+      "SOFT_BLOCK": "Soft block",
+      "FULL_BLOCK": "Full block",
+      "CANCELLED": "Cancelled"
+    },
+    "banner": {
+      "GRACE": "Renew your subscription before the grace period ends.",
+      "SOFT_BLOCK": "New orders, partnerships and invitations are blocked. Existing order fulfillment remains available.",
+      "FULL_BLOCK": "Read, export, payments, closing existing orders and returns/disputes remain available. Renew to resume other actions.",
+      "CANCELLED": "Subscription cancelled. Read, export, payments, closing existing orders and returns/disputes remain available. Renew to resume other actions."
+    },
+    "usage": {
+      "active_stores": "Active stores",
+      "users": "Users",
+      "products": "Products"
+    },
+    "methods": {
+      "CASH": "Cash",
+      "BANK_TRANSFER": "Bank transfer"
+    },
+    "requestStatus": {
+      "PENDING": "Pending",
+      "DONE": "Done",
+      "DISMISSED": "Dismissed"
     }
   }
 }

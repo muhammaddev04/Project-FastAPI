@@ -11,7 +11,15 @@ export function membershipFixture(overrides: Partial<Membership> = {}): Membersh
     role: 'OWNER',
     status: 'ACTIVE',
     joined_at: '2026-09-01T08:00:00Z',
-    permissions: ['members.change_role', 'members.invite', 'members.revoke', 'members.suspend', 'members.view'],
+    permissions: [
+      'members.change_role',
+      'members.invite',
+      'members.revoke',
+      'members.suspend',
+      'members.view',
+      'subscription.view',
+      'subscription.manage',
+    ],
     verification_status: 'APPROVED',
     ...overrides,
   };
@@ -42,5 +50,6 @@ export const storeMembership = (overrides: Partial<Membership> = {}) =>
     organization_id: 'org-store',
     org_type: 'STORE',
     org_name: 'Corner Market',
+    permissions: ['members.change_role', 'members.invite', 'members.revoke', 'members.suspend', 'members.view'],
     ...overrides,
   });

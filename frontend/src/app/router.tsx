@@ -10,6 +10,13 @@ import { CourierHome } from '@/features/dashboard/courier-home';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
 import { PlannedModulePage } from '@/features/modules/planned-module-page';
 import { VerificationsPage } from '@/features/admin/verifications-page';
+import { SubscriptionPage } from '@/features/subscriptions/subscription-page';
+import {
+  AdminSubscriptionsPage,
+  AdminSubscriptionDetailPage,
+  AdminPlansPage,
+  AdminPlanRequestsPage,
+} from '@/features/subscriptions/admin-pages';
 import { OrganizationProfilePage } from '@/features/organization/organization-profile-page';
 import { BusinessSetupPage } from '@/features/onboarding/business-setup-page';
 import { BusinessTypePage } from '@/features/onboarding/business-type-page';
@@ -127,6 +134,10 @@ export const routes: RouteObject[] = [
       { index: true, element: <Navigate to="verifications" replace /> },
       { path: 'support', element: <SupportContent admin /> },
       { path: 'verifications', element: <VerificationsPage /> },
+      { path: 'subscriptions', element: <AdminSubscriptionsPage /> },
+      { path: 'subscriptions/:subscriptionId', element: <AdminSubscriptionDetailPage /> },
+      { path: 'plans', element: <AdminPlansPage /> },
+      { path: 'plan-requests', element: <AdminPlanRequestsPage /> },
       { path: ':module', element: <AdminPlannedPage /> },
     ],
   },
@@ -139,6 +150,8 @@ export const routes: RouteObject[] = [
       { path: 'settings', element: <Navigate to="profile" replace /> },
       { path: 'settings/profile', element: <OrganizationProfilePage /> },
       { path: 'settings/verification', element: <VerificationPage /> },
+      { path: 'settings/subscription', element: <SubscriptionPage /> },
+      { path: 'subscription', element: <Navigate to="../settings/subscription" replace /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },

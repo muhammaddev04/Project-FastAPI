@@ -21,9 +21,13 @@ async def test_org_idempotent_replay_does_not_publish_again(client: AsyncClient,
     assert second.status_code == 201
     assert first.json() == second.json()
     rows = (await session.scalars(select(OutboxEvent).order_by(OutboxEvent.created_at))).all()
-    assert [row.event_type for row in rows] == ["COMPANY_CREATED", "MEMBERSHIP_CREATED"]
+    assert sorted(row.event_type for row in rows) == [
+        "COMPANY_CREATED",
+        "MEMBERSHIP_CREATED",
+        "SUBSCRIPTION_STATUS_CHANGED",
+    ]
     assert all(str(row.org_id) == first.json()["organization"]["id"] for row in rows)
-    assert rows[0].payload["owner_id"] == str(user.id)
+    assert next(row for row in rows if row.event_type == "COMPANY_CREATED").payload["owner_id"] == str(user.id)
 
 
 async def test_org_failed_handler_rolls_back_business_and_events(

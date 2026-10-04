@@ -204,6 +204,9 @@ def idempotent(ttl: timedelta = DEFAULT_TTL, *, permission: str | None = None) -
         if idempotency_key is None:
             raise AppError("idempotency_key_required", 400)
         body = await request.body()
+        if request.path_params:
+            # A reused key must never replay a payment for a different subscription/resource.
+            body = request.url.path.encode() + b"\n" + body
         if permission is not None:
             from app.modules.identity.deps import get_org_context
 

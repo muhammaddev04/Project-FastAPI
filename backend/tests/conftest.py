@@ -51,6 +51,10 @@ async def _clean_state() -> AsyncIterator[None]:
     async with get_engine().begin() as connection:
         # TRUNCATE is the only reset that bypasses the append-only row triggers; used by tests only.
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
+    from app.modules.subscriptions.service import seed_plans
+
+    async with get_sessionmaker()() as session, session.begin():
+        await seed_plans(session)
     await get_redis().flushdb()
 
 

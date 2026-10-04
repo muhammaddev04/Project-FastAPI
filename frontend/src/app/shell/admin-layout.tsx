@@ -14,6 +14,9 @@ type AdminItem = { key: string; icon: LucideIcon; phase?: 'P12' };
 const REVIEW: AdminItem[] = [
   { key: 'verifications', icon: ClipboardCheck },
   { key: 'support', icon: Headset },
+  { key: 'subscriptions', icon: ScrollText },
+  { key: 'plans', icon: Database },
+  { key: 'plan-requests', icon: ClipboardCheck },
 ];
 const PLATFORM: AdminItem[] = [
   { key: 'dashboard', icon: LayoutDashboard, phase: 'P12' },

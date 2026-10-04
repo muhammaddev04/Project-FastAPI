@@ -90,19 +90,35 @@ Google setup reference: <https://developers.google.com/identity/openid-connect/o
 
 Local commits are authorized for coherent, tested changes; the owner pushes them (see `AGENTS.md`).
 
-Apply migration `0016` before starting jobs. Start the local worker and scheduler with
-`docker compose --profile jobs up -d celery-worker celery-beat`. The worker dispatches durable
+Apply migrations through `0018` before starting jobs. Start the local worker and scheduler with
+`docker compose --profile jobs up -d --build celery-worker celery-beat`. The worker dispatches durable
 outbox events every five seconds, with eight attempts and exponential backoff. Event data cannot
 be updated or deleted; only delivery metadata can change. Events without a registered consumer
 retry and eventually fail rather than silently disappearing. External consumers must deduplicate
 side effects using `event_id`. Business modules will register their handlers as they are implemented.
 For a worker outside Docker, configure `CELERY_BROKER_URL` (default `redis://localhost:6380/1`).
 Registration, organization/OWNER membership creation and verification decisions publish events
-transactionally. Subscription and notification consumers are pending in P03/P11: starting the
-dispatcher now will retry these unhandled events and eventually mark them FAILED while keeping
-their records. Celery Beat also purges expired idempotency records daily.
+transactionally. P03 subscription lifecycle jobs are implemented; notification consumers remain
+pending in P11. The dispatcher retries unhandled events and eventually marks them FAILED while
+keeping their records. Celery Beat also purges expired idempotency records daily, expires invitations
+hourly, evaluates subscriptions every 15 minutes and generates hourly idempotent reminder events.
 `/api/health/ready` checks PostgreSQL, Redis and the private S3 bucket. Provision the bucket before
 using readiness as a deployment gate; the probe does not create it.
+
+## Company subscriptions (P03)
+
+Company creation starts a 14-day STANDARD trial in the same transaction. Migration `0018`
+also gives existing companies a fresh trial and records its history, audit and event; Store remains free.
+The owner and manager view status, limits and payment history at `/company/settings/subscription`.
+Only the owner requests a plan change or toggles cancellation at the end of the paid period.
+SUPERADMIN uses `/admin/subscriptions`, `/admin/plans` and `/admin/plan-requests` for manual billing.
+Payment confirmation previews calendar-month dates; the server determines the final period.
+
+Expired trials/paid periods enter GRACE, then SOFT_BLOCK and FULL_BLOCK; cancellation of an
+active paid period enters CANCELLED. Manual payment reactivates the subscription. History and
+payments are append-only. Company banners and team buttons use server-reported allowed actions.
+User limits enforce invitation acceptance/reactivation; product/store usage ports connect in
+P04/P06 when those modules exist. [P03 acceptance evidence](docs/P03_ACCEPTANCE.md).
 
 ## Tests
 

@@ -123,6 +123,10 @@ async def list_invitations(
 async def invite(session: AsyncSession, context: OrgContext, payload: InvitationCreate) -> InvitationOut:
     require_owner(context)
     org = await lock_org(session, context.organization.id)
+    from app.modules.subscriptions.domain import SubAction
+    from app.modules.subscriptions.service import guard
+
+    await guard.require(session, org.id, SubAction.MEMBER_INVITE)
     validate_role(org, payload.role)
     await expire_invitations(session, org.id)
     existing = (

@@ -1,4 +1,4 @@
-import { FileBadge2, IdCard } from 'lucide-react';
+import { CreditCard, FileBadge2, IdCard } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAreaContext } from '@/app/shell/use-area-context';
 import { areaFor } from '@/shared/auth/context';
@@ -10,6 +10,12 @@ export function SettingsTabs() {
   const { membership } = useAreaContext();
   const base = `/${areaFor(membership)}/settings`;
   const tabs = [
+    {
+      to: `${base}/subscription`,
+      icon: CreditCard,
+      label: t('billing.title'),
+      visible: membership.permissions.includes('subscription.view'),
+    },
     { to: `${base}/profile`, icon: IdCard, label: t('orgProfile.tabs.profile'), visible: membership.permissions.includes('org.view') },
     {
       to: `${base}/verification`,

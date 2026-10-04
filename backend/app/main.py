@@ -16,6 +16,9 @@ from app.modules.identity.router import router as identity_router
 from app.modules.identity.team_router import router as team_router
 from app.modules.organizations.ports import install_handlers
 from app.modules.organizations.router import router as organizations_router
+from app.modules.subscriptions.router import admin_router as subscription_admin_router
+from app.modules.subscriptions.router import router as subscription_router
+from app.modules.subscriptions.service import install as install_subscriptions
 from app.modules.support.router import router as support_router
 from app.modules.verification.router import admin_router as admin_verification_router
 from app.modules.verification.router import router as verification_router
@@ -26,6 +29,7 @@ def create_app() -> FastAPI:
     configure_logging(settings.log_level)
     configure_monitoring()
     install_handlers()
+    install_subscriptions()
     app = FastAPI(
         title="TezFarmo API",
         version=settings.app_version,
@@ -65,6 +69,8 @@ def create_app() -> FastAPI:
     app.include_router(files_router)
     app.include_router(verification_router)
     app.include_router(admin_verification_router)
+    app.include_router(subscription_router)
+    app.include_router(subscription_admin_router)
     install_error_contract(app)
     return app
 

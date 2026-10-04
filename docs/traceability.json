@@ -296,6 +296,18 @@
     "backend/tests/auth/test_register.py::test_iam_016_delivery_failure_answers_503_and_creates_nothing",
     "backend/tests/identity/test_team.py::test_invitation_email_failure_rolls_back"
   ],
+  "SUB-001": ["backend/tests/test_subscription_api.py::test_sub_001_002_trial_and_store_free", "backend/tests/test_subscription_migration.py::test_p03_migration_backfills_trial_history_audit_and_event"],
+  "SUB-002": ["backend/tests/test_subscription_api.py::test_sub_001_002_trial_and_store_free"],
+  "SUB-003": ["backend/tests/test_subscription_api.py::test_sub_003_004_payment_idempotent_and_override"],
+  "SUB-004": ["backend/tests/test_subscription_domain.py::test_sub_004_calendar_months", "backend/tests/test_subscription_api.py::test_concurrent_payments_extend_without_lost_periods"],
+  "SUB-005": ["backend/tests/test_subscription_api.py::test_sub_005_tick_catchup_idempotent_audit_events", "backend/tests/test_subscription_api.py::test_sub_005_skip_locked_subscription_and_catchup"],
+  "SUB-006": ["backend/tests/test_subscription_domain.py::test_sub_006_guard_matrix", "backend/tests/test_subscription_api.py::test_sub_006_guard_expiry_and_member_invite"],
+  "SUB-007": ["backend/tests/test_subscription_api.py::test_sub_007_append_only"],
+  "SUB-008": ["backend/tests/test_subscription_domain.py::test_sub_008_limit_boundary_and_downgrade", "backend/tests/test_subscription_api.py::test_sub_008_009_limits_downgrade_preserves_members"],
+  "SUB-009": ["backend/tests/test_subscription_api.py::test_sub_008_009_limits_downgrade_preserves_members"],
+  "SUB-010": ["backend/tests/test_subscription_api.py::test_sub_010_reminders_once_per_anchor"],
+  "SUB-011": ["backend/tests/test_subscription_api.py::test_sub_011_012_owner_cancel_and_plan_request", "backend/tests/test_subscription_api.py::test_cancelled_paid_subscription_reactivates_and_resets_cancel"],
+  "SUB-012": ["backend/tests/test_subscription_api.py::test_sub_011_012_owner_cancel_and_plan_request"],
   "FND-040": [
     "scripts/test_p00_tooling.py::test_ci_enforces_foundation_gates"
   ]

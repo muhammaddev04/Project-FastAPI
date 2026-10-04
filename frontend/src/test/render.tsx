@@ -23,6 +23,24 @@ export function mockApi(routes: MockRoute[]) {
       body: typeof init?.body === 'string' ? JSON.parse(init.body) : (init?.body ?? undefined),
     });
     const defaults: MockRoute[] = [
+      {
+        path: '/subscription/access',
+        body: {
+          status: 'ACTIVE',
+          allowed_actions: [
+            'READ',
+            'EXPORT',
+            'PAYMENT',
+            'NEW_ORDER',
+            'ORDER_FULFILLMENT',
+            'ORDER_CLOSE',
+            'CATALOG_WRITE',
+            'PARTNERSHIP_NEW',
+            'MEMBER_INVITE',
+            'RETURNS_DISPUTES',
+          ],
+        },
+      },
       { path: '/me/invitations', body: { count: 0, limit: 20, offset: 0, results: [] } },
       { path: '/members/invitations', body: { count: 0, limit: 20, offset: 0, results: [] } },
     ];

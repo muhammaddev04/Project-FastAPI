@@ -1,4 +1,29 @@
-# P03 subscriptions implementation in progress - 2026-10-04
+# P03 subscriptions local acceptance - 2026-10-04
+
+P03 is implemented and locally accepted: company trials, lifecycle, manual admin billing,
+append-only payment/status history, cancellation, plan requests, plans administration,
+subscription guards/real user limits, scheduled ticks/reminders and TG/RU/EN frontend.
+Development migrations through 0018 are applied without a data reset; schema matches models.
+Real browser acceptance found and fixed the asynchronous cancellation-checkbox reset.
+Payment idempotency now binds the concrete subscription and rechecks admin privileges.
+
+Validation: initial complete backend run 977 passed; all three affected P01/P02 expectations
+were corrected and passed in the 94-case final regression. Security/idempotency 53 passed;
+final billing/migration/company-event tests 30 passed; canonical policies 114 passed.
+Final cross-module regression 219 passed; last billing/idempotency/team checks 106 passed,
+including locked plan freshness and safe partial plan updates. Development jobs are running.
+Full frontend 376 passed, final subscription/team/shell checks 54 passed; twelve tooling
+tests and all ten P00-P03 browser scenarios passed. Build, lint, strict typing, formatting,
+API types, catalog, migration consistency and SUB-001–012 reference checks passed.
+
+Formal status remains PARTIAL pending green remote CI after the owner's push. No push or
+done tag. P04 is not started and requires approval. Product/partnership/order integrations
+remain in P04/P06/P07; external notification delivery remains in P11.
+[Current P03 acceptance evidence](docs/P03_ACCEPTANCE.md).
+
+Earlier entries below are historical evidence.
+
+# P03 initial policy increment - 2026-10-04
 
 The owner approved P03. The first backend increment provides the canonical pure
 subscription lifecycle, all 60 status/action permission combinations, calendar-month

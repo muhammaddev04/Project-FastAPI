@@ -19,6 +19,11 @@ DEMO_PASSWORD = "P00Demo2026!"
 async def seed() -> None:
     if get_settings().app_env != "development":
         raise RuntimeError("seed is allowed only in development")
+    from app.modules.organizations.ports import install_handlers
+    from app.modules.subscriptions.service import install
+
+    install_handlers()
+    install()
     async with get_sessionmaker()() as session, session.begin():
         users: dict[str, User] = {}
         for name in ("company", "store", "courier", "admin"):

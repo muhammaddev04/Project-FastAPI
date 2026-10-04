@@ -27,10 +27,10 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
     ]);
   });
 
-  it('keeps subscription with the owner only; managers see the team read-only', () => {
+  it('lets owners and managers view subscriptions; managers see the team read-only', () => {
     const manager = keys('company', 'MANAGER', ['members.view']);
     expect(manager).toContain('team');
-    expect(manager).not.toContain('subscription');
+    expect(manager).toContain('subscription');
   });
 
   it('limits operators to orders, catalog, clients, payments and disputes', () => {
@@ -73,7 +73,7 @@ describe('honest navigation (Phase C8)', () => {
     const { available, planned } = navByAvailability('company', owner);
     const availableKeys = available.flatMap((section) => section.items.map((item) => item.key));
 
-    expect(availableKeys).toEqual(['dashboard', 'team', 'settings']);
+    expect(availableKeys).toEqual(['dashboard', 'team', 'subscription', 'settings']);
     // Nothing in the working navigation may carry a phase, which is what marks a placeholder.
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
@@ -86,7 +86,6 @@ describe('honest navigation (Phase C8)', () => {
       'finance',
       'returns',
       'reports',
-      'subscription',
     ]);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });

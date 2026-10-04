@@ -47,6 +47,8 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
         "org.edit_contacts",
         "org.edit_legal",
         "org.view",
+        "subscription.manage",
+        "subscription.view",
         "verification.submit",
         "verification.view",
     ]

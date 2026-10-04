@@ -280,12 +280,14 @@ async def test_invitation_email_failure_rolls_back(client: AsyncClient, session:
             raise EmailDeliveryError("offline")
 
     set_email_provider(FailingEmail())
+    models = (MembershipInvitation, AuditLog, OutboxEvent)
+    before = {model: await session.scalar(select(func.count()).select_from(model)) for model in models}
     response = await client.post(
         "/api/v1/members/invitations", headers=auth(owner, org), json={"email": recipient.email, "role": "MANAGER"}
     )
     assert response.status_code == 503
-    for model in (MembershipInvitation, AuditLog, OutboxEvent):
-        assert await session.scalar(select(func.count()).select_from(model)) == 0
+    for model in models:
+        assert await session.scalar(select(func.count()).select_from(model)) == before[model]
 
 
 async def test_subscription_port_blocks_accept_and_reactivate(

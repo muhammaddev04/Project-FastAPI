@@ -74,7 +74,17 @@ export function InviteDialog({ membership, open, onClose }: { membership: Member
   );
 }
 
-export function MemberActions({ member, membership, userId }: { member: Member; membership: Membership; userId: string }) {
+export function MemberActions({
+  member,
+  membership,
+  userId,
+  subscriptionAllowed = true,
+}: {
+  member: Member;
+  membership: Membership;
+  userId: string;
+  subscriptionAllowed?: boolean;
+}) {
   const { t } = useTranslation();
   const mutation = useTeamAction(membership.organization_id);
   const [action, setAction] = useState<'role' | 'suspend' | 'reactivate' | 'revoke' | null>(null);
@@ -88,6 +98,7 @@ export function MemberActions({ member, membership, userId }: { member: Member; 
         <Button
           size="sm"
           variant="outline"
+          disabled={member.status === 'SUSPENDED' && !subscriptionAllowed}
           onClick={() => {
             mutation.reset();
             setRole(member.role);
@@ -129,7 +140,7 @@ export function MemberActions({ member, membership, userId }: { member: Member; 
         confirmLabel={t('common.confirm')}
         loading={mutation.isPending}
         tone={action === 'revoke' ? 'danger' : 'primary'}
-        confirmDisabled={needsReason && !reason.trim()}
+        confirmDisabled={(needsReason && !reason.trim()) || (action === 'reactivate' && !subscriptionAllowed)}
         onConfirm={async () => {
           if (!action) return;
           try {

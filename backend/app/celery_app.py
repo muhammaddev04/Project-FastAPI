@@ -23,6 +23,8 @@ celery_app.conf.update(
         "dispatch-outbox": {"task": "tezfarmo.dispatch_outbox", "schedule": 5.0},
         "purge-expired-idempotency": {"task": "tezfarmo.purge_expired_idempotency", "schedule": 86400.0},
         "expire-membership-invitations": {"task": "tezfarmo.expire_membership_invitations", "schedule": 3600.0},
+        "subscription-tick": {"task": "tezfarmo.subscription_tick", "schedule": 900.0},
+        "subscription-reminders": {"task": "tezfarmo.subscription_reminders", "schedule": 3600.0},
     },
 )
 
@@ -62,3 +64,27 @@ def expire_membership_invitations() -> int:
             return await expire_invitations(session)
 
     return _runner().run(expire())
+
+
+@celery_app.task(name="tezfarmo.subscription_tick")
+def subscription_tick() -> int:
+    from app.core.db import get_sessionmaker
+    from app.modules.subscriptions.service import tick
+
+    async def run() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await tick(session)
+
+    return _runner().run(run())
+
+
+@celery_app.task(name="tezfarmo.subscription_reminders")
+def subscription_reminders() -> int:
+    from app.core.db import get_sessionmaker
+    from app.modules.subscriptions.service import send_reminders
+
+    async def run() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await send_reminders(session)
+
+    return _runner().run(run())

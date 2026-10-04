@@ -71,6 +71,10 @@ async def make_org(
         session.add(Store(**common))
     session.add(Membership(user_id=owner.id, organization_id=org.id, role="OWNER", joined_at=utcnow()))
     await session.flush()
+    if org_type == "COMPANY":
+        from app.modules.subscriptions.service import TrialStarter
+
+        await TrialStarter().start_trial(session, org.id)
     return org
 
 
