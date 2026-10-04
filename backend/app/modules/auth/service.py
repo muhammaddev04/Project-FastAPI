@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
 from app.core.config import get_settings
-from app.core.email import EmailDeliveryError, OutgoingEmail, get_email
+from app.core.email import EmailDeliveryError, OutgoingEmail, send_email
 from app.core.email_templates import render
 from app.core.errors import AppError
 from app.core.events import DomainEvent, event_bus
@@ -87,7 +87,7 @@ def _link(path: str, token: str | None = None) -> str:
 async def _deliver(email: OutgoingEmail) -> None:
     """IAM-016: sent directly (not through the outbox); a failed delivery rolls the request back with 503."""
     try:
-        await get_email().send(email)
+        await send_email(email)
     except EmailDeliveryError as exc:
         raise AppError("service_unavailable", 503) from exc
 

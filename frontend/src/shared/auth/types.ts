@@ -55,6 +55,7 @@ export type Member = {
   role: Role;
   status: MembershipStatus;
   joined_at: string;
+  version?: number;
 };
 
 export type Page<T> = { count: number; limit: number; offset: number; results: T[] };

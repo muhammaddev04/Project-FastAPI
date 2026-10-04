@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     smtp_username: str = ""
     smtp_password: SecretStr = SecretStr("")
     smtp_starttls: bool = True
-    smtp_timeout_seconds: int = 10
+    smtp_timeout_seconds: int = 5
     from_email: str = ""
     #: Public URL of the web app, used to build links in emails (e.g. /verify-email?token=...).
     frontend_base_url: str = "http://localhost:5174"

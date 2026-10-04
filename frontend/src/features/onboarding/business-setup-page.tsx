@@ -15,6 +15,7 @@ import { useSessionStore } from '@/shared/auth/session-store';
 import type { Me, OrgType } from '@/shared/auth/types';
 import { Alert, Button, ConfirmDialog, FormField, InfoRow, Input } from '@/shared/ui';
 import { useCreateOrganization, type OrganizationPayload } from './api';
+import { InvitationsInbox, InvitationsBadge } from '@/features/team/invitations';
 
 const optional = (value: string) => (value.trim() ? value.trim() : undefined);
 const coordinate = (min: number, max: number) =>
@@ -184,8 +185,18 @@ export function BusinessSetupPage({ me, type }: { me: Me; type: OrgType }) {
   if (optional(values.email)) summary.push([t('onboarding.fields.email'), values.email.trim()]);
 
   return (
-    <AuthFrame step="setup" width="wide" actions={<AccountMenu me={me} compact />}>
+    <AuthFrame
+      step="setup"
+      width="wide"
+      actions={
+        <>
+          <InvitationsBadge />
+          <AccountMenu me={me} compact />
+        </>
+      }
+    >
       <AuthPage title={isCompany ? t('onboarding.setupCompany') : t('onboarding.setupStore')} lead={t('onboarding.setup.lead')}>
+        <InvitationsInbox compact />
         <AuthForm onSubmit={toConfirm}>
           {field(
             'name',

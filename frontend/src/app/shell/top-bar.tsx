@@ -3,6 +3,7 @@ import { LanguageSwitcher } from '@/shared/i18n/language-switcher';
 import { cn } from '@/shared/lib/cn';
 import { ThemeSwitcher } from '@/shared/theme/theme-switcher';
 import { SupportButton } from '@/shared/ui';
+import { InvitationsBadge } from '@/features/team/invitations';
 
 /**
  * The chrome top bar of pages outside an organization area (account, status pages): brand on the left,
@@ -24,6 +25,7 @@ export function TopBar({ start, center, end, className }: { start: ReactNode; ce
           <ThemeSwitcher className="hidden bg-surface/50 sm:inline-flex" />
           <LanguageSwitcher className="bg-surface/50" />
           {end}
+          {end ? <InvitationsBadge /> : null}
         </div>
       </div>
     </header>

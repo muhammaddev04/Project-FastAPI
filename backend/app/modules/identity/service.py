@@ -182,6 +182,7 @@ async def list_members(
                 role=m.role,
                 status=m.status,
                 joined_at=m.joined_at,
+                version=m.version,
             )
             for m in rows.scalars().unique()
         ],

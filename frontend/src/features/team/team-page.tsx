@@ -7,6 +7,8 @@ import { useMembers } from '@/shared/auth/api';
 import { RequirePermission } from '@/shared/auth/guards';
 import type { Member, MembershipStatus, Role } from '@/shared/auth/types';
 import { Avatar, Badge, Button, DataTable, DateText, Input, PageHeader, Select, StatusBadge } from '@/shared/ui';
+import { InviteDialog, MemberActions } from './team-actions';
+import { TeamInvitations } from './invitations';
 
 const PAGE_SIZE = 20;
 const ROLES: Record<'COMPANY' | 'STORE', Role[]> = {
@@ -22,10 +24,11 @@ function useDebounced<T>(value: T, delay = 300): T {
   return debounced;
 }
 
-/** P01 §10 Team page: members of the active organization (members.view). Invitations and role changes come later. */
+/** P01 team management and invitation history, scoped to the active organization. */
 export function TeamPage() {
   const { t } = useTranslation();
-  const { membership } = useAreaContext();
+  const { membership, me } = useAreaContext();
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [role, setRole] = useState<Role | ''>('');
   const [status, setStatus] = useState<MembershipStatus | ''>('');
@@ -57,7 +60,7 @@ export function TeamPage() {
           description={t('team.description')}
           actions={
             membership.permissions.includes('members.invite') ? (
-              <Button variant="secondary" disabled title={t('team.inviteLater')}>
+              <Button variant="secondary" onClick={() => setInviteOpen(true)}>
                 <UserPlus /> {t('team.invite')}
               </Button>
             ) : undefined
@@ -143,8 +146,17 @@ export function TeamPage() {
               header: t('team.columns.joined'),
               cell: (member) => <DateText value={member.joined_at} dateOnly className="text-muted-foreground" />,
             },
+            {
+              key: 'actions',
+              header: t('teamActions.actions'),
+              cell: (member) => <MemberActions member={member} membership={membership} userId={me.id} />,
+            },
           ]}
         />
+        <TeamInvitations key={membership.organization_id} membership={membership} />
+        {inviteOpen ? (
+          <InviteDialog key={membership.organization_id} membership={membership} open onClose={() => setInviteOpen(false)} />
+        ) : null}
       </div>
     </RequirePermission>
   );

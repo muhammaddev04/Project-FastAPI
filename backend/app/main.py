@@ -13,6 +13,7 @@ from app.core.request_context import RequestContextMiddleware
 from app.modules.auth.router import router as auth_router
 from app.modules.files.router import router as files_router
 from app.modules.identity.router import router as identity_router
+from app.modules.identity.team_router import router as team_router
 from app.modules.organizations.router import router as organizations_router
 from app.modules.support.router import router as support_router
 from app.modules.verification.router import admin_router as admin_verification_router
@@ -57,6 +58,7 @@ def create_app() -> FastAPI:
     app.include_router(support_router)
     app.include_router(auth_router)
     app.include_router(identity_router)
+    app.include_router(team_router)
     app.include_router(organizations_router)
     app.include_router(files_router)
     app.include_router(verification_router)

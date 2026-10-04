@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.core.pagination import Page
 
@@ -92,7 +92,49 @@ class MemberOut(BaseModel):
     role: str
     status: str
     joined_at: datetime
+    version: int = 1
 
 
 class MemberPage(Page[MemberOut]):
     """API-002 pagination envelope (FND-009)."""
+
+
+class InvitationCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    email: EmailStr = Field(max_length=254)
+    role: Literal["OWNER", "MANAGER", "OPERATOR", "WAREHOUSE", "COURIER", "SELLER"]
+
+    @field_validator("email", mode="after")
+    @classmethod
+    def lower_email(cls, value: str) -> str:
+        return value.lower()
+
+
+class RoleChange(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    role: Literal["OWNER", "MANAGER", "OPERATOR", "WAREHOUSE", "COURIER", "SELLER"]
+    version: int = Field(ge=1)
+
+
+class MembershipReason(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    reason: str = Field(min_length=1, max_length=1000)
+
+
+class InvitationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    organization_id: UUID
+    org_name: str
+    org_type: str
+    email: str
+    role: str
+    status: str
+    invited_by: UUID
+    created_at: datetime
+    expires_at: datetime
+    responded_at: datetime | None
+
+
+class InvitationPage(Page[InvitationOut]):
+    pass

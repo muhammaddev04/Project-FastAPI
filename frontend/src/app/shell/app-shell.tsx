@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { VerificationBanner } from '@/features/verification/verification-banner';
+import { InvitationsBadge } from '@/features/team/invitations';
 import { AccountMenu } from '@/shared/auth/account-menu';
 import type { Area } from '@/shared/auth/context';
 import type { Me, Membership } from '@/shared/auth/types';
@@ -295,6 +296,7 @@ export function ShellFrame({
 export function HeaderTools({ me, notifications = true }: { me: Me; notifications?: boolean }) {
   return (
     <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <InvitationsBadge />
       <ThemeSwitcher className="hidden bg-surface/50 md:inline-flex" />
       <LanguageSwitcher className="hidden bg-surface/50 sm:inline-flex" />
       {notifications ? <NotificationsButton /> : null}

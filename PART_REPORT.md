@@ -1,4 +1,22 @@
-# P00 local acceptance ? 2026-10-03
+# P01 team and invitation acceptance - 2026-10-04
+
+Missing P01 team functionality is implemented and locally tested: invitations and inbox,
+accept/decline/revoke, owner role changes, suspend/reactivate/revoke/leave, hourly expiry,
+audit/events, subscription guard integration points and private superadmin creation.
+Frontend includes confirmations, errors and TG/RU/EN translations.
+
+Validation covers 793 distinct backend cases, 359 frontend cases, ten tooling tests,
+five P00 browser scenarios and the new real-API P01 lifecycle. Typing, lint, formatting,
+production build and requirement reference checks passed.
+
+Overall P01 status remains PARTIAL: existing code-based auth and 4-128-character password
+policy differ from IAM-001/002/003/015; green remote CI awaits the owner's push.
+No push or done tag. P02 has not started and requires the owner's approval.
+[Current P01 evidence and exact remaining differences](docs/P01_ACCEPTANCE.md).
+
+The P00 report and progress entries below remain historical evidence.
+
+# P00 local acceptance - 2026-10-03
 
 P00 local implementation is complete and tested. Formal status remains PARTIAL until the
 owner pushes these commits and the required remote CI run succeeds. No push or done tag

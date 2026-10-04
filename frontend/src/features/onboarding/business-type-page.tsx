@@ -10,6 +10,7 @@ import { useSessionStore } from '@/shared/auth/session-store';
 import type { Me, OrgType } from '@/shared/auth/types';
 import { Avatar, Badge, Button } from '@/shared/ui';
 import { OrgTypeChoice } from './org-type-choice';
+import { InvitationsInbox, InvitationsBadge } from '@/features/team/invitations';
 
 /**
  * Step 3 of 5: how will you use TezFarmo? (Phase D)
@@ -31,8 +32,17 @@ export function BusinessTypePage({ me }: { me: Me }) {
   const existing = me.memberships.filter(isUsable);
 
   return (
-    <AuthFrame step="type" actions={<AccountMenu me={me} compact />}>
+    <AuthFrame
+      step="type"
+      actions={
+        <>
+          <InvitationsBadge />
+          <AccountMenu me={me} compact />
+        </>
+      }
+    >
       <AuthPage title={t('onboarding.type.title')} lead={t('onboarding.type.lead')}>
+        <InvitationsInbox compact />
         <form className="space-y-6" onSubmit={form.handleSubmit(({ type }) => navigate(`/welcome/${type.toLowerCase()}`))}>
           <OrgTypeChoice selected={selected} field={form.register('type')} legend={t('onboarding.type.legend')} />
           <Button type="submit" block size="xl">

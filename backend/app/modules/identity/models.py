@@ -6,7 +6,7 @@ from uuid import UUID
 from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, IdMixin, TimestampMixin
+from app.core.db import Base, CreatedAtMixin, IdMixin, TimestampMixin
 
 ORG_TYPES = ("COMPANY", "STORE")
 COMPANY_ROLES = ("OWNER", "MANAGER", "OPERATOR", "WAREHOUSE", "COURIER")
@@ -109,6 +109,31 @@ class Membership(IdMixin, TimestampMixin, Base):
 
     organization: Mapped[Organization] = relationship(lazy="joined")
     user: Mapped[User] = relationship(foreign_keys=[user_id], lazy="joined")
+
+
+class MembershipInvitation(IdMixin, CreatedAtMixin, Base):
+    __tablename__ = "membership_invitations"
+    __table_args__ = (
+        CheckConstraint("role IN ('MANAGER','OPERATOR','WAREHOUSE','COURIER','SELLER')", name="role"),
+        CheckConstraint("status IN ('PENDING','ACCEPTED','DECLINED','REVOKED','EXPIRED')", name="status"),
+        Index(
+            "uq_invitations_org_email_pending",
+            "organization_id",
+            func.lower(text("email")),
+            unique=True,
+            postgresql_where=text("status = 'PENDING'"),
+        ),
+        Index("ix_invitations_email_status", func.lower(text("email")), "status"),
+    )
+
+    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), index=True)
+    email: Mapped[str] = mapped_column(String(254))
+    role: Mapped[str] = mapped_column(String(16))
+    status: Mapped[str] = mapped_column(String(16), default="PENDING", server_default="PENDING")
+    invited_by: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    organization: Mapped[Organization] = relationship(lazy="joined")
 
 
 class OAuthIdentity(IdMixin, TimestampMixin, Base):

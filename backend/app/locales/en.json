@@ -1,4 +1,6 @@
 {
+  "invitations.email.subject": "You are invited to {org}",
+  "invitations.email.text": "You have been invited to join {org} as {role}. Sign in with this email to accept or decline. The invitation expires in seven days.",
   "errors.validation_error": "Some fields are invalid.",
   "errors.bad_request": "The request is malformed.",
   "errors.not_found": "Not found.",

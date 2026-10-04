@@ -103,7 +103,17 @@ async def test_members_list_filters_search_and_paginates(client: AsyncClient, se
 
     page = (await client.get("/api/v1/members", params={"limit": 2}, headers=headers)).json()
     assert page["count"] == 4 and page["limit"] == 2 and len(page["results"]) == 2
-    assert set(page["results"][0]) == {"id", "user_id", "full_name", "email", "phone", "role", "status", "joined_at"}
+    assert set(page["results"][0]) == {
+        "id",
+        "user_id",
+        "full_name",
+        "email",
+        "phone",
+        "role",
+        "status",
+        "joined_at",
+        "version",
+    }
 
     by_role = (await client.get("/api/v1/members", params={"role": "WAREHOUSE"}, headers=headers)).json()
     assert [m["full_name"] for m in by_role["results"]] == ["Sitora Warehouse"]

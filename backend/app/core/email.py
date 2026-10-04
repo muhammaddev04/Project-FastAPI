@@ -115,6 +115,15 @@ def get_email() -> EmailPort:
     return _override or _configured()
 
 
+async def send_email(email: OutgoingEmail) -> None:
+    """IAM-016: cap direct delivery at five seconds, regardless of provider implementation."""
+    try:
+        async with asyncio.timeout(5):
+            await get_email().send(email)
+    except TimeoutError as exc:
+        raise EmailDeliveryError(email.template) from exc
+
+
 def set_email_provider(provider: EmailPort | None) -> None:
     """Tests (and future providers) swap the implementation without touching business code."""
     global _override

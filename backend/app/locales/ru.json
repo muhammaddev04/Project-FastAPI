@@ -1,4 +1,6 @@
 {
+  "invitations.email.subject": "Приглашение в {org}",
+  "invitations.email.text": "Вас пригласили в {org}, роль: {role}. Войдите с этим email, чтобы принять или отклонить приглашение. Оно действует семь дней.",
   "errors.validation_error": "Некоторые поля заполнены неверно.",
   "errors.bad_request": "Некорректный запрос.",
   "errors.not_found": "Не найдено.",

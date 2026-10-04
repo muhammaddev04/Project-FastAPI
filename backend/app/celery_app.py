@@ -22,6 +22,7 @@ celery_app.conf.update(
     beat_schedule={
         "dispatch-outbox": {"task": "tezfarmo.dispatch_outbox", "schedule": 5.0},
         "purge-expired-idempotency": {"task": "tezfarmo.purge_expired_idempotency", "schedule": 86400.0},
+        "expire-membership-invitations": {"task": "tezfarmo.expire_membership_invitations", "schedule": 3600.0},
     },
 )
 
@@ -49,3 +50,15 @@ def purge_expired_idempotency() -> int:
             return await purge_expired(session)
 
     return _runner().run(purge())
+
+
+@celery_app.task(name="tezfarmo.expire_membership_invitations")
+def expire_membership_invitations() -> int:
+    from app.core.db import get_sessionmaker
+    from app.modules.identity.team_service import expire_invitations
+
+    async def expire() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await expire_invitations(session)
+
+    return _runner().run(expire())

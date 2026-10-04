@@ -46,7 +46,7 @@ def commands(task: str, name: str | None = None) -> list[tuple[Path, list[str]]]
         ],
         "fe-build": [(frontend, [npm, "run", "build"])],
         "fe-format-check": [(frontend, [npm, "run", "format:check"])],
-        "traceability": [(ROOT, [python, "scripts/check_traceability.py", "--complete-p00"])],
+        "traceability": [(ROOT, [python, "scripts/check_traceability.py", "--complete-p00", "--complete-p01"])],
         "seed": [(backend, [python, "-m", "app.seed"])],
         "hooks": [(ROOT, [python, "-X", "utf8", "-m", "pre_commit", "install"])],
         "api-types": [

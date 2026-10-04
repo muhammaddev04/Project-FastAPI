@@ -1,4 +1,6 @@
 {
+  "invitations.email.subject": "Даъват ба {org}",
+  "invitations.email.text": "Шуморо ба {org} бо нақши {role} даъват карданд. Бо ҳамин email ворид шуда, даъватро қабул ё рад кунед. Даъват ҳафт рӯз эътибор дорад.",
   "errors.validation_error": "Баъзе майдонҳо нодуруст пур карда шудаанд.",
   "errors.bad_request": "Дархост нодуруст аст.",
   "errors.not_found": "Ёфт нашуд.",

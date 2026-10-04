@@ -21,6 +21,7 @@ import { PublicShell } from '@/features/public/public-shell';
 import { SupportPage, SupportContent } from '@/features/support/support-page';
 import { ProfilePage } from '@/features/profile/profile-page';
 import { TeamPage } from '@/features/team/team-page';
+import { InvitationsPage } from '@/features/team/invitations';
 import { useMe } from '@/shared/auth/api';
 import { homePath, onboardingPath, usableMemberships } from '@/shared/auth/context';
 import { RequireAuth, RequireGuest, RequireSuperadmin } from '@/shared/auth/guards';
@@ -118,6 +119,7 @@ export const routes: RouteObject[] = [
   { path: '/welcome/store', element: <RequireAuth>{(me) => <BusinessSetupPage me={me} type="STORE" />}</RequireAuth> },
   { path: '/support', element: <RequireAuth>{(me) => <SupportPage me={me} />}</RequireAuth> },
   { path: '/profile', element: <RequireAuth>{(me) => <ProfilePage me={me} />}</RequireAuth> },
+  { path: '/invitations', element: <RequireAuth>{(me) => <InvitationsPage me={me} />}</RequireAuth> },
   {
     path: '/admin',
     element: <RequireSuperadmin>{(me) => <AdminLayout me={me} />}</RequireSuperadmin>,

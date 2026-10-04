@@ -33,6 +33,7 @@ import {
 import { ConnectedAccounts } from './connected-accounts';
 import { useGoogleLinkState } from './google-link-api';
 import { PasswordChangeCard } from './password-change-card';
+import { LeaveMembership } from '@/features/team/leave-membership';
 
 /** Spaces, dashes, dots and brackets are dropped; the server normalises the same way and stays authoritative. */
 const normalizePhone = (value: string) => value.replace(/[\s().-]/g, '');
@@ -109,6 +110,7 @@ function MembershipsCard({ me }: { me: Me }) {
                   {membership.organization_id === activeOrgId ? t('profile.memberships.current') : t('profile.memberships.open')}
                   <ArrowRight aria-hidden="true" />
                 </Button>
+                <LeaveMembership membership={membership} />
               </li>
             );
           })}

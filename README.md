@@ -28,8 +28,14 @@ Open `http://127.0.0.1:15174`; the API is on `http://127.0.0.1:18001`.
 Demo accounts are `p00-{company,store,courier,admin}@example.tj`, password `P00Demo2026!`.
 These are disposable local fixtures. Run `make fe-e2e` (or `scripts/dev.py fe-e2e` with
 the virtual-environment Python) after `cd frontend && npx playwright install chromium`.
-The browser suite exercises the real API, all four areas, responsive widths and WCAG AA checks.
+The browser suite exercises the real API, all four areas, responsive widths, WCAG AA checks,
+and P01 invitation acceptance, role changes, suspension, reactivation and revocation.
 `verify` covers unit/integration checks; the browser suite and live service checks are separate.
+
+Create a new verified superadmin from a trusted backend shell with
+`python -m app.cli create-superadmin --email admin@example.tj --full-name "Platform Admin"`.
+The command prompts for a password without echoing it and refuses existing accounts.
+No public API assigns superadmin privileges. Invitation expiry runs hourly in Celery Beat.
 See [P00 acceptance](docs/P00_ACCEPTANCE.md) for the exact evidence and remote CI gate.
 
 ```bash

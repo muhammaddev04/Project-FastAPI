@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import smtplib
 from typing import Any
@@ -21,6 +22,28 @@ from app.core.email_templates import render
 
 SECRET_LINK = "https://app.tezfarmo.tj/login?token=SECRET-ONE-TIME-VALUE"
 CODE = "482913"
+
+
+async def test_iam_016_direct_delivery_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+    class SlowProvider:
+        async def send(self, email: OutgoingEmail) -> None:
+            await asyncio.Event().wait()
+
+    timeout = asyncio.timeout
+    requested: list[float] = []
+
+    def short_timeout(seconds: float) -> asyncio.Timeout:
+        requested.append(seconds)
+        return timeout(0.001)
+
+    monkeypatch.setattr(email_module.asyncio, "timeout", short_timeout)
+    set_email_provider(SlowProvider())
+    try:
+        with pytest.raises(EmailDeliveryError):
+            await email_module.send_email(OutgoingEmail("a@example.tj", "Subject", "Text", "<p>Text</p>", "test"))
+        assert requested == [5]
+    finally:
+        set_email_provider(None)
 
 
 @pytest.mark.parametrize(

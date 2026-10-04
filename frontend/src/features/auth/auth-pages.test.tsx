@@ -29,7 +29,7 @@ async function fillRegistration(email = '  Nigina@Example.TJ ') {
 }
 
 function nonMetaCalls<T extends { path: string }>(calls: T[]) {
-  return calls.filter((call) => call.path !== '/api/v1/meta');
+  return calls.filter((call) => call.path !== '/api/v1/meta' && call.path !== '/api/v1/me/invitations');
 }
 
 // The notice replaces the animated "checking" row once /meta has answered.

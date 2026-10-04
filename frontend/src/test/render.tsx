@@ -22,7 +22,11 @@ export function mockApi(routes: MockRoute[]) {
       headers,
       body: typeof init?.body === 'string' ? JSON.parse(init.body) : (init?.body ?? undefined),
     });
-    const match = routes.find((route) => (route.method ?? 'GET') === method && `/api/v1${route.path}` === url.pathname);
+    const defaults: MockRoute[] = [
+      { path: '/me/invitations', body: { count: 0, limit: 20, offset: 0, results: [] } },
+      { path: '/members/invitations', body: { count: 0, limit: 20, offset: 0, results: [] } },
+    ];
+    const match = [...routes, ...defaults].find((route) => (route.method ?? 'GET') === method && `/api/v1${route.path}` === url.pathname);
     const status = match?.status ?? (match ? 200 : 404);
     const body = match?.body ?? (match ? {} : { error: { code: 'not_found', message: 'Not found', details: {}, request_id: 'test' } });
     // 204, and a 202 without a body (the P01 email endpoints), are empty like the real API.
