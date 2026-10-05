@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+from decimal import Decimal, InvalidOperation
 from io import BytesIO
 from typing import Any, Literal
 from uuid import UUID
@@ -37,9 +38,14 @@ from app.modules.files.service import display_name
 from app.modules.identity.deps import OrgContext
 from app.modules.identity.models import Membership, Organization, User
 
-Kind = Literal["PRODUCTS", "PRICES"]
+Kind = Literal["PRODUCTS", "PRICES", "STOCK"]
 MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 HEADERS: dict[str, dict[str, list[str]]] = {
+    "STOCK": {
+        "en": ["sku", "unit_code", "quantity", "note"],
+        "ru": ["Артикул", "Код единицы", "Количество", "Примечание"],
+        "tg": ["Артикул", "Коди воҳид", "Миқдор", "Эзоҳ"],
+    },
     "PRODUCTS": {
         "en": ["sku", "name", "category", "barcode", "description", "base_unit", "is_active"],
         "ru": ["Артикул", "Название", "Категория", "Штрихкод", "Описание", "Базовая единица", "Активен"],
@@ -171,9 +177,11 @@ def read_rows(data: bytes, kind: str) -> list[dict[str, Any]]:
             label: key for labels in HEADERS[kind].values() for key, label in zip(canonical, labels, strict=True)
         }
         headers = [aliases.get(label, label) for label in raw_headers]
-        required = (
-            {"sku", "name", "base_unit"} if kind == "PRODUCTS" else {"price_list_code", "sku", "unit_code", "price"}
-        )
+        required = {
+            "PRODUCTS": {"sku", "name", "base_unit"},
+            "PRICES": {"price_list_code", "sku", "unit_code", "price"},
+            "STOCK": {"sku", "unit_code", "quantity"},
+        }[kind]
         if (
             not required <= set(headers)
             or len(set(headers)) != len(headers)
@@ -250,6 +258,28 @@ async def price_payload(session: AsyncSession, company_id: UUID, data: dict[str,
     return payload
 
 
+async def stock_payload(session: AsyncSession, company_id: UUID, data: dict[str, Any]) -> tuple[UUID, Decimal]:
+    from app.modules.inventory.service import to_base
+
+    product = await session.scalar(
+        select(Product).where(Product.company_id == company_id, Product.sku == str(data.get("sku")))
+    )
+    if product is None:
+        raise AppError("not_found", 422, {"field": "sku"})
+    unit = await session.scalar(
+        select(ProductUnit).where(ProductUnit.product_id == product.id, ProductUnit.code == str(data.get("unit_code")))
+    )
+    if unit is None:
+        raise AppError("not_found", 422, {"field": "unit_code"})
+    try:
+        value = Decimal(str(data.get("quantity", "")))
+    except InvalidOperation as exc:
+        raise ValueError("Invalid quantity") from exc
+    if data.get("note") is not None and len(str(data["note"])) > 2000:
+        raise ValueError("Note too long")
+    return product.id, await to_base(session, company_id, product.id, unit.id, value)
+
+
 async def parse_import(session: AsyncSession, job: ImportJob) -> None:
     if job.status != "UPLOADED":
         return
@@ -315,6 +345,8 @@ async def parse_import(session: AsyncSession, job: ImportJob) -> None:
                         CategoryIn(name=data["category"])
                         data["category_will_create"] = True
                         new_categories.add(data["category"])
+            elif job.kind == "STOCK":
+                await stock_payload(session, job.company_id, data)
             else:
                 price_input = await price_payload(session, job.company_id, data)
                 if await session.scalar(
@@ -394,6 +426,23 @@ async def run_import(session: AsyncSession, job: ImportJob) -> None:
     rows = list(
         await session.scalars(select(ImportRow).where(ImportRow.import_id == job.id).order_by(ImportRow.row_number))
     )
+    if job.kind == "STOCK":
+        from app.modules.inventory.service import SourceRef, stock_service
+
+        lines = [await stock_payload(session, job.company_id, row.data) for row in rows]
+        await stock_service._lock(session, job.company_id, [product_id for product_id, _ in lines])
+        for row, line in zip(rows, lines, strict=True):
+            await stock_service.receive(
+                session,
+                job.company_id,
+                [line],
+                context.user.id,
+                str(row.data["note"]) if row.data.get("note") is not None else None,
+                SourceRef(job.company_id, job.id, "IMPORT"),
+            )
+        job.summary = {"created": len(rows), "updated": 0, "skipped": 0}
+        await transition(session, job, "COMPLETED", actor_id=context.user.id)
+        return
     for row in rows:
         data = row.data
         if job.kind == "PRODUCTS":

@@ -10,15 +10,21 @@ _ORG_OWNER = frozenset(
     {"org.view", "org.edit_contacts", "org.edit_legal", "org.edit_branding", "verification.submit", "verification.view"}
 )
 _CATALOG_ADMIN = frozenset({"catalog.view", "catalog.manage", "pricing.view", "pricing.manage", "import.run"})
+_STOCK_ADMIN = frozenset({"stock.view", "stock.receive", "stock.adjust", "stock.write_off", "stock.settings"})
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
-    ("COMPANY", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER | _CATALOG_ADMIN | {"subscription.view", "subscription.manage"},
+    ("COMPANY", "OWNER"): _MEMBER_ADMIN
+    | _ORG_OWNER
+    | _CATALOG_ADMIN
+    | _STOCK_ADMIN
+    | {"subscription.view", "subscription.manage"},
     ("COMPANY", "MANAGER"): frozenset(
         {"members.view", "org.view", "org.edit_contacts", "verification.view", "subscription.view"}
     )
-    | _CATALOG_ADMIN,
-    ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view"}),
-    ("COMPANY", "WAREHOUSE"): frozenset({"org.view", "catalog.view"}),
+    | _CATALOG_ADMIN
+    | _STOCK_ADMIN,
+    ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view", "stock.view"}),
+    ("COMPANY", "WAREHOUSE"): frozenset({"org.view", "catalog.view", "stock.view", "stock.receive", "stock.settings"}),
     ("COMPANY", "COURIER"): frozenset({"org.view"}),
     ("STORE", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER,
     ("STORE", "SELLER"): frozenset({"org.view"}),

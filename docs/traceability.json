@@ -327,6 +327,16 @@
   "IMP-004": ["backend/tests/test_catalog.py::test_imp_products_preview_confirm_upsert_and_categories", "backend/tests/test_catalog.py::test_imp_errors_base_unit_duplicate_and_cancel"],
   "IMP-005": ["backend/tests/test_catalog.py::test_imp_005_prices_and_resolve_none"],
   "IMP-006": ["backend/tests/test_catalog.py::test_imp_products_preview_confirm_upsert_and_categories"],
+  "INV-001": ["backend/tests/test_inventory.py::test_inv_001_unit_conversion_to_base"],
+  "INV-002": ["backend/tests/test_inventory.py::test_inv_002_reserve_all_or_nothing_lists_all_insufficient", "backend/tests/test_inventory.py::test_inv_002_concurrent_80_and_50_of_100_only_one_succeeds", "backend/tests/test_inventory.py::test_inv_002_concurrent_many_reservations_never_negative", "backend/tests/test_inventory.py::test_inv_002_lock_order_no_deadlock"],
+  "INV-003": ["backend/tests/test_inventory.py::test_inv_003_stock_movements_append_only_and_checks"],
+  "INV-004": ["backend/tests/test_inventory.py::test_inv_004_close_idempotent"],
+  "INV-005": ["backend/tests/test_inventory.py::test_inv_005_006_adjust_below_reserved_and_write_off_exceeds_available"],
+  "INV-006": ["backend/tests/test_inventory.py::test_inv_005_006_adjust_below_reserved_and_write_off_exceeds_available"],
+  "INV-007": ["backend/tests/test_inventory.py::test_inv_007_low_stock_event_once_per_24h"],
+  "INV-008": ["backend/tests/test_inventory.py::test_inv_008_manual_write_requires_catalog_subscription_access"],
+  "INV-009": ["backend/tests/test_inventory.py::test_inv_009_reconciliation_detects_mismatch"],
+  "INV-010": ["backend/tests/test_inventory.py::test_inv_010_stock_import_all_or_nothing", "backend/tests/test_inventory.py::test_inv_010_valid_stock_import_and_execution_rollback"],
   "FND-040": [
     "scripts/test_p00_tooling.py::test_ci_enforces_foundation_gates"
   ]

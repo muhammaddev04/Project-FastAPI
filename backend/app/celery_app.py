@@ -4,17 +4,20 @@ import asyncio
 from functools import lru_cache
 
 from celery import Celery
+from celery.schedules import crontab
 from kombu import Queue
 
 import app.model_registry  # noqa: F401 - standalone workers need every foreign-key target before flushing.
 from app.core.config import get_settings
 from app.modules.catalog.service import install as install_catalog
+from app.modules.inventory.service import install as install_inventory
 from app.modules.organizations.ports import install_handlers
 from app.modules.subscriptions.service import install as install_subscriptions
 
 install_handlers()
 install_subscriptions()
 install_catalog()
+install_inventory()
 
 celery_app = Celery("tezfarmo", broker=get_settings().celery_broker_url)
 celery_app.conf.update(
@@ -34,6 +37,7 @@ celery_app.conf.update(
         "subscription-tick": {"task": "tezfarmo.subscription_tick", "schedule": 900.0},
         "subscription-reminders": {"task": "tezfarmo.subscription_reminders", "schedule": 3600.0},
         "process-imports": {"task": "tezfarmo.process_imports", "schedule": 5.0},
+        "stock-reconciliation": {"task": "tezfarmo.stock_reconciliation", "schedule": crontab(hour=22, minute=0)},
     },
 )
 
@@ -49,6 +53,22 @@ def process_imports() -> int:
     from app.modules.catalog.imports import process_pending
 
     return _runner().run(process_pending())
+
+
+@celery_app.task(name="tezfarmo.stock_reconciliation")
+def stock_reconciliation() -> int:
+    from app.core.db import get_sessionmaker
+    from app.core.monitoring import report_bug
+    from app.modules.inventory.service import reconcile
+
+    async def run() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await reconcile(session)
+
+    mismatches = _runner().run(run())
+    if mismatches:
+        report_bug("STOCK_RECONCILIATION_MISMATCH")
+    return mismatches
 
 
 @celery_app.task(name="tezfarmo.dispatch_outbox")

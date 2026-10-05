@@ -112,7 +112,7 @@ jobs:
 
       - name: Tracked requirement references
         run: |
-          python ../scripts/check_traceability.py --complete-p00 --complete-p01 --complete-p02 --complete-p03 --complete-p04
+          python ../scripts/check_traceability.py --complete-p00 --complete-p01 --complete-p02 --complete-p03 --complete-p04 --complete-p05
           python -m unittest discover -s ../scripts -p 'test_*.py'
           python ../scripts/sync_error_catalog.py
 
@@ -161,7 +161,7 @@ jobs:
         run: npm run build
 
   foundation-browser:
-    name: P00-P03 browser acceptance
+    name: P00-P05 browser acceptance
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:

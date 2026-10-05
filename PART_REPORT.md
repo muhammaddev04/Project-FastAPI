@@ -1,3 +1,26 @@
+# P05 inventory implementation - 2026-10-05
+
+P05 is implemented: Company warehouse stock/details, receipt unit conversion and barcode
+entry, confirmed counts/write-offs, active reservations, low-stock thresholds, movement
+history and atomic STOCK Excel imports in TG/RU/EN. StockService provides atomic reservation,
+release, shipment and return contracts with sorted row locks and source retry locks.
+Immutable movements, tenant constraints, daily reconciliation and low-stock events protect
+stock integrity. Development upgraded to 20261005_0020 without resetting data.
+
+Current evidence: 46 inventory integration/concurrency/migration tests and 15 focused
+frontend/navigation tests passed. Linux Ruff, strict typing and fresh migration drift checks
+passed; 18 tooling tests and INV traceability passed. The real P05 browser receipt/count/
+write-off/import/mobile scenario passed. Complete regression: 1078 backend and 390 frontend
+tests passed; all twelve P00-P05 browser scenarios passed together in 6.9 minutes.
+Generated API types and locale error keys match the backend contract.
+
+P07 supplies order numbers/screens; P11 delivers notifications from the emitted events.
+Authentication behavior is preserved. P06 has not started and requires owner approval.
+Remote CI and deployment await the owner's push; no DONE tag.
+[P05 acceptance evidence](docs/P05_ACCEPTANCE.md).
+
+Earlier entries below are historical evidence.
+
 # Backend CI repair - 2026-10-05
 
 The last three inspected CI runs failed strict mypy; Ruff passed and migrations/tests were

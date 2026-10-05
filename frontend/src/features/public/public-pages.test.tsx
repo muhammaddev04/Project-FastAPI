@@ -98,7 +98,9 @@ describe('public site', () => {
       // Everything the sidebar renders as a placeholder is also marked as unbuilt on the public site.
       expect(plannedKeys.has('catalog')).toBe(false);
       expect(ROADMAP.find((entry) => entry.key === 'catalog')?.phase).toBeUndefined();
-      for (const key of ['orders', 'inventory', 'delivery', 'returns', 'reports']) {
+      expect(plannedKeys.has('inventory')).toBe(false);
+      expect(ROADMAP.find((entry) => entry.key === 'inventory')?.phase).toBeUndefined();
+      for (const key of ['orders', 'delivery', 'returns', 'reports']) {
         expect(plannedKeys.has(key)).toBe(true);
         expect(ROADMAP.find((entry) => entry.key === key)?.phase).toBeTruthy();
       }

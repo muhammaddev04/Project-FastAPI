@@ -25,6 +25,7 @@ def check_commands(tests: bool) -> list[list[str]]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tests", action="store_true", help="Also run the complete backend test suite")
+    parser.add_argument("--test-path", action="append", default=[], help="Restrict --tests to selected test paths")
     args = parser.parse_args()
     compose = ["docker", "compose", "-f", "docker-compose.ci.yml", "-p", f"tezfarmo-ci-{uuid4().hex[:12]}"]
 
@@ -44,6 +45,8 @@ def main() -> None:
             ]
         )
         for command in check_commands(args.tests):
+            if "pytest" in command:
+                command = [*command, *args.test_path]
             print("Checking: " + " ".join(command), flush=True)
             run(["run", "--rm", "--no-deps", "backend", *command])
     finally:

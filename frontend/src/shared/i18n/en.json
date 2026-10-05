@@ -1537,6 +1537,7 @@
     "kind": "Type",
     "kindPRODUCTS": "Products",
     "kindPRICES": "Prices",
+    "kindSTOCK": "Stock receipts",
     "rows": "Rows",
     "errors": "Errors",
     "createdAt": "Created",
@@ -1566,6 +1567,53 @@
       "COMPLETED": "Completed",
       "FAILED": "Failed",
       "CANCELLED": "Cancelled"
+    }
+  },
+  "inventory": {
+    "title": "Stock",
+    "movements": "Stock movements",
+    "receive": "Receive goods",
+    "search": "Search name, SKU or barcode",
+    "scanHint": "Search or scan a barcode, then press Enter",
+    "quantity": "On hand",
+    "reserved": "Reserved",
+    "available": "Available",
+    "availableDescending": "Available: highest first",
+    "threshold": "Low stock threshold",
+    "low": "Low stock only",
+    "empty": "No products in stock",
+    "adjust": "Inventory count",
+    "writeOff": "Write off",
+    "actual": "Actual quantity in base units",
+    "reason": "Reason (at least 5 characters)",
+    "difference": "Quantity change",
+    "reservedDifference": "Reserved change",
+    "note": "Note",
+    "remove": "Remove line",
+    "reservations": "Active reservations",
+    "noReservations": "No active reservations",
+    "noMovements": "No stock movements",
+    "confirmMovement": "Check the quantities before confirming. All lines are applied together.",
+    "movementType": "Movement type",
+    "source": "Source",
+    "allTypes": "All movement types",
+    "allSources": "All sources",
+    "dateFrom": "From date",
+    "dateTo": "To date",
+    "types": {
+      "RECEIPT": "Receipt",
+      "ADJUSTMENT": "Adjustment",
+      "WRITE_OFF": "Write-off",
+      "RESERVE": "Reservation",
+      "RELEASE": "Release",
+      "SHIP": "Shipment",
+      "RETURN_IN": "Return received"
+    },
+    "sources": {
+      "MANUAL": "Manual",
+      "IMPORT": "Excel import",
+      "ORDER": "Order",
+      "RETURN": "Return"
     }
   }
 }

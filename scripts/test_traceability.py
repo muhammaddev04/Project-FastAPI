@@ -7,6 +7,17 @@ from check_traceability import check
 
 
 class TraceabilityTests(unittest.TestCase):
+    def test_complete_p05_rejects_unmapped_requirement(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent) as directory:
+            root = Path(directory)
+            (root / "docs").mkdir()
+            (root / "TZ.md").write_text("## [P05_inventory]\nINV-001 INV-010\n## [P06_partnerships]", encoding="utf-8")
+            (root / "docs/traceability.json").write_text("{}", encoding="utf-8")
+            self.assertEqual(
+                check(root, complete_p05=True),
+                ["Unmapped P05 requirement: INV-001", "Unmapped P05 requirement: INV-010"],
+            )
+
     def test_complete_p03_rejects_unmapped_requirement(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent) as directory:
             root = Path(directory)

@@ -106,6 +106,7 @@ function Wizard({ id }: { id?: string }) {
             <Select value={kind} onChange={(event) => setKind(event.target.value)}>
               <option value="PRODUCTS">{t('catalog.kindPRODUCTS')}</option>
               <option value="PRICES">{t('catalog.kindPRICES')}</option>
+              <option value="STOCK">{t('catalog.kindSTOCK')}</option>
             </Select>
           </Field>
           <Button

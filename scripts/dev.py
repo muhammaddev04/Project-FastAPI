@@ -59,6 +59,7 @@ def commands(task: str, name: str | None = None) -> list[tuple[Path, list[str]]]
                     "--complete-p02",
                     "--complete-p03",
                     "--complete-p04",
+                    "--complete-p05",
                 ],
             )
         ],

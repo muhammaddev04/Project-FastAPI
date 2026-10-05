@@ -7,7 +7,7 @@ const keys = (area: 'company' | 'store' | 'courier', role: Role, permissions: st
     section.items.map((item) => item.key),
   );
 
-const OWNER_PERMS = ['members.change_role', 'members.invite', 'members.revoke', 'members.suspend', 'members.view'];
+const OWNER_PERMS = ['members.change_role', 'members.invite', 'members.revoke', 'members.suspend', 'members.view', 'stock.view'];
 
 describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
   it('gives the company owner the whole console', () => {
@@ -38,7 +38,7 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
   });
 
   it('shows warehouse staff catalog and stock without prices', () => {
-    expect(keys('company', 'WAREHOUSE')).toEqual(['dashboard', 'catalog', 'inventory']);
+    expect(keys('company', 'WAREHOUSE', ['stock.view'])).toEqual(['dashboard', 'catalog', 'inventory']);
   });
 
   it('keeps debt, disputes, team and settings from store sellers', () => {
@@ -73,11 +73,11 @@ describe('honest navigation (Phase C8)', () => {
     const { available, planned } = navByAvailability('company', owner);
     const availableKeys = available.flatMap((section) => section.items.map((item) => item.key));
 
-    expect(availableKeys).toEqual(['dashboard', 'catalog', 'team', 'subscription', 'settings']);
+    expect(availableKeys).toEqual(['dashboard', 'catalog', 'inventory', 'team', 'subscription', 'settings']);
     // Nothing in the working navigation may carry a phase, which is what marks a placeholder.
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
-    expect(planned.map((item) => item.key)).toEqual(['orders', 'inventory', 'partners', 'delivery', 'finance', 'returns', 'reports']);
+    expect(planned.map((item) => item.key)).toEqual(['orders', 'partners', 'delivery', 'finance', 'returns', 'reports']);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });
 
@@ -98,10 +98,10 @@ describe('honest navigation (Phase C8)', () => {
   });
 
   it('drops a section that has nothing available rather than leaving an empty heading', () => {
-    // Catalog ships in P04; stock remains on the P05 roadmap.
+    // Inventory is delivered in P05 and requires the stock.view permission.
     const { available, planned } = navByAvailability('company', membershipFixture({ role: 'WAREHOUSE', permissions: [] }));
     expect(available.flatMap((section) => section.items.map((item) => item.key))).toEqual(['dashboard', 'catalog']);
     expect(available.every((section) => section.items.length > 0)).toBe(true);
-    expect(planned.map((item) => item.key)).toEqual(['inventory']);
+    expect(planned.map((item) => item.key)).toEqual([]);
   });
 });

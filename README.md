@@ -1,5 +1,11 @@
 # TezFarmo
 
+Company warehouse (P05) opens at `/company/warehouse/stock`: receive goods with unit
+conversion, count stock, write off damaged goods, inspect movement history and configure
+low-stock thresholds. STOCK Excel imports apply all receipts atomically. Reservation,
+release, shipment and return services are ready for the P07 order workflow.
+See [P05 acceptance evidence](docs/P05_ACCEPTANCE.md).
+
 B2B wholesale platform connecting **Companies** (suppliers/distributors) with **Stores**. The product specification is
 [`TZ.md`](TZ.md); implementation follows its parts in order (P00 → P13). Current state: [`PART_REPORT.md`](PART_REPORT.md).
 

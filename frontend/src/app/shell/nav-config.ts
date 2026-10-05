@@ -46,7 +46,7 @@ const COMPANY: NavSection[] = [
       { key: 'dashboard', path: '', icon: LayoutDashboard },
       { key: 'orders', path: 'orders', icon: ClipboardList, roles: ['OWNER', 'MANAGER', 'OPERATOR'], phase: 'P07' },
       { key: 'catalog', path: 'catalog', icon: Package, roles: ['OWNER', 'MANAGER', 'OPERATOR', 'WAREHOUSE'] },
-      { key: 'inventory', path: 'inventory', icon: Boxes, roles: ['OWNER', 'MANAGER', 'WAREHOUSE'], phase: 'P05' },
+      { key: 'inventory', path: 'warehouse/stock', icon: Boxes, permission: 'stock.view' },
       { key: 'partners', path: 'partners', icon: Handshake, roles: ['OWNER', 'MANAGER', 'OPERATOR'], phase: 'P06' },
       { key: 'delivery', path: 'delivery', icon: Truck, roles: ['OWNER', 'MANAGER'], phase: 'P08' },
       { key: 'finance', path: 'finance', icon: Wallet, roles: ['OWNER', 'MANAGER', 'OPERATOR'], phase: 'P09' },

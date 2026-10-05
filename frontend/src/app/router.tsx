@@ -11,6 +11,7 @@ import { ProductPage as CatalogProductPage } from '@/features/catalog/product-pa
 import { CategoriesPage } from '@/features/catalog/categories-page';
 import { PriceListsPage, PriceMatrixPage } from '@/features/catalog/pricing-pages';
 import { ImportHistoryPage, ImportWizardPage } from '@/features/catalog/import-pages';
+import { StockPage, StockDetailPage, ReceiptPage, MovementsPage } from '@/features/inventory/pages';
 import { CourierHome } from '@/features/dashboard/courier-home';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
 import { PlannedModulePage } from '@/features/modules/planned-module-page';
@@ -167,6 +168,11 @@ export const routes: RouteObject[] = [
       { path: 'imports', element: <ImportHistoryPage /> },
       { path: 'imports/new', element: <ImportWizardPage /> },
       { path: 'imports/:jobId', element: <ImportWizardPage /> },
+      { path: 'inventory', element: <Navigate to="../warehouse/stock" replace /> },
+      { path: 'warehouse/stock', element: <StockPage /> },
+      { path: 'warehouse/stock/:productId', element: <StockDetailPage /> },
+      { path: 'warehouse/receipts/new', element: <ReceiptPage /> },
+      { path: 'warehouse/movements', element: <MovementsPage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },
