@@ -1,3 +1,19 @@
+# Backend CI repair - 2026-10-05
+
+The last three inspected CI runs failed strict mypy; Ruff passed and migrations/tests were
+skipped. A clean Linux reproduction identified SQLAlchemy 2.1.3 versus local 2.0.54.
+Both manifests now pin the tested SQLAlchemy/Alembic/Ruff/mypy versions. Full validated
+dependency constraints are shared by CI, Linux validation and production image installs.
+An installed pre-commit gate checks Linux typing and migrations on a unique disposable
+database. `verify` now includes all backend tests in Linux.
+
+Validation: Linux Ruff, strict mypy (85 files), upgrade through P04, and Alembic model drift
+checks passed. All 1032 backend tests passed; 17 tooling regressions, local lint, generated
+API drift and requirement traceability passed. No auth behavior changes; no P05 work.
+The constrained production image build, package consistency and Alembic CLI checks passed.
+Production deployment still awaits the owner's push and green remote CI.
+[Repair details](docs/CI_BACKEND_REPAIR.md).
+
 # P04 catalog/pricing/import local acceptance - 2026-10-05
 
 P04 is implemented locally: Company categories/products/private images/base and sale units,

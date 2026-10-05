@@ -10,13 +10,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY pyproject.toml requirements.txt ./
+COPY pyproject.toml requirements.txt constraints.txt ./
 COPY app ./app
 COPY migrations ./migrations
 COPY alembic.ini ./
 
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir .
+    && pip install --no-cache-dir -c constraints.txt .
 
 EXPOSE 8000
 

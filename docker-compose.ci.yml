@@ -1,0 +1,47 @@
+# Isolated Linux checks. No published ports, production secrets, or persistent database volumes.
+services:
+  backend:
+    image: tezfarmo-backend-ci
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.ci
+    environment:
+      APP_ENV: testing
+      DATABASE_URL: postgresql+asyncpg://tezfarmo:tezfarmo@postgres:5432/tezfarmo_ci
+      TEST_DATABASE_URL: postgresql+asyncpg://tezfarmo:tezfarmo@postgres:5432/tezfarmo_ci
+      TEST_REDIS_URL: redis://redis:6379/15
+      TEST_S3_ENDPOINT: storage:8333
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./backend/app:/workspace/backend/app:ro
+      - ./backend/migrations:/workspace/backend/migrations:ro
+      - ./backend/tests:/workspace/backend/tests:ro
+      - ./backend/pyproject.toml:/workspace/backend/pyproject.toml:ro
+      - ./backend/alembic.ini:/workspace/backend/alembic.ini:ro
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tezfarmo_ci
+      POSTGRES_USER: tezfarmo
+      POSTGRES_PASSWORD: tezfarmo
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tezfarmo -d tezfarmo_ci"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  storage:
+    image: chrislusf/seaweedfs:latest
+    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -ip.bind=0.0.0.0 -volume.max=100 -master.volumeSizeLimitMB=64
+    volumes:
+      - ./infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+    tmpfs:
+      - /data

@@ -19,6 +19,8 @@ def commands(task: str, name: str | None = None) -> list[tuple[Path, list[str]]]
         "down": [(ROOT, ["docker", "compose", "down"])],
         "migrate": [(backend, [python, "-m", "alembic", "upgrade", "head"])],
         "test": [(backend, [python, "-m", "pytest", "-p", "no:cacheprovider"])],
+        "backend-ci": [(ROOT, [python, "scripts/check_backend_ci.py"])],
+        "backend-ci-tests": [(ROOT, [python, "scripts/check_backend_ci.py", "--tests"])],
         "lint": [
             (backend, [python, "-m", "ruff", "check", "."]),
             (backend, [python, "-m", "ruff", "format", "--check", "."]),
@@ -81,7 +83,7 @@ def commands(task: str, name: str | None = None) -> list[tuple[Path, list[str]]]
             command
             for part in (
                 "lint",
-                "test",
+                "backend-ci-tests",
                 "fe-lint",
                 "fe-format-check",
                 "fe-test",

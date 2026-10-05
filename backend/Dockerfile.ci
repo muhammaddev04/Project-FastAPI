@@ -1,0 +1,5 @@
+FROM python:3.12-slim
+WORKDIR /workspace/backend
+COPY requirements.txt constraints.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+CMD ["python", "-m", "mypy", "--strict", "--no-incremental", "app"]

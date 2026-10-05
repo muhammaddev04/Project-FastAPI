@@ -167,6 +167,17 @@ cd frontend && npm test && npm run lint && npm run build
 
 ## Deployment
 
+Before committing backend changes, run `python scripts/dev.py backend-ci` with Docker running.
+The pre-commit hook enforces clean Python 3.12 Linux dependencies, Ruff, strict mypy without
+its incremental cache, and `alembic upgrade head` / `alembic check`. It uses a uniquely named
+disposable PostgreSQL database with no host ports or `.env` mount. Development and production
+databases are untouched. `python scripts/dev.py verify` also runs the complete backend suite
+in Linux. Allow time for the first image build. SQLAlchemy, Alembic, Ruff and mypy versions
+are pinned in both backend manifests; update them together and rerun the checks.
+`backend/constraints.txt` also fixes the complete validated dependency set for CI and
+production images. Update this file explicitly when upgrading dependencies.
+A passing local check still requires green GitHub Actions after the owner pushes before deployment.
+
 CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every push to `main` and every pull
 request; a green run on `main` triggers
 [.github/workflows/deploy.yml](.github/workflows/deploy.yml), which deploys that exact commit to

@@ -23,6 +23,12 @@ repos:
         language: system
         pass_filenames: false
         files: ^backend/(app/.*\.py|pyproject\.toml|requirements\.txt)$
+      - id: backend-ci
+        name: Backend Linux typing and migration parity
+        entry: python scripts/dev.py backend-ci
+        language: system
+        pass_filenames: false
+        files: ^(backend/|docker-compose\.ci\.yml|scripts/(check_backend_ci|dev)\.py|\.github/workflows/ci\.yml)
       - id: frontend-eslint
         name: Frontend lint
         entry: python scripts/dev.py fe-lint
