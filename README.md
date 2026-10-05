@@ -119,8 +119,24 @@ Payment confirmation previews calendar-month dates; the server determines the fi
 Expired trials/paid periods enter GRACE, then SOFT_BLOCK and FULL_BLOCK; cancellation of an
 active paid period enters CANCELLED. Manual payment reactivates the subscription. History and
 payments are append-only. Company banners and team buttons use server-reported allowed actions.
-User limits enforce invitation acceptance/reactivation; product/store usage ports connect in
-P04/P06 when those modules exist. [P03 acceptance evidence](docs/P03_ACCEPTANCE.md).
+User limits enforce invitation acceptance/reactivation; active product limits connect in P04,
+and store usage connects in P06. [P03 acceptance evidence](docs/P03_ACCEPTANCE.md).
+
+## Company catalog, pricing and Excel import (P04)
+
+Company members open `/company/catalog/products`; OWNER/MANAGER manage categories, products,
+private images, base/sale units, price lists and imports. OPERATOR reads products/prices;
+WAREHOUSE reads products without prices. Store catalog arrives in P07.
+
+`/company/pricing/lists` provides an automatic DEFAULT list and custom lists. Matrix edits
+show old/new values and percentage differences before one atomic confirmation. Each unit
+has its own price; future prices can be cancelled while historical values remain immutable.
+
+`/company/imports/new` downloads localized Excel templates, uploads .xlsx (5 MB/5000 rows),
+shows validation errors, confirms every row together, and displays completion/failure.
+The durable `process-imports` Beat job checks committed uploads/confirmations every five
+seconds. Run the `jobs` profile for automatic processing; restart worker/Beat after changing
+development source. [P04 acceptance evidence](docs/P04_ACCEPTANCE.md).
 
 ## Tests
 

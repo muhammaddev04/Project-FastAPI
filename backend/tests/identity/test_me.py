@@ -38,6 +38,9 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
     assert memberships["Pamir Distribution"]["org_type"] == "COMPANY"
     assert memberships["Pamir Distribution"]["role"] == "OWNER"
     assert memberships["Pamir Distribution"]["permissions"] == [
+        "catalog.manage",
+        "catalog.view",
+        "import.run",
         "members.change_role",
         "members.invite",
         "members.revoke",
@@ -47,6 +50,8 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
         "org.edit_contacts",
         "org.edit_legal",
         "org.view",
+        "pricing.manage",
+        "pricing.view",
         "subscription.manage",
         "subscription.view",
         "verification.submit",

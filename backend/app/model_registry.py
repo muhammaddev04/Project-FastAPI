@@ -6,6 +6,16 @@ from app.core.idempotency import IdempotencyRecord
 from app.core.outbox import OutboxEvent
 from app.core.sequences import NumberSequence
 from app.modules.auth.models import EmailToken, RefreshToken
+from app.modules.catalog.models import (
+    Category,
+    ImportError,
+    ImportJob,
+    ImportRow,
+    Price,
+    PriceList,
+    Product,
+    ProductUnit,
+)
 from app.modules.files.models import StoredFile
 from app.modules.identity.models import Membership, MembershipInvitation, OAuthIdentity, Organization, User
 from app.modules.organizations.models import Company, Store
@@ -21,6 +31,14 @@ from app.modules.support.models import SupportTicket
 from app.modules.verification.models import VerificationDocument, VerificationRequest
 
 __all__ = [
+    "Category",
+    "ImportError",
+    "ImportJob",
+    "ImportRow",
+    "Price",
+    "PriceList",
+    "Product",
+    "ProductUnit",
     "AuditLog",
     "Base",
     "Company",

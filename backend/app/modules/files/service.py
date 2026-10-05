@@ -50,9 +50,17 @@ async def upload(session: AsyncSession, context: OrgContext, upload_file: Upload
         raise AppError("organization_blocked", 403)
     if category == "VERIFICATION" and "verification.submit" not in context.permissions:
         raise AppError("permission_denied", 403)
+    if category == "PRODUCT_IMAGE":
+        if "catalog.manage" not in context.permissions:
+            raise AppError("permission_denied", 403)
+        from app.modules.catalog.service import writable
+
+        await writable(session, context)
     content_type = (upload_file.content_type or "").split(";")[0].strip().lower()
     if content_type not in ALLOWED:
         raise AppError("file_type_not_allowed", 422, {"allowed": sorted(ALLOWED)})
+    if category == "PRODUCT_IMAGE" and content_type not in {"image/jpeg", "image/png"}:
+        raise AppError("file_type_not_allowed", 422)
     data = await upload_file.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
         raise AppError("file_too_large", 422, {"max_bytes": MAX_BYTES})
@@ -108,6 +116,8 @@ async def get_owned(session: AsyncSession, organization_id: UUID, file_id: UUID)
 async def signed_url(session: AsyncSession, context: OrgContext, file_id: UUID) -> SignedUrl:
     """GET /files/{id}/url: verification documents are readable by the organization OWNER only (VER-004)."""
     stored = await get_owned(session, context.organization.id, file_id)
+    if stored.category == "PRODUCT_IMAGE" and "catalog.view" not in context.permissions:
+        raise AppError("permission_denied", 403)
     if stored.category == "VERIFICATION" and "verification.submit" not in context.permissions:
         raise AppError("permission_denied", 403)
     return await get_storage().signed_url(stored.storage_key)

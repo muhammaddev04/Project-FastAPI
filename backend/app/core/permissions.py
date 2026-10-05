@@ -9,14 +9,16 @@ _MEMBER_ADMIN = frozenset(
 _ORG_OWNER = frozenset(
     {"org.view", "org.edit_contacts", "org.edit_legal", "org.edit_branding", "verification.submit", "verification.view"}
 )
+_CATALOG_ADMIN = frozenset({"catalog.view", "catalog.manage", "pricing.view", "pricing.manage", "import.run"})
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
-    ("COMPANY", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER | {"subscription.view", "subscription.manage"},
+    ("COMPANY", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER | _CATALOG_ADMIN | {"subscription.view", "subscription.manage"},
     ("COMPANY", "MANAGER"): frozenset(
         {"members.view", "org.view", "org.edit_contacts", "verification.view", "subscription.view"}
-    ),
-    ("COMPANY", "OPERATOR"): frozenset({"org.view"}),
-    ("COMPANY", "WAREHOUSE"): frozenset({"org.view"}),
+    )
+    | _CATALOG_ADMIN,
+    ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view"}),
+    ("COMPANY", "WAREHOUSE"): frozenset({"org.view", "catalog.view"}),
     ("COMPANY", "COURIER"): frozenset({"org.view"}),
     ("STORE", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER,
     ("STORE", "SELLER"): frozenset({"org.view"}),

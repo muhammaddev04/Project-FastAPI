@@ -96,7 +96,9 @@ describe('public site', () => {
       const { planned } = navByAvailability('company', membershipFixture({ permissions: ['members.view'] }));
       const plannedKeys = new Set(planned.map((item) => item.key));
       // Everything the sidebar renders as a placeholder is also marked as unbuilt on the public site.
-      for (const key of ['catalog', 'orders', 'inventory', 'delivery', 'returns', 'reports']) {
+      expect(plannedKeys.has('catalog')).toBe(false);
+      expect(ROADMAP.find((entry) => entry.key === 'catalog')?.phase).toBeUndefined();
+      for (const key of ['orders', 'inventory', 'delivery', 'returns', 'reports']) {
         expect(plannedKeys.has(key)).toBe(true);
         expect(ROADMAP.find((entry) => entry.key === key)?.phase).toBeTruthy();
       }

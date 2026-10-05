@@ -108,7 +108,7 @@ jobs:
 
       - name: Tracked requirement references
         run: |
-          python ../scripts/check_traceability.py --complete-p00 --complete-p01 --complete-p02 --complete-p03
+          python ../scripts/check_traceability.py --complete-p00 --complete-p01 --complete-p02 --complete-p03 --complete-p04
           python -m unittest discover -s ../scripts -p 'test_*.py'
           python ../scripts/sync_error_catalog.py
 

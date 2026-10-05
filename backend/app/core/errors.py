@@ -117,6 +117,14 @@ def register_error_handlers(app: FastAPI) -> None:
             for constraint, code in {
                 "tax_identifier": "tax_identifier_taken",
                 "uq_products_company_sku": "sku_taken",
+                "uq_products_company_barcode": "barcode_taken",
+                "uq_categories_company_parent_name": "category_name_taken",
+                "uq_product_units_product_id_code": "unit_code_taken",
+                "uq_price_lists_company_id_code": "price_list_code_taken",
+                "price_overlap": "price_overlap",
+                "category_not_empty": "category_not_empty",
+                "unit_immutable": "unit_immutable",
+                "price_immutable": "price_immutable",
             }.items():
                 if constraint in str(exc.orig):
                     return JSONResponse(error_body(request, code), status_code=409)

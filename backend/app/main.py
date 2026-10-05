@@ -11,6 +11,8 @@ from app.core.metrics import MetricsMiddleware, metrics_router
 from app.core.monitoring import configure_monitoring
 from app.core.request_context import RequestContextMiddleware
 from app.modules.auth.router import router as auth_router
+from app.modules.catalog.router import router as catalog_router
+from app.modules.catalog.service import install as install_catalog
 from app.modules.files.router import router as files_router
 from app.modules.identity.router import router as identity_router
 from app.modules.identity.team_router import router as team_router
@@ -30,6 +32,7 @@ def create_app() -> FastAPI:
     configure_monitoring()
     install_handlers()
     install_subscriptions()
+    install_catalog()
     app = FastAPI(
         title="TezFarmo API",
         version=settings.app_version,
@@ -71,6 +74,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_verification_router)
     app.include_router(subscription_router)
     app.include_router(subscription_admin_router)
+    app.include_router(catalog_router)
     install_error_contract(app)
     return app
 

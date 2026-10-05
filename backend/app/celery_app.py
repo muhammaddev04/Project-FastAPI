@@ -8,11 +8,13 @@ from kombu import Queue
 
 import app.model_registry  # noqa: F401 - standalone workers need every foreign-key target before flushing.
 from app.core.config import get_settings
+from app.modules.catalog.service import install as install_catalog
 from app.modules.organizations.ports import install_handlers
 from app.modules.subscriptions.service import install as install_subscriptions
 
 install_handlers()
 install_subscriptions()
+install_catalog()
 
 celery_app = Celery("tezfarmo", broker=get_settings().celery_broker_url)
 celery_app.conf.update(
@@ -31,6 +33,7 @@ celery_app.conf.update(
         "expire-membership-invitations": {"task": "tezfarmo.expire_membership_invitations", "schedule": 3600.0},
         "subscription-tick": {"task": "tezfarmo.subscription_tick", "schedule": 900.0},
         "subscription-reminders": {"task": "tezfarmo.subscription_reminders", "schedule": 3600.0},
+        "process-imports": {"task": "tezfarmo.process_imports", "schedule": 5.0},
     },
 )
 
@@ -39,6 +42,13 @@ celery_app.conf.update(
 def _runner() -> asyncio.Runner:
     # Created after the worker forks; reuse the loop that owns pooled async DB connections.
     return asyncio.Runner()
+
+
+@celery_app.task(name="tezfarmo.process_imports")
+def process_imports() -> int:
+    from app.modules.catalog.imports import process_pending
+
+    return _runner().run(process_pending())
 
 
 @celery_app.task(name="tezfarmo.dispatch_outbox")

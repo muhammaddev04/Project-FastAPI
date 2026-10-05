@@ -74,6 +74,7 @@ export type RequestOptions = {
    * the FE-008 refresh retry nor ends the current session.
    */
   authEndpoint?: boolean;
+  responseType?: 'blob';
 };
 
 async function parseError(response: Response): Promise<ApiError> {
@@ -151,6 +152,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     if (error.status === 401 && !options.authEndpoint && error.code !== 'invalid_credentials') hooks.onUnauthorized(error);
     throw error;
   }
+  if (options.responseType === 'blob') return (await response.blob()) as T;
   // 204, and the 202 of the P01 email endpoints, carry no body.
   const text = await response.text();
   return (text ? JSON.parse(text) : undefined) as T;

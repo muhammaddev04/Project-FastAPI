@@ -6,6 +6,11 @@ import { RegisterPage } from '@/features/auth/register-page';
 import { ForgotPasswordPage } from '@/features/auth/forgot-password-page';
 import { VerifyEmailPage } from '@/features/auth/verify-email-page';
 import { CompanyDashboard } from '@/features/dashboard/company-dashboard';
+import { ProductsPage } from '@/features/catalog/products-page';
+import { ProductPage as CatalogProductPage } from '@/features/catalog/product-page';
+import { CategoriesPage } from '@/features/catalog/categories-page';
+import { PriceListsPage, PriceMatrixPage } from '@/features/catalog/pricing-pages';
+import { ImportHistoryPage, ImportWizardPage } from '@/features/catalog/import-pages';
 import { CourierHome } from '@/features/dashboard/courier-home';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
 import { PlannedModulePage } from '@/features/modules/planned-module-page';
@@ -152,6 +157,16 @@ export const routes: RouteObject[] = [
       { path: 'settings/verification', element: <VerificationPage /> },
       { path: 'settings/subscription', element: <SubscriptionPage /> },
       { path: 'subscription', element: <Navigate to="../settings/subscription" replace /> },
+      { path: 'catalog', element: <Navigate to="products" replace /> },
+      { path: 'catalog/products', element: <ProductsPage /> },
+      { path: 'catalog/products/new', element: <CatalogProductPage /> },
+      { path: 'catalog/products/:productId', element: <CatalogProductPage /> },
+      { path: 'catalog/categories', element: <CategoriesPage /> },
+      { path: 'pricing/lists', element: <PriceListsPage /> },
+      { path: 'pricing/lists/:listId', element: <PriceMatrixPage /> },
+      { path: 'imports', element: <ImportHistoryPage /> },
+      { path: 'imports/new', element: <ImportWizardPage /> },
+      { path: 'imports/:jobId', element: <ImportWizardPage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },

@@ -1,3 +1,26 @@
+# P04 catalog/pricing/import local acceptance - 2026-10-05
+
+P04 is implemented locally: Company categories/products/private images/base and sale units,
+active-product subscription limits, default/custom price lists, immutable price history,
+future cancellation and fallback, atomic bulk price preview/confirmation, and asynchronous
+Excel import with localized templates, row errors, upsert and all-or-nothing rollback.
+TG/RU/EN Company screens and role permissions are connected. Store catalog remains P07.
+
+Validation: complete backend 1026 passed; final P04/worker/files/identity 79 passed.
+Complete frontend 384 passed; focused catalog/navigation/public 31 passed; final catalog 7 passed.
+All eleven P00–P04 real-browser scenarios passed together (3.7 minutes). Browser acceptance
+found and fixed stale row/error previews after import validation. Production build, lint,
+strict typing, locales, API types, migration consistency and CAT/PRC/IMP traceability passed;
+twelve tooling tests passed. Development migrated from P03 without resetting data; workers
+run the Excel-enabled image with development source binds.
+
+Formal status remains PARTIAL until green remote CI after the owner's push. No push/done tag.
+P05 requires new approval. P05/P07 install real stock/order-reference ports; current tests
+exercise the immutable-base-unit contract through that port. Stock import is P05, external
+notification delivery is P11. [Current P04 acceptance evidence](docs/P04_ACCEPTANCE.md).
+
+Earlier entries below are historical evidence.
+
 # P03 subscriptions local acceptance - 2026-10-04
 
 P03 is implemented and locally accepted: company trials, lifecycle, manual admin billing,

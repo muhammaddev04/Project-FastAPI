@@ -37,8 +37,8 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
     expect(keys('company', 'OPERATOR')).toEqual(['dashboard', 'orders', 'catalog', 'partners', 'finance', 'returns']);
   });
 
-  it('shows warehouse staff stock only (no prices)', () => {
-    expect(keys('company', 'WAREHOUSE')).toEqual(['dashboard', 'inventory']);
+  it('shows warehouse staff catalog and stock without prices', () => {
+    expect(keys('company', 'WAREHOUSE')).toEqual(['dashboard', 'catalog', 'inventory']);
   });
 
   it('keeps debt, disputes, team and settings from store sellers', () => {
@@ -73,20 +73,11 @@ describe('honest navigation (Phase C8)', () => {
     const { available, planned } = navByAvailability('company', owner);
     const availableKeys = available.flatMap((section) => section.items.map((item) => item.key));
 
-    expect(availableKeys).toEqual(['dashboard', 'team', 'subscription', 'settings']);
+    expect(availableKeys).toEqual(['dashboard', 'catalog', 'team', 'subscription', 'settings']);
     // Nothing in the working navigation may carry a phase, which is what marks a placeholder.
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
-    expect(planned.map((item) => item.key)).toEqual([
-      'orders',
-      'catalog',
-      'inventory',
-      'partners',
-      'delivery',
-      'finance',
-      'returns',
-      'reports',
-    ]);
+    expect(planned.map((item) => item.key)).toEqual(['orders', 'inventory', 'partners', 'delivery', 'finance', 'returns', 'reports']);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });
 
@@ -107,9 +98,9 @@ describe('honest navigation (Phase C8)', () => {
   });
 
   it('drops a section that has nothing available rather than leaving an empty heading', () => {
-    // A warehouse role with no member permissions sees only the dashboard once stock (P05) is in the roadmap.
+    // Catalog ships in P04; stock remains on the P05 roadmap.
     const { available, planned } = navByAvailability('company', membershipFixture({ role: 'WAREHOUSE', permissions: [] }));
-    expect(available.flatMap((section) => section.items.map((item) => item.key))).toEqual(['dashboard']);
+    expect(available.flatMap((section) => section.items.map((item) => item.key))).toEqual(['dashboard', 'catalog']);
     expect(available.every((section) => section.items.length > 0)).toBe(true);
     expect(planned.map((item) => item.key)).toEqual(['inventory']);
   });
