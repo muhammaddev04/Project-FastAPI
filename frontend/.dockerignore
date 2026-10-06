@@ -12,3 +12,7 @@ coverage/
 *.log
 .DS_Store
 Thumbs.db
+
+# Image masters are only inputs to scripts/optimize_site_media.py; the generated webp files in
+# public/ are committed, so 21 MB of originals never need to enter the build context.
+media-masters/

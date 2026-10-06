@@ -7,6 +7,21 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>TezFarmo</title>
     <script>
+      // Start the visible background before the application bundle arrives.
+      (function () {
+        var path = window.location.pathname;
+        var asset = path === '/' ? 'distribution' : path === '/how-it-works' ? 'partnership' : path === '/product' || /^\/(login|register|verify-email|forgot-password|reset)/.test(path) ? 'product-office' : null;
+        if (asset) {
+          var link = document.createElement('link');
+          link.rel = 'preload';
+          link.as = 'image';
+          link.href = '/media/tezfarmo-' + asset + (window.matchMedia('(max-width: 640px)').matches ? '-640' : '') + '.webp';
+          link.setAttribute('fetchpriority', 'high');
+          document.head.appendChild(link);
+        }
+      })();
+    </script>
+    <script>
       // Apply the saved (or system) theme before first paint so the wrong theme never flashes.
       (function () {
         try {

@@ -44,8 +44,8 @@ export const ASSET_MANIFEST: AssetSlot[] = [
 
 /** Explicit slot-to-file mapping; absent assets keep the designed fallback. */
 const AVAILABLE = new Map<string, string>([
-  ['media/shop-counter.jpg', '/media/tezfarmo-distribution.png'],
-  ['media/delivery-run.jpg', '/media/tezfarmo-delivery.png'],
+  ['media/shop-counter.jpg', '/media/tezfarmo-distribution.webp'],
+  ['media/delivery-run.jpg', '/media/tezfarmo-delivery.webp'],
 ]);
 
 export function assetSrc(file: string): string | undefined {

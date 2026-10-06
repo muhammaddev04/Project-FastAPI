@@ -1,3 +1,5 @@
+@import './media-previews.css';
+
 /* Warm paper palette for light mode; dark overrides follow below. */
 .daylight-site,
 .daylight-auth {
@@ -98,7 +100,9 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: url('/media/tezfarmo-distribution.png') center 62% / cover no-repeat;
+  background:
+    var(--media-distribution) center 62% / cover no-repeat,
+    var(--preview-distribution) center 62% / cover no-repeat;
   animation: day-landscape-in 1.5s ease-out both;
 }
 .day-hero::after {
@@ -735,7 +739,8 @@
 .daylight-auth > aside {
   background:
     linear-gradient(#faf1dcdd, #faf1dcf2),
-    url('/media/tezfarmo-distribution.png') center / cover;
+    var(--media-distribution) center / cover,
+    var(--preview-distribution) center / cover;
 }
 @keyframes day-text-in {
   from {
@@ -925,10 +930,10 @@
   background-position: center;
 }
 .day-page-hero--distribution .day-page-hero-image {
-  background-image: url('/media/tezfarmo-distribution.png');
+  background-image: var(--media-distribution), var(--preview-distribution);
 }
 .day-page-hero--delivery .day-page-hero-image {
-  background-image: url('/media/tezfarmo-delivery.png');
+  background-image: var(--media-delivery), var(--preview-delivery);
 }
 .day-page-hero::after {
   content: '';
@@ -1006,10 +1011,10 @@
 }
 
 .day-page-hero--product .day-page-hero-image {
-  background-image: url('/media/tezfarmo-product-office.png');
+  background-image: var(--media-product-office), var(--preview-product-office);
 }
 .day-page-hero--journey .day-page-hero-image {
-  background-image: url('/media/tezfarmo-partnership.png');
+  background-image: var(--media-partnership), var(--preview-partnership);
 }
 .how-story > div > .grid {
   align-items: center;
@@ -1255,7 +1260,8 @@
 .dark .daylight-auth > aside {
   background:
     linear-gradient(#211c17e8, #211c17f5),
-    url('/media/tezfarmo-distribution.png') center / cover;
+    var(--media-distribution) center / cover,
+    var(--preview-distribution) center / cover;
 }
 @media (max-width: 767px) {
   .dark .day-hero::after,
@@ -1366,7 +1372,8 @@
   flex-direction: column;
   background:
     linear-gradient(90deg, #f2ecdf30, #f2ecdf66),
-    url('/media/tezfarmo-product-office.png') center / cover fixed;
+    var(--media-product-office) center / cover fixed,
+    var(--preview-product-office) center / cover fixed;
 }
 .auth-access-header,
 .auth-access-content,
@@ -1526,7 +1533,8 @@
 .dark .daylight-auth.auth-access {
   background:
     linear-gradient(90deg, #211c1755, #211c1788),
-    url('/media/tezfarmo-product-office.png') center / cover fixed;
+    var(--media-product-office) center / cover fixed,
+    var(--preview-product-office) center / cover fixed;
 }
 .dark .auth-access .auth-statement {
   color: #fff8ea;
