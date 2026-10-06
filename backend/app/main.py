@@ -20,6 +20,7 @@ from app.modules.inventory.router import router as inventory_router
 from app.modules.inventory.service import install as install_inventory
 from app.modules.organizations.ports import install_handlers
 from app.modules.organizations.router import router as organizations_router
+from app.modules.partnerships.router import router as partnerships_router
 from app.modules.subscriptions.router import admin_router as subscription_admin_router
 from app.modules.subscriptions.router import router as subscription_router
 from app.modules.subscriptions.service import install as install_subscriptions
@@ -79,6 +80,7 @@ def create_app() -> FastAPI:
     app.include_router(subscription_admin_router)
     app.include_router(catalog_router)
     app.include_router(inventory_router)
+    app.include_router(partnerships_router)
     install_error_contract(app)
     return app
 

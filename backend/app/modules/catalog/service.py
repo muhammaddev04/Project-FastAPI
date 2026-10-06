@@ -140,7 +140,10 @@ class ProductUsage:
                 )
                 or 0
             )
-        # Partnerships are introduced in P06.
+        if kind == LimitKind.ACTIVE_STORES:
+            from app.modules.partnerships.service import active_store_count
+
+            return await active_store_count(session, company_id)
         return 0
 
 

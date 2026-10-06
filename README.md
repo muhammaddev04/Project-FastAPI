@@ -1,5 +1,11 @@
 # TezFarmo
 
+Company partnerships (P06) open at `/company/partners`; store suppliers open at
+`/store/suppliers`. Invite a store by its exact phone/tax identifier or request a company
+with its public code. Commercial terms retain immutable versions and support future dates.
+Activation checks both organizations' verification and the subscription's active-store limit.
+See [P06 acceptance evidence](docs/P06_ACCEPTANCE.md).
+
 Company warehouse (P05) opens at `/company/warehouse/stock`: receive goods with unit
 conversion, count stock, write off damaged goods, inspect movement history and configure
 low-stock thresholds. STOCK Excel imports apply all receipts atomically. Reservation,
@@ -126,7 +132,7 @@ Expired trials/paid periods enter GRACE, then SOFT_BLOCK and FULL_BLOCK; cancell
 active paid period enters CANCELLED. Manual payment reactivates the subscription. History and
 payments are append-only. Company banners and team buttons use server-reported allowed actions.
 User limits enforce invitation acceptance/reactivation; active product limits connect in P04,
-and store usage connects in P06. [P03 acceptance evidence](docs/P03_ACCEPTANCE.md).
+and store usage counts ACTIVE and SUSPENDED partnerships in P06. [P03 acceptance evidence](docs/P03_ACCEPTANCE.md).
 
 ## Company catalog, pricing and Excel import (P04)
 

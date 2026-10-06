@@ -84,6 +84,9 @@ services:
     volumes: ["./frontend/src:/app/src:ro"]
     environment:
       VITE_API_PROXY_TARGET: http://backend:8000
+      # Docker Desktop bind mounts do not reliably forward Windows file-change events.
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "1000"
     ports: ["127.0.0.1:15174:5174"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:5174/').then(r => {if (!r.ok) process.exit(1)}).catch(() => process.exit(1))"]

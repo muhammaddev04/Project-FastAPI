@@ -12,6 +12,7 @@ import { CategoriesPage } from '@/features/catalog/categories-page';
 import { PriceListsPage, PriceMatrixPage } from '@/features/catalog/pricing-pages';
 import { ImportHistoryPage, ImportWizardPage } from '@/features/catalog/import-pages';
 import { StockPage, StockDetailPage, ReceiptPage, MovementsPage } from '@/features/inventory/pages';
+import { PartnersPage, PartnerDetailPage } from '@/features/partnerships/pages';
 import { CourierHome } from '@/features/dashboard/courier-home';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
 import { PlannedModulePage } from '@/features/modules/planned-module-page';
@@ -173,6 +174,8 @@ export const routes: RouteObject[] = [
       { path: 'warehouse/stock/:productId', element: <StockDetailPage /> },
       { path: 'warehouse/receipts/new', element: <ReceiptPage /> },
       { path: 'warehouse/movements', element: <MovementsPage /> },
+      { path: 'partners', element: <PartnersPage /> },
+      { path: 'partners/:partnershipId', element: <PartnerDetailPage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },
@@ -185,6 +188,8 @@ export const routes: RouteObject[] = [
       { path: 'settings', element: <Navigate to="profile" replace /> },
       { path: 'settings/profile', element: <OrganizationProfilePage /> },
       { path: 'settings/verification', element: <VerificationPage /> },
+      { path: 'suppliers', element: <PartnersPage /> },
+      { path: 'suppliers/:partnershipId', element: <PartnerDetailPage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },

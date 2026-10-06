@@ -2,12 +2,20 @@ import { membershipFixture, storeMembership } from '@/test/fixtures';
 import type { Role } from '@/shared/auth/types';
 import { navByAvailability, navFor } from './nav-config';
 
-const keys = (area: 'company' | 'store' | 'courier', role: Role, permissions: string[] = []) =>
+const keys = (area: 'company' | 'store' | 'courier', role: Role, permissions: string[] = ['partners.view']) =>
   navFor(area, area === 'store' ? storeMembership({ role, permissions }) : membershipFixture({ role, permissions })).flatMap((section) =>
     section.items.map((item) => item.key),
   );
 
-const OWNER_PERMS = ['members.change_role', 'members.invite', 'members.revoke', 'members.suspend', 'members.view', 'stock.view'];
+const OWNER_PERMS = [
+  'members.change_role',
+  'members.invite',
+  'members.revoke',
+  'members.suspend',
+  'members.view',
+  'stock.view',
+  'partners.view',
+];
 
 describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
   it('gives the company owner the whole console', () => {
@@ -73,11 +81,11 @@ describe('honest navigation (Phase C8)', () => {
     const { available, planned } = navByAvailability('company', owner);
     const availableKeys = available.flatMap((section) => section.items.map((item) => item.key));
 
-    expect(availableKeys).toEqual(['dashboard', 'catalog', 'inventory', 'team', 'subscription', 'settings']);
+    expect(availableKeys).toEqual(['dashboard', 'catalog', 'inventory', 'partners', 'team', 'subscription', 'settings']);
     // Nothing in the working navigation may carry a phase, which is what marks a placeholder.
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
-    expect(planned.map((item) => item.key)).toEqual(['orders', 'partners', 'delivery', 'finance', 'returns', 'reports']);
+    expect(planned.map((item) => item.key)).toEqual(['orders', 'delivery', 'finance', 'returns', 'reports']);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });
 

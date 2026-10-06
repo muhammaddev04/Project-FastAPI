@@ -24,7 +24,6 @@ import {
   Input,
   MetaChip,
   Pill,
-  PlannedPanel,
   ProfileHeader,
   SectionHeader,
   Skeleton,
@@ -415,7 +414,16 @@ export function OrganizationProfilePage() {
             </Card>
           )}
 
-          <PlannedPanel icon={Users} title={t('orgProfile.partners')} description={t('orgProfile.partnersText')} phase="P06" />
+          {membership.permissions.includes('partners.view') && (
+            <Card className="space-y-3 p-5 sm:p-6">
+              <SectionHeader icon={Users} title={t('orgProfile.partners')} />
+              <Button asChild variant="outline">
+                <Link to={membership.org_type === 'COMPANY' ? '/company/partners' : '/store/suppliers'}>
+                  {t(membership.org_type === 'COMPANY' ? 'partnerships.clients' : 'partnerships.suppliers')}
+                </Link>
+              </Button>
+            </Card>
+          )}
         </div>
       </div>
     </div>

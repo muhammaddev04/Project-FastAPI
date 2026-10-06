@@ -1,3 +1,27 @@
+# P06 partnerships and terms implementation - 2026-10-06
+
+P06 is implemented and locally accepted: company clients and store suppliers, both
+invitation directions, recipient acceptance, immutable current/future terms, permission
+and tenant checks, verified activation, subscription usage/limits, customer-code version
+checks, suspension/reactivation and confirmed termination. Terms enforce company-owned
+active price lists and owner-only credit editing. Development upgraded to 2125e5a871b4
+without resetting data. Browser acceptance also fixed cross-area organization switching
+and waiting for price-list options before terms preview.
+
+Validation passed: `python scripts/dev.py verify`, 1120 backend tests (including 42 P06),
+398 frontend tests, 19 tooling tests, clean Linux backend-ci, fresh migrations/model drift,
+generated API type drift, locale error keys and PRT traceability. All thirteen P00-P06
+real-browser scenarios passed together in 5.4 minutes after concurrent checks finished.
+The 390px P06 mobile view has no horizontal overflow. Authentication behavior is preserved.
+
+P07/P09 supply downstream orders, payments and ledgers; P06 provides partnership identity,
+terms resolution, the new-order gate and a transactional order-cancellation port. P11
+consumes emitted events for notifications. P07 has not started and requires owner approval.
+Remote CI and deployment await the owner's push; no push or DONE tag.
+[P06 acceptance evidence](docs/P06_ACCEPTANCE.md).
+
+Earlier entries below are historical evidence.
+
 # P05 inventory implementation - 2026-10-05
 
 P05 is implemented: Company warehouse stock/details, receipt unit conversion and barcode

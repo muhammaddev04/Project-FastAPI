@@ -144,6 +144,19 @@ describe('Store application', () => {
 });
 
 describe('organization switcher and profile', () => {
+  it('keeps the selected second company when switching from a store', async () => {
+    const first = membershipFixture();
+    const second = membershipFixture({ id: 'm-company-2', organization_id: 'org-company-2', org_name: 'Second supplier' });
+    const store = storeMembership();
+    mockApi([{ path: '/me', body: meFixture([first, second, store]) }]);
+    useSessionStore.setState({ accessToken: 'token', activeOrgId: store.organization_id, restoring: false });
+    renderRoutes(routes, '/store');
+    await userEvent.click(await screen.findByRole('button', { name: 'Switch organization' }));
+    await userEvent.click(screen.getByRole('menuitem', { name: /Second supplier/ }));
+    await waitFor(() => expect(useSessionStore.getState().activeOrgId).toBe(second.organization_id));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Switch organization' })).toHaveTextContent('Second supplier'));
+  });
+
   it('switches from the company to the store application', async () => {
     mockApi([
       { path: '/me', body: meFixture([membershipFixture(), storeMembership()]) },

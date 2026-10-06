@@ -116,6 +116,8 @@ def register_error_handlers(app: FastAPI) -> None:
         if isinstance(exc, IntegrityError):
             for constraint, code in {
                 "tax_identifier": "tax_identifier_taken",
+                "uq_partnership_open": "partnership_exists",
+                "uq_partnership_customer_code": "validation_error",
                 "uq_products_company_sku": "sku_taken",
                 "uq_products_company_barcode": "barcode_taken",
                 "uq_categories_company_parent_name": "category_name_taken",

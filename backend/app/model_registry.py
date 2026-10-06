@@ -20,6 +20,7 @@ from app.modules.files.models import StoredFile
 from app.modules.identity.models import Membership, MembershipInvitation, OAuthIdentity, Organization, User
 from app.modules.inventory.models import Stock, StockMovement, StockReservation
 from app.modules.organizations.models import Company, Store
+from app.modules.partnerships.models import Partnership, PartnershipTerms
 from app.modules.subscriptions.models import (
     Plan,
     PlanChangeRequest,
@@ -32,6 +33,8 @@ from app.modules.support.models import SupportTicket
 from app.modules.verification.models import VerificationDocument, VerificationRequest
 
 __all__ = [
+    "Partnership",
+    "PartnershipTerms",
     "Stock",
     "StockMovement",
     "StockReservation",

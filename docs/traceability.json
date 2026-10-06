@@ -339,5 +339,17 @@
   "INV-010": ["backend/tests/test_inventory.py::test_inv_010_stock_import_all_or_nothing", "backend/tests/test_inventory.py::test_inv_010_valid_stock_import_and_execution_rollback"],
   "FND-040": [
     "scripts/test_p00_tooling.py::test_ci_enforces_foundation_gates"
-  ]
+  ],
+  "PRT-001": ["backend/tests/test_partnerships.py::test_prt_009_terminate_calls_cancellation_port"],
+  "PRT-002": ["backend/tests/test_partnerships.py::test_prt_002_open_partnership_unique_constraint_and_service"],
+  "PRT-003": ["backend/tests/test_partnerships.py::test_prt_003_activation_requires_both_verified"],
+  "PRT-004": ["backend/tests/test_partnerships.py::test_prt_004_lookup_exact_match_only"],
+  "PRT-005": ["backend/tests/test_partnerships.py::test_prt_005_active_stores_limit_counts_suspended"],
+  "PRT-006": ["backend/tests/test_partnerships.py::test_prt_006_terms_versioning_and_effective_from_rules"],
+  "PRT-007": ["backend/tests/test_partnerships.py::test_prt_007_manager_cannot_change_credit"],
+  "PRT-008": ["backend/tests/test_partnerships.py::test_prt_008_foreign_price_list_rejected"],
+  "PRT-009": ["backend/tests/test_partnerships.py::test_prt_009_terminate_calls_cancellation_port"],
+  "PRT-010": ["backend/tests/test_partnerships.py::test_prt_010_new_order_gate"],
+  "PRT-011": ["backend/tests/test_partnerships.py::test_prt_011_profile_privacy_and_customer_code_version"],
+  "PRT-012": ["backend/tests/test_partnerships.py::test_prt_012_store_multiple_companies"]
 }

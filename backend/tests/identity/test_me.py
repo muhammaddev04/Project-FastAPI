@@ -50,6 +50,9 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
         "org.edit_contacts",
         "org.edit_legal",
         "org.view",
+        "partners.manage",
+        "partners.terminate",
+        "partners.view",
         "pricing.manage",
         "pricing.view",
         "stock.adjust",
@@ -59,12 +62,15 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
         "stock.write_off",
         "subscription.manage",
         "subscription.view",
+        "terms.manage",
+        "terms.manage_credit",
+        "terms.view",
         "verification.submit",
         "verification.view",
     ]
     assert memberships["Corner Market"]["org_type"] == "STORE"
     assert memberships["Corner Market"]["role"] == "SELLER"
-    assert memberships["Corner Market"]["permissions"] == ["org.view"]
+    assert memberships["Corner Market"]["permissions"] == ["org.view", "partners.view", "terms.view"]
     assert company.id and store.id
 
 

@@ -1,5 +1,6 @@
 import { Check, ChevronsUpDown, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { flushSync } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { areaFor, areaHome, isUsable } from '@/shared/auth/context';
 import { useSessionStore } from '@/shared/auth/session-store';
@@ -57,8 +58,11 @@ export function OrgSwitcher({ me, active }: { me: Me; active: Membership }) {
           <DropdownMenuItem
             key={membership.id}
             onSelect={() => {
-              setActiveOrg(membership.organization_id);
-              navigate(areaHome(areaFor(membership)));
+              // Commit the destination and organization together so the old area's guard cannot select a fallback.
+              flushSync(() => {
+                setActiveOrg(membership.organization_id);
+                navigate(areaHome(areaFor(membership)), { flushSync: true });
+              });
             }}
           >
             <OrgGlyph membership={membership} size="xs" />
