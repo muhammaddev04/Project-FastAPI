@@ -13,6 +13,8 @@ import { PriceListsPage, PriceMatrixPage } from '@/features/catalog/pricing-page
 import { ImportHistoryPage, ImportWizardPage } from '@/features/catalog/import-pages';
 import { StockPage, StockDetailPage, ReceiptPage, MovementsPage } from '@/features/inventory/pages';
 import { PartnersPage, PartnerDetailPage } from '@/features/partnerships/pages';
+import { BuyingPage } from '@/features/orders/buying';
+import { OrdersPage, OrderPage } from '@/features/orders/pages';
 import { CourierHome } from '@/features/dashboard/courier-home';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
 import { PlannedModulePage } from '@/features/modules/planned-module-page';
@@ -176,6 +178,10 @@ export const routes: RouteObject[] = [
       { path: 'warehouse/movements', element: <MovementsPage /> },
       { path: 'partners', element: <PartnersPage /> },
       { path: 'partners/:partnershipId', element: <PartnerDetailPage /> },
+      { path: 'orders', element: <OrdersPage /> },
+      { path: 'orders/new', element: <BuyingPage onBehalf /> },
+      { path: 'orders/:orderId', element: <OrderPage /> },
+      { path: 'warehouse/orders', element: <OrdersPage warehouse /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },
@@ -190,6 +196,11 @@ export const routes: RouteObject[] = [
       { path: 'settings/verification', element: <VerificationPage /> },
       { path: 'suppliers', element: <PartnersPage /> },
       { path: 'suppliers/:partnershipId', element: <PartnerDetailPage /> },
+      { path: 'catalog', element: <BuyingPage /> },
+      { path: 'cart', element: <BuyingPage cart /> },
+      { path: 'cart/:partnershipId', element: <BuyingPage cart /> },
+      { path: 'orders', element: <OrdersPage /> },
+      { path: 'orders/:orderId', element: <OrderPage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },

@@ -37,40 +37,62 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
     memberships = {m["org_name"]: m for m in body["memberships"]}
     assert memberships["Pamir Distribution"]["org_type"] == "COMPANY"
     assert memberships["Pamir Distribution"]["role"] == "OWNER"
-    assert memberships["Pamir Distribution"]["permissions"] == [
-        "catalog.manage",
-        "catalog.view",
-        "import.run",
-        "members.change_role",
-        "members.invite",
-        "members.revoke",
-        "members.suspend",
-        "members.view",
-        "org.edit_branding",
-        "org.edit_contacts",
-        "org.edit_legal",
-        "org.view",
-        "partners.manage",
-        "partners.terminate",
-        "partners.view",
-        "pricing.manage",
-        "pricing.view",
-        "stock.adjust",
-        "stock.receive",
-        "stock.settings",
-        "stock.view",
-        "stock.write_off",
-        "subscription.manage",
-        "subscription.view",
-        "terms.manage",
-        "terms.manage_credit",
-        "terms.view",
-        "verification.submit",
-        "verification.view",
-    ]
+    assert memberships["Pamir Distribution"]["permissions"] == sorted(
+        [
+            "catalog.manage",
+            "catalog.view",
+            "import.run",
+            "members.change_role",
+            "members.invite",
+            "members.revoke",
+            "members.suspend",
+            "members.view",
+            "org.edit_branding",
+            "org.edit_contacts",
+            "org.edit_legal",
+            "org.view",
+            "orders.assemble",
+            "orders.cancel",
+            "orders.confirm",
+            "orders.create",
+            "orders.discount",
+            "orders.override",
+            "orders.reattempt",
+            "orders.reject",
+            "orders.view",
+            "partners.manage",
+            "partners.terminate",
+            "partners.view",
+            "pricing.manage",
+            "pricing.view",
+            "stock.adjust",
+            "stock.receive",
+            "stock.settings",
+            "stock.view",
+            "stock.write_off",
+            "subscription.manage",
+            "subscription.view",
+            "terms.manage",
+            "terms.manage_credit",
+            "terms.view",
+            "verification.submit",
+            "verification.view",
+        ]
+    )
     assert memberships["Corner Market"]["org_type"] == "STORE"
     assert memberships["Corner Market"]["role"] == "SELLER"
-    assert memberships["Corner Market"]["permissions"] == ["org.view", "partners.view", "terms.view"]
+    assert memberships["Corner Market"]["permissions"] == sorted(
+        [
+            "cart.manage",
+            "org.view",
+            "orders.cancel",
+            "orders.create",
+            "orders.view",
+            "partners.view",
+            "store_catalog.view",
+            "terms.view",
+        ]
+    )
     assert company.id and store.id
 
 

@@ -5,5 +5,5 @@
 - Never push automatically. The owner performs git push.
 - Before every backend commit run `python scripts/dev.py backend-ci` (also enforced by pre-commit): clean Linux dependencies, Ruff, strict mypy without cache, and upgrade/check migrations on an isolated disposable database. Docker must be running; never bypass a failed hook. Before completing a TZ part run `python scripts/dev.py verify`, isolated browser acceptance, and generated API type drift checks. Dependency version changes must pass these checks before committing.
 - Report unfinished requirements honestly; a partial part is not DONE.
-- Ask the owner before starting each next TZ part. P06 is authorized (2026-10-06); P07 and later require a new approval.
+- Ask the owner before starting each next TZ part. P07 is authorized (2026-10-06); P08 and later require a new approval.
 - Preserve the current login, registration password policy, email-code verification and password reset even where TZ differs. Duplicate registration must show that the email is already registered on the registration page.

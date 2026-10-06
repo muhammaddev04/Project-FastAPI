@@ -1,3 +1,30 @@
+# P07 orders and store checkout implementation - 2026-10-06
+
+P07 is implemented and locally accepted: store catalogue with current prices and
+availability bands, personal carts and atomic idempotent checkout, company-on-behalf
+orders, immutable snapshots, current-terms confirmation, partial quantities, credit
+and minimum checks, permission-controlled discounts/overrides, stock reservations,
+cancellation/release and repeat orders. One transactional status writer records history,
+audit and durable events. Warehouse views and printable pick lists exclude money;
+tenant/version checks and database triggers protect the workflow. Dashboard navigation
+opens the implemented screens. Development upgraded to `f78d0fa3dbff` without a reset.
+
+Validation passed: `python scripts/dev.py verify`, 1160 backend tests, 20 tooling tests,
+Linux dependencies/Ruff/strict typing, fresh migrations/model drift, generated API type
+drift and complete ORD traceability. Browser accessibility found and fixed the shared
+class merger's confusion between named font sizes and text colours. All frontend checks
+then passed again with 407 tests, and all fourteen P00–P07 real-browser scenarios passed
+together in 6.5 minutes. P07's 390px mobile view has no horizontal overflow.
+
+Authentication behavior is preserved. `COMPANY_ON_BEHALF` needs 17 characters, so the
+source column uses VARCHAR(20) rather than TZ's proposed VARCHAR(16). P08/P09/P10 supply
+delivery, ledger and dispute implementations through explicit ports; P11 consumes durable
+events. P08 has not started and requires owner approval. Remote CI and deployment await
+the owner's push; no push or DONE tag.
+[P07 acceptance evidence](docs/P07_ACCEPTANCE.md).
+
+Earlier entries below are historical evidence.
+
 # P06 partnerships and terms implementation - 2026-10-06
 
 P06 is implemented and locally accepted: company clients and store suppliers, both

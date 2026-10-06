@@ -44,7 +44,14 @@ const COMPANY: NavSection[] = [
     key: 'operations',
     items: [
       { key: 'dashboard', path: '', icon: LayoutDashboard },
-      { key: 'orders', path: 'orders', icon: ClipboardList, roles: ['OWNER', 'MANAGER', 'OPERATOR'], phase: 'P07' },
+      { key: 'orders', path: 'orders', icon: ClipboardList, roles: ['OWNER', 'MANAGER', 'OPERATOR'], permission: 'orders.view' },
+      {
+        key: 'warehouseOrders',
+        path: 'warehouse/orders',
+        icon: ClipboardList,
+        roles: ['OWNER', 'MANAGER', 'WAREHOUSE'],
+        permission: 'orders.assemble',
+      },
       { key: 'catalog', path: 'catalog', icon: Package, roles: ['OWNER', 'MANAGER', 'OPERATOR', 'WAREHOUSE'] },
       { key: 'inventory', path: 'warehouse/stock', icon: Boxes, permission: 'stock.view' },
       { key: 'partners', path: 'partners', icon: Handshake, roles: ['OWNER', 'MANAGER', 'OPERATOR'], permission: 'partners.view' },
@@ -70,9 +77,9 @@ const STORE: NavSection[] = [
     items: [
       { key: 'dashboard', path: '', icon: LayoutGrid, primary: true },
       { key: 'suppliers', path: 'suppliers', icon: Building2, permission: 'partners.view' },
-      { key: 'catalog', path: 'catalog', icon: Archive, phase: 'P07', primary: true },
-      { key: 'cart', path: 'cart', icon: ShoppingCart, phase: 'P07', primary: true },
-      { key: 'orders', path: 'orders', icon: ClipboardList, phase: 'P07', primary: true },
+      { key: 'catalog', path: 'catalog', icon: Archive, permission: 'store_catalog.view', primary: true },
+      { key: 'cart', path: 'cart', icon: ShoppingCart, permission: 'cart.manage', primary: true },
+      { key: 'orders', path: 'orders', icon: ClipboardList, permission: 'orders.view', primary: true },
       { key: 'debt', path: 'debt', icon: Wallet, roles: ['OWNER'], phase: 'P09', primary: true },
       { key: 'returns', path: 'returns', icon: RotateCcw, roles: ['OWNER'], phase: 'P10' },
     ],

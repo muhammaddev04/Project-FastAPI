@@ -1,5 +1,11 @@
 # TezFarmo
 
+Orders (P07) open at `/company/orders` and `/store/orders`; warehouse staff use
+`/company/warehouse/orders`. Stores browse `/store/catalog` and checkout personal carts.
+Confirmation snapshots current terms, reserves only confirmed quantities and checks credit
+and minimum amounts. Cancellation releases stock; pick lists contain quantities without prices.
+See [P07 acceptance evidence](docs/P07_ACCEPTANCE.md).
+
 Company partnerships (P06) open at `/company/partners`; store suppliers open at
 `/store/suppliers`. Invite a store by its exact phone/tax identifier or request a company
 with its public code. Commercial terms retain immutable versions and support future dates.

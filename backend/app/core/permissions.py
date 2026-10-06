@@ -13,6 +13,15 @@ _CATALOG_ADMIN = frozenset({"catalog.view", "catalog.manage", "pricing.view", "p
 _STOCK_ADMIN = frozenset({"stock.view", "stock.receive", "stock.adjust", "stock.write_off", "stock.settings"})
 _PARTNERS_VIEW = frozenset({"partners.view", "terms.view"})
 _PARTNERS_ADMIN = _PARTNERS_VIEW | {"partners.manage", "terms.manage"}
+_ORDER_COMPANY = frozenset({"orders.view", "orders.create", "orders.confirm", "orders.reject"})
+_ORDER_ADMIN = _ORDER_COMPANY | {
+    "orders.discount",
+    "orders.override",
+    "orders.assemble",
+    "orders.cancel",
+    "orders.reattempt",
+}
+_ORDER_STORE = frozenset({"orders.view", "orders.create", "orders.cancel", "store_catalog.view", "cart.manage"})
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     ("COMPANY", "OWNER"): _MEMBER_ADMIN
@@ -20,6 +29,7 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _CATALOG_ADMIN
     | _STOCK_ADMIN
     | _PARTNERS_ADMIN
+    | _ORDER_ADMIN
     | {"partners.terminate", "terms.manage_credit"}
     | {"subscription.view", "subscription.manage"},
     ("COMPANY", "MANAGER"): frozenset(
@@ -27,12 +37,21 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     )
     | _CATALOG_ADMIN
     | _STOCK_ADMIN
-    | _PARTNERS_ADMIN,
-    ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view", "stock.view"}) | _PARTNERS_VIEW,
-    ("COMPANY", "WAREHOUSE"): frozenset({"org.view", "catalog.view", "stock.view", "stock.receive", "stock.settings"}),
+    | _PARTNERS_ADMIN
+    | _ORDER_ADMIN,
+    ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view", "stock.view"})
+    | _PARTNERS_VIEW
+    | _ORDER_COMPANY,
+    ("COMPANY", "WAREHOUSE"): frozenset(
+        {"org.view", "catalog.view", "stock.view", "stock.receive", "stock.settings", "orders.view", "orders.assemble"}
+    ),
     ("COMPANY", "COURIER"): frozenset({"org.view"}),
-    ("STORE", "OWNER"): _MEMBER_ADMIN | _ORG_OWNER | _PARTNERS_VIEW | {"partners.manage", "partners.terminate"},
-    ("STORE", "SELLER"): frozenset({"org.view"}) | _PARTNERS_VIEW,
+    ("STORE", "OWNER"): _MEMBER_ADMIN
+    | _ORG_OWNER
+    | _PARTNERS_VIEW
+    | _ORDER_STORE
+    | {"partners.manage", "partners.terminate"},
+    ("STORE", "SELLER"): frozenset({"org.view"}) | _PARTNERS_VIEW | _ORDER_STORE,
 }
 
 

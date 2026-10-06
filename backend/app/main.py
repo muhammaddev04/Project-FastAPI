@@ -18,6 +18,8 @@ from app.modules.identity.router import router as identity_router
 from app.modules.identity.team_router import router as team_router
 from app.modules.inventory.router import router as inventory_router
 from app.modules.inventory.service import install as install_inventory
+from app.modules.orders.router import router as orders_router
+from app.modules.orders.service import install as install_orders
 from app.modules.organizations.ports import install_handlers
 from app.modules.organizations.router import router as organizations_router
 from app.modules.partnerships.router import router as partnerships_router
@@ -37,6 +39,7 @@ def create_app() -> FastAPI:
     install_subscriptions()
     install_catalog()
     install_inventory()
+    install_orders()
     app = FastAPI(
         title="TezFarmo API",
         version=settings.app_version,
@@ -50,7 +53,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=[
             "Authorization",
             "Content-Type",
@@ -81,6 +84,7 @@ def create_app() -> FastAPI:
     app.include_router(catalog_router)
     app.include_router(inventory_router)
     app.include_router(partnerships_router)
+    app.include_router(orders_router)
     install_error_contract(app)
     return app
 

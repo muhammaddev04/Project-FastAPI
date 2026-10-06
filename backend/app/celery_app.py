@@ -11,6 +11,7 @@ import app.model_registry  # noqa: F401 - standalone workers need every foreign-
 from app.core.config import get_settings
 from app.modules.catalog.service import install as install_catalog
 from app.modules.inventory.service import install as install_inventory
+from app.modules.orders.service import install as install_orders
 from app.modules.organizations.ports import install_handlers
 from app.modules.subscriptions.service import install as install_subscriptions
 
@@ -18,6 +19,7 @@ install_handlers()
 install_subscriptions()
 install_catalog()
 install_inventory()
+install_orders()
 
 celery_app = Celery("tezfarmo", broker=get_settings().celery_broker_url)
 celery_app.conf.update(
@@ -38,6 +40,7 @@ celery_app.conf.update(
         "subscription-reminders": {"task": "tezfarmo.subscription_reminders", "schedule": 3600.0},
         "process-imports": {"task": "tezfarmo.process_imports", "schedule": 5.0},
         "stock-reconciliation": {"task": "tezfarmo.stock_reconciliation", "schedule": crontab(hour=22, minute=0)},
+        "complete-delivered-orders": {"task": "tezfarmo.complete_delivered_orders", "schedule": 1800.0},
     },
 )
 
@@ -53,6 +56,18 @@ def process_imports() -> int:
     from app.modules.catalog.imports import process_pending
 
     return _runner().run(process_pending())
+
+
+@celery_app.task(name="tezfarmo.complete_delivered_orders")
+def complete_delivered_orders() -> int:
+    from app.core.db import get_sessionmaker
+    from app.modules.orders.service import complete_due
+
+    async def run() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await complete_due(session)
+
+    return _runner().run(run())
 
 
 @celery_app.task(name="tezfarmo.stock_reconciliation")

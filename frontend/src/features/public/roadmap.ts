@@ -41,7 +41,7 @@ export const ROADMAP: ModuleEntry[] = [
   { key: 'areas', side: 'both' },
   { key: 'catalog', side: 'company' },
   { key: 'partnerships', phase: 'P06', side: 'both' },
-  { key: 'orders', phase: 'P07', side: 'both' },
+  { key: 'orders', side: 'both' },
   { key: 'inventory', side: 'company' },
   { key: 'delivery', phase: 'P08', side: 'company' },
   { key: 'finance', phase: 'P09', side: 'both' },

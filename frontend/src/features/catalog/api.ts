@@ -40,10 +40,16 @@ export function useCatalogQuery<T>(path: string, orgId: string, enabled = true, 
   });
 }
 
-export function useCatalogMutation<T>(path: string, orgId: string, method: 'POST' | 'PATCH' | 'DELETE' = 'POST', idempotent = false) {
+export function useCatalogMutation<T>(
+  path: string,
+  orgId: string,
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'POST',
+  idempotent = false,
+) {
   const cache = useQueryClient();
   const [key] = useState(createSubmissionKey);
   return useMutation({
+    mutationKey: ['catalog', orgId],
     mutationFn: (body?: unknown) =>
       apiRequest<T>(path, {
         method,

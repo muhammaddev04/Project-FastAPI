@@ -44,6 +44,7 @@ describe('Company application', () => {
     const { calls } = mockApi([
       { path: '/me', body: meFixture([membershipFixture()]) },
       { path: '/members', body: MEMBERS },
+      { path: '/orders', body: { count: 0, limit: 1, offset: 0, results: [] } },
     ]);
     signIn();
     renderRoutes(routes, '/company');
@@ -51,13 +52,13 @@ describe('Company application', () => {
     expect(within(sidebar()).getByRole('link', { name: /subscription/i })).toBeInTheDocument();
     expect(await screen.findByText('2')).toBeInTheDocument();
     expect(screen.getByText('Getting ready')).toBeInTheDocument();
-    expect(screen.getByText('Store orders will appear here once partnerships and ordering are live.')).toBeInTheDocument();
+    expect(within(screen.getByRole('main')).getByRole('link', { name: 'Orders' })).toHaveAttribute('href', '/company/orders');
     const membersCall = calls.find((call) => call.path === '/api/v1/members');
     expect(membersCall?.headers['X-Org-Id']).toBe('org-company');
   });
 
   it('gives an operator a reduced menu and no team data', async () => {
-    const { calls } = mockApi([{ path: '/me', body: meFixture([membershipFixture({ role: 'OPERATOR', permissions: [] })]) }]);
+    const { calls } = mockApi([{ path: '/me', body: meFixture([membershipFixture({ role: 'OPERATOR', permissions: ['orders.view'] })]) }]);
     signIn();
     renderRoutes(routes, '/company');
     await screen.findByRole('heading', { name: 'Pamir Distribution' });
@@ -75,9 +76,9 @@ describe('Company application', () => {
       { path: '/members', body: MEMBERS },
     ]);
     signIn();
-    renderRoutes(routes, '/company/orders');
-    expect(await screen.findByRole('heading', { name: 'Orders' })).toBeInTheDocument();
-    expect(screen.getByText('Arrives in P07')).toBeInTheDocument();
+    renderRoutes(routes, '/company/delivery');
+    expect(await screen.findByRole('heading', { name: 'Delivery' })).toBeInTheDocument();
+    expect(screen.getByText('Arrives in P08')).toBeInTheDocument();
   });
 
   it('forbids a planned page the role cannot see', async () => {
@@ -121,7 +122,7 @@ describe('Store application', () => {
     signIn();
     renderRoutes(routes, '/store');
     expect(await screen.findByRole('heading', { name: 'Corner Market' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Repeat order' })).toBeDisabled();
+    expect(screen.getByRole('link', { name: 'Repeat order' })).toHaveAttribute('href', '/store/orders');
     expect(screen.getByText('My suppliers')).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Quick navigation' })).toBeInTheDocument();
   });

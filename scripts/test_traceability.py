@@ -91,6 +91,14 @@ class TraceabilityTests(unittest.TestCase):
             (root / "docs/traceability.json").write_text("{}", encoding="utf-8")
             self.assertEqual(len(check(root, complete_p00=True)), 2)
 
+    def test_complete_p07_rejects_unmapped_requirement(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent) as directory:
+            root = Path(directory)
+            (root / "docs").mkdir()
+            (root / "TZ.md").write_text("## [P07_orders]\nORD-001 ORD-044\n## [P08_delivery]", encoding="utf-8")
+            (root / "docs/traceability.json").write_text("{}", encoding="utf-8")
+            self.assertEqual(len(check(root, complete_p07=True)), 2)
+
     def test_valid_reference_and_missing_test(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent) as directory:
             root = Path(directory)

@@ -1,5 +1,6 @@
-import { Building2, CalendarClock, PackageSearch, RefreshCcw, ShoppingCart } from 'lucide-react';
+import { CalendarClock, RefreshCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { useAreaContext } from '@/app/shell/use-area-context';
 import { Button, Card, PlannedPanel } from '@/shared/ui';
 import { OrgHero } from './org-hero';
@@ -13,7 +14,7 @@ const READINESS = [
 
 /**
  * Store dashboard (TZ §17.1: my suppliers, a prominent "repeat order" action, upcoming debts).
- * Suppliers, ordering and debts come with P06/P07/P09, so those panels are honest empty states.
+ * Suppliers and orders open their working screens; debts remain planned for P09.
  */
 export function StoreDashboard() {
   const { t } = useTranslation();
@@ -31,36 +32,44 @@ export function StoreDashboard() {
           </span>
           <div>
             <p className="text-sm font-semibold">{t('dashboard.store.repeatTitle')}</p>
-            <p className="text-label text-muted-foreground">{t('dashboard.store.repeatText')}</p>
+            <p className="text-label text-muted-foreground">{t('orders.title')}</p>
           </div>
         </div>
-        <Button variant="primary" size="lg" disabled aria-describedby="repeat-order-note" className="relative max-sm:w-full">
-          {t('dashboard.store.repeatAction')}
-        </Button>
-        <span id="repeat-order-note" className="sr-only">
-          {t('planned.badge', { phase: 'P07' })}
-        </span>
+        {membership.permissions.includes('orders.view') && (
+          <Button asChild variant="primary" size="lg" className="relative max-sm:w-full">
+            <Link to="/store/orders">{t('dashboard.store.repeatAction')}</Link>
+          </Button>
+        )}
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <PlannedPanel
-          icon={PackageSearch}
-          title={t('home.store.catalog')}
-          description={t('home.store.catalogText')}
-          phase="P04"
-          className="lg:col-span-2"
-        />
-        <PlannedPanel icon={ShoppingCart} title={t('home.store.cart')} description={t('home.store.cartText')} phase="P07" />
+        {membership.permissions.includes('store_catalog.view') && (
+          <Card className="space-y-3 p-5 lg:col-span-2">
+            <h2>{t('home.store.catalog')}</h2>
+            <Button asChild>
+              <Link to="/store/catalog">{t('orders.storeCatalog')}</Link>
+            </Button>
+          </Card>
+        )}
+        {membership.permissions.includes('cart.manage') && (
+          <Card className="space-y-3 p-5">
+            <h2>{t('home.store.cart')}</h2>
+            <Button asChild>
+              <Link to="/store/cart">{t('orders.openCart')}</Link>
+            </Button>
+          </Card>
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <PlannedPanel
-          emptyTitle={t('dashboard.pending.title')}
-          icon={Building2}
-          title={t('dashboard.store.suppliers')}
-          description={t('dashboard.store.suppliersEmpty')}
-          phase="P06"
-        />
+        {membership.permissions.includes('partners.view') && (
+          <Card className="space-y-3 p-5">
+            <h2>{t('dashboard.store.suppliers')}</h2>
+            <Button asChild variant="outline">
+              <Link to="/store/suppliers">{t('partnerships.suppliers')}</Link>
+            </Button>
+          </Card>
+        )}
         {isOwner ? (
           <PlannedPanel
             emptyTitle={t('dashboard.pending.title')}
