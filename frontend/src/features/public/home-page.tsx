@@ -200,7 +200,15 @@ export function HomePage() {
       </section>
       <section className="day-landscape-band">
         <figure>
-          <img src="/media/tezfarmo-delivery.png" alt={t('site.media.delivery-run.alt')} loading="lazy" decoding="async" />
+          <img
+            style={{ backgroundImage: 'var(--preview-delivery)', backgroundSize: 'cover' }}
+            src="/media/tezfarmo-delivery.webp"
+            srcSet="/media/tezfarmo-delivery-640.webp 640w, /media/tezfarmo-delivery.webp 1280w"
+            sizes="(max-width: 640px) 100vw, 50vw"
+            alt={t('site.media.delivery-run.alt')}
+            loading="lazy"
+            decoding="async"
+          />
           <figcaption>
             <span className="day-kicker">{t('site.daylight.location')}</span>
             <h2 className="font-serif">{t('site.daylight.landscapeTitle')}</h2>

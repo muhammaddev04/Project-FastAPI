@@ -81,7 +81,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    volumes: ["./frontend/src:/app/src:ro"]
+    volumes: ["./frontend/src:/app/src:ro", "./frontend/public:/app/public:ro", "./frontend/index.html:/app/index.html:ro"]
     environment:
       VITE_API_PROXY_TARGET: http://backend:8000
       # Docker Desktop bind mounts do not reliably forward Windows file-change events.

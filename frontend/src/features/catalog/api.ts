@@ -31,9 +31,14 @@ export function useCatalogAccess(permission = 'catalog.manage') {
   };
 }
 
+/** The cache key behind `useCatalogQuery`, so a mutation can write its own answer back onto a query. */
+export function catalogKey(orgId: string, path: string, revision?: string) {
+  return ['catalog', orgId, path, revision];
+}
+
 export function useCatalogQuery<T>(path: string, orgId: string, enabled = true, poll?: number, revision?: string) {
   return useQuery({
-    queryKey: ['catalog', orgId, path, revision],
+    queryKey: catalogKey(orgId, path, revision),
     queryFn: ({ signal }) => apiRequest<T>(path, { headers: { 'X-Org-Id': orgId }, signal }),
     enabled,
     refetchInterval: poll,

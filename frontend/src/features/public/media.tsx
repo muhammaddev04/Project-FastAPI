@@ -59,6 +59,9 @@ export function Figure({
       {src ? (
         <motion.img
           src={src}
+          style={{ backgroundImage: `var(--preview-${src.replace(/^\/media\/tezfarmo-|\.webp$/g, '')})`, backgroundSize: 'cover' }}
+          srcSet={`${src.replace('.webp', '-640.webp')} 640w, ${src} 1280w`}
+          sizes={bleed ? '100vw' : '(max-width: 640px) 100vw, 50vw'}
           alt={t(`site.media.${slot.file.replace(/^media\/|\.jpg$/g, '')}.alt`)}
           loading="lazy"
           decoding="async"

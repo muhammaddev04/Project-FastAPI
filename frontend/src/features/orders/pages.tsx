@@ -1,8 +1,9 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAreaContext } from '@/app/shell/use-area-context';
-import { useCatalogMutation, useCatalogQuery, type Page } from '@/features/catalog/api';
+import { catalogKey, useCatalogMutation, useCatalogQuery, type Page } from '@/features/catalog/api';
 import { Feedback, Field } from '@/features/catalog/shared';
 import { useBillingQuery, type Access } from '@/features/subscriptions/api';
 import type { Partnership } from '@/features/partnerships/api';
@@ -241,12 +242,22 @@ export function OrderPage() {
   const access = useAccess();
   const { orgId, company, has, base, fulfillment, warehouse, membership } = access;
   const query = useCatalogQuery<OrderView>(`/orders/${orderId}`, orgId, has('orders.view'), 30_000);
-  const viewed = useCatalogMutation<OrderView>(`/orders/${orderId}/mark-viewed`, orgId);
+  const cache = useQueryClient();
+  /*
+   * Opening a NEW order moves it to VIEWED, and every transition bumps the order's version. The page
+   * must adopt the version this very transition produced: invalidating instead would leave a window in
+   * which the open page still holds the previous one, and the next action (reject, cancel, confirm)
+   * would post it and be refused as somebody else's change — on an order only this user just touched.
+   */
+  const viewed = useMutation({
+    mutationFn: () => apiRequest<OrderView>(`/orders/${orderId}/mark-viewed`, { method: 'POST', headers: { 'X-Org-Id': orgId } }),
+    onSuccess: (data) => cache.setQueryData(catalogKey(orgId, `/orders/${orderId}`), data),
+  });
   const marked = useRef('');
   useEffect(() => {
     if (company && query.data?.status === 'NEW' && marked.current !== `${orgId}:${orderId}`) {
       marked.current = `${orgId}:${orderId}`;
-      viewed.mutate(undefined);
+      viewed.mutate();
     }
   }, [company, orgId, orderId, query.data?.status, viewed]);
   const [action, setAction] = useState<string | null>(null);

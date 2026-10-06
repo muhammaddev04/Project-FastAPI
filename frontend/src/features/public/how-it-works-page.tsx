@@ -92,7 +92,15 @@ export function HowItWorksPage() {
           weight="text-minor"
           aside={
             <figure className="how-photo">
-              <img src="/media/tezfarmo-warehouse.png" alt={t('site.how.photos.company')} loading="lazy" decoding="async" />
+              <img
+                style={{ backgroundImage: 'var(--preview-warehouse)', backgroundSize: 'cover' }}
+                src="/media/tezfarmo-warehouse.webp"
+                srcSet="/media/tezfarmo-warehouse-640.webp 640w, /media/tezfarmo-warehouse.webp 1280w"
+                sizes="(max-width: 640px) 100vw, 50vw"
+                alt={t('site.how.photos.company')}
+                loading="lazy"
+                decoding="async"
+              />
               <figcaption>{t('site.how.company.subtitle')}</figcaption>
             </figure>
           }
@@ -114,7 +122,15 @@ export function HowItWorksPage() {
           weight="text-minor"
           aside={
             <figure className="how-photo">
-              <img src="/media/tezfarmo-shop-order.png" alt={t('site.how.photos.store')} loading="lazy" decoding="async" />
+              <img
+                style={{ backgroundImage: 'var(--preview-shop-order)', backgroundSize: 'cover' }}
+                src="/media/tezfarmo-shop-order.webp"
+                srcSet="/media/tezfarmo-shop-order-640.webp 640w, /media/tezfarmo-shop-order.webp 1280w"
+                sizes="(max-width: 640px) 100vw, 50vw"
+                alt={t('site.how.photos.store')}
+                loading="lazy"
+                decoding="async"
+              />
               <figcaption>{t('site.how.store.subtitle')}</figcaption>
             </figure>
           }

@@ -218,3 +218,27 @@ it('seller cannot cancel an order created by another user', async () => {
   await screen.findByRole('heading', { name: order.order_number });
   expect(screen.queryByRole('button', { name: 'Cancel order' })).not.toBeInTheDocument();
 });
+
+it('rejects with the version that opening the order produced, not the one the page loaded with', async () => {
+  // The order arrives as NEW, so the page marks it VIEWED; that transition bumps the version server
+  // side. The GET keeps answering with the pre-transition order, standing in for a refetch that has
+  // not landed yet, so only a page that adopts the transition's own answer can post the live version.
+  const api = mockApi([
+    { path: '/me', body: setup() },
+    { path: '/orders/order-1', body: { ...order, status: 'NEW', version: 2 } },
+    { method: 'POST', path: '/orders/order-1/mark-viewed', body: { ...order, status: 'VIEWED', version: 3 } },
+    { method: 'POST', path: '/orders/order-1/reject', body: { ...order, status: 'REJECTED', version: 4 } },
+  ]);
+  renderRoutes(routes, '/company/orders/order-1');
+  await screen.findByRole('heading', { name: order.order_number });
+  await waitFor(() => expect(api.calls.some((call) => call.path.endsWith('/mark-viewed'))).toBe(true));
+  await userEvent.click(await screen.findByRole('button', { name: 'Reject order' }));
+  const dialog = await screen.findByRole('dialog');
+  await userEvent.type(within(dialog).getByLabelText('Reason'), 'Reschedule requested');
+  await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
+  await waitFor(() => expect(api.calls.some((call) => call.path.endsWith('/reject'))).toBe(true));
+  expect(api.calls.find((call) => call.path.endsWith('/reject'))?.body).toMatchObject({
+    version: 3,
+    reason: 'Reschedule requested',
+  });
+});
