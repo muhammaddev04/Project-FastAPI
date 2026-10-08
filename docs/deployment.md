@@ -95,6 +95,7 @@ values that differ from the development example:
 | `S3_SECURE` | `false` (plain HTTP inside the Docker network only) |
 | `CORS_ORIGINS` / `FRONTEND_BASE_URL` | `https://tezfarmo.qobus.tj` |
 | `APP_SECRET_KEY`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | 32+ random bytes each, e.g. `openssl rand -hex 32` (SEC-003) |
+| `DELIVERY_CODE_HMAC_SECRET`, `DELIVERY_CODE_ENCRYPTION_KEY` | Two independent secrets, each generated separately with `openssl rand -hex 32`; required since P08. Preserve existing values to keep delivery codes usable. |
 | `EMAIL_PROVIDER` | `smtp` — `console` is rejected in production |
 | `SMTP_HOST`, `FROM_EMAIL` | required; plus `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` for the provider |
 
@@ -104,10 +105,27 @@ chmod 600 backend/.env
 
 `APP_ENV=production` is validated on startup by
 [`Settings`](../backend/app/core/config.py) and the container **refuses to boot** unless all three
-secrets are 32+ bytes and are not the development defaults, `APP_DEBUG=false`, and
+authentication and delivery-code secrets are 32+ bytes and are not the development defaults, `APP_DEBUG=false`, and
 `EMAIL_PROVIDER=smtp` with `SMTP_HOST` and `FROM_EMAIL` set. A deployment that fails its health check
 immediately after a `backend/.env` change is almost always this validator — check
 `docker compose -f docker-compose.prod.yml logs --tail=50 backend`.
+
+### Existing servers upgrading to P08 or later
+
+Before deploying, add `DELIVERY_CODE_HMAC_SECRET` and `DELIVERY_CODE_ENCRYPTION_KEY`
+to the server's `backend/.env` if they have never been configured. Generate each
+value independently with `openssl rand -hex 32` in a private server terminal and
+save it in that file. Do not paste the values into Actions logs, Git, or chat.
+Keep existing configured values: changing these keys invalidates existing handover
+code verification or encryption. The deployment preflight checks both names and
+minimum lengths before starting new containers.
+
+If an upgrade fails with `production requires 32+ byte explicit secrets and
+APP_DEBUG=false`, verify these two settings along with the three authentication
+secrets and `APP_DEBUG=false`. This is a configuration failure; rerun the failed
+deployment after fixing the server settings. The `NO automatic rollback was
+performed` footer alone does not identify the failure: inspect the preceding
+error and backend logs to distinguish startup, build, migration and health errors.
 
 **3. `/home/dev/Project-FastAPI/infra/seaweedfs/s3.prod.json`** — the S3 identity for the storage
 container. See [infra/seaweedfs/README.md](../infra/seaweedfs/README.md):
