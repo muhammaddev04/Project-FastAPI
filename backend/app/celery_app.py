@@ -11,6 +11,7 @@ import app.model_registry  # noqa: F401 - standalone workers need every foreign-
 from app.core.config import get_settings
 from app.modules.catalog.service import install as install_catalog
 from app.modules.delivery.ports import install as install_delivery
+from app.modules.finance.ports import install as install_finance
 from app.modules.inventory.service import install as install_inventory
 from app.modules.orders.service import install as install_orders
 from app.modules.organizations.ports import install_handlers
@@ -22,6 +23,7 @@ install_catalog()
 install_inventory()
 install_orders()
 install_delivery()
+install_finance()
 
 celery_app = Celery("tezfarmo", broker=get_settings().celery_broker_url)
 celery_app.conf.update(
@@ -44,6 +46,9 @@ celery_app.conf.update(
         "stock-reconciliation": {"task": "tezfarmo.stock_reconciliation", "schedule": crontab(hour=22, minute=0)},
         "complete-delivered-orders": {"task": "tezfarmo.complete_delivered_orders", "schedule": 1800.0},
         "purge-courier-sync": {"task": "tezfarmo.purge_courier_sync_operations", "schedule": 86400.0},
+        # Beat uses UTC; Asia/Dushanbe is UTC+05:00 without daylight saving.
+        "finance-reminders": {"task": "tezfarmo.finance_reminders", "schedule": crontab(hour=4, minute=0)},
+        "finance-reconciliation": {"task": "tezfarmo.finance_reconciliation", "schedule": crontab(hour=22, minute=30)},
     },
 )
 
@@ -52,6 +57,36 @@ celery_app.conf.update(
 def _runner() -> asyncio.Runner:
     # Created after the worker forks; reuse the loop that owns pooled async DB connections.
     return asyncio.Runner()
+
+
+@celery_app.task(name="tezfarmo.finance_reminders")
+def finance_reminders() -> int:
+    from app.core.db import get_sessionmaker
+    from app.modules.finance.jobs import send_reminders
+
+    async def run() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await send_reminders(session)
+
+    return _runner().run(run())
+
+
+@celery_app.task(name="tezfarmo.finance_reconciliation")
+def finance_reconciliation() -> int:
+    from app.core.db import get_sessionmaker
+    from app.core.monitoring import configure_monitoring, report_bug
+    from app.modules.finance.jobs import reconcile
+
+    async def run() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await reconcile(session)
+
+    mismatches = _runner().run(run())
+    if mismatches:
+        # Standalone workers do not run FastAPI's monitoring startup hook.
+        configure_monitoring()
+        report_bug("FINANCE_RECONCILIATION_MISMATCH")
+    return mismatches
 
 
 @celery_app.task(name="tezfarmo.process_imports")

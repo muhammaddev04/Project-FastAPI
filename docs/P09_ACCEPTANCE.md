@@ -122,11 +122,45 @@ identical artifacts. Ignored local evidence: `p09-api-final-tests.log`,
 This implementation checkpoint does not constitute browser acceptance or
 completion of P09.
 
+## Daily finance workers
+
+Celery Beat schedules debt reminders at 09:00 and reconciliation at 03:30
+Asia/Dushanbe (04:00 and 22:30 UTC). Standalone Celery installs the finance
+handlers and real P07 credit port alongside the other domain modules.
+
+Reminders cover one day before due, the first overdue day, and each seventh
+day thereafter. They exclude paid charges, respect the company's opt-out,
+and report only the outstanding amount. A unique reminder claim and its
+outbox event share a transaction; concurrent runs and retries emit once.
+
+Reconciliation follows the posting company lock order and checks projection
+versus ledger, projection versus outstanding minus unapplied, allocation
+totals for every charge and credit, positive delivered/disputed/completed
+orders with a charge, and confirmed payments with a credit and ledger entry.
+Each discrepancy creates an unresolved issue and durable event; the task
+reports mismatches to Sentry after the transaction commits. It does not
+repair financial rows, including missing balance projections.
+
+The focused isolated run passed 12 finance/subscription worker tests,
+including standalone Celery schedules/wiring/Sentry, reminder rollback and
+concurrency, and deliberate disposable-database corruption for all six
+reconciliation checks. Mandatory `python scripts/dev.py backend-ci` passed
+clean Linux dependencies, Ruff/format, strict uncached typing and fresh
+migrations without model drift. Local ignored evidence: `p09-worker-tests.log`
+and `p09-worker-ci.log`.
+
+The combined isolated run passed all 357 finance domain/model/service/API/job,
+delivery and standalone subscription-worker tests. After adding explicit Sentry
+initialization for a worker without FastAPI startup, the final focused run
+passed all 12 worker tests and the final mandatory backend-ci passed strict
+typing for 121 source files plus all dependency, formatting and migration
+checks. Evidence: `p09-worker-final-tests.log`,
+`p09-worker-standalone-tests.log`, `p09-worker-final-ci.log`.
+
 ## Remaining requirements
 
-- Daily reminder/reconciliation workers.
 - Company/store finance pages and courier cash recording.
-- Worker tests and Hypothesis tests of persisted operations.
+- Hypothesis tests of persisted operations.
 - Complete verify, isolated browser acceptance and generated API type drift checks.
 - Final acceptance evidence and PART_REPORT.md.
 
