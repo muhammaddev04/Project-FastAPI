@@ -214,17 +214,21 @@ the isolated real-browser acceptance was repeated against the p00 stack: P09 fin
 the P08 delivery regression both passed. Regenerating `frontend/openapi.json` and
 `src/shared/api/schema.d.ts` produced no drift.
 
-## Known deployment gap (not P09 code)
+## Deployment review
 
-`docker-compose.prod.yml` defines only postgres, redis, storage, backend and frontend,
-and `infra/deploy/remote-deploy.sh` restarts `backend frontend` only. No Celery worker or
-beat runs in production, so `tezfarmo.finance_reminders` (09:00) and
-`tezfarmo.finance_reconciliation` (03:30 Asia/Dushanbe) never fire on the server, as is
-already the case for the earlier scheduled tasks. Deployment itself is unaffected: P09
-adds no new required setting, the migration chain stays linear with the single head
-`20261008_0024`, the only change to an existing table is `companies.debt_reminders_enabled`
-with a server default, and the new `payments` table does not collide with
-`subscription_payments`. Closing this gap is a separate infrastructure decision for the
-owner.
+P09 adds no new required setting, so the deployment preflight is unchanged. The migration
+chain stays linear with the single head `20261008_0024`; the only change to an existing
+table is `companies.debt_reminders_enabled` with a server default, which PostgreSQL applies
+without rewriting the table. The new `payments` table does not collide with the billing
+`subscription_payments`. New frontend routes are served by the existing SPA fallback, and
+regenerating the API artifacts produces no drift.
+
+The review did find that production ran no Celery worker or beat, so
+`tezfarmo.finance_reminders` (09:00) and `tezfarmo.finance_reconciliation` (03:30
+Asia/Dushanbe) would never have fired on the server, as was already true of the earlier
+scheduled tasks. The owner approved closing this on 2026-10-08, and the follow-up
+infrastructure commit adds both containers to `docker-compose.prod.yml`, starts them in
+`infra/deploy/remote-deploy.sh` after the migration step, checks them for `running`,
+documents them in the runbook and guards their presence in CI.
 
 P10 remains unauthorized. Existing authentication behavior is preserved.

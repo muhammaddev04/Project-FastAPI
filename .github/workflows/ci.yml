@@ -238,6 +238,18 @@ jobs:
           fi
           echo "No data service is published; every published port is bound to 127.0.0.1."
 
+      - name: Production runs the scheduled work (Celery worker and beat)
+        run: |
+          set -euo pipefail
+          # Without these two services the Beat schedule (finance debt reminders and reconciliation,
+          # delivered-order completion, courier sync purge) never runs on the server, which is not
+          # visible from any API response. The deployment must also start them.
+          for service in celery-worker celery-beat; do
+            jq -e --arg s "$service" '.services | has($s)' /tmp/prod-compose.json > /dev/null               || { echo "::error file=docker-compose.prod.yml::service '$service' is missing; scheduled work would never run in production" >&2; exit 1; }
+            grep -q "$service" infra/deploy/remote-deploy.sh               || { echo "::error file=infra/deploy/remote-deploy.sh::the deployment never starts '$service'" >&2; exit 1; }
+          done
+          echo "Scheduled work is deployed: celery-worker and celery-beat are defined and started."
+
       - name: Build the production backend image
         run: docker build -t tezfarmo-backend:ci backend
 
@@ -250,4 +262,6 @@ jobs:
           # The backend image must be able to run migrations (deployment runs `alembic upgrade head`),
           # and the frontend image must serve a valid nginx configuration.
           docker run --rm tezfarmo-backend:ci alembic --help > /dev/null
+          # The same image runs the Celery worker and beat in production.
+          docker run --rm tezfarmo-backend:ci celery -A app.celery_app:celery_app --version > /dev/null
           docker run --rm tezfarmo-frontend:ci nginx -t

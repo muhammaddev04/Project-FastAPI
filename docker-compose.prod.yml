@@ -4,7 +4,8 @@
 # Every published port is bound to 127.0.0.1, and postgres / redis / storage publish no port at all:
 # they are reachable only over the tezfarmo-prod bridge network, never from the internet.
 #
-# Deployment never recreates postgres, redis or storage, and never runs `docker compose down`.
+# Deployment never recreates postgres, redis or storage, and never runs `docker compose down`;
+# it builds and restarts backend, frontend and the two Celery containers.
 # See docs/deployment.md for the full runbook (including the required .env files) and for rollback.
 #
 # The Compose project name is derived from the directory, so this file must stay in
@@ -80,6 +81,60 @@ services:
         condition: service_started
     ports:
       - "127.0.0.1:8211:8000"
+    networks:
+      - tezfarmo-prod
+
+  # Scheduled finance and maintenance work (debt reminders, reconciliation, delivered-order
+  # completion, courier sync purge) only runs if these two containers run: Beat emits the schedule,
+  # the worker executes it. Neither publishes a port; both reach postgres, redis and storage over
+  # the internal network only.
+  celery-worker:
+    build:
+      context: ./backend
+    container_name: tezfarmo-prod-celery-worker
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      # The broker is this stack's redis. Set here rather than in backend/.env so that an .env
+      # written before the workers existed (its default is a localhost port) cannot misdirect them.
+      CELERY_BROKER_URL: redis://redis:6379/1
+    command: celery -A app.celery_app:celery_app worker --loglevel=WARNING -Q default,notifications,heavy
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      storage:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.celery_app:celery_app inspect ping --destination celery@$$HOSTNAME --timeout 5 | grep -q pong"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    networks:
+      - tezfarmo-prod
+
+  celery-beat:
+    build:
+      context: ./backend
+    container_name: tezfarmo-prod-celery-beat
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+    command: celery -A app.celery_app:celery_app beat --loglevel=INFO --schedule=/tmp/celerybeat-schedule --pidfile=/tmp/celerybeat.pid
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; os.kill(int(open('/tmp/celerybeat.pid').read()), 0)"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     networks:
       - tezfarmo-prod
 

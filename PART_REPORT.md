@@ -28,9 +28,10 @@ regression both passed. Regenerating OpenAPI and the API types produced no drift
 Authentication, registration password rules, email verification/reset and duplicate
 registration behavior are preserved. P10 workflows have not started and require
 separate owner approval. No push or deployment is performed.
-Production note: the production Compose stack runs no Celery worker or beat, so the
-daily debt reminders and nightly reconciliation do not execute on the server yet. This
-is a pre-existing deployment gap, not a P09 code defect, and is recorded for the owner.
+Production note: the deployment review found that no Celery worker or beat ran in
+production, so the daily debt reminders and nightly reconciliation would never have
+executed on the server. The owner approved the fix and the follow-up infrastructure
+commit deploys both containers.
 [P09 acceptance evidence](docs/P09_ACCEPTANCE.md).
 
 # P08 delivery and courier offline workflows - 2026-10-08

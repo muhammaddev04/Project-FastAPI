@@ -8,7 +8,7 @@
 # a rollback is this same script with an earlier DEPLOY_SHA, nothing else.
 #
 # Scope and safety — this script, by construction:
-#   * touches only $PROJECT_DIR and only the backend / frontend services of this Compose project;
+#   * touches only $PROJECT_DIR and only the backend / frontend / Celery services of this project;
 #   * never runs `docker compose down` / `down -v` / `system prune` / `docker stop $(docker ps -q)`,
 #     never removes a volume, never recreates postgres / redis / storage;
 #   * never runs `git pull` (fetch + checkout of one exact SHA only);
@@ -39,9 +39,14 @@ READY_HEALTH_URL="${READY_HEALTH_URL:-http://127.0.0.1:8211/api/health/ready}"
 PUBLIC_HEALTH_URL="${PUBLIC_HEALTH_URL:-https://tezfarmo.qobus.tj/api/v1/meta}"
 HEALTH_TIMEOUT="${HEALTH_TIMEOUT:-120}"
 
-# Only these two services are ever built, started, inspected or logged.
-SERVICES=(backend frontend)
-CONTAINERS=(tezfarmo-prod-backend tezfarmo-prod-frontend)
+# Only these services are ever built, started, inspected or logged. The web pair is started before
+# migrations; the Celery pair is started after them, so Beat cannot dispatch a task into the old
+# schema during the upgrade. SERVICES is the union, used for state checks, `ps` and diagnostics.
+WEB_SERVICES=(backend frontend)
+WORKER_SERVICES=(celery-worker celery-beat)
+SERVICES=("${WEB_SERVICES[@]}" "${WORKER_SERVICES[@]}")
+CONTAINERS=(tezfarmo-prod-backend tezfarmo-prod-frontend
+            tezfarmo-prod-celery-worker tezfarmo-prod-celery-beat)
 
 log()  { printf '\n==> %s\n' "$*"; }
 fail() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
@@ -251,8 +256,8 @@ docker compose -f "$COMPOSE_FILE" config --quiet \
 # --no-deps keeps postgres / redis / storage exactly as they are: not recreated, not restarted.
 # From here on a failure leaves the stack changed, so diagnostics and the rollback hint are printed.
 deploy_started=1
-log "building and starting ${SERVICES[*]}"
-docker compose -f "$COMPOSE_FILE" up -d --build --no-deps "${SERVICES[@]}"
+log "building and starting ${WEB_SERVICES[*]}"
+docker compose -f "$COMPOSE_FILE" up -d --build --no-deps "${WEB_SERVICES[@]}"
 
 # ---------------------------------------------------------------------------- 5. migrations
 
@@ -262,6 +267,14 @@ docker compose -f "$COMPOSE_FILE" up -d --build --no-deps "${SERVICES[@]}"
 log "applying migrations: alembic upgrade head"
 docker compose -f "$COMPOSE_FILE" run --rm --no-deps backend alembic upgrade head \
   || fail "alembic upgrade head failed — the new containers are running against the old schema. Fix forward or roll back; the schema is NOT downgraded automatically."
+
+# ---------------------------------------------------------------------------- 5b. scheduled work
+
+# Started only now, on the migrated schema. Without these two containers the Celery Beat schedule
+# (finance debt reminders and reconciliation, delivered-order completion, courier sync purge) never
+# runs, so they are part of a deployment and are checked for "running" below like the web pair.
+log "building and starting ${WORKER_SERVICES[*]}"
+docker compose -f "$COMPOSE_FILE" up -d --build --no-deps "${WORKER_SERVICES[@]}"
 
 # ---------------------------------------------------------------------------- 6. containers are running
 

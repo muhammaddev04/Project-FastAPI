@@ -50,6 +50,15 @@ The host configuration is managed separately from deployment.
 | `tezfarmo-prod-storage` | `chrislusf/seaweedfs:latest` | volume `tezfarmo_prod_storage` |
 | `tezfarmo-prod-backend` | built from `./backend` | stateless |
 | `tezfarmo-prod-frontend` | built from `./frontend` | stateless |
+| `tezfarmo-prod-celery-worker` | built from `./backend` | stateless |
+| `tezfarmo-prod-celery-beat` | built from `./backend` | schedule file in the container |
+
+The two Celery containers run the scheduled work: finance debt reminders (09:00 Asia/Dushanbe) and
+reconciliation (03:30), delivered-order completion and the courier sync purge. Beat emits the
+schedule and the worker executes it, both from the backend image with the same `backend/.env`; the
+broker is this stack's Redis, set in the Compose file so an older `backend/.env` without
+`CELERY_BROKER_URL` cannot point them at a localhost port. Neither publishes a port. If both are
+stopped, the API keeps working and nothing scheduled ever runs, a state no API response reveals.
 
 > The Compose **project name** is derived from the directory name, and the volume names above are
 > prefixed with it. The checkout must therefore stay at `/home/dev/Project-FastAPI`: running the same
@@ -230,14 +239,16 @@ It then pipes `infra/deploy/remote-deploy.sh` to the server over SSH. The script
    file from that commit;
 8. `docker compose -f docker-compose.prod.yml up -d --build --no-deps backend frontend`;
 9. `docker compose -f docker-compose.prod.yml run --rm --no-deps backend alembic upgrade head`;
-10. checks both containers report `running`;
-11. health checks, each retried for up to 120 s — `http://127.0.0.1:8211/api/v1/meta`,
+10. `docker compose -f docker-compose.prod.yml up -d --build --no-deps celery-worker celery-beat`,
+    after the migration so Beat cannot dispatch a task into the old schema;
+11. checks all four containers report `running`;
+12. health checks, each retried for up to 120 s — `http://127.0.0.1:8211/api/v1/meta`,
     `http://127.0.0.1:8211/api/health/ready` (503 unless PostgreSQL **and** Redis are reachable), and
     `https://tezfarmo.qobus.tj/api/v1/meta`. The deployment **fails** if any of them never succeeds.
 
 Steps 1–7 run before anything changes: a failure there leaves the stack exactly as it was. From step 8
 onward, any failure prints `docker compose ps`, each container's status/exit code/restart count, and
-the last 80 log lines of `backend` and `frontend` — and then the previous known-good SHA with the exact
+the last 80 log lines of each deployed service — and then the previous known-good SHA with the exact
 rollback command. Diagnostics never include environment variables, `.env` contents or credentials, and
 the Compose file is only ever validated with `config --quiet` so that rendered `env_file` values are
 never emitted.
