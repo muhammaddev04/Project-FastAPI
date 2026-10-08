@@ -1,3 +1,16 @@
+# P09 finance started - 2026-10-08
+
+Owner authorized P09 on 2026-10-08. Status: IN PROGRESS, not DONE.
+The first backend increment adds exact financial domain calculations: deterministic
+FIFO allocation, amount validation, ledger directions, Dushanbe due dates, aging,
+net-balance credit checks and reminder scheduling. No live financial workflow is
+enabled by this increment. Database persistence, transactional services, APIs,
+workers, frontend and complete acceptance remain outstanding.
+Validation: 237 finance domain tests passed in the isolated Linux harness;
+dependencies, Ruff, strict mypy without cache and migration/model parity passed.
+See [P09 progress and remaining requirements](docs/P09_ACCEPTANCE.md).
+P10 and later still require separate owner approval.
+
 # P08 delivery and courier offline workflows - 2026-10-08
 
 P08 is implemented and locally accepted: transactional delivery creation and completion,
