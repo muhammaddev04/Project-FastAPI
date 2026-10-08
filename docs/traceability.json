@@ -732,5 +732,16 @@
   ],
   "DSP-024": [
     "backend/tests/test_returns_domain.py::test_dsp_024_sla_warning_idempotent"
+  ],
+  "RET-004": [
+    "backend/tests/test_returns_domain.py::test_return_state_machine_valid_invalid",
+    "backend/tests/test_returns_models.py::test_ret_004_one_open_return_per_order"
+  ],
+  "DSP-003": [
+    "backend/tests/test_returns_models.py::test_dsp_003_one_open_dispute_per_order"
+  ],
+  "DSP-010": [
+    "backend/tests/test_returns_models.py::test_return_and_dispute_history_is_append_only",
+    "backend/tests/test_returns_models.py::test_dispute_message_body_and_system_author"
   ]
 }

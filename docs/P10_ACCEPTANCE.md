@@ -35,10 +35,39 @@ tracked reference manifest (RET-001/002/003/010/012, DSP-001/002/021/024) passed
 This is a calculation layer only. Nothing is persisted and no endpoint exists, so no
 return or dispute workflow is available to a user.
 
+## Database foundation
+
+Revision `20261008_0025` adds `returns`, `return_items`, `return_status_history`,
+`disputes` and `dispute_messages`. The dispute-to-return reference is created after
+`returns` exists, because the two tables point at each other.
+
+The database, not a read-then-write, enforces the rules that matter:
+
+- One open return and one open dispute per order, as partial unique indexes over the
+  open statuses (RET-004, DSP-003). A closed return frees the order for another attempt.
+- The quantity ladder: approved <= requested, received <= approved, accepted <= received,
+  restock <= accepted, and each later step requires the one before it (RET-003).
+- `OTHER` must carry a note, a dispute description is at least 10 characters, a dispute
+  has exactly one subject matching its target type, and a credit note can only hang off a
+  completed return that earned credit.
+- Returns and disputes are immutable except for the columns their state machine moves;
+  a finished return and a closed dispute cannot be rewritten or deleted, and a return
+  quantity, once decided, cannot be rewritten (the step can only be filled in).
+- Status history and dispute messages are append-only through the core `forbid_mutation`
+  guard, and a SYSTEM message has no user author (DSP-010, DSP-021).
+- Both tables reuse the finance partnership-ownership trigger, so a record cannot be filed
+  under a company or store that is not its own partnership.
+
+Validation: 22 database protection tests passed against migrated PostgreSQL, asserting
+the actual trigger and constraint errors through direct SQL. The migration applied from
+an empty database, rolled back and re-applied, and `alembic check` reports no model
+drift. Ruff and strict mypy over 123 source files passed.
+
+These are foundation tests. No return or dispute workflow exists yet: there is still no
+service, endpoint or screen, so nothing can create one of these rows in the product.
+
 ## Remaining work
 
-- Data model: `returns`, `return_items`, `return_status_history`, `disputes`,
-  `dispute_messages`, their partial unique indexes and append-only guards.
 - Services: the return state machine with credit-note and restock posting, dispute
   resolution including the three resolution types, and the real `OpenDisputePort`.
 - APIs with idempotency keys, the P10 permission matrix, audit records and events.

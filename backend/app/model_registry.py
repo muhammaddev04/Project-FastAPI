@@ -36,6 +36,13 @@ from app.modules.inventory.models import Stock, StockMovement, StockReservation
 from app.modules.orders.models import Cart, CartItem, Order, OrderItem, OrderStatusHistory
 from app.modules.organizations.models import Company, Store
 from app.modules.partnerships.models import Partnership, PartnershipTerms
+from app.modules.returns.models import (
+    Dispute,
+    DisputeMessage,
+    Return,
+    ReturnItem,
+    ReturnStatusHistory,
+)
 from app.modules.subscriptions.models import (
     Plan,
     PlanChangeRequest,
@@ -70,6 +77,11 @@ __all__ = [
     "OrderStatusHistory",
     "Partnership",
     "PartnershipTerms",
+    "Dispute",
+    "DisputeMessage",
+    "Return",
+    "ReturnItem",
+    "ReturnStatusHistory",
     "Stock",
     "StockMovement",
     "StockReservation",

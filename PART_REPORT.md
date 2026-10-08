@@ -7,8 +7,12 @@ returns, credit with the order discount shared proportionally and no delivery fe
 base-unit restock conversion, the dispute and payment dispute windows, the adjustment
 ceiling and the idempotent SLA warning anchor. No return or dispute can be created yet:
 persistence, services, APIs, workers, frontend and acceptance are all outstanding.
-Validation: 15 P10 domain tests passed; Ruff, strict mypy over 122 source files and the
-tracked reference manifest passed.
+The second increment adds the five P10 tables with the one-open-per-order indexes, the
+quantity ladder, append-only history and messages, immutable record identity and the
+partnership ownership guard.
+Validation: 15 P10 domain tests and 22 database protection tests passed; migrations
+applied from empty, rolled back and re-applied without model drift; Ruff, strict mypy
+over 123 source files and the tracked reference manifest passed.
 See [P10 progress and remaining requirements](docs/P10_ACCEPTANCE.md).
 P11 and later still require separate owner approval.
 
