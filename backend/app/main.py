@@ -16,6 +16,7 @@ from app.modules.catalog.service import install as install_catalog
 from app.modules.delivery.ports import install as install_delivery
 from app.modules.delivery.router import router as delivery_router
 from app.modules.files.router import router as files_router
+from app.modules.finance.ports import install as install_finance
 from app.modules.identity.router import router as identity_router
 from app.modules.identity.team_router import router as team_router
 from app.modules.inventory.router import router as inventory_router
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     install_inventory()
     install_orders()
     install_delivery()
+    install_finance()
     app = FastAPI(
         title="TezFarmo API",
         version=settings.app_version,

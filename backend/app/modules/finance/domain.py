@@ -34,7 +34,7 @@ ENTRY_DIRECTIONS: dict[EntryType, Direction] = {
 def payment_amount(value: Decimal) -> Decimal:
     """FIN-020: reject extra decimal places rather than silently rounding money."""
     if not value.is_finite() or value <= ZERO or value > MAX_PAYMENT or value % CENT != ZERO:
-        raise AppError("validation_error", 422, {"field": "amount"})
+        raise AppError("payment_amount_invalid", 422, {"field": "amount"})
     return value.quantize(CENT)
 
 

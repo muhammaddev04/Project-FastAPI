@@ -32,6 +32,8 @@ _DELIVERY_ADMIN = _DELIVERY_VIEW | {
     "delivery.manual_confirm",
     "delivery.regenerate_code",
 }
+_FINANCE_VIEW = frozenset({"finance.view", "payments.record"})
+_FINANCE_ADMIN = _FINANCE_VIEW | {"payments.confirm", "payments.reject", "adjustments.create"}
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     ("COMPANY", "OWNER"): _MEMBER_ADMIN
@@ -41,6 +43,8 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _PARTNERS_ADMIN
     | _ORDER_ADMIN
     | _DELIVERY_ADMIN
+    | _FINANCE_ADMIN
+    | {"adjustments.approve"}
     | {"partners.terminate", "terms.manage_credit"}
     | {"subscription.view", "subscription.manage"},
     ("COMPANY", "MANAGER"): frozenset(
@@ -50,20 +54,23 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _STOCK_ADMIN
     | _PARTNERS_ADMIN
     | _ORDER_ADMIN
-    | _DELIVERY_ADMIN,
+    | _DELIVERY_ADMIN
+    | _FINANCE_ADMIN,
     ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view", "stock.view"})
     | _PARTNERS_VIEW
     | _ORDER_COMPANY
-    | _DELIVERY_VIEW,
+    | _DELIVERY_VIEW
+    | _FINANCE_VIEW,
     ("COMPANY", "WAREHOUSE"): frozenset(
         {"org.view", "catalog.view", "stock.view", "stock.receive", "stock.settings", "orders.view", "orders.assemble"}
     )
     | _DELIVERY_VIEW,
-    ("COMPANY", "COURIER"): frozenset({"org.view", "delivery.act_own"}),
+    ("COMPANY", "COURIER"): frozenset({"org.view", "delivery.act_own", "payments.record"}),
     ("STORE", "OWNER"): _MEMBER_ADMIN
     | _ORG_OWNER
     | _PARTNERS_VIEW
     | _ORDER_STORE
+    | _FINANCE_VIEW
     | {"partners.manage", "partners.terminate", "delivery.view_store"},
     ("STORE", "SELLER"): frozenset({"org.view", "delivery.view_store"}) | _PARTNERS_VIEW | _ORDER_STORE,
 }

@@ -14,6 +14,8 @@ class CreditCheck:
     limit: Decimal
     outstanding: Decimal = Decimal("0")
     unapplied: Decimal = Decimal("0")
+    balance: Decimal = Decimal("0")
+    available: Decimal = Decimal("0")
 
 
 class CreditPort(Protocol):
