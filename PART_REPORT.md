@@ -1,3 +1,17 @@
+# P10 returns and disputes started - 2026-10-08
+
+Owner authorized P10 on 2026-10-08. Status: IN PROGRESS, not DONE.
+This first increment adds only the pure P10 calculations: the return and dispute state
+machines, the return window and zero-day rule, the returnable quantity left after earlier
+returns, credit with the order discount shared proportionally and no delivery fee, the
+base-unit restock conversion, the dispute and payment dispute windows, the adjustment
+ceiling and the idempotent SLA warning anchor. No return or dispute can be created yet:
+persistence, services, APIs, workers, frontend and acceptance are all outstanding.
+Validation: 15 P10 domain tests passed; Ruff, strict mypy over 122 source files and the
+tracked reference manifest passed.
+See [P10 progress and remaining requirements](docs/P10_ACCEPTANCE.md).
+P11 and later still require separate owner approval.
+
 # P09 finance completion - 2026-10-08
 
 Owner authorized P09 on 2026-10-08. Status: DONE.

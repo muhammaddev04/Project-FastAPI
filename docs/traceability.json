@@ -296,106 +296,326 @@
     "backend/tests/auth/test_register.py::test_iam_016_delivery_failure_answers_503_and_creates_nothing",
     "backend/tests/identity/test_team.py::test_invitation_email_failure_rolls_back"
   ],
-  "SUB-001": ["backend/tests/test_subscription_api.py::test_sub_001_002_trial_and_store_free", "backend/tests/test_subscription_migration.py::test_p03_migration_backfills_trial_history_audit_and_event"],
-  "SUB-002": ["backend/tests/test_subscription_api.py::test_sub_001_002_trial_and_store_free"],
-  "SUB-003": ["backend/tests/test_subscription_api.py::test_sub_003_004_payment_idempotent_and_override"],
-  "SUB-004": ["backend/tests/test_subscription_domain.py::test_sub_004_calendar_months", "backend/tests/test_subscription_api.py::test_concurrent_payments_extend_without_lost_periods"],
-  "SUB-005": ["backend/tests/test_subscription_api.py::test_sub_005_tick_catchup_idempotent_audit_events", "backend/tests/test_subscription_api.py::test_sub_005_skip_locked_subscription_and_catchup"],
-  "SUB-006": ["backend/tests/test_subscription_domain.py::test_sub_006_guard_matrix", "backend/tests/test_subscription_api.py::test_sub_006_guard_expiry_and_member_invite"],
-  "SUB-007": ["backend/tests/test_subscription_api.py::test_sub_007_append_only"],
-  "SUB-008": ["backend/tests/test_subscription_domain.py::test_sub_008_limit_boundary_and_downgrade", "backend/tests/test_subscription_api.py::test_sub_008_009_limits_downgrade_preserves_members"],
-  "SUB-009": ["backend/tests/test_subscription_api.py::test_sub_008_009_limits_downgrade_preserves_members"],
-  "SUB-010": ["backend/tests/test_subscription_api.py::test_sub_010_reminders_once_per_anchor"],
-  "SUB-011": ["backend/tests/test_subscription_api.py::test_sub_011_012_owner_cancel_and_plan_request", "backend/tests/test_subscription_api.py::test_cancelled_paid_subscription_reactivates_and_resets_cancel"],
-  "SUB-012": ["backend/tests/test_subscription_api.py::test_sub_011_012_owner_cancel_and_plan_request"],
-  "CAT-001": ["backend/tests/test_catalog.py::test_cat_001_002_tenant_base_unit_and_idempotency"],
-  "CAT-002": ["backend/tests/test_catalog.py::test_cat_001_002_tenant_base_unit_and_idempotency"],
-  "CAT-003": ["backend/tests/test_catalog.py::test_cat_003_used_base_unit_immutable"],
-  "CAT-004": ["backend/tests/test_catalog.py::test_imp_005_prices_and_resolve_none"],
-  "CAT-005": ["backend/tests/test_catalog.py::test_cat_005_006_limits_activation_and_blocking", "backend/tests/test_catalog.py::test_imp_all_or_nothing_limit_rollback"],
-  "CAT-006": ["backend/tests/test_catalog.py::test_cat_005_006_limits_activation_and_blocking"],
-  "CAT-007": ["backend/tests/test_catalog.py::test_cat_007_category_tree_constraints"],
-  "CAT-008": ["backend/tests/test_catalog.py::test_units_and_immutable_trigger"],
-  "PRC-001": ["backend/tests/test_catalog.py::test_prc_001_002_003_history_future_cancel_resolve", "backend/tests/test_catalog.py::test_prc_concurrent_first_price_serialized"],
-  "PRC-002": ["backend/tests/test_catalog.py::test_prc_001_002_003_history_future_cancel_resolve"],
-  "PRC-003": ["backend/tests/test_catalog.py::test_prc_001_002_003_history_future_cancel_resolve", "backend/tests/test_catalog.py::test_imp_005_prices_and_resolve_none"],
-  "PRC-004": ["backend/tests/test_catalog.py::test_units_and_immutable_trigger"],
-  "PRC-005": ["backend/tests/test_catalog.py::test_prc_001_002_003_history_future_cancel_resolve"],
-  "IMP-001": ["backend/tests/test_catalog.py::test_import_invalid_file_and_upload_guards", "backend/tests/test_catalog.py::test_import_row_limit_and_formulas"],
-  "IMP-002": ["backend/tests/test_catalog.py::test_imp_errors_base_unit_duplicate_and_cancel", "backend/tests/test_catalog.py::test_imp_all_or_nothing_limit_rollback"],
-  "IMP-003": ["backend/tests/test_catalog.py::test_imp_localized_template"],
-  "IMP-004": ["backend/tests/test_catalog.py::test_imp_products_preview_confirm_upsert_and_categories", "backend/tests/test_catalog.py::test_imp_errors_base_unit_duplicate_and_cancel"],
-  "IMP-005": ["backend/tests/test_catalog.py::test_imp_005_prices_and_resolve_none"],
-  "IMP-006": ["backend/tests/test_catalog.py::test_imp_products_preview_confirm_upsert_and_categories"],
-  "INV-001": ["backend/tests/test_inventory.py::test_inv_001_unit_conversion_to_base"],
-  "INV-002": ["backend/tests/test_inventory.py::test_inv_002_reserve_all_or_nothing_lists_all_insufficient", "backend/tests/test_inventory.py::test_inv_002_concurrent_80_and_50_of_100_only_one_succeeds", "backend/tests/test_inventory.py::test_inv_002_concurrent_many_reservations_never_negative", "backend/tests/test_inventory.py::test_inv_002_lock_order_no_deadlock"],
-  "INV-003": ["backend/tests/test_inventory.py::test_inv_003_stock_movements_append_only_and_checks"],
-  "INV-004": ["backend/tests/test_inventory.py::test_inv_004_close_idempotent"],
-  "INV-005": ["backend/tests/test_inventory.py::test_inv_005_006_adjust_below_reserved_and_write_off_exceeds_available"],
-  "INV-006": ["backend/tests/test_inventory.py::test_inv_005_006_adjust_below_reserved_and_write_off_exceeds_available"],
-  "INV-007": ["backend/tests/test_inventory.py::test_inv_007_low_stock_event_once_per_24h"],
-  "INV-008": ["backend/tests/test_inventory.py::test_inv_008_manual_write_requires_catalog_subscription_access"],
-  "INV-009": ["backend/tests/test_inventory.py::test_inv_009_reconciliation_detects_mismatch"],
-  "INV-010": ["backend/tests/test_inventory.py::test_inv_010_stock_import_all_or_nothing", "backend/tests/test_inventory.py::test_inv_010_valid_stock_import_and_execution_rollback"],
+  "SUB-001": [
+    "backend/tests/test_subscription_api.py::test_sub_001_002_trial_and_store_free",
+    "backend/tests/test_subscription_migration.py::test_p03_migration_backfills_trial_history_audit_and_event"
+  ],
+  "SUB-002": [
+    "backend/tests/test_subscription_api.py::test_sub_001_002_trial_and_store_free"
+  ],
+  "SUB-003": [
+    "backend/tests/test_subscription_api.py::test_sub_003_004_payment_idempotent_and_override"
+  ],
+  "SUB-004": [
+    "backend/tests/test_subscription_domain.py::test_sub_004_calendar_months",
+    "backend/tests/test_subscription_api.py::test_concurrent_payments_extend_without_lost_periods"
+  ],
+  "SUB-005": [
+    "backend/tests/test_subscription_api.py::test_sub_005_tick_catchup_idempotent_audit_events",
+    "backend/tests/test_subscription_api.py::test_sub_005_skip_locked_subscription_and_catchup"
+  ],
+  "SUB-006": [
+    "backend/tests/test_subscription_domain.py::test_sub_006_guard_matrix",
+    "backend/tests/test_subscription_api.py::test_sub_006_guard_expiry_and_member_invite"
+  ],
+  "SUB-007": [
+    "backend/tests/test_subscription_api.py::test_sub_007_append_only"
+  ],
+  "SUB-008": [
+    "backend/tests/test_subscription_domain.py::test_sub_008_limit_boundary_and_downgrade",
+    "backend/tests/test_subscription_api.py::test_sub_008_009_limits_downgrade_preserves_members"
+  ],
+  "SUB-009": [
+    "backend/tests/test_subscription_api.py::test_sub_008_009_limits_downgrade_preserves_members"
+  ],
+  "SUB-010": [
+    "backend/tests/test_subscription_api.py::test_sub_010_reminders_once_per_anchor"
+  ],
+  "SUB-011": [
+    "backend/tests/test_subscription_api.py::test_sub_011_012_owner_cancel_and_plan_request",
+    "backend/tests/test_subscription_api.py::test_cancelled_paid_subscription_reactivates_and_resets_cancel"
+  ],
+  "SUB-012": [
+    "backend/tests/test_subscription_api.py::test_sub_011_012_owner_cancel_and_plan_request"
+  ],
+  "CAT-001": [
+    "backend/tests/test_catalog.py::test_cat_001_002_tenant_base_unit_and_idempotency"
+  ],
+  "CAT-002": [
+    "backend/tests/test_catalog.py::test_cat_001_002_tenant_base_unit_and_idempotency"
+  ],
+  "CAT-003": [
+    "backend/tests/test_catalog.py::test_cat_003_used_base_unit_immutable"
+  ],
+  "CAT-004": [
+    "backend/tests/test_catalog.py::test_imp_005_prices_and_resolve_none"
+  ],
+  "CAT-005": [
+    "backend/tests/test_catalog.py::test_cat_005_006_limits_activation_and_blocking",
+    "backend/tests/test_catalog.py::test_imp_all_or_nothing_limit_rollback"
+  ],
+  "CAT-006": [
+    "backend/tests/test_catalog.py::test_cat_005_006_limits_activation_and_blocking"
+  ],
+  "CAT-007": [
+    "backend/tests/test_catalog.py::test_cat_007_category_tree_constraints"
+  ],
+  "CAT-008": [
+    "backend/tests/test_catalog.py::test_units_and_immutable_trigger"
+  ],
+  "PRC-001": [
+    "backend/tests/test_catalog.py::test_prc_001_002_003_history_future_cancel_resolve",
+    "backend/tests/test_catalog.py::test_prc_concurrent_first_price_serialized"
+  ],
+  "PRC-002": [
+    "backend/tests/test_catalog.py::test_prc_001_002_003_history_future_cancel_resolve"
+  ],
+  "PRC-003": [
+    "backend/tests/test_catalog.py::test_prc_001_002_003_history_future_cancel_resolve",
+    "backend/tests/test_catalog.py::test_imp_005_prices_and_resolve_none"
+  ],
+  "PRC-004": [
+    "backend/tests/test_catalog.py::test_units_and_immutable_trigger"
+  ],
+  "PRC-005": [
+    "backend/tests/test_catalog.py::test_prc_001_002_003_history_future_cancel_resolve"
+  ],
+  "IMP-001": [
+    "backend/tests/test_catalog.py::test_import_invalid_file_and_upload_guards",
+    "backend/tests/test_catalog.py::test_import_row_limit_and_formulas"
+  ],
+  "IMP-002": [
+    "backend/tests/test_catalog.py::test_imp_errors_base_unit_duplicate_and_cancel",
+    "backend/tests/test_catalog.py::test_imp_all_or_nothing_limit_rollback"
+  ],
+  "IMP-003": [
+    "backend/tests/test_catalog.py::test_imp_localized_template"
+  ],
+  "IMP-004": [
+    "backend/tests/test_catalog.py::test_imp_products_preview_confirm_upsert_and_categories",
+    "backend/tests/test_catalog.py::test_imp_errors_base_unit_duplicate_and_cancel"
+  ],
+  "IMP-005": [
+    "backend/tests/test_catalog.py::test_imp_005_prices_and_resolve_none"
+  ],
+  "IMP-006": [
+    "backend/tests/test_catalog.py::test_imp_products_preview_confirm_upsert_and_categories"
+  ],
+  "INV-001": [
+    "backend/tests/test_inventory.py::test_inv_001_unit_conversion_to_base"
+  ],
+  "INV-002": [
+    "backend/tests/test_inventory.py::test_inv_002_reserve_all_or_nothing_lists_all_insufficient",
+    "backend/tests/test_inventory.py::test_inv_002_concurrent_80_and_50_of_100_only_one_succeeds",
+    "backend/tests/test_inventory.py::test_inv_002_concurrent_many_reservations_never_negative",
+    "backend/tests/test_inventory.py::test_inv_002_lock_order_no_deadlock"
+  ],
+  "INV-003": [
+    "backend/tests/test_inventory.py::test_inv_003_stock_movements_append_only_and_checks"
+  ],
+  "INV-004": [
+    "backend/tests/test_inventory.py::test_inv_004_close_idempotent"
+  ],
+  "INV-005": [
+    "backend/tests/test_inventory.py::test_inv_005_006_adjust_below_reserved_and_write_off_exceeds_available"
+  ],
+  "INV-006": [
+    "backend/tests/test_inventory.py::test_inv_005_006_adjust_below_reserved_and_write_off_exceeds_available"
+  ],
+  "INV-007": [
+    "backend/tests/test_inventory.py::test_inv_007_low_stock_event_once_per_24h"
+  ],
+  "INV-008": [
+    "backend/tests/test_inventory.py::test_inv_008_manual_write_requires_catalog_subscription_access"
+  ],
+  "INV-009": [
+    "backend/tests/test_inventory.py::test_inv_009_reconciliation_detects_mismatch"
+  ],
+  "INV-010": [
+    "backend/tests/test_inventory.py::test_inv_010_stock_import_all_or_nothing",
+    "backend/tests/test_inventory.py::test_inv_010_valid_stock_import_and_execution_rollback"
+  ],
   "FND-040": [
     "scripts/test_p00_tooling.py::test_ci_enforces_foundation_gates"
   ],
-  "PRT-001": ["backend/tests/test_partnerships.py::test_prt_009_terminate_calls_cancellation_port"],
-  "PRT-002": ["backend/tests/test_partnerships.py::test_prt_002_open_partnership_unique_constraint_and_service"],
-  "PRT-003": ["backend/tests/test_partnerships.py::test_prt_003_activation_requires_both_verified"],
-  "PRT-004": ["backend/tests/test_partnerships.py::test_prt_004_lookup_exact_match_only"],
-  "PRT-005": ["backend/tests/test_partnerships.py::test_prt_005_active_stores_limit_counts_suspended"],
-  "PRT-006": ["backend/tests/test_partnerships.py::test_prt_006_terms_versioning_and_effective_from_rules"],
-  "PRT-007": ["backend/tests/test_partnerships.py::test_prt_007_manager_cannot_change_credit"],
-  "PRT-008": ["backend/tests/test_partnerships.py::test_prt_008_foreign_price_list_rejected"],
-  "PRT-009": ["backend/tests/test_partnerships.py::test_prt_009_terminate_calls_cancellation_port"],
-  "PRT-010": ["backend/tests/test_partnerships.py::test_prt_010_new_order_gate"],
-  "PRT-011": ["backend/tests/test_partnerships.py::test_prt_011_profile_privacy_and_customer_code_version"],
-  "PRT-012": ["backend/tests/test_partnerships.py::test_prt_012_store_multiple_companies"],
-  "ORD-001": ["backend/tests/test_orders.py::test_ord_001_002_005_creation_guards"],
-  "ORD-002": ["backend/tests/test_orders.py::test_ord_001_002_005_creation_guards"],
-  "ORD-003": ["backend/tests/test_orders.py::test_ord_003_quantity_rules"],
-  "ORD-004": ["backend/tests/test_orders.py::test_ord_004_merges_duplicates"],
-  "ORD-005": ["backend/tests/test_orders.py::test_ord_001_002_005_creation_guards"],
-  "ORD-006": ["backend/tests/test_orders.py::test_ord_007_price_snapshot_create_no_reservation_and_immutable"],
-  "ORD-007": ["backend/tests/test_orders.py::test_ord_007_price_snapshot_create_no_reservation_and_immutable"],
-  "ORD-008": ["backend/tests/test_orders.py::test_ord_008_personal_cart_checkout_idempotent_atomic_clear"],
-  "ORD-009": ["backend/tests/test_orders.py::test_ord_007_price_snapshot_create_no_reservation_and_immutable"],
-  "ORD-010": ["backend/tests/test_orders.py::test_ord_010_all_invalid_transition_pairs_and_011_single_writer"],
-  "ORD-011": ["backend/tests/test_orders.py::test_ord_010_all_invalid_transition_pairs_and_011_single_writer"],
-  "ORD-020": ["backend/tests/test_orders.py::test_ord_020_021_026_partial_and_version_and_zero"],
-  "ORD-021": ["backend/tests/test_orders.py::test_ord_020_021_026_partial_and_version_and_zero"],
-  "ORD-022": ["backend/tests/test_orders.py::test_ord_022_current_terms_delivery_threshold_and_minimum_override"],
-  "ORD-023": ["backend/tests/test_orders.py::test_ord_022_023_credit_minimum_discount_overrides_audited"],
-  "ORD-024": ["backend/tests/test_orders.py::test_ord_024_concurrent_confirmation_only_one_reserves"],
-  "ORD-025": ["backend/tests/test_orders.py::test_ord_010_fulfillment_system_delivery_failure_dispute_and_completion"],
-  "ORD-026": ["backend/tests/test_orders.py::test_ord_020_021_026_partial_and_version_and_zero"],
-  "ORD-030": ["backend/tests/test_orders.py::test_ord_030_031_seller_own_rejection_and_transit_cancellation"],
-  "ORD-031": ["backend/tests/test_orders.py::test_ord_030_031_seller_own_rejection_and_transit_cancellation"],
-  "ORD-032": ["backend/tests/test_orders.py::test_ord_030_seller_own_and_032_cancel_releases"],
-  "ORD-040": ["backend/tests/test_orders.py::test_ord_040_catalog_no_exact_stock_and_repeat_reprices"],
-  "ORD-041": ["backend/tests/test_orders.py::test_ord_041_completion_window_and_open_dispute"],
-  "ORD-042": ["backend/tests/test_orders.py::test_ord_042_043_warehouse_no_prices_and_cross_tenant"],
-  "ORD-043": ["backend/tests/test_orders.py::test_ord_042_043_warehouse_no_prices_and_cross_tenant"],
-  "ORD-044": ["backend/tests/test_orders.py::test_ord_040_catalog_no_exact_stock_and_repeat_reprices"],
-  "DEL-001": ["backend/tests/test_delivery.py::test_del_001_order_ready_creates_planned", "backend/tests/test_delivery.py::test_del_001_reattempt_creates_new_attempt_no"],
-  "DEL-002": ["backend/tests/test_delivery.py::test_del_002_cancel_port_cancels_planned", "backend/tests/test_delivery.py::test_del_002_cancel_port_in_transit_raises"],
-  "DEL-003": ["backend/tests/test_delivery.py::test_del_003_courier_sees_only_own_404", "backend/tests/test_delivery.py::test_sync_cannot_act_on_or_disclose_another_couriers_stop"],
-  "DEL-004": ["backend/tests/test_delivery.py::test_permission_matrix_p08"],
-  "DEL-010": ["backend/tests/test_delivery.py::test_del_010_code_generated_on_dispatch_hash_and_encrypted"],
-  "DEL-011": ["backend/tests/test_delivery.py::test_del_011_wrong_code_attempts_and_lock_after_5"],
-  "DEL-012": ["backend/tests/test_delivery.py::test_del_012_code_never_in_audit_or_outbox", "backend/tests/test_delivery.py::test_del_012_code_visible_only_to_store_in_transit"],
-  "DEL-013": ["backend/tests/test_delivery.py::test_del_013_manual_override_requires_reason_and_audits"],
-  "DEL-014": ["backend/tests/test_delivery.py::test_del_014_regenerate_resets_attempts"],
-  "DEL-015": ["backend/tests/test_delivery.py::test_del_015_delivered_updates_order_and_stock_in_one_transaction", "backend/tests/test_delivery.py::test_del_015_order_failure_rolls_the_delivery_back"],
-  "DEL-016": ["frontend/src/features/delivery/delivery.test.tsx::hands map navigation to coordinates or an encoded address"],
-  "DEL-020": ["frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"],
-  "DEL-021": ["backend/tests/test_delivery.py::test_del_021_queued_code_is_not_stored_in_the_sync_log", "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"],
-  "DEL-022": ["backend/tests/test_delivery.py::test_del_022_sync_processes_in_client_order", "backend/tests/test_delivery.py::test_del_022_each_operation_commits_on_its_own"],
-  "DEL-023": ["backend/tests/test_delivery.py::test_del_023_duplicate_operation_returns_same_result", "backend/tests/test_delivery.py::test_sync_duplicate_keeps_the_original_conflict_state"],
-  "DEL-024": ["backend/tests/test_delivery.py::test_del_024_conflict_returns_server_state", "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"],
-  "DEL-025": ["backend/tests/test_delivery.py::test_del_025_confirm_after_arrive_is_applied"],
-  "DEL-026": ["backend/tests/test_delivery.py::test_del_026_invalid_code_is_rejected", "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"],
+  "PRT-001": [
+    "backend/tests/test_partnerships.py::test_prt_009_terminate_calls_cancellation_port"
+  ],
+  "PRT-002": [
+    "backend/tests/test_partnerships.py::test_prt_002_open_partnership_unique_constraint_and_service"
+  ],
+  "PRT-003": [
+    "backend/tests/test_partnerships.py::test_prt_003_activation_requires_both_verified"
+  ],
+  "PRT-004": [
+    "backend/tests/test_partnerships.py::test_prt_004_lookup_exact_match_only"
+  ],
+  "PRT-005": [
+    "backend/tests/test_partnerships.py::test_prt_005_active_stores_limit_counts_suspended"
+  ],
+  "PRT-006": [
+    "backend/tests/test_partnerships.py::test_prt_006_terms_versioning_and_effective_from_rules"
+  ],
+  "PRT-007": [
+    "backend/tests/test_partnerships.py::test_prt_007_manager_cannot_change_credit"
+  ],
+  "PRT-008": [
+    "backend/tests/test_partnerships.py::test_prt_008_foreign_price_list_rejected"
+  ],
+  "PRT-009": [
+    "backend/tests/test_partnerships.py::test_prt_009_terminate_calls_cancellation_port"
+  ],
+  "PRT-010": [
+    "backend/tests/test_partnerships.py::test_prt_010_new_order_gate"
+  ],
+  "PRT-011": [
+    "backend/tests/test_partnerships.py::test_prt_011_profile_privacy_and_customer_code_version"
+  ],
+  "PRT-012": [
+    "backend/tests/test_partnerships.py::test_prt_012_store_multiple_companies"
+  ],
+  "ORD-001": [
+    "backend/tests/test_orders.py::test_ord_001_002_005_creation_guards"
+  ],
+  "ORD-002": [
+    "backend/tests/test_orders.py::test_ord_001_002_005_creation_guards"
+  ],
+  "ORD-003": [
+    "backend/tests/test_orders.py::test_ord_003_quantity_rules"
+  ],
+  "ORD-004": [
+    "backend/tests/test_orders.py::test_ord_004_merges_duplicates"
+  ],
+  "ORD-005": [
+    "backend/tests/test_orders.py::test_ord_001_002_005_creation_guards"
+  ],
+  "ORD-006": [
+    "backend/tests/test_orders.py::test_ord_007_price_snapshot_create_no_reservation_and_immutable"
+  ],
+  "ORD-007": [
+    "backend/tests/test_orders.py::test_ord_007_price_snapshot_create_no_reservation_and_immutable"
+  ],
+  "ORD-008": [
+    "backend/tests/test_orders.py::test_ord_008_personal_cart_checkout_idempotent_atomic_clear"
+  ],
+  "ORD-009": [
+    "backend/tests/test_orders.py::test_ord_007_price_snapshot_create_no_reservation_and_immutable"
+  ],
+  "ORD-010": [
+    "backend/tests/test_orders.py::test_ord_010_all_invalid_transition_pairs_and_011_single_writer"
+  ],
+  "ORD-011": [
+    "backend/tests/test_orders.py::test_ord_010_all_invalid_transition_pairs_and_011_single_writer"
+  ],
+  "ORD-020": [
+    "backend/tests/test_orders.py::test_ord_020_021_026_partial_and_version_and_zero"
+  ],
+  "ORD-021": [
+    "backend/tests/test_orders.py::test_ord_020_021_026_partial_and_version_and_zero"
+  ],
+  "ORD-022": [
+    "backend/tests/test_orders.py::test_ord_022_current_terms_delivery_threshold_and_minimum_override"
+  ],
+  "ORD-023": [
+    "backend/tests/test_orders.py::test_ord_022_023_credit_minimum_discount_overrides_audited"
+  ],
+  "ORD-024": [
+    "backend/tests/test_orders.py::test_ord_024_concurrent_confirmation_only_one_reserves"
+  ],
+  "ORD-025": [
+    "backend/tests/test_orders.py::test_ord_010_fulfillment_system_delivery_failure_dispute_and_completion"
+  ],
+  "ORD-026": [
+    "backend/tests/test_orders.py::test_ord_020_021_026_partial_and_version_and_zero"
+  ],
+  "ORD-030": [
+    "backend/tests/test_orders.py::test_ord_030_031_seller_own_rejection_and_transit_cancellation"
+  ],
+  "ORD-031": [
+    "backend/tests/test_orders.py::test_ord_030_031_seller_own_rejection_and_transit_cancellation"
+  ],
+  "ORD-032": [
+    "backend/tests/test_orders.py::test_ord_030_seller_own_and_032_cancel_releases"
+  ],
+  "ORD-040": [
+    "backend/tests/test_orders.py::test_ord_040_catalog_no_exact_stock_and_repeat_reprices"
+  ],
+  "ORD-041": [
+    "backend/tests/test_orders.py::test_ord_041_completion_window_and_open_dispute"
+  ],
+  "ORD-042": [
+    "backend/tests/test_orders.py::test_ord_042_043_warehouse_no_prices_and_cross_tenant"
+  ],
+  "ORD-043": [
+    "backend/tests/test_orders.py::test_ord_042_043_warehouse_no_prices_and_cross_tenant"
+  ],
+  "ORD-044": [
+    "backend/tests/test_orders.py::test_ord_040_catalog_no_exact_stock_and_repeat_reprices"
+  ],
+  "DEL-001": [
+    "backend/tests/test_delivery.py::test_del_001_order_ready_creates_planned",
+    "backend/tests/test_delivery.py::test_del_001_reattempt_creates_new_attempt_no"
+  ],
+  "DEL-002": [
+    "backend/tests/test_delivery.py::test_del_002_cancel_port_cancels_planned",
+    "backend/tests/test_delivery.py::test_del_002_cancel_port_in_transit_raises"
+  ],
+  "DEL-003": [
+    "backend/tests/test_delivery.py::test_del_003_courier_sees_only_own_404",
+    "backend/tests/test_delivery.py::test_sync_cannot_act_on_or_disclose_another_couriers_stop"
+  ],
+  "DEL-004": [
+    "backend/tests/test_delivery.py::test_permission_matrix_p08"
+  ],
+  "DEL-010": [
+    "backend/tests/test_delivery.py::test_del_010_code_generated_on_dispatch_hash_and_encrypted"
+  ],
+  "DEL-011": [
+    "backend/tests/test_delivery.py::test_del_011_wrong_code_attempts_and_lock_after_5"
+  ],
+  "DEL-012": [
+    "backend/tests/test_delivery.py::test_del_012_code_never_in_audit_or_outbox",
+    "backend/tests/test_delivery.py::test_del_012_code_visible_only_to_store_in_transit"
+  ],
+  "DEL-013": [
+    "backend/tests/test_delivery.py::test_del_013_manual_override_requires_reason_and_audits"
+  ],
+  "DEL-014": [
+    "backend/tests/test_delivery.py::test_del_014_regenerate_resets_attempts"
+  ],
+  "DEL-015": [
+    "backend/tests/test_delivery.py::test_del_015_delivered_updates_order_and_stock_in_one_transaction",
+    "backend/tests/test_delivery.py::test_del_015_order_failure_rolls_the_delivery_back"
+  ],
+  "DEL-016": [
+    "frontend/src/features/delivery/delivery.test.tsx::hands map navigation to coordinates or an encoded address"
+  ],
+  "DEL-020": [
+    "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"
+  ],
+  "DEL-021": [
+    "backend/tests/test_delivery.py::test_del_021_queued_code_is_not_stored_in_the_sync_log",
+    "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"
+  ],
+  "DEL-022": [
+    "backend/tests/test_delivery.py::test_del_022_sync_processes_in_client_order",
+    "backend/tests/test_delivery.py::test_del_022_each_operation_commits_on_its_own"
+  ],
+  "DEL-023": [
+    "backend/tests/test_delivery.py::test_del_023_duplicate_operation_returns_same_result",
+    "backend/tests/test_delivery.py::test_sync_duplicate_keeps_the_original_conflict_state"
+  ],
+  "DEL-024": [
+    "backend/tests/test_delivery.py::test_del_024_conflict_returns_server_state",
+    "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"
+  ],
+  "DEL-025": [
+    "backend/tests/test_delivery.py::test_del_025_confirm_after_arrive_is_applied"
+  ],
+  "DEL-026": [
+    "backend/tests/test_delivery.py::test_del_026_invalid_code_is_rejected",
+    "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"
+  ],
   "FIN-001": [
     "backend/tests/test_finance_models.py::test_fin_001_direction_matches_entry_type_check"
   ],
@@ -481,5 +701,36 @@
   ],
   "FIN-060": [
     "backend/tests/test_finance_jobs.py::test_reconciliation_detects_corruption_without_repair"
+  ],
+  "RET-001": [
+    "backend/tests/test_returns_domain.py::test_ret_001_order_status_required"
+  ],
+  "RET-002": [
+    "backend/tests/test_returns_domain.py::test_ret_002_window_closed",
+    "backend/tests/test_returns_domain.py::test_ret_002_zero_days_forbids_returns"
+  ],
+  "RET-003": [
+    "backend/tests/test_returns_domain.py::test_ret_003_quantity_exceeds_considers_previous_returns",
+    "backend/tests/test_returns_domain.py::test_quantity_ladder_is_bounded_by_the_previous_step"
+  ],
+  "RET-010": [
+    "backend/tests/test_returns_domain.py::test_ret_010_credit_with_proportional_discount_no_delivery_fee",
+    "backend/tests/test_returns_domain.py::test_ret_010_rounds_once_per_line"
+  ],
+  "RET-012": [
+    "backend/tests/test_returns_domain.py::test_ret_012_restock_movement_base_units",
+    "backend/tests/test_returns_domain.py::test_ret_012_damaged_not_restocked"
+  ],
+  "DSP-001": [
+    "backend/tests/test_returns_domain.py::test_dsp_001_window_and_order_status"
+  ],
+  "DSP-002": [
+    "backend/tests/test_returns_domain.py::test_dsp_002_payment_dispute_window_is_thirty_days"
+  ],
+  "DSP-021": [
+    "backend/tests/test_returns_domain.py::test_dsp_021_adjustment_cannot_exceed_the_order"
+  ],
+  "DSP-024": [
+    "backend/tests/test_returns_domain.py::test_dsp_024_sla_warning_idempotent"
   ]
 }
