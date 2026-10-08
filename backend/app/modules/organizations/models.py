@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, Numeric, String, text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, Numeric, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -45,6 +45,7 @@ class Company(_Profile, Base):
     id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="RESTRICT"), primary_key=True)
     tax_identifier: Mapped[str] = mapped_column(String(32), unique=True)
     public_code: Mapped[str] = mapped_column(String(8), unique=True)
+    debt_reminders_enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
     # TZ data dictionary `companies.logo` (CR-003): the company's own ORG_LOGO file.
     logo_file_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("stored_files.id", ondelete="SET NULL"), index=True, nullable=True

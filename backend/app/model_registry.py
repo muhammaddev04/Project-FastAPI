@@ -18,6 +18,19 @@ from app.modules.catalog.models import (
 )
 from app.modules.delivery.models import CourierSyncOperation, Delivery, DeliveryRun, DeliveryStatusHistory
 from app.modules.files.models import StoredFile
+from app.modules.finance.models import (
+    Adjustment,
+    Allocation,
+    Charge,
+    Credit,
+    CreditNote,
+    DebtReminder,
+    LedgerEntry,
+    PartnershipBalance,
+    Payment,
+    PaymentStatusHistory,
+    ReconciliationIssue,
+)
 from app.modules.identity.models import Membership, MembershipInvitation, OAuthIdentity, Organization, User
 from app.modules.inventory.models import Stock, StockMovement, StockReservation
 from app.modules.orders.models import Cart, CartItem, Order, OrderItem, OrderStatusHistory
@@ -35,6 +48,17 @@ from app.modules.support.models import SupportTicket
 from app.modules.verification.models import VerificationDocument, VerificationRequest
 
 __all__ = [
+    "Adjustment",
+    "Allocation",
+    "Charge",
+    "Credit",
+    "CreditNote",
+    "DebtReminder",
+    "LedgerEntry",
+    "PartnershipBalance",
+    "Payment",
+    "PaymentStatusHistory",
+    "ReconciliationIssue",
     "CourierSyncOperation",
     "Delivery",
     "DeliveryRun",
