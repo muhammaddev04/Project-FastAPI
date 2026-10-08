@@ -17,6 +17,7 @@ from app.modules.delivery.ports import install as install_delivery
 from app.modules.delivery.router import router as delivery_router
 from app.modules.files.router import router as files_router
 from app.modules.finance.ports import install as install_finance
+from app.modules.finance.router import router as finance_router
 from app.modules.identity.router import router as identity_router
 from app.modules.identity.team_router import router as team_router
 from app.modules.inventory.router import router as inventory_router
@@ -91,6 +92,7 @@ def create_app() -> FastAPI:
     app.include_router(partnerships_router)
     app.include_router(orders_router)
     app.include_router(delivery_router)
+    app.include_router(finance_router)
     install_error_contract(app)
     return app
 

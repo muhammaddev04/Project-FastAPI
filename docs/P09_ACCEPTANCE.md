@@ -84,13 +84,49 @@ Local ignored evidence: `p09-service-tests.log` (regressions and an initial cloc
 fixture failure corrected in the final run) and `p09-service-final-tests.log`
 (270 passed). This is backend service validation, not full P09 acceptance.
 
+## Finance API and offline cash
+
+Tenant-scoped summary, partnership balances, charge detail, FIFO preview and
+Dushanbe-date statements are exposed through the P09 routes. Lists use bounded
+pagination, deterministic tie breakers and validated filters. Aggregated balance
+reads use one SQL snapshot without multiplying charge/credit joins. Statements
+include the opening balance and an inclusive local end date.
+
+Payment record/confirm/reject/cancel and adjustment create/approve/reject routes
+require idempotency keys. Cached replies check current membership/permissions,
+bind the tenant and resource into the request hash, and check the additional
+confirmation permission before replaying a record-and-confirm request.
+Store owners can report pending payments; confirmation remains company-only.
+Superadmins can list and resolve reconciliation issues with an audit record.
+
+Courier `PAYMENT_RECORD` accepts only amount and note for the courier's assigned
+delivery, creates a pending CASH payment, and returns its payment ID. Replaying
+the operation returns the original ID without another payment. Each offline
+operation remains a separate transaction. The sync log retains only allowed
+scalar payload fields, excluding extra and nested handover-code fields.
+
+The finance response schema uses `FinancePaymentOut` to preserve the existing
+subscription `PaymentOut` generated API contract. Frontend API types are updated;
+finance screens and the courier cash interface remain unfinished.
+
+Validation: the final mandatory `python scripts/dev.py backend-ci` passed
+clean Linux dependencies, Ruff/format, strict uncached mypy (120 source files),
+fresh migrations and zero model drift. The isolated combined run passed 79
+finance API/service and delivery tests. After adding terminal-payment,
+adjustment-decision and aging coverage and preserving the billing schema name,
+the final isolated API run passed all 19 tests. Frontend lint, TypeScript
+typecheck and formatting passed. Regenerating OpenAPI and API types produced
+identical artifacts. Ignored local evidence: `p09-api-final-tests.log`,
+`p09-api-complete-tests.log`, `p09-api-final-ci.log`.
+
+This implementation checkpoint does not constitute browser acceptance or
+completion of P09.
+
 ## Remaining requirements
 
-- Tenant-scoped APIs, idempotency and courier offline PAYMENT_RECORD.
-- Statement queries and API response/filter/pagination contracts.
-- Daily reminder/reconciliation workers and superadmin issue resolution.
+- Daily reminder/reconciliation workers.
 - Company/store finance pages and courier cash recording.
-- Remaining API/idempotency/worker tests and Hypothesis tests of persisted operations.
+- Worker tests and Hypothesis tests of persisted operations.
 - Complete verify, isolated browser acceptance and generated API type drift checks.
 - Final acceptance evidence and PART_REPORT.md.
 

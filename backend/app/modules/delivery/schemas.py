@@ -204,6 +204,7 @@ class SyncResultOut(BaseModel):
     result_status: SyncResult
     error: str | None = None
     server_state: DeliveryOut | None = None
+    payment_id: UUID | None = None
 
 
 class SyncOut(BaseModel):

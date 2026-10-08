@@ -7,13 +7,14 @@ order/delivery locks. Savepoints undo posting even when a caller catches an erro
 
 import logging
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import Select, case, func, select
 from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.engine import RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import audit
@@ -36,7 +37,8 @@ from app.modules.finance.models import (
 from app.modules.identity.deps import OrgContext
 from app.modules.identity.team_service import lock_org
 from app.modules.orders.models import Order
-from app.modules.partnerships.models import Partnership
+from app.modules.organizations.models import Company, Store
+from app.modules.partnerships.models import Partnership, PartnershipTerms
 from app.modules.partnerships.service import require, terms_service
 from app.modules.subscriptions import service as subscriptions
 from app.modules.subscriptions.domain import SubAction
@@ -129,6 +131,7 @@ class FinanceService:
             balance_after=after,
             description=description,
             created_by=actor_id,
+            created_at=utcnow(),
         )
         session.add(entry)
         await session.flush()
@@ -694,6 +697,148 @@ class FinanceService:
             for line in domain.allocate_fifo(self._charges(charges), self._credits(credits) + [hypothetical])
             if line.credit_id == hypothetical.id
         ]
+
+    def balances_query(self, ctx: OrgContext) -> Select[Any]:
+        """One SQL snapshot for tenant summaries/lists; aggregate each side before joining."""
+        today = domain.local_date(utcnow())
+        remaining = Charge.amount - Charge.allocated_amount
+        buckets = {
+            "current": Charge.due_date >= today,
+            "1-30": (Charge.due_date < today) & (Charge.due_date >= today - timedelta(days=30)),
+            "31-60": (Charge.due_date < today - timedelta(days=30)) & (Charge.due_date >= today - timedelta(days=60)),
+            "61-90": (Charge.due_date < today - timedelta(days=60)) & (Charge.due_date >= today - timedelta(days=90)),
+            "90+": Charge.due_date < today - timedelta(days=90),
+        }
+        charges = (
+            select(
+                Charge.partnership_id,
+                func.sum(remaining).label("outstanding"),
+                *(
+                    func.sum(case((predicate, remaining), else_=domain.ZERO)).label(key)
+                    for key, predicate in buckets.items()
+                ),
+            )
+            .group_by(Charge.partnership_id)
+            .subquery()
+        )
+        credits = (
+            select(Credit.partnership_id, func.sum(Credit.amount - Credit.allocated_amount).label("unapplied"))
+            .group_by(Credit.partnership_id)
+            .subquery()
+        )
+        limit = func.coalesce(
+            select(PartnershipTerms.credit_limit)
+            .where(PartnershipTerms.partnership_id == Partnership.id, PartnershipTerms.effective_from <= utcnow())
+            .order_by(PartnershipTerms.effective_from.desc(), PartnershipTerms.version_no.desc())
+            .limit(1)
+            .scalar_subquery(),
+            domain.ZERO,
+        )
+        balance = func.coalesce(PartnershipBalance.balance, domain.ZERO)
+        overdue = (
+            func.coalesce(charges.c["1-30"], domain.ZERO)
+            + func.coalesce(charges.c["31-60"], domain.ZERO)
+            + func.coalesce(charges.c["61-90"], domain.ZERO)
+            + func.coalesce(charges.c["90+"], domain.ZERO)
+        )
+        company_side = ctx.organization.type == "COMPANY"
+        scoped = Partnership.company_id if company_side else Partnership.store_id
+        name = Store.legal_name if company_side else Company.legal_name
+        return (
+            select(
+                Partnership.id.label("partnership_id"),
+                Partnership.company_id,
+                Partnership.store_id,
+                name.label("partner_name"),
+                balance.label("balance"),
+                func.coalesce(charges.c.outstanding, domain.ZERO).label("outstanding"),
+                func.coalesce(credits.c.unapplied, domain.ZERO).label("unapplied"),
+                overdue.label("overdue"),
+                limit.label("credit_limit"),
+                (limit - balance).label("available"),
+                *(func.coalesce(charges.c[key], domain.ZERO).label(key) for key in buckets),
+            )
+            .select_from(Partnership)
+            .join(Company, Company.id == Partnership.company_id)
+            .join(Store, Store.id == Partnership.store_id)
+            .outerjoin(PartnershipBalance, PartnershipBalance.partnership_id == Partnership.id)
+            .outerjoin(charges, charges.c.partnership_id == Partnership.id)
+            .outerjoin(credits, credits.c.partnership_id == Partnership.id)
+            .where(scoped == ctx.organization.id, Partnership.status.in_(["ACTIVE", "SUSPENDED", "TERMINATED"]))
+        )
+
+    @staticmethod
+    def balance_output(row: RowMapping) -> dict[str, Any]:
+        buckets = ["current", "1-30", "31-60", "61-90", "90+"]
+        return {key: value for key, value in row.items() if key not in buckets} | {
+            "aging": {key: row[key] for key in buckets}
+        }
+
+    async def summary(self, session: AsyncSession, ctx: OrgContext) -> dict[str, Any]:
+        rows = (await session.execute(self.balances_query(ctx))).mappings().all()
+        totals = {
+            key: sum((r[key] for r in rows), domain.ZERO) for key in ["balance", "outstanding", "unapplied", "overdue"]
+        }
+        return totals | {
+            "aging": {
+                key: sum((r[key] for r in rows), domain.ZERO) for key in ["current", "1-30", "31-60", "61-90", "90+"]
+            }
+        }
+
+    async def payment_preview(self, session: AsyncSession, partnership_id: UUID, amount: Decimal) -> dict[str, Any]:
+        lines = await self.allocation_preview(session, partnership_id, amount)
+        charges = {
+            r.id: r
+            for r in await session.scalars(select(Charge).where(Charge.id.in_([line.charge_id for line in lines])))
+        }
+        allocated = sum((line.amount for line in lines), domain.ZERO)
+        return {
+            "amount": amount,
+            "allocated": allocated,
+            "unapplied": amount - allocated,
+            "lines": [
+                {
+                    "charge_id": line.charge_id,
+                    "amount": line.amount,
+                    "due_date": charges[line.charge_id].due_date,
+                    "source_id": charges[line.charge_id].source_id,
+                }
+                for line in lines
+            ],
+        }
+
+    async def statement(
+        self, session: AsyncSession, partnership_id: UUID, date_from: date | None, date_to: date | None
+    ) -> dict[str, Any]:
+        if date_from and date_to and date_from > date_to:
+            raise AppError("validation_error", 422, {"field": "date_from"})
+        await self._lock(session, partnership_id)
+        query = select(LedgerEntry).where(LedgerEntry.partnership_id == partnership_id)
+        signed = case((LedgerEntry.direction == "DEBIT", LedgerEntry.amount), else_=-LedgerEntry.amount)
+        opening = domain.ZERO
+        if date_from:
+            start = datetime.combine(date_from, time.min, tzinfo=domain.FINANCE_TIMEZONE)
+            opening = (
+                await session.execute(
+                    select(func.coalesce(func.sum(signed), domain.ZERO)).where(
+                        LedgerEntry.partnership_id == partnership_id, LedgerEntry.created_at < start
+                    )
+                )
+            ).scalar_one()
+            query = query.where(LedgerEntry.created_at >= start)
+        if date_to and date_to < date.max:
+            end = datetime.combine(date_to + timedelta(days=1), time.min, tzinfo=domain.FINANCE_TIMEZONE)
+            query = query.where(LedgerEntry.created_at < end)
+        entries = list(await session.scalars(query.order_by(LedgerEntry.created_at, LedgerEntry.id)))
+        closing = opening + sum((e.amount if e.direction == "DEBIT" else -e.amount for e in entries), domain.ZERO)
+        return {
+            "partnership_id": partnership_id,
+            "date_from": date_from,
+            "date_to": date_to,
+            "opening_balance": opening,
+            "closing_balance": closing,
+            "entries": entries,
+        }
 
 
 finance_service = FinanceService()

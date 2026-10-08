@@ -14,6 +14,7 @@ decide the outcome and none of them is the client's opinion of the world:
 from typing import Any
 from uuid import UUID
 
+from pydantic import ValidationError
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +24,10 @@ from app.core.time import utcnow
 from app.modules.delivery.models import CourierSyncOperation, Delivery
 from app.modules.delivery.schemas import DeliveryOut, SyncOperationIn, SyncResult, SyncResultOut
 from app.modules.delivery.service import Actor, delivery_service
+from app.modules.finance.schemas import CourierPaymentIn
+from app.modules.finance.service import finance_service
 from app.modules.identity.deps import OrgContext
+from app.modules.orders.models import Order
 
 #  DEL-024/026: a conflict means "the server moved on, here is where it is"; a rejection means the
 # operation itself was never acceptable. The client clears both from the queue but shows them apart.
@@ -43,9 +47,7 @@ async def _state(session: AsyncSession, ctx: OrgContext, delivery_id: UUID) -> D
     return DeliveryOut.model_validate(delivery) if delivery else None
 
 
-async def _perform(session: AsyncSession, actor: Actor, operation: SyncOperationIn) -> None:
-    if operation.operation_type == "PAYMENT_RECORD":
-        raise AppError("not_supported", 422)
+async def _perform(session: AsyncSession, actor: Actor, operation: SyncOperationIn) -> UUID | None:
     delivery = await session.scalar(
         select(Delivery).where(Delivery.id == operation.entity_id, Delivery.company_id == actor.ctx.organization.id)
     )
@@ -53,6 +55,18 @@ async def _perform(session: AsyncSession, actor: Actor, operation: SyncOperation
         "delivery.act_any" not in actor.ctx.permissions and delivery.courier_id != actor.ctx.user.id
     ):
         raise AppError("not_found", 404)
+    if operation.operation_type == "PAYMENT_RECORD":
+        try:
+            payload = CourierPaymentIn.model_validate(operation.payload)
+        except ValidationError as exc:
+            raise AppError("validation_error", 422) from exc
+        order = await session.get(Order, delivery.order_id)
+        if order is None:
+            raise AppError("not_found", 404)
+        payment = await finance_service.record_payment(
+            session, actor.ctx, order.partnership_id, payload.amount, "CASH", note=payload.note, delivery_id=delivery.id
+        )
+        return payment.id
     if operation.operation_type == "DELIVERY_ARRIVE":
         await delivery_service.arrive(session, actor, delivery)
     elif operation.operation_type == "DELIVERY_CONFIRM":
@@ -67,16 +81,24 @@ async def _perform(session: AsyncSession, actor: Actor, operation: SyncOperation
         reason = str(operation.payload.get("reason_code") or "")
         note = operation.payload.get("note")
         await delivery_service.fail(session, actor, delivery, reason, str(note) if note else None)
-    else:  # PAYMENT_RECORD arrives before P09 exists.
+    else:
         raise AppError("not_supported", 422)
+    return None
 
 
 def _stored_payload(operation: SyncOperationIn) -> dict[str, Any]:
     """DEL-021: whatever the client sent, the code is not what gets written down."""
     # Allowlist avoids retaining codes hidden in arbitrary extra/nested fields.
-    return {key: value for key, value in operation.payload.items() if key in {"reason_code", "note"}} | {
-        "expected_status": operation.expected_status
+    stored: dict[str, Any] = {
+        key: value
+        for key, value in operation.payload.items()
+        if key in {"reason_code", "note"} and isinstance(value, str)
     }
+    if operation.operation_type == "PAYMENT_RECORD":
+        amount = operation.payload.get("amount")
+        if isinstance(amount, str | int | float) and not isinstance(amount, bool):
+            stored["amount"] = amount
+    return stored | {"expected_status": operation.expected_status}
 
 
 class SyncService:
@@ -109,13 +131,15 @@ class SyncService:
                     result_status="DUPLICATE",
                     error=seen.result.get("error"),
                     server_state=DeliveryOut.model_validate(stored_state) if stored_state else None,
+                    payment_id=UUID(seen.result["payment_id"]) if seen.result.get("payment_id") else None,
                 )
             status: SyncResult = "APPLIED"
             error: str | None = None
+            payment_id: UUID | None = None
             try:
                 # A savepoint, so a refused operation still leaves the log row behind to commit.
                 async with session.begin_nested():
-                    await _perform(session, Actor(ctx, "OFFLINE_SYNC"), operation)
+                    payment_id = await _perform(session, Actor(ctx, "OFFLINE_SYNC"), operation)
             except AppError as refused:
                 status, error = _classify(refused)
             state = await _state(session, ctx, operation.entity_id)
@@ -131,6 +155,7 @@ class SyncService:
                     result_status=status,
                     result={
                         "error": error,
+                        "payment_id": str(payment_id) if payment_id else None,
                         "server_state": state.model_dump(mode="json") if state and status == "CONFLICT" else None,
                     },
                 )
@@ -141,6 +166,7 @@ class SyncService:
             result_status=status,
             error=error,
             server_state=state if status == "CONFLICT" else None,
+            payment_id=payment_id,
         )
 
 

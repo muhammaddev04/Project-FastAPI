@@ -550,7 +550,7 @@ async def test_del_022_each_operation_commits_on_its_own(client: AsyncClient, se
     results = await sync(client, courier, ctx.organization, [good, bad])
     assert results[good["operation_id"]]["result_status"] == "APPLIED"
     assert results[bad["operation_id"]]["result_status"] == "REJECTED"
-    assert results[bad["operation_id"]]["error"] == "not_supported"
+    assert results[bad["operation_id"]]["error"] == "validation_error"
     await session.refresh(delivery)
     assert delivery.status == "ARRIVED"
 
