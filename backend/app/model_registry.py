@@ -16,6 +16,7 @@ from app.modules.catalog.models import (
     Product,
     ProductUnit,
 )
+from app.modules.delivery.models import CourierSyncOperation, Delivery, DeliveryRun, DeliveryStatusHistory
 from app.modules.files.models import StoredFile
 from app.modules.identity.models import Membership, MembershipInvitation, OAuthIdentity, Organization, User
 from app.modules.inventory.models import Stock, StockMovement, StockReservation
@@ -34,6 +35,10 @@ from app.modules.support.models import SupportTicket
 from app.modules.verification.models import VerificationDocument, VerificationRequest
 
 __all__ = [
+    "CourierSyncOperation",
+    "Delivery",
+    "DeliveryRun",
+    "DeliveryStatusHistory",
     "Cart",
     "CartItem",
     "Order",

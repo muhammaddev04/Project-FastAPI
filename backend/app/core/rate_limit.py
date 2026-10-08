@@ -36,6 +36,9 @@ PASSWORD_RESET = RateLimit("password_reset", 3, 60 * 60)
 EMAIL_CODE_ATTEMPTS = RateLimit("auth_email_code", 5, 15 * 60)
 # 6-digit password reset codes: at most 5 wrong guesses per email per 30 minutes (the code's lifetime), any IP.
 RESET_CODE_ATTEMPTS = RateLimit("password_reset_code", 5, 30 * 60)
+# DEL-011: the handover code is six digits, so guessing is cheap without a ceiling on how fast a
+# courier may try. The per-delivery attempt counter locks at five; this caps the rate as well.
+DELIVERY_CONFIRM = RateLimit("delivery_confirm", 10, 10 * 60)
 DEFAULT_AUTHENTICATED = RateLimit("default_authenticated", 300, 60)
 
 

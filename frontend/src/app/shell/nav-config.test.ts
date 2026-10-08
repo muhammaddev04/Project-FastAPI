@@ -23,6 +23,7 @@ const OWNER_PERMS = [
   'orders.assemble',
   'store_catalog.view',
   'cart.manage',
+  'delivery.view_all',
 ];
 
 describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
@@ -79,7 +80,7 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
   });
 
   it('gives couriers their run screens', () => {
-    expect(keys('courier', 'COURIER')).toEqual(['today', 'history']);
+    expect(keys('courier', 'COURIER')).toEqual(['today', 'issues']);
   });
 });
 
@@ -102,6 +103,7 @@ describe('honest navigation (Phase C8)', () => {
       'catalog',
       'inventory',
       'partners',
+      'delivery',
       'team',
       'subscription',
       'settings',
@@ -109,7 +111,7 @@ describe('honest navigation (Phase C8)', () => {
     // Nothing in the working navigation may carry a phase, which is what marks a placeholder.
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
-    expect(planned.map((item) => item.key)).toEqual(['delivery', 'finance', 'returns', 'reports']);
+    expect(planned.map((item) => item.key)).toEqual(['finance', 'returns', 'reports']);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });
 

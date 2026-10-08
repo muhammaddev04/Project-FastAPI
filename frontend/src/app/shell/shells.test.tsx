@@ -76,9 +76,9 @@ describe('Company application', () => {
       { path: '/members', body: MEMBERS },
     ]);
     signIn();
-    renderRoutes(routes, '/company/delivery');
-    expect(await screen.findByRole('heading', { name: 'Delivery' })).toBeInTheDocument();
-    expect(screen.getByText('Arrives in P08')).toBeInTheDocument();
+    renderRoutes(routes, '/company/finance');
+    expect(await screen.findByRole('heading', { name: 'Finance' })).toBeInTheDocument();
+    expect(screen.getByText('Arrives in P09')).toBeInTheDocument();
   });
 
   it('forbids a planned page the role cannot see', async () => {
@@ -173,10 +173,13 @@ describe('organization switcher and profile', () => {
   });
 
   it('routes company couriers to the courier area', async () => {
-    mockApi([{ path: '/me', body: meFixture([membershipFixture({ role: 'COURIER', permissions: [] })]) }]);
+    mockApi([
+      { path: '/me', body: meFixture([membershipFixture({ role: 'COURIER', permissions: ['delivery.act_own'] })]) },
+      { path: '/courier/today', body: { runs: [], stops: [], run_id: null, run_status: null, run_date: null } },
+    ]);
     signIn();
     renderRoutes(routes, '/');
-    expect(await screen.findByRole('heading', { name: "Today's run" })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Today' })).toBeInTheDocument();
   });
 
   it('saves the profile through PATCH /me', async () => {

@@ -1,3 +1,25 @@
+# P08 delivery and courier offline workflows - 2026-10-08
+
+P08 is implemented and locally accepted: transactional delivery creation and completion,
+company assignment and ordered runs, protected handover codes, store receipt instructions,
+mobile courier PWA, encrypted durable offline operations, retry-safe synchronization and
+visible authoritative conflicts. Tenant and courier authorization, code locks, immutable
+sync retention and same-transaction order/stock effects are covered by integration tests.
+
+Validation: the required verify run passed all 1192 backend tests and exposed frontend
+regressions that were fixed. The complete frontend rerun passed 418 tests, lint, typing,
+formatting and production build. Final clean Linux backend-ci, 32 delivery tests, 20 tooling
+tests, P00-P08 traceability and generated API type drift passed. Isolated browser acceptance
+covered run management, store codes, mobile/offline cached reads, encrypted queue, logout
+warning, reconnection, duplicate replay and server conflicts. Acceptance workers are restored.
+
+Authentication behavior is preserved. PAYMENT_RECORD awaits P09; notifications consume
+durable events in P11. P09 and later require owner approval and have not started.
+No push or deployment was performed.
+[P08 acceptance evidence](docs/P08_ACCEPTANCE.md).
+
+Earlier entries below are historical evidence.
+
 # P07 orders and store checkout implementation - 2026-10-06
 
 P07 is implemented and locally accepted: store catalogue with current prices and

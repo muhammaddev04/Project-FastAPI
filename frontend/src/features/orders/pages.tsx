@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAreaContext } from '@/app/shell/use-area-context';
+import { StoreDeliveryBlock } from '@/features/delivery/pages';
 import { catalogKey, useCatalogMutation, useCatalogQuery, type Page } from '@/features/catalog/api';
 import { Feedback, Field } from '@/features/catalog/shared';
 import { useBillingQuery, type Access } from '@/features/subscriptions/api';
@@ -304,6 +305,11 @@ export function OrderPage() {
           </p>
         )}
       </Card>
+      {!company &&
+        has('delivery.view_store') &&
+        ['READY_FOR_DELIVERY', 'IN_TRANSIT', 'DELIVERED', 'DELIVERY_FAILED', 'COMPLETED', 'DISPUTED'].includes(order.status) && (
+          <StoreDeliveryBlock orderId={order.id} orgId={orgId} />
+        )}
       <DataTable
         rows={order.items}
         rowKey={(row) => row.id}

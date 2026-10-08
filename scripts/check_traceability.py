@@ -22,6 +22,7 @@ def check(
     complete_p05: bool = False,
     complete_p06: bool = False,
     complete_p07: bool = False,
+    complete_p08: bool = False,
 ) -> list[str]:
     manifest = json.loads((root / "docs/traceability.json").read_text(encoding="utf-8"))
     requirements = set(re.findall(r"\b[A-Z]{2,8}-\d{3}\b", (root / "TZ.md").read_text(encoding="utf-8")))
@@ -66,6 +67,11 @@ def check(
         section = specification.split("## [P07_orders]", 1)[1].split("## [P08_", 1)[0]
         required = set(re.findall(r"\bORD-\d{3}\b", section))
         errors.extend(f"Unmapped P07 requirement: {item}" for item in sorted(required - manifest.keys()))
+    if complete_p08:
+        specification = (root / "TZ.md").read_text(encoding="utf-8")
+        section = specification.split("## [P08_delivery]", 1)[1].split("## [P09_", 1)[0]
+        required = set(re.findall(r"\bDEL-\d{3}\b", section))
+        errors.extend(f"Unmapped P08 requirement: {item}" for item in sorted(required - manifest.keys()))
     for requirement, references in manifest.items():
         if requirement not in requirements:
             errors.append(f"Unknown requirement: {requirement}")
@@ -109,6 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("--complete-p05", action="store_true")
     parser.add_argument("--complete-p06", action="store_true")
     parser.add_argument("--complete-p07", action="store_true")
+    parser.add_argument("--complete-p08", action="store_true")
     args = parser.parse_args()
     problems = check(
         ROOT,
@@ -120,6 +127,7 @@ if __name__ == "__main__":
         complete_p05=args.complete_p05,
         complete_p06=args.complete_p06,
         complete_p07=args.complete_p07,
+        complete_p08=args.complete_p08,
     )
     for problem in problems:
         print(problem)

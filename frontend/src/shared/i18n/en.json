@@ -187,7 +187,8 @@
     "unit_immutable": "Unit code and coefficient cannot change.",
     "price_immutable": "Historical prices cannot change.",
     "import_failed": "The import failed; no changes were applied.",
-    "invalid_state_transition": "This action is unavailable in the current state."
+    "invalid_state_transition": "This action is unavailable in the current state.",
+    "delivery_session_expired": "The session key expired. Enter the handover code again when online."
   },
   "validation": {
     "required": "This field is required.",
@@ -517,7 +518,8 @@
     },
     "courier": {
       "today": "Today",
-      "history": "History"
+      "history": "History",
+      "issues": "Issues"
     },
     "admin": {
       "verifications": "Verification queue",
@@ -1796,5 +1798,93 @@
       "REJECTED": "Rejected",
       "CANCELLED": "Cancelled"
     }
+  },
+  "delivery": {
+    "title": "Delivery",
+    "board": "Delivery board",
+    "unassigned": "Waiting to be planned",
+    "runs": "Runs",
+    "run": "Run",
+    "newRun": "New run",
+    "courier": "Courier",
+    "chooseCourier": "Choose courier",
+    "runDate": "Run date",
+    "stops": "Stops",
+    "stop": "Stop",
+    "address": "Address",
+    "attempt": "Attempt {{number}}",
+    "empty": "No deliveries found",
+    "emptyRuns": "No runs for this date",
+    "emptyStops": "Pick deliveries to build a run",
+    "openMap": "Open in maps",
+    "call": "Call",
+    "code": "Handover code",
+    "codeHint": "Give this code to the courier only when you receive the goods.",
+    "codeLocked": "Too many wrong codes. Ask the supplier for a new one.",
+    "codeAttempts": "{{count}} attempts used",
+    "enterCode": "Enter the 6-digit code",
+    "items": "Items",
+    "orderTotal": "Order total",
+    "today": "Today",
+    "issues": "Issues",
+    "offline": "Offline",
+    "online": "Online",
+    "queued": "{{count}} waiting to sync",
+    "syncNow": "Sync now",
+    "noIssues": "Nothing to resolve",
+    "serverState": "Server state: {{status}}",
+    "confirmHandover": "Confirm handover",
+    "reportFailure": "Delivery failed",
+    "actions": {
+      "assign": "Assign",
+      "unassign": "Unassign",
+      "cancel": "Cancel delivery",
+      "dispatch": "Set off",
+      "arrive": "I have arrived",
+      "confirm": "Handed over",
+      "fail": "Could not deliver",
+      "start": "Start run",
+      "finish": "Finish run",
+      "cancelRun": "Cancel run",
+      "regenerate": "New code",
+      "manual": "Confirm without code"
+    },
+    "manual": {
+      "title": "Confirm without the code?",
+      "warning": "The store will be told this delivery was confirmed without its code. Use this only when the code cannot be read.",
+      "reason": "Why the code was not used"
+    },
+    "statuses": {
+      "PLANNED": "Planned",
+      "ASSIGNED": "Assigned",
+      "IN_TRANSIT": "On the way",
+      "ARRIVED": "Arrived",
+      "DELIVERED": "Delivered",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "runStatuses": {
+      "DRAFT": "Draft",
+      "STARTED": "Started",
+      "FINISHED": "Finished",
+      "CANCELLED": "Cancelled"
+    },
+    "reasons": {
+      "STORE_CLOSED": "Store closed",
+      "REFUSED": "Refused",
+      "ADDRESS_NOT_FOUND": "Address not found",
+      "NO_CONTACT": "Nobody answered",
+      "VEHICLE_ISSUE": "Vehicle problem",
+      "OTHER": "Other"
+    },
+    "results": {
+      "CONFLICT": "Out of date",
+      "REJECTED": "Refused"
+    },
+    "moveUp": "Move stop up",
+    "moveDown": "Move stop down",
+    "logoutWarning": "{{count}} delivery actions are waiting to sync. Sign out and keep them on this device?",
+    "issueNav": "Issues",
+    "removeStop": "Remove stop"
   }
 }

@@ -104,7 +104,16 @@ export async function restoreSession(): Promise<void> {
  * refresh and CSRF cookies. The readable CSRF cookie is also expired here, so even if the request fails (offline)
  * the next page load does not restore the session. The in-memory access token is dropped either way.
  */
-export async function logoutSession(): Promise<void> {
+export async function logoutSession({ warnPending = false }: { warnPending?: boolean } = {}): Promise<boolean> {
+  // DEL-026: logout never silently discards offline work. A user can still sign out,
+  // after the warning, and the queue remains partitioned by its original owner.
+  const { operations, resetSessionKey } = await import('@/features/delivery/offline-queue');
+  const pending = typeof indexedDB === 'undefined' ? [] : (await operations().catch(() => [])).filter((row) => row.status === 'PENDING');
+  if (pending.length && warnPending) {
+    const { i18n } = await import('@/shared/i18n');
+    if (!window.confirm(i18n.t('delivery.logoutWarning', { count: pending.length }))) return false;
+  }
+  if (!pending.length) resetSessionKey();
   const csrf = readCookie('csrf_token');
   if (csrf) {
     try {
@@ -115,6 +124,7 @@ export async function logoutSession(): Promise<void> {
   }
   document.cookie = 'csrf_token=; Max-Age=0; Path=/; SameSite=Strict';
   useSessionStore.getState().endSession(null);
+  return true;
 }
 
 /** Test hook: lets each test start a fresh "page load". */

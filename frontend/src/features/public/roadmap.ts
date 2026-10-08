@@ -40,15 +40,15 @@ export const ROADMAP: ModuleEntry[] = [
   { key: 'team', side: 'both' },
   { key: 'areas', side: 'both' },
   { key: 'catalog', side: 'company' },
-  { key: 'partnerships', phase: 'P06', side: 'both' },
+  { key: 'partnerships', side: 'both' },
   { key: 'orders', side: 'both' },
   { key: 'inventory', side: 'company' },
-  { key: 'delivery', phase: 'P08', side: 'company' },
+  { key: 'delivery', side: 'company' },
   { key: 'finance', phase: 'P09', side: 'both' },
   { key: 'returns', phase: 'P10', side: 'both' },
   { key: 'notifications', phase: 'P11', side: 'both' },
   { key: 'reports', phase: 'P12', side: 'company' },
-  { key: 'subscriptions', phase: 'P03', side: 'company' },
+  { key: 'subscriptions', side: 'company' },
 ];
 
 export const LIVE_MODULES = ROADMAP.filter((entry) => !entry.phase);

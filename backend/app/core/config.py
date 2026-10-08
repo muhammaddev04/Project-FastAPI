@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     access_token_ttl_minutes: int = 15
     # SEC-003 / SEC-004: refresh tokens (30 days) have their own secret and live in an httpOnly cookie.
     jwt_refresh_secret: str = INSECURE_DEFAULT + "-refresh"
+
+    # DEL-010/012: the six-digit delivery code is keyed twice and never stored in the clear. The HMAC
+    # secret answers "is this the code"; the separate AES key produces the ciphertext the store is
+    # shown. They are distinct so a leak of the verifier cannot reveal any code.
+    delivery_code_hmac_secret: str = INSECURE_DEFAULT + "-delivery-hmac"
+    delivery_code_encryption_key: str = INSECURE_DEFAULT + "-delivery-aes"
     refresh_token_ttl_days: int = 30
 
     # FND-017 private S3-compatible storage. Buckets are never public; files are reached via signed URLs (SEC-008).
@@ -74,7 +80,13 @@ class Settings(BaseSettings):
     def _refuse_insecure_production(self) -> Settings:
         """FND-002: production must not start with debug on or weak/default secrets."""
         if self.app_env == "production":
-            secrets = (self.app_secret_key, self.jwt_access_secret, self.jwt_refresh_secret)
+            secrets = (
+                self.app_secret_key,
+                self.jwt_access_secret,
+                self.jwt_refresh_secret,
+                self.delivery_code_hmac_secret,
+                self.delivery_code_encryption_key,
+            )
             weak = any(len(value) < 32 or value.startswith(INSECURE_DEFAULT) for value in secrets)
             if self.app_debug or weak:
                 raise ValueError("production requires 32+ byte explicit secrets and APP_DEBUG=false")

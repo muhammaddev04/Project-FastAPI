@@ -16,6 +16,9 @@ import { restoreSession } from './shared/auth/session-store';
 import { initTheme } from './shared/theme/theme';
 
 initTheme();
+if ('serviceWorker' in navigator) {
+  void navigator.serviceWorker.register('/courier-sw.js', { scope: '/' }).catch(() => undefined);
+}
 // Started before the first render, so guards see `restoring` instead of an apparent guest (SEC-004 + FE-008).
 void restoreSession();
 const router = createAppRouter();

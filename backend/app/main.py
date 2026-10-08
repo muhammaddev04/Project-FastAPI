@@ -13,6 +13,8 @@ from app.core.request_context import RequestContextMiddleware
 from app.modules.auth.router import router as auth_router
 from app.modules.catalog.router import router as catalog_router
 from app.modules.catalog.service import install as install_catalog
+from app.modules.delivery.ports import install as install_delivery
+from app.modules.delivery.router import router as delivery_router
 from app.modules.files.router import router as files_router
 from app.modules.identity.router import router as identity_router
 from app.modules.identity.team_router import router as team_router
@@ -40,6 +42,7 @@ def create_app() -> FastAPI:
     install_catalog()
     install_inventory()
     install_orders()
+    install_delivery()
     app = FastAPI(
         title="TezFarmo API",
         version=settings.app_version,
@@ -85,6 +88,7 @@ def create_app() -> FastAPI:
     app.include_router(inventory_router)
     app.include_router(partnerships_router)
     app.include_router(orders_router)
+    app.include_router(delivery_router)
     install_error_contract(app)
     return app
 

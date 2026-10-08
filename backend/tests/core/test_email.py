@@ -231,6 +231,8 @@ def test_production_requires_smtp_delivery() -> None:
             app_secret_key=strong,
             jwt_access_secret=strong,
             jwt_refresh_secret=strong,
+            delivery_code_hmac_secret=strong,
+            delivery_code_encryption_key=strong,
         )
     Settings(
         _env_file=None,
@@ -238,6 +240,8 @@ def test_production_requires_smtp_delivery() -> None:
         app_secret_key=strong,
         jwt_access_secret=strong,
         jwt_refresh_secret=strong,
+        delivery_code_hmac_secret=strong,
+        delivery_code_encryption_key=strong,
         email_provider="smtp",
         smtp_host="smtp.gmail.com",
         from_email="a@b.tj",

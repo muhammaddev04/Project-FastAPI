@@ -15,7 +15,8 @@ import { StockPage, StockDetailPage, ReceiptPage, MovementsPage } from '@/featur
 import { PartnersPage, PartnerDetailPage } from '@/features/partnerships/pages';
 import { BuyingPage } from '@/features/orders/buying';
 import { OrdersPage, OrderPage } from '@/features/orders/pages';
-import { CourierHome } from '@/features/dashboard/courier-home';
+import { DeliveryBoard, DeliveryPage, RunPage } from '@/features/delivery/pages';
+import { CourierPage, CourierStopPage, CourierIssuesPage } from '@/features/delivery/courier-pages';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
 import { PlannedModulePage } from '@/features/modules/planned-module-page';
 import { VerificationsPage } from '@/features/admin/verifications-page';
@@ -182,6 +183,11 @@ export const routes: RouteObject[] = [
       { path: 'orders/new', element: <BuyingPage onBehalf /> },
       { path: 'orders/:orderId', element: <OrderPage /> },
       { path: 'warehouse/orders', element: <OrdersPage warehouse /> },
+      { path: 'delivery', element: <DeliveryBoard /> },
+      { path: 'delivery/runs/:runId', element: <RunPage /> },
+      { path: 'delivery/:deliveryId', element: <DeliveryPage /> },
+      { path: 'delivery/stops/:deliveryId', element: <CourierStopPage /> },
+      { path: 'delivery/issues', element: <CourierIssuesPage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },
@@ -208,7 +214,10 @@ export const routes: RouteObject[] = [
     path: '/courier',
     element: <AreaLayout area="courier" />,
     children: [
-      { index: true, element: <CourierHome /> },
+      { index: true, element: <CourierPage /> },
+      { path: 'stops/:deliveryId', element: <CourierStopPage /> },
+      { path: 'issues', element: <CourierIssuesPage /> },
+      { path: 'history', element: <Navigate to="../issues" replace /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },

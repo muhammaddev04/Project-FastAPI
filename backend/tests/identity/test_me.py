@@ -41,6 +41,12 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
         [
             "catalog.manage",
             "catalog.view",
+            "delivery.act_any",
+            "delivery.act_own",
+            "delivery.manual_confirm",
+            "delivery.plan",
+            "delivery.regenerate_code",
+            "delivery.view_all",
             "import.run",
             "members.change_role",
             "members.invite",
@@ -84,6 +90,7 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
     assert memberships["Corner Market"]["permissions"] == sorted(
         [
             "cart.manage",
+            "delivery.view_store",
             "org.view",
             "orders.cancel",
             "orders.create",

@@ -55,7 +55,7 @@ const COMPANY: NavSection[] = [
       { key: 'catalog', path: 'catalog', icon: Package, roles: ['OWNER', 'MANAGER', 'OPERATOR', 'WAREHOUSE'] },
       { key: 'inventory', path: 'warehouse/stock', icon: Boxes, permission: 'stock.view' },
       { key: 'partners', path: 'partners', icon: Handshake, roles: ['OWNER', 'MANAGER', 'OPERATOR'], permission: 'partners.view' },
-      { key: 'delivery', path: 'delivery', icon: Truck, roles: ['OWNER', 'MANAGER'], phase: 'P08' },
+      { key: 'delivery', path: 'delivery', icon: Truck, permission: 'delivery.view_all' },
       { key: 'finance', path: 'finance', icon: Wallet, roles: ['OWNER', 'MANAGER', 'OPERATOR'], phase: 'P09' },
       { key: 'returns', path: 'returns', icon: RotateCcw, roles: ['OWNER', 'MANAGER', 'OPERATOR'], phase: 'P10' },
       { key: 'reports', path: 'reports', icon: BarChart3, roles: ['OWNER', 'MANAGER'], phase: 'P12' },
@@ -98,7 +98,7 @@ const COURIER: NavSection[] = [
     key: 'runs',
     items: [
       { key: 'today', path: '', icon: Truck, primary: true },
-      { key: 'history', path: 'history', icon: ClipboardList, phase: 'P08', primary: true },
+      { key: 'issues', path: 'issues', icon: ClipboardList, primary: true },
     ],
   },
 ];

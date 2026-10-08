@@ -10,6 +10,7 @@ from kombu import Queue
 import app.model_registry  # noqa: F401 - standalone workers need every foreign-key target before flushing.
 from app.core.config import get_settings
 from app.modules.catalog.service import install as install_catalog
+from app.modules.delivery.ports import install as install_delivery
 from app.modules.inventory.service import install as install_inventory
 from app.modules.orders.service import install as install_orders
 from app.modules.organizations.ports import install_handlers
@@ -20,6 +21,7 @@ install_subscriptions()
 install_catalog()
 install_inventory()
 install_orders()
+install_delivery()
 
 celery_app = Celery("tezfarmo", broker=get_settings().celery_broker_url)
 celery_app.conf.update(
@@ -41,6 +43,7 @@ celery_app.conf.update(
         "process-imports": {"task": "tezfarmo.process_imports", "schedule": 5.0},
         "stock-reconciliation": {"task": "tezfarmo.stock_reconciliation", "schedule": crontab(hour=22, minute=0)},
         "complete-delivered-orders": {"task": "tezfarmo.complete_delivered_orders", "schedule": 1800.0},
+        "purge-courier-sync": {"task": "tezfarmo.purge_courier_sync_operations", "schedule": 86400.0},
     },
 )
 
@@ -139,3 +142,26 @@ def subscription_reminders() -> int:
             return await send_reminders(session)
 
     return _runner().run(run())
+
+
+@celery_app.task(name="tezfarmo.purge_courier_sync_operations")
+def purge_courier_sync_operations() -> int:
+    """P08 §1.4: the sync log answers replays for 30 days, then it has served its purpose."""
+    from datetime import timedelta
+
+    from sqlalchemy import delete
+
+    from app.core.db import get_sessionmaker
+    from app.core.time import utcnow
+    from app.modules.delivery.models import CourierSyncOperation
+
+    async def purge() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            cutoff = utcnow() - timedelta(days=30)
+            result = await session.execute(
+                delete(CourierSyncOperation).where(CourierSyncOperation.received_at < cutoff)
+            )
+            deleted: int = result.rowcount  # type: ignore[attr-defined]
+            return deleted
+
+    return _runner().run(purge())

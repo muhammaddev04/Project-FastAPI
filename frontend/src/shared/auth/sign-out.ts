@@ -11,7 +11,7 @@ export function useSignOut() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   return useCallback(async () => {
-    await logoutSession();
+    if (!(await logoutSession({ warnPending: true }))) return;
     queryClient.clear();
     navigate('/login', { replace: true });
   }, [navigate, queryClient]);

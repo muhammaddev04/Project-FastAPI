@@ -22,6 +22,16 @@ _ORDER_ADMIN = _ORDER_COMPANY | {
     "orders.reattempt",
 }
 _ORDER_STORE = frozenset({"orders.view", "orders.create", "orders.cancel", "store_catalog.view", "cart.manage"})
+# P08 §4. `view_all` is read-only board access; `plan` builds runs; `act_own` is what a courier does on
+# the stops assigned to them, and `act_any` lets an owner or manager stand in for a courier.
+_DELIVERY_VIEW = frozenset({"delivery.view_all"})
+_DELIVERY_ADMIN = _DELIVERY_VIEW | {
+    "delivery.plan",
+    "delivery.act_own",
+    "delivery.act_any",
+    "delivery.manual_confirm",
+    "delivery.regenerate_code",
+}
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     ("COMPANY", "OWNER"): _MEMBER_ADMIN
@@ -30,6 +40,7 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _STOCK_ADMIN
     | _PARTNERS_ADMIN
     | _ORDER_ADMIN
+    | _DELIVERY_ADMIN
     | {"partners.terminate", "terms.manage_credit"}
     | {"subscription.view", "subscription.manage"},
     ("COMPANY", "MANAGER"): frozenset(
@@ -38,20 +49,23 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _CATALOG_ADMIN
     | _STOCK_ADMIN
     | _PARTNERS_ADMIN
-    | _ORDER_ADMIN,
+    | _ORDER_ADMIN
+    | _DELIVERY_ADMIN,
     ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view", "stock.view"})
     | _PARTNERS_VIEW
-    | _ORDER_COMPANY,
+    | _ORDER_COMPANY
+    | _DELIVERY_VIEW,
     ("COMPANY", "WAREHOUSE"): frozenset(
         {"org.view", "catalog.view", "stock.view", "stock.receive", "stock.settings", "orders.view", "orders.assemble"}
-    ),
-    ("COMPANY", "COURIER"): frozenset({"org.view"}),
+    )
+    | _DELIVERY_VIEW,
+    ("COMPANY", "COURIER"): frozenset({"org.view", "delivery.act_own"}),
     ("STORE", "OWNER"): _MEMBER_ADMIN
     | _ORG_OWNER
     | _PARTNERS_VIEW
     | _ORDER_STORE
-    | {"partners.manage", "partners.terminate"},
-    ("STORE", "SELLER"): frozenset({"org.view"}) | _PARTNERS_VIEW | _ORDER_STORE,
+    | {"partners.manage", "partners.terminate", "delivery.view_store"},
+    ("STORE", "SELLER"): frozenset({"org.view", "delivery.view_store"}) | _PARTNERS_VIEW | _ORDER_STORE,
 }
 
 
