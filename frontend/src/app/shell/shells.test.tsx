@@ -50,7 +50,7 @@ describe('Company application', () => {
     renderRoutes(routes, '/company');
     expect(await screen.findByRole('heading', { name: 'Pamir Distribution' })).toBeInTheDocument();
     expect(within(sidebar()).getByRole('link', { name: /subscription/i })).toBeInTheDocument();
-    expect(await screen.findByText('2')).toBeInTheDocument();
+    expect(await within(screen.getByRole('main')).findByText('2')).toBeInTheDocument();
     expect(screen.getByText('Getting ready')).toBeInTheDocument();
     expect(within(screen.getByRole('main')).getByRole('link', { name: 'Orders' })).toHaveAttribute('href', '/company/orders');
     const membersCall = calls.find((call) => call.path === '/api/v1/members');
@@ -76,9 +76,9 @@ describe('Company application', () => {
       { path: '/members', body: MEMBERS },
     ]);
     signIn();
-    renderRoutes(routes, '/company/finance');
-    expect(await screen.findByRole('heading', { name: 'Finance' })).toBeInTheDocument();
-    expect(screen.getByText('Arrives in P09')).toBeInTheDocument();
+    renderRoutes(routes, '/company/returns');
+    expect(await screen.findByRole('heading', { name: 'Returns & disputes' })).toBeInTheDocument();
+    expect(screen.getByText('Arrives in P10')).toBeInTheDocument();
   });
 
   it('forbids a planned page the role cannot see', async () => {

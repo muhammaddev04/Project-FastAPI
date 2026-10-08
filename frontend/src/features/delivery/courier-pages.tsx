@@ -8,6 +8,7 @@ import { Feedback, Field } from '@/features/catalog/shared';
 import { apiRequest } from '@/shared/api/client';
 import { Alert, Button, Card, ForbiddenState, Input, PageHeader, Select, Skeleton } from '@/shared/ui';
 import { failureReasons, mapsUrl, type CourierStop, type CourierToday, type FailureReason, type Run } from './api';
+import { validAmount } from '@/features/finance/api';
 import { useCourierSync } from './courier-sync';
 
 function useCourierQuery<T>(path: string) {
@@ -118,6 +119,8 @@ export function CourierStopPage() {
   const query = useCourierQuery<CourierStop>(`/courier/deliveries/${deliveryId}`);
   const sync = useCourierSync(me.id, membership.organization_id);
   const dispatch = useCatalogMutation(`/courier/deliveries/${deliveryId}/dispatch`, membership.organization_id, 'POST', true);
+  const [cash, setCash] = useState('');
+  const [cashSaved, setCashSaved] = useState(false);
   const [code, setCode] = useState('');
   const [reason, setReason] = useState<FailureReason>('STORE_CLOSED');
   const [note, setNote] = useState('');
@@ -126,7 +129,7 @@ export function CourierStopPage() {
   if (!membership.permissions.includes('delivery.act_own')) return <ForbiddenState />;
   const stop = query.data;
   const pending = sync.rows.filter((row) => row.entity_id === deliveryId && row.status === 'PENDING');
-  const pendingClose = pending.some((row) => row.operation_type !== 'DELIVERY_ARRIVE');
+  const pendingClose = pending.some((row) => ['DELIVERY_CONFIRM', 'DELIVERY_FAIL'].includes(row.operation_type));
   const canAct = sync.online || membership.role === 'COURIER';
   const arrived = pending.some((row) => row.operation_type === 'DELIVERY_ARRIVE') || stop?.status === 'ARRIVED';
   const act = async (type: 'DELIVERY_ARRIVE' | 'DELIVERY_CONFIRM' | 'DELIVERY_FAIL', payload?: Record<string, unknown>) => {
@@ -175,6 +178,44 @@ export function CourierStopPage() {
               {t('delivery.orderTotal')}: {stop.order_total} TJS
             </p>
           </Card>
+          {membership.role === 'COURIER' &&
+            membership.permissions.includes('payments.record') &&
+            !['CANCELLED', 'FAILED', 'PLANNED'].includes(stop.status) && (
+              <Card className="space-y-3 p-4">
+                <form
+                  className="space-y-3"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    if (!validAmount(cash) || busy) return;
+                    setBusy(true);
+                    void sync
+                      .act('PAYMENT_RECORD', stop.id, stop.status, { amount: cash })
+                      .then(() => {
+                        setCash('');
+                        setCashSaved(true);
+                        setError(undefined);
+                      })
+                      .catch(setError)
+                      .finally(() => setBusy(false));
+                  }}
+                >
+                  <Field label={t('finance.amount')}>
+                    <Input
+                      inputMode="decimal"
+                      value={cash}
+                      onChange={(event) => {
+                        setCash(event.target.value);
+                        setCashSaved(false);
+                      }}
+                    />
+                  </Field>
+                  <Button type="submit" disabled={!validAmount(cash) || busy}>
+                    {t('finance.cash')}
+                  </Button>
+                </form>
+                {cashSaved && <p role="status">{t('finance.cashSaved')}</p>}
+              </Card>
+            )}
           {stop.status === 'ASSIGNED' && (
             <Button disabled={!sync.online || busy || dispatch.isPending} onClick={() => dispatch.mutate(undefined)}>
               {t('delivery.actions.dispatch')}

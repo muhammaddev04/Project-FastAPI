@@ -15,6 +15,7 @@ import { StockPage, StockDetailPage, ReceiptPage, MovementsPage } from '@/featur
 import { PartnersPage, PartnerDetailPage } from '@/features/partnerships/pages';
 import { BuyingPage } from '@/features/orders/buying';
 import { OrdersPage, OrderPage } from '@/features/orders/pages';
+import { FinancePage, PartnerFinancePage, PaymentsPage, AdjustmentsPage } from '@/features/finance/pages';
 import { DeliveryBoard, DeliveryPage, RunPage } from '@/features/delivery/pages';
 import { CourierPage, CourierStopPage, CourierIssuesPage } from '@/features/delivery/courier-pages';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
@@ -188,6 +189,10 @@ export const routes: RouteObject[] = [
       { path: 'delivery/:deliveryId', element: <DeliveryPage /> },
       { path: 'delivery/stops/:deliveryId', element: <CourierStopPage /> },
       { path: 'delivery/issues', element: <CourierIssuesPage /> },
+      { path: 'finance', element: <FinancePage /> },
+      { path: 'finance/payments', element: <PaymentsPage /> },
+      { path: 'finance/adjustments', element: <AdjustmentsPage /> },
+      { path: 'finance/:partnershipId', element: <PartnerFinancePage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },
@@ -207,6 +212,9 @@ export const routes: RouteObject[] = [
       { path: 'cart/:partnershipId', element: <BuyingPage cart /> },
       { path: 'orders', element: <OrdersPage /> },
       { path: 'orders/:orderId', element: <OrderPage /> },
+      { path: 'debt', element: <Navigate to="../finance" replace /> },
+      { path: 'finance', element: <FinancePage /> },
+      { path: 'finance/:partnershipId', element: <PartnerFinancePage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },

@@ -1,8 +1,9 @@
-import { CalendarClock, RefreshCcw } from 'lucide-react';
+import { FinanceOverviewCard } from '@/features/finance/overview-card';
+import { RefreshCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAreaContext } from '@/app/shell/use-area-context';
-import { Button, Card, PlannedPanel } from '@/shared/ui';
+import { Button, Card } from '@/shared/ui';
 import { OrgHero } from './org-hero';
 import { AccessCard, ReadinessChecklist, TeamCard } from './widgets';
 
@@ -14,7 +15,7 @@ const READINESS = [
 
 /**
  * Store dashboard (TZ §17.1: my suppliers, a prominent "repeat order" action, upcoming debts).
- * Suppliers and orders open their working screens; debts remain planned for P09.
+ * Suppliers, orders and debts open their working screens.
  */
 export function StoreDashboard() {
   const { t } = useTranslation();
@@ -70,15 +71,7 @@ export function StoreDashboard() {
             </Button>
           </Card>
         )}
-        {isOwner ? (
-          <PlannedPanel
-            emptyTitle={t('dashboard.pending.title')}
-            icon={CalendarClock}
-            title={t('dashboard.store.debts')}
-            description={t('dashboard.store.debtsEmpty')}
-            phase="P09"
-          />
-        ) : null}
+        {isOwner ? <FinanceOverviewCard /> : null}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">

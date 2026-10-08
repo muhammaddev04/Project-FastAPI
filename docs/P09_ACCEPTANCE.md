@@ -1,7 +1,7 @@
 # P09 finance
 
 Owner approval: 2026-10-08 (`p09 oghoz kun`).
-Status: IN PROGRESS. P09 is not DONE.
+Status: DONE.
 
 ## Backend foundation
 
@@ -157,11 +157,74 @@ typing for 121 source files plus all dependency, formatting and migration
 checks. Evidence: `p09-worker-final-tests.log`,
 `p09-worker-standalone-tests.log`, `p09-worker-final-ci.log`.
 
-## Remaining requirements
+## Frontend and persisted property acceptance
 
-- Company/store finance pages and courier cash recording.
-- Hypothesis tests of persisted operations.
-- Complete verify, isolated browser acceptance and generated API type drift checks.
-- Final acceptance evidence and PART_REPORT.md.
+Company and store finance routes now show service balances, aging, overdue and
+credit-utilization highlights, paginated partnership accounts, charge allocations,
+payment history, and Dushanbe statements with opening/running/closing balances.
+The existing store debt URL redirects to `/store/finance`. Dashboard finance cards
+read the same summary API. Payments and adjustment queues identify their partner.
+
+Payment dialogs enforce exact-cent amounts, current allowed methods and bank
+references, show FIFO allocations and unapplied credit before submission, and
+preserve submission idempotency keys across retries. Store owners report pending
+payments; confirmation/rejection is permission controlled and repeats the amount.
+Adjustments show the proposed balance effect and expose owner decisions only to
+owners. Company/store/courier UI text is supplied in tg, ru and en.
+
+Courier cash is written to the durable scoped offline queue before synchronization.
+Cash operations do not block delivery arrival/handover. The server applies each
+cash record once, and collection creates a pending payment for company approval.
+
+FIN-002 passed all 200 Hypothesis-generated sequences against isolated PostgreSQL.
+Each scenario uses its own partnership; every operation commits before a separate
+database session checks ledger running balances, the balance projection,
+outstanding minus unapplied, and allocation sums for every charge and credit.
+Generated operations include debit/credit adjustments, payment confirmation,
+rejection/cancellation and refunds bounded by actual unapplied credit.
+The P09 internal DISPUTE-source adjustment boundary also retains owner approval;
+P10 dispute workflows have not started.
+
+Isolated real-browser P09 acceptance passed delivery-to-charge, FIFO preview,
+pending payment and confirmation, partial then full allocation, running statement,
+owner credit adjustment, store reporting, matching company/store balances, mobile
+courier offline cash, synchronization and duplicate replay. The P08 browser
+regression passed encrypted offline handover, logout preservation and conflicts.
+OpenAPI and generated API types are unchanged after regeneration. All 21 tooling
+tests passed, including the new P09 traceability completeness gate.
+
+Evidence: ignored local `p09-property-retest.log`, `p09-ui-retest.log`,
+`p09-ui-final-retest.log`, `p09-browser-complete.log`, `p09-delivery-browser-regression.log`,
+`p09-api-drift.log`, `p09-tooling-final.log`, `p09-backend-ci-final.log`.
+
+Final browser coverage also passed the global receivables page, payment approval
+queue, adjustment list and partner links, plus the courier's 390px layout. CI and
+local verify enforce reference completeness through P09.
+
+## Final verification
+
+The mandatory `python scripts/dev.py verify` passed end to end: clean Linux dependency
+compatibility, Ruff lint and format, strict mypy without cache, migrations applied from
+an empty database with `alembic check` reporting no model drift, all 1518 backend tests,
+frontend ESLint, TypeScript, Prettier, Vitest, the production build, and tracked
+reference completeness with `--complete-p09`. Evidence: `p09-verify-final.log`.
+
+Because `frontend/src/features/finance/pages.tsx` changed after the earlier browser run,
+the isolated real-browser acceptance was repeated against the p00 stack: P09 finance and
+the P08 delivery regression both passed. Regenerating `frontend/openapi.json` and
+`src/shared/api/schema.d.ts` produced no drift.
+
+## Known deployment gap (not P09 code)
+
+`docker-compose.prod.yml` defines only postgres, redis, storage, backend and frontend,
+and `infra/deploy/remote-deploy.sh` restarts `backend frontend` only. No Celery worker or
+beat runs in production, so `tezfarmo.finance_reminders` (09:00) and
+`tezfarmo.finance_reconciliation` (03:30 Asia/Dushanbe) never fire on the server, as is
+already the case for the earlier scheduled tasks. Deployment itself is unaffected: P09
+adds no new required setting, the migration chain stays linear with the single head
+`20261008_0024`, the only change to an existing table is `companies.debt_reminders_enabled`
+with a server default, and the new `payments` table does not collide with
+`subscription_payments`. Closing this gap is a separate infrastructure decision for the
+owner.
 
 P10 remains unauthorized. Existing authentication behavior is preserved.

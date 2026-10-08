@@ -1,15 +1,37 @@
-# P09 finance started - 2026-10-08
+# P09 finance completion - 2026-10-08
 
-Owner authorized P09 on 2026-10-08. Status: IN PROGRESS, not DONE.
-The first backend increment adds exact financial domain calculations: deterministic
-FIFO allocation, amount validation, ledger directions, Dushanbe due dates, aging,
-net-balance credit checks and reminder scheduling. No live financial workflow is
-enabled by this increment. Database persistence, transactional services, APIs,
-workers, frontend and complete acceptance remain outstanding.
-Validation: 237 finance domain tests passed in the isolated Linux harness;
-dependencies, Ruff, strict mypy without cache and migration/model parity passed.
-See [P09 progress and remaining requirements](docs/P09_ACCEPTANCE.md).
-P10 and later still require separate owner approval.
+Owner authorized P09 on 2026-10-08. Status: DONE.
+
+Delivered orders create immutable charges in the delivery/order/stock transaction.
+Confirmed payments, approved adjustments and credit notes post a serialized ledger,
+update balances and allocate FIFO. Pending payment reporting, owner approval, credit
+control, Dushanbe due dates/statements, aging, reminders and reconciliation are
+implemented through tenant-scoped services and APIs. Reconciliation reports
+discrepancies without repairing financial facts.
+
+Company/store finance screens expose balances, charges, payment history, statements,
+FIFO previews, payment decisions and adjustments. Global queues identify the partner.
+Dashboard cards read FinanceService summaries. Courier cash is durable offline work
+and synchronizes to a pending payment once, including duplicate replay. UI text is
+available in tg, ru and en; existing courier labels with damaged encoding are repaired.
+
+Validation: the mandatory `python scripts/dev.py verify` passed in full - clean Linux
+dependency compatibility, Ruff lint/format, strict uncached mypy, migrations applied
+from an empty database with no model drift, all 1518 backend tests, frontend ESLint,
+TypeScript, Prettier, Vitest, the production build and reference completeness through
+P09. The initial complete backend run had found an outdated /me permission expectation;
+its six missing P09 permissions are corrected and included in that passing run.
+All 200 persisted Hypothesis scenarios passed. Isolated real-browser acceptance was
+re-run after the last finance screen change: P09 finance and the P08 delivery
+regression both passed. Regenerating OpenAPI and the API types produced no drift.
+
+Authentication, registration password rules, email verification/reset and duplicate
+registration behavior are preserved. P10 workflows have not started and require
+separate owner approval. No push or deployment is performed.
+Production note: the production Compose stack runs no Celery worker or beat, so the
+daily debt reminders and nightly reconciliation do not execute on the server yet. This
+is a pre-existing deployment gap, not a P09 code defect, and is recorded for the owner.
+[P09 acceptance evidence](docs/P09_ACCEPTANCE.md).
 
 # P08 delivery and courier offline workflows - 2026-10-08
 

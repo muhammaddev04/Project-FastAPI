@@ -16,7 +16,7 @@ const DB_NAME = 'tezfarmo-courier';
 const STORE = 'operations';
 const DB_VERSION = 1;
 
-export type OperationType = 'DELIVERY_ARRIVE' | 'DELIVERY_CONFIRM' | 'DELIVERY_FAIL';
+export type OperationType = 'DELIVERY_ARRIVE' | 'DELIVERY_CONFIRM' | 'DELIVERY_FAIL' | 'PAYMENT_RECORD';
 export type QueueState = 'PENDING' | 'CONFLICT' | 'REJECTED';
 
 export type QueuedOperation = {

@@ -5,7 +5,7 @@ import { navByAvailability, navFor } from './nav-config';
 const keys = (
   area: 'company' | 'store' | 'courier',
   role: Role,
-  permissions: string[] = ['partners.view', 'orders.view', 'store_catalog.view', 'cart.manage'],
+  permissions: string[] = ['partners.view', 'orders.view', 'store_catalog.view', 'cart.manage', 'finance.view'],
 ) =>
   navFor(area, area === 'store' ? storeMembership({ role, permissions }) : membershipFixture({ role, permissions })).flatMap((section) =>
     section.items.map((item) => item.key),
@@ -23,6 +23,7 @@ const OWNER_PERMS = [
   'orders.assemble',
   'store_catalog.view',
   'cart.manage',
+  'finance.view',
   'delivery.view_all',
 ];
 
@@ -104,6 +105,7 @@ describe('honest navigation (Phase C8)', () => {
       'inventory',
       'partners',
       'delivery',
+      'finance',
       'team',
       'subscription',
       'settings',
@@ -111,7 +113,7 @@ describe('honest navigation (Phase C8)', () => {
     // Nothing in the working navigation may carry a phase, which is what marks a placeholder.
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
-    expect(planned.map((item) => item.key)).toEqual(['finance', 'returns', 'reports']);
+    expect(planned.map((item) => item.key)).toEqual(['returns', 'reports']);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });
 

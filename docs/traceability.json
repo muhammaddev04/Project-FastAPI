@@ -395,5 +395,91 @@
   "DEL-023": ["backend/tests/test_delivery.py::test_del_023_duplicate_operation_returns_same_result", "backend/tests/test_delivery.py::test_sync_duplicate_keeps_the_original_conflict_state"],
   "DEL-024": ["backend/tests/test_delivery.py::test_del_024_conflict_returns_server_state", "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"],
   "DEL-025": ["backend/tests/test_delivery.py::test_del_025_confirm_after_arrive_is_applied"],
-  "DEL-026": ["backend/tests/test_delivery.py::test_del_026_invalid_code_is_rejected", "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"]
+  "DEL-026": ["backend/tests/test_delivery.py::test_del_026_invalid_code_is_rejected", "frontend/e2e/delivery.spec.ts::P08 board, courier offline handover, encrypted queue, replay and authoritative conflicts"],
+  "FIN-001": [
+    "backend/tests/test_finance_models.py::test_fin_001_direction_matches_entry_type_check"
+  ],
+  "FIN-002": [
+    "backend/tests/test_finance_properties.py::test_fin_002_invariant_after_random_operations"
+  ],
+  "FIN-003": [
+    "backend/tests/test_finance_service.py::test_fin_003_concurrent_payments_preserve_running_balance"
+  ],
+  "FIN-004": [
+    "backend/tests/test_finance_models.py::test_fin_004_posting_update_delete_forbidden"
+  ],
+  "FIN-005": [
+    "backend/tests/test_finance_api.py::test_summary_aging_matches_details_and_overdue_filters",
+    "frontend/src/features/finance/finance.test.tsx::reads service summaries, highlights overdue partners and applies server filters"
+  ],
+  "FIN-010": [
+    "backend/tests/test_finance_service.py::test_fin_010_frozen_terms_and_dushanbe_boundary"
+  ],
+  "FIN-011": [
+    "backend/tests/test_finance_service.py::test_fin_010_011_delivery_charge_is_atomic_and_replay_safe"
+  ],
+  "FIN-012": [
+    "backend/tests/test_finance_domain.py::test_fin_010_012_due_date_local_boundary_and_frozen_credit_days"
+  ],
+  "FIN-020": [
+    "backend/tests/test_finance_service.py::test_fin_020_bank_reference_with_current_allowed_method"
+  ],
+  "FIN-021": [
+    "backend/tests/test_finance_api.py::test_same_key_concurrency_posts_once"
+  ],
+  "FIN-022": [
+    "backend/tests/test_finance_service.py::test_fin_022_pending_cancel_and_final_immutable"
+  ],
+  "FIN-023": [
+    "backend/tests/test_finance_api.py::test_offline_cash_replay_validation_and_log_privacy",
+    "frontend/e2e/finance.spec.ts::P09 delivered charge, FIFO payment, statement, adjustments and offline courier cash"
+  ],
+  "FIN-024": [
+    "backend/tests/test_finance_service.py::test_fin_024_payment_allowed_on_cancelled_subscription"
+  ],
+  "FIN-030": [
+    "backend/tests/test_finance_properties.py::test_fin_002_invariant_after_random_operations"
+  ],
+  "FIN-031": [
+    "backend/tests/test_finance_domain.py::test_fin_031_fifo_order_by_due_date_created_at_and_id"
+  ],
+  "FIN-032": [
+    "backend/tests/test_finance_domain.py::test_fifo_conservation_capacity_and_determinism_generated"
+  ],
+  "FIN-033": [
+    "backend/tests/test_finance_service.py::test_fin_033_prepayment_applies_to_future_charge"
+  ],
+  "FIN-034": [
+    "backend/tests/test_finance_service.py::test_fin_034_persisted_fifo_example"
+  ],
+  "FIN-040": [
+    "backend/tests/test_finance_service.py::test_fin_040_adjustment_permissions_and_approval"
+  ],
+  "FIN-041": [
+    "backend/tests/test_finance_service.py::test_fin_034_persisted_fifo_example"
+  ],
+  "FIN-042": [
+    "backend/tests/test_finance_service.py::test_fin_042_043_credit_and_refund"
+  ],
+  "FIN-043": [
+    "backend/tests/test_finance_service.py::test_refund_rechecks_available_credit_at_approval"
+  ],
+  "FIN-044": [
+    "backend/tests/test_finance_service.py::test_fin_044_dispute_source_retains_owner_approval"
+  ],
+  "FIN-050": [
+    "backend/tests/test_finance_service.py::test_fin_050_real_credit_port_blocks_order_and_counts_prepayment"
+  ],
+  "FIN-051": [
+    "backend/tests/test_finance_domain.py::test_fin_051_052_aging_boundaries"
+  ],
+  "FIN-052": [
+    "backend/tests/test_finance_api.py::test_summary_aging_matches_details_and_overdue_filters"
+  ],
+  "FIN-053": [
+    "backend/tests/test_finance_jobs.py::test_parallel_reminders_emit_once"
+  ],
+  "FIN-060": [
+    "backend/tests/test_finance_jobs.py::test_reconciliation_detects_corruption_without_repair"
+  ]
 }

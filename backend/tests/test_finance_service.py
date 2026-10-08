@@ -150,6 +150,30 @@ async def test_fin_042_043_credit_and_refund(client: AsyncClient, session: Async
     assert summary.unapplied == summary.outstanding == 0
 
 
+async def test_fin_044_dispute_source_retains_owner_approval(client: AsyncClient, session: AsyncSession):
+    """Exercise the P09 internal boundary without implementing P10 dispute workflows."""
+    ctx, _, pid = await prepared(client, session)
+    manager = await member(session, ctx, "MANAGER")
+    source_id = new_id()
+    adjustment = await finance.create_adjustment(
+        session,
+        manager,
+        pid,
+        "CREDIT",
+        Decimal("20"),
+        "Dispute boundary correction",
+        source="DISPUTE",
+        source_id=source_id,
+    )
+    assert adjustment.source == "DISPUTE" and adjustment.source_id == source_id
+    assert adjustment.status == "PENDING_APPROVAL"
+    await invariant(session, pid, Decimal("0"))
+    with pytest.raises(AppError, match="permission_denied"):
+        await finance.approve_adjustment(session, manager, adjustment.id, adjustment.version)
+    await finance.approve_adjustment(session, ctx, adjustment.id, adjustment.version)
+    await invariant(session, pid, Decimal("-20"))
+
+
 async def test_refund_rechecks_available_credit_at_approval(client: AsyncClient, session: AsyncSession):
     ctx, _, pid = await prepared(client, session)
     manager = await member(session, ctx, "MANAGER")

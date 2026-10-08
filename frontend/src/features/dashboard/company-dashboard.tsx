@@ -1,4 +1,5 @@
-import { Bell, PackageSearch, Wallet } from 'lucide-react';
+import { FinanceOverviewCard } from '@/features/finance/overview-card';
+import { Bell, PackageSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useCatalogQuery, type Page } from '@/features/catalog/api';
@@ -50,15 +51,7 @@ export function CompanyDashboard() {
             </Button>
           </Card>
         ) : null}
-        {isOwnerOrManager ? (
-          <PlannedPanel
-            emptyTitle={t('dashboard.pending.title')}
-            icon={Wallet}
-            title={t('dashboard.company.receivables')}
-            description={t('dashboard.company.receivablesEmpty')}
-            phase="P09"
-          />
-        ) : null}
+        {isOwnerOrManager ? <FinanceOverviewCard /> : null}
         <PlannedPanel
           emptyTitle={t('dashboard.pending.title')}
           icon={Bell}
