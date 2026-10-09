@@ -781,5 +781,59 @@
   ],
   "RET-014": [
     "backend/tests/test_returns_service.py::test_ret_014_returns_work_without_a_live_subscription"
+  ],
+  "NTF-001": [
+    "backend/tests/test_notifications.py::test_ntf_001_no_send_inside_business_tx",
+    "backend/tests/test_notifications.py::test_registered_outbox_pipeline_delivers_once"
+  ],
+  "NTF-002": [
+    "backend/tests/test_notifications.py::test_ntf_002_duplicate_event_single_notification"
+  ],
+  "NTF-003": [
+    "backend/tests/test_notifications.py::test_ntf_003_in_app_always_and_sms_never"
+  ],
+  "NTF-004": [
+    "backend/tests/test_notifications.py::test_ntf_004_channel_failure_does_not_affect_business_failed_after_3",
+    "backend/tests/test_notifications.py::test_telegram_block_and_retryable_provider_failure"
+  ],
+  "NTF-005": [
+    "backend/tests/test_notifications.py::test_recipient_matrix",
+    "backend/tests/test_notifications.py::test_delivery_rechecks_revocation_after_consume"
+  ],
+  "NTF-006": [
+    "backend/tests/test_notifications.py::test_ntf_006_language_and_money",
+    "backend/tests/test_notifications.py::test_registered_outbox_pipeline_delivers_once"
+  ],
+  "NTF-007": [
+    "backend/tests/test_notifications.py::test_ntf_007_params_allowlist",
+    "backend/tests/test_notifications.py::test_ntf_007_delivery_code_only_in_telegram_payload"
+  ],
+  "TG-001": [
+    "backend/tests/test_telegram.py::test_tg_001_secret_required_and_tg_003_duplicate_update"
+  ],
+  "TG-002": [
+    "backend/tests/test_telegram.py::test_tg_001_secret_required_and_tg_003_duplicate_update"
+  ],
+  "TG-003": [
+    "backend/tests/test_telegram.py::test_tg_001_secret_required_and_tg_003_duplicate_update"
+  ],
+  "TG-004": [
+    "backend/tests/test_telegram.py::test_tg_004_webhook_rate_limit"
+  ],
+  "TG-005": [
+    "backend/tests/test_telegram.py::test_tg_005_webhook_cli_requires_https"
+  ],
+  "TG-010": [
+    "backend/tests/test_telegram.py::test_tg_010_link_token_single_use_expiry"
+  ],
+  "TG-011": [
+    "backend/tests/test_telegram.py::test_tg_011_telegram_already_linked"
+  ],
+  "TG-012": [
+    "backend/tests/test_telegram.py::test_tg_012_unlink_invalidates_unused_tokens"
+  ],
+  "TG-013": [
+    "backend/tests/test_telegram.py::test_tg_013_unlinked_blocked_and_group_private",
+    "backend/tests/test_telegram.py::test_bot_orders_respects_permissions"
   ]
 }

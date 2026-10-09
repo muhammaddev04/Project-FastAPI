@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import en from './en.json';
 import ru from './ru.json';
 import tg from './tg.json';
+import { notificationResources } from './notifications';
 
 export const SUPPORTED_LANGUAGES = ['tg', 'ru', 'en'] as const;
 export type Language = (typeof SUPPORTED_LANGUAGES)[number];
@@ -31,7 +32,11 @@ export function detectLanguage(): Language {
 }
 
 void i18n.use(initReactI18next).init({
-  resources: { tg: { translation: tg }, ru: { translation: ru }, en: { translation: en } },
+  resources: {
+    tg: { translation: { ...tg, notifications: notificationResources.tg } },
+    ru: { translation: { ...ru, notifications: notificationResources.ru } },
+    en: { translation: { ...en, notifications: notificationResources.en } },
+  },
   lng: detectLanguage(),
   fallbackLng: DEFAULT_LANGUAGE,
   supportedLngs: [...SUPPORTED_LANGUAGES],

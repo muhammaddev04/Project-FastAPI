@@ -1,3 +1,25 @@
+# P11 notifications and Telegram - 2026-10-09
+
+Owner authorized implementation and local commits on 2026-10-09. Backend, frontend
+and automated acceptance are implemented. Status: NOT DONE until live Telegram
+linking, outbound receipt and tenant-specific bot commands are verified with the
+owner's account. SMS is deferred by CR-004; P12 has not been started.
+
+The header notification bell now opens the latest notifications and links to the
+full list, preferences and Telegram linking page. Telegram is also available through
+the profile. Durable outbox processing creates user-scoped notifications and the
+worker handles optional Telegram delivery, retries and blocked-chat recovery.
+
+Validation: `python scripts/dev.py verify` passed with 1663 backend tests and 449
+frontend tests, clean static checks, disposable database migrations, the production
+build and traceability. Both isolated browser acceptance modes passed, including
+simulated authenticated Telegram linking and delivery. Generated API type drift
+checks passed. The final bot-unblocking change has an additional focused regression.
+The live bot and webhook configuration were checked; no application account is
+linked yet. See [P11 acceptance](docs/P11_ACCEPTANCE.md) for the remaining live steps.
+
+P11 commits exclude concurrent P10 changes. No push was performed.
+
 # P10 returns and disputes started - 2026-10-08
 
 Owner authorized P10 on 2026-10-08. Status: IN PROGRESS, not DONE.

@@ -38,6 +38,7 @@ import { ProductPage } from '@/features/public/product-page';
 import { PublicShell } from '@/features/public/public-shell';
 import { SupportPage, SupportContent } from '@/features/support/support-page';
 import { ProfilePage } from '@/features/profile/profile-page';
+import { NotificationsPage, NotificationPreferencesPage, TelegramPage } from '@/features/notifications/pages';
 import { TeamPage } from '@/features/team/team-page';
 import { InvitationsPage } from '@/features/team/invitations';
 import { useMe } from '@/shared/auth/api';
@@ -136,6 +137,9 @@ export const routes: RouteObject[] = [
   { path: '/welcome/company', element: <RequireAuth>{(me) => <BusinessSetupPage me={me} type="COMPANY" />}</RequireAuth> },
   { path: '/welcome/store', element: <RequireAuth>{(me) => <BusinessSetupPage me={me} type="STORE" />}</RequireAuth> },
   { path: '/support', element: <RequireAuth>{(me) => <SupportPage me={me} />}</RequireAuth> },
+  { path: '/notifications', element: <RequireAuth>{(me) => <NotificationsPage me={me} />}</RequireAuth> },
+  { path: '/profile/notifications', element: <RequireAuth>{(me) => <NotificationPreferencesPage me={me} />}</RequireAuth> },
+  { path: '/profile/telegram', element: <RequireAuth>{(me) => <TelegramPage me={me} />}</RequireAuth> },
   { path: '/profile', element: <RequireAuth>{(me) => <ProfilePage me={me} />}</RequireAuth> },
   { path: '/invitations', element: <RequireAuth>{(me) => <InvitationsPage me={me} />}</RequireAuth> },
   {

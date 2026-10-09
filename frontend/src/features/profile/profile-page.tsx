@@ -275,6 +275,18 @@ export function ProfilePage({ me }: { me: Me }) {
             />
             <PasswordChangeCard />
             <ConnectedAccounts />
+            <Card className="space-y-3 p-5 sm:p-6">
+              <h2 className="font-semibold">{t('notifications.settings')}</h2>
+              <p className="text-label text-muted-foreground">{t('notifications.telegramHint')}</p>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/profile/notifications">{t('notifications.settings')}</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link to="/profile/telegram">Telegram</Link>
+                </Button>
+              </div>
+            </Card>
           </div>
         </div>
       </div>
