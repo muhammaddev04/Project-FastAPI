@@ -44,6 +44,7 @@ from app.modules.notifications.models import (
 from app.modules.orders.models import Cart, CartItem, Order, OrderItem, OrderStatusHistory
 from app.modules.organizations.models import Company, Store
 from app.modules.partnerships.models import Partnership, PartnershipTerms
+from app.modules.reports.models import Export
 from app.modules.returns.models import (
     Dispute,
     DisputeMessage,
@@ -64,6 +65,7 @@ from app.modules.support.models import SupportTicket
 from app.modules.verification.models import VerificationDocument, VerificationRequest
 
 __all__ = [
+    "Export",
     "DisputeSlaWarning",
     "Notification",
     "NotificationDelivery",

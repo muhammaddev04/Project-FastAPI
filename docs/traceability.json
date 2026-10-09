@@ -840,5 +840,97 @@
   "TG-013": [
     "backend/tests/test_telegram.py::test_tg_013_unlinked_blocked_and_group_private",
     "backend/tests/test_telegram.py::test_bot_orders_respects_permissions"
+  ],
+  "RPT-001": [
+    "backend/tests/test_reports.py::test_rpt_001_scope_isolation",
+    "backend/tests/test_reports.py::test_reports_require_their_own_permission"
+  ],
+  "RPT-002": [
+    "backend/tests/test_reports.py::test_rpt_002_financial_numbers_match_finance_service",
+    "backend/tests/test_reports.py::test_receivables_aging_buckets"
+  ],
+  "RPT-003": [
+    "backend/tests/test_reports.py::test_rpt_003_range_limit",
+    "backend/tests/test_reports.py::test_rpt_003_snapshot_reports_need_no_period",
+    "backend/tests/test_reports.py::test_period_default_is_the_last_thirty_days"
+  ],
+  "RPT-004": [
+    "backend/tests/test_reports.py::test_rpt_004_reports_are_served_by_indexes"
+  ],
+  "RPT-005": [
+    "backend/tests/test_reports.py::test_rpt_005_api_equals_export"
+  ],
+  "EXP-001": [
+    "backend/tests/test_exports.py::test_exp_001_create_is_accepted_and_the_worker_builds_the_file",
+    "backend/tests/test_exports.py::test_export_unauthorized_kind_403"
+  ],
+  "EXP-002": [
+    "backend/tests/test_exports.py::test_exp_002_revoked_member_cannot_download",
+    "backend/tests/test_exports.py::test_exp_002_permission_loss_hides_the_file"
+  ],
+  "EXP-003": [
+    "backend/tests/test_exports.py::test_exp_003_download_is_signed_for_fifteen_minutes_and_audited"
+  ],
+  "EXP-004": [
+    "backend/tests/test_exports.py::test_exp_004_expired_410"
+  ],
+  "EXP-005": [
+    "backend/tests/test_exports.py::test_exp_005_row_limit_fails_the_export"
+  ],
+  "EXP-006": [
+    "backend/tests/test_exports.py::test_exp_006_csv_format_bom_separator",
+    "backend/tests/test_exports.py::test_exp_006_xlsx_money_is_a_number"
+  ],
+  "EXP-007": [
+    "backend/tests/test_exports.py::test_exp_007_headers_follow_the_requesting_user"
+  ],
+  "EXP-008": [
+    "backend/tests/test_exports.py::test_exp_008_rate_limit_stops_the_twenty_first_request",
+    "backend/tests/test_exports.py::test_export_ready_notifies_the_requester"
+  ],
+  "ADM-001": [
+    "backend/tests/test_admin.py::test_adm_001_dashboard_counts",
+    "backend/tests/test_admin.py::test_adm_admin_endpoints_require_superadmin"
+  ],
+  "ADM-002": [
+    "backend/tests/test_admin.py::test_adm_002_block_user_ends_every_session",
+    "backend/tests/test_admin.py::test_adm_002_logout_all_keeps_the_user_active",
+    "backend/tests/test_admin.py::test_adm_002_user_detail_lists_memberships",
+    "backend/tests/test_admin.py::test_adm_002_superadmin_is_managed_by_cli_only"
+  ],
+  "ADM-003": [
+    "backend/tests/test_admin.py::test_adm_003_organization_status_machine",
+    "backend/tests/test_admin.py::test_adm_003_transfer_ownership_single_owner",
+    "backend/tests/test_admin.py::test_adm_003_transfer_ownership_can_revoke_the_previous_owner",
+    "backend/tests/test_admin.py::test_adm_003_legal_fields_need_a_version_and_a_reason",
+    "backend/tests/test_admin.py::test_adm_003_organization_detail_and_search"
+  ],
+  "ADM-004": [
+    "backend/tests/verification/test_verification.py::test_admin_reviews_and_approves",
+    "backend/tests/verification/test_verification.py::test_queue_filters_by_status_and_type"
+  ],
+  "ADM-005": [
+    "backend/tests/test_subscription_api.py::test_admin_plan_price_does_not_change_paid_period",
+    "backend/tests/test_subscription_api.py::test_trial_extension_and_admin_filter"
+  ],
+  "ADM-006": [
+    "backend/tests/test_admin.py::test_adm_006_audit_viewer_filters",
+    "backend/tests/test_exports.py::test_admin_export_belongs_to_the_platform"
+  ],
+  "ADM-007": [
+    "backend/tests/test_admin.py::test_adm_007_outbox_retry"
+  ],
+  "ADM-008": [
+    "backend/tests/test_admin.py::test_adm_008_notification_failures"
+  ],
+  "ADM-009": [
+    "backend/tests/test_finance_api.py::test_reconciliation_resolution_is_superadmin_only"
+  ],
+  "ADM-010": [
+    "backend/tests/test_admin.py::test_adm_010_admin_read_audited",
+    "backend/tests/test_admin.py::test_admin_panel_does_not_change_business_data"
+  ],
+  "ADM-011": [
+    "backend/tests/test_admin.py::test_adm_011_no_impersonation_endpoint"
   ]
 }

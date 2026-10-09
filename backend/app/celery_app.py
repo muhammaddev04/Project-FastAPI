@@ -54,6 +54,9 @@ celery_app.conf.update(
         "subscription-tick": {"task": "tezfarmo.subscription_tick", "schedule": 900.0},
         "subscription-reminders": {"task": "tezfarmo.subscription_reminders", "schedule": 3600.0},
         "process-imports": {"task": "tezfarmo.process_imports", "schedule": 5.0},
+        # EXP-001: exports are heavy; EXP-004 retires a file the day after its seventh.
+        "process-exports": {"task": "tezfarmo.process_exports", "schedule": 10.0, "options": {"queue": "heavy"}},
+        "expire-exports": {"task": "tezfarmo.expire_exports", "schedule": crontab(hour=1, minute=0)},
         "stock-reconciliation": {"task": "tezfarmo.stock_reconciliation", "schedule": crontab(hour=22, minute=0)},
         "complete-delivered-orders": {"task": "tezfarmo.complete_delivered_orders", "schedule": 1800.0},
         "purge-courier-sync": {"task": "tezfarmo.purge_courier_sync_operations", "schedule": 86400.0},
@@ -110,6 +113,26 @@ def finance_reconciliation() -> int:
         configure_monitoring()
         report_bug("FINANCE_RECONCILIATION_MISMATCH")
     return mismatches
+
+
+@celery_app.task(name="tezfarmo.process_exports", queue="heavy")
+def process_exports() -> int:
+    from app.modules.reports.exports import process_pending
+
+    return _runner().run(process_pending())
+
+
+@celery_app.task(name="tezfarmo.expire_exports")
+def expire_exports() -> int:
+    """EXP-004: delete the file, keep the row and its history."""
+    from app.core.db import get_sessionmaker
+    from app.modules.reports.exports import expire_files
+
+    async def run() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await expire_files(session)
+
+    return _runner().run(run())
 
 
 @celery_app.task(name="tezfarmo.process_imports")

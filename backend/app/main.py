@@ -10,6 +10,7 @@ from app.core.logging import configure_logging
 from app.core.metrics import MetricsMiddleware, metrics_router
 from app.core.monitoring import configure_monitoring
 from app.core.request_context import RequestContextMiddleware
+from app.modules.admin.router import router as admin_router
 from app.modules.auth.router import router as auth_router
 from app.modules.catalog.router import router as catalog_router
 from app.modules.catalog.service import install as install_catalog
@@ -30,6 +31,7 @@ from app.modules.orders.service import install as install_orders
 from app.modules.organizations.ports import install_handlers
 from app.modules.organizations.router import router as organizations_router
 from app.modules.partnerships.router import router as partnerships_router
+from app.modules.reports.router import router as reports_router
 from app.modules.returns.ports import install as install_returns
 from app.modules.returns.router import router as returns_router
 from app.modules.subscriptions.router import admin_router as subscription_admin_router
@@ -102,6 +104,8 @@ def create_app() -> FastAPI:
     app.include_router(finance_router)
     app.include_router(returns_router)
     app.include_router(notifications_router)
+    app.include_router(reports_router)
+    app.include_router(admin_router)
     app.include_router(telegram_router)
     install_error_contract(app)
     return app

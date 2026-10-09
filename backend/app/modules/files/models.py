@@ -29,7 +29,12 @@ class StoredFile(IdMixin, CreatedAtMixin, Base):
             name="category",
         ),
         CheckConstraint("(organization_id IS NULL) <> (owner_user_id IS NULL)", name="exactly_one_owner"),
-        CheckConstraint("(category = 'USER_AVATAR') = (owner_user_id IS NOT NULL)", name="user_owner_only_for_avatar"),
+        # An avatar is always user-owned; P12 §2.1 adds the one other user-owned file, an admin EXPORT.
+        CheckConstraint(
+            "(category <> 'USER_AVATAR' OR owner_user_id IS NOT NULL)"
+            " AND (owner_user_id IS NULL OR category IN ('USER_AVATAR','EXPORT'))",
+            name="user_owner_only_for_avatar",
+        ),
         CheckConstraint("size_bytes > 0", name="size_positive"),
         CheckConstraint(
             "deleted_at IS NULL OR category IN ('USER_AVATAR','ORG_LOGO')", name="deleted_only_profile_images"

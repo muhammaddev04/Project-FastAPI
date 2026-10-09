@@ -37,6 +37,13 @@ async def resolve(session: AsyncSession, event: DomainEvent) -> list[Recipient]:
     if POLICIES[name].group == "admin":
         users = await session.scalars(select(User.id).where(User.is_superadmin.is_(True), User.status == "ACTIVE"))
         return [Recipient(user_id, None) for user_id in users]
+    if name == "EXPORT_READY":
+        # EXP-008: only the member who asked for the file hears about it, and an admin export has no organization.
+        requester = identifier(event, "requested_by")
+        if requester is None:
+            return []
+        if event.org_id is None:
+            return [Recipient(requester, None)]
 
     company, store = identifier(event, "company_id"), identifier(event, "store_id")
     partner_id = identifier(event, "partnership_id")
@@ -57,7 +64,10 @@ async def resolve(session: AsyncSession, event: DomainEvent) -> list[Recipient]:
     def add(org: UUID | None, roles: str, permission: str, user: UUID | None = None) -> None:
         targets.append((org, set(roles.split()), permission, user))
 
-    if name.startswith("VERIFICATION_"):
+    if name == "EXPORT_READY":
+        every_role = "OWNER MANAGER OPERATOR WAREHOUSE COURIER SELLER"
+        add(event.org_id, every_role, "org.view", identifier(event, "requested_by"))
+    elif name.startswith("VERIFICATION_"):
         add(event.org_id, "OWNER", "verification.view")
     elif name.startswith("SUBSCRIPTION_"):
         status = event.payload.get("status") or event.payload.get("to_status") or event.payload.get("to")

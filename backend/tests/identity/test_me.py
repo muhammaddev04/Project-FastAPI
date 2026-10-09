@@ -81,6 +81,13 @@ async def test_me_returns_user_and_memberships_with_permissions(client: AsyncCli
             "payments.reject",
             "pricing.manage",
             "pricing.view",
+            # P12 §1.2: a company owner reads every report family.
+            "reports.delivery",
+            "reports.finance",
+            "reports.funnel",
+            "reports.inventory",
+            "reports.returns",
+            "reports.sales",
             "returns.approve",
             "returns.complete",
             "returns.receive",

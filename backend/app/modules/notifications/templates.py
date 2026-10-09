@@ -18,6 +18,7 @@ GROUP_TITLES = {
     "finance": ("Молия", "Финансы", "Finance"),
     "returns": ("Баргардонидан", "Возврат", "Return"),
     "disputes": ("Баҳс", "Спор", "Dispute"),
+    "exports": ("Export", "Экспорт", "Export"),
 }
 ACTION_TITLES = {
     "SUBMITTED": ("барои санҷиш фиристода шуд", "отправлено на проверку", "submitted for review"),

@@ -44,6 +44,12 @@ _DISPUTES_VIEW = frozenset({"disputes.view"})
 _DISPUTES_REVIEW = _DISPUTES_VIEW | {"disputes.message", "disputes.review"}
 _DISPUTES_ADMIN = _DISPUTES_REVIEW | {"disputes.resolve"}
 _DISPUTES_STORE = _DISPUTES_VIEW | {"disputes.open", "disputes.withdraw", "disputes.message"}
+# P12 §1.2. One permission per report family, mirroring the "who" column: an operator sees the funnel only,
+# a warehouse role the stock reports, and the money reports stay with the owner and the manager.
+_REPORTS_COMPANY = frozenset(
+    {"reports.sales", "reports.funnel", "reports.finance", "reports.returns", "reports.delivery", "reports.inventory"}
+)
+_REPORTS_STORE = frozenset({"reports.purchases", "reports.debt"})
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     ("COMPANY", "OWNER"): _MEMBER_ADMIN
@@ -56,6 +62,7 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _FINANCE_ADMIN
     | _RETURNS_ADMIN
     | _DISPUTES_ADMIN
+    | _REPORTS_COMPANY
     | {"adjustments.approve"}
     | {"partners.terminate", "terms.manage_credit"}
     | {"subscription.view", "subscription.manage"},
@@ -69,20 +76,22 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _DELIVERY_ADMIN
     | _FINANCE_ADMIN
     | _RETURNS_ADMIN
-    | _DISPUTES_ADMIN,
+    | _DISPUTES_ADMIN
+    | _REPORTS_COMPANY,
     ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view", "stock.view"})
     | _PARTNERS_VIEW
     | _ORDER_COMPANY
     | _DELIVERY_VIEW
     | _FINANCE_VIEW
     | _RETURNS_VIEW
-    | _DISPUTES_REVIEW,
+    | _DISPUTES_REVIEW
+    | {"reports.funnel"},
     ("COMPANY", "WAREHOUSE"): frozenset(
         {"org.view", "catalog.view", "stock.view", "stock.receive", "stock.settings", "orders.view", "orders.assemble"}
     )
     | _DELIVERY_VIEW
     | _RETURNS_VIEW
-    | {"returns.receive"},
+    | {"returns.receive", "reports.inventory"},
     ("COMPANY", "COURIER"): frozenset({"org.view", "delivery.act_own", "payments.record"}),
     ("STORE", "OWNER"): _MEMBER_ADMIN
     | _ORG_OWNER
@@ -91,6 +100,7 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _FINANCE_VIEW
     | _RETURNS_STORE
     | _DISPUTES_STORE
+    | _REPORTS_STORE
     | {"partners.manage", "partners.terminate", "delivery.view_store"},
     ("STORE", "SELLER"): frozenset({"org.view", "delivery.view_store"})
     | _PARTNERS_VIEW

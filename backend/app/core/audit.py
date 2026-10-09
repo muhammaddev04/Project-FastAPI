@@ -59,15 +59,20 @@ async def record(
     old: dict[str, Any] | None = None,
     new: dict[str, Any] | None = None,
     reason: str | None = None,
+    actor_type: str | None = None,
 ) -> None:
-    """AUD-001: added to the caller's transaction; actor, IP, user agent and request id come from context."""
+    """AUD-001: added to the caller's transaction; actor, IP, user agent and request id come from context.
+
+    `actor_type` is given only where the actor is not acting as a member of the organization: every P12 admin
+    action is recorded as SUPERADMIN (§3).
+    """
     context_actor, context_org = get_actor()
     actor_id = actor_id or context_actor
     org_id = org_id or context_org
     session.add(
         AuditLog(
             actor_id=actor_id,
-            actor_type="USER" if actor_id else "SYSTEM",
+            actor_type=actor_type or ("USER" if actor_id else "SYSTEM"),
             org_id=org_id,
             action=action,
             entity_type=entity_type,

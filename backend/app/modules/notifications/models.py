@@ -55,7 +55,7 @@ class NotificationPreference(Base):
         CheckConstraint("channel IN ('TELEGRAM','SMS')", name="channel"),
         CheckConstraint(
             "event_group IN ('admin','account','billing','catalog','stock','partners','orders',"
-            "'delivery','finance','returns','disputes')",
+            "'delivery','finance','returns','disputes','exports')",
             name="event_group",
         ),
     )
