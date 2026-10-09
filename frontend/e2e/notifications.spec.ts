@@ -10,7 +10,7 @@ test('P11 personal notifications, pagination, preferences, optional Telegram and
   const email = `p11-${randomUUID()}@example.tj`;
   const project = process.env.P11_COMPOSE_PROJECT;
   const override = process.env.P11_COMPOSE_OVERRIDE;
-  if (!project || !override) throw new Error('Run with python scripts/check_p11_browser.py for isolated acceptance');
+  if (!project) throw new Error('Run with python scripts/check_p11_browser.py for isolated acceptance');
   execFileSync(
     'docker',
     [
@@ -19,8 +19,7 @@ test('P11 personal notifications, pagination, preferences, optional Telegram and
       project,
       '-f',
       resolve('../docker-compose.p00.yml'),
-      '-f',
-      override,
+      ...(override ? ['-f', override] : []),
       'exec',
       '-T',
       'backend',
@@ -149,8 +148,7 @@ asyncio.run(seed())
         project,
         '-f',
         resolve('../docker-compose.p00.yml'),
-        '-f',
-        override,
+        ...(override ? ['-f', override] : []),
         'exec',
         '-T',
         'backend',

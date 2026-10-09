@@ -161,7 +161,7 @@ jobs:
         run: npm run build
 
   foundation-browser:
-    name: P00-P05 browser acceptance
+    name: P00-P11 browser acceptance
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -180,6 +180,11 @@ jobs:
         run: docker compose -p tezfarmo-p00 -f docker-compose.p00.yml up -d --build --wait --wait-timeout 180
       - name: Four areas, responsive layouts and accessibility
         working-directory: frontend
+        env:
+          # These tests seed the same disposable acceptance stack, never production.
+          P10_COMPOSE_PROJECT: tezfarmo-p00
+          P11_COMPOSE_PROJECT: tezfarmo-p00
+          P11_TELEGRAM_CONFIGURED: "0"
         run: npm run test:e2e
       - name: Acceptance logs
         if: failure()

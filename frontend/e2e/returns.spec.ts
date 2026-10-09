@@ -7,8 +7,7 @@ type Case = { id: string; status: string; credit_note_id?: string; total_credit?
 test('P10 return credit, damaged goods, private dispute evidence and owner resolution', async ({ page }) => {
   test.setTimeout(240_000);
   page.setDefaultTimeout(30_000);
-  if (!process.env.P10_COMPOSE_PROJECT || !process.env.P10_COMPOSE_OVERRIDE)
-    throw new Error('Run with python scripts/check_p10_browser.py for isolated acceptance');
+  if (!process.env.P10_COMPOSE_PROJECT) throw new Error('Run with python scripts/check_p10_browser.py for isolated acceptance');
   const data = seed();
   await login(page, data.email);
   await switchOrg(page, 'P08 Company');
