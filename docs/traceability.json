@@ -721,7 +721,8 @@
     "backend/tests/test_returns_domain.py::test_ret_010_credit_with_proportional_discount_no_delivery_fee",
     "backend/tests/test_returns_domain.py::test_ret_010_rounds_once_per_line",
     "backend/tests/test_returns_service.py::test_ret_010_011_credit_note_ledger_and_fifo",
-    "backend/tests/test_returns_service.py::test_ret_010_credit_shares_the_order_discount_and_never_the_delivery_fee"
+    "backend/tests/test_returns_service.py::test_ret_010_credit_shares_the_order_discount_and_never_the_delivery_fee",
+    "backend/tests/test_returns_api.py::test_return_workflow_over_http"
   ],
   "RET-012": [
     "backend/tests/test_returns_domain.py::test_ret_012_restock_movement_base_units",
@@ -741,7 +742,8 @@
     "backend/tests/test_returns_service.py::test_dsp_021_owner_adjustment_resolves_immediately",
     "backend/tests/test_returns_service.py::test_dsp_021_manager_pending_then_approved_resolves",
     "backend/tests/test_returns_service.py::test_dsp_021_rejected_adjustment_returns_the_dispute_to_review",
-    "backend/tests/test_returns_service.py::test_dsp_021_amount_cannot_exceed_the_order"
+    "backend/tests/test_returns_service.py::test_dsp_021_amount_cannot_exceed_the_order",
+    "backend/tests/test_returns_api.py::test_dispute_workflow_over_http"
   ],
   "DSP-024": [
     "backend/tests/test_returns_domain.py::test_dsp_024_sla_warning_idempotent"
@@ -753,7 +755,8 @@
   ],
   "DSP-003": [
     "backend/tests/test_returns_models.py::test_dsp_003_one_open_dispute_per_order",
-    "backend/tests/test_returns_service.py::test_dsp_003_single_open_dispute_and_window"
+    "backend/tests/test_returns_service.py::test_dsp_003_single_open_dispute_and_window",
+    "backend/tests/test_returns_api.py::test_dispute_second_attempt_and_store_withdrawal"
   ],
   "DSP-010": [
     "backend/tests/test_returns_models.py::test_return_and_dispute_history_is_append_only",
@@ -761,7 +764,8 @@
     "backend/tests/test_returns_service.py::test_dsp_020_dispute_does_not_touch_the_ledger"
   ],
   "RET-011": [
-    "backend/tests/test_returns_service.py::test_ret_010_011_credit_note_ledger_and_fifo"
+    "backend/tests/test_returns_service.py::test_ret_010_011_credit_note_ledger_and_fifo",
+    "backend/tests/test_returns_api.py::test_return_workflow_over_http"
   ],
   "RET-013": [
     "backend/tests/test_returns_service.py::test_ret_013_return_does_not_change_the_order"

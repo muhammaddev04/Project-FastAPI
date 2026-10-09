@@ -105,10 +105,39 @@ permission matrix. The combined run of all 59 P10 tests with the P06-P09 regress
 maps every P10 requirement except DSP-023 (no escalation exists in the MVP) and the parts
 still to be built.
 
+## API
+
+The P10 endpoints of section 7 are served under `/api/v1`: the returnable lines of an
+order, return list/detail/request, approve, reject, cancel, receive, completion preview
+and complete, plus dispute list/detail/open, messages, start-review, resolve, reject and
+withdraw. Every command requires an `Idempotency-Key`, and a replay returns the original
+record instead of acting twice. Reads and writes are tenant scoped by company or store, so
+another tenant's return is a 404 rather than a 403 (SEC-007). Lists use the project's
+bounded pagination with a status filter and a deterministic tie breaker.
+
+Cancelling is the one route open to both sides: the store cancels its own request without
+explaining, the company must give a reason, and the service decides which permission
+applies. The completion preview is a GET whose lines travel as repeated
+`items=<return_item_id>:<accepted>:<restock>` parameters, and a malformed entry is a 422.
+
+The dispute resolve body is `DisputeResolveIn` rather than `ResolveIn`: the finance module
+already owns that name, and reusing it would have renamed P09's schema in the generated
+frontend types. With that naming, regenerating `openapi.json` and `schema.d.ts` adds only
+the P10 types and leaves every existing contract name untouched.
+
+Validation: 10 API tests passed, covering the whole return workflow over HTTP (preview
+20.00, credit note attached, four history rows), the required and replayed idempotency
+key, a 404 for another tenant, refused store approval and company request, a version
+conflict, store cancellation with list filters, the dispute workflow through to an owner
+credit, a second dispute answered with `dispute_already_open`, payload rules for the
+target reference and description, an operator who may review but not resolve, and the
+malformed preview. All 70 P10 backend tests passed together (15 domain, 22 database, 23 service, 10 API). Frontend ESLint, TypeScript
+and Prettier passed against the regenerated types.
+
 ## Remaining work
 
-- APIs with idempotency keys, plus a `DISPUTE` file category: `stored_files` has no such
-  category yet, so a dispute photo cannot be uploaded for attachment.
+- A `DISPUTE` file category: `stored_files` has no such category yet, so a dispute photo
+  cannot be uploaded for attachment even though a message can carry a file id.
 - The SLA warning job (DSP-024 has its anchor but nothing emits the event yet).
 - Store and company frontend, including the dispute chat with files.
 - Tests for persisted behaviour, browser acceptance and the Part Acceptance report.

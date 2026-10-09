@@ -16,8 +16,15 @@ approval path, the real open-dispute port and the P10 permission matrix.
 Validation: all 59 P10 tests (15 domain, 22 database, 22 service) passed, and the combined
 run with the P06-P09 regression passed 251 tests. Migrations applied from empty, rolled
 back and re-applied without model drift; Ruff, strict mypy over 125 source files and the
-tracked reference manifest passed. No API, worker or screen exists yet, so a user still
-cannot open a return or a dispute.
+tracked reference manifest passed.
+
+The fourth increment exposes the P10 endpoints: returnable lines, the return workflow with
+its completion preview, and the dispute workflow with messages and resolutions. Commands
+require an idempotency key and replay safely, reads are tenant scoped, and the dispute
+resolve schema is named apart from P09's so the generated API types keep every existing
+name. Validation: 10 API tests and all 70 P10 backend tests passed; frontend ESLint,
+TypeScript and Prettier passed on the regenerated types. No screen and no SLA job exist
+yet, so a user still cannot work a return or a dispute from the product.
 See [P10 progress and remaining requirements](docs/P10_ACCEPTANCE.md).
 P11 and later still require separate owner approval.
 
