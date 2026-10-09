@@ -66,12 +66,50 @@ drift. Ruff and strict mypy over 123 source files passed.
 These are foundation tests. No return or dispute workflow exists yet: there is still no
 service, endpoint or screen, so nothing can create one of these rows in the product.
 
+## Services and P07/P09 integration
+
+`ReturnService` drives the return state machine. A store requests a return against a
+delivered order, the company approves per line, a warehouse member receives the goods and
+the company completes it. Completing is the only step with money in it: the credit is
+calculated once, written onto each line, posted as a credit note through the finance
+service (its ledger entry and FIFO allocation included) and the restock part is returned
+to stock in base units, all inside the caller's transaction (RET-010..012). The order
+itself is never touched (RET-013). A return number comes from the core sequence
+(`RET-2026-000001`), approving every line as zero is refused as a rejection, and the
+completed row is written in one statement because the database then freezes it.
+
+`DisputeService` keeps a dispute away from the ledger (DSP-020). Opening one marks the
+order DISPUTED (T15); resolving it does nothing, asks finance for a credit adjustment, or
+converts it into an approved return, and rejecting or withdrawing it also closes the order
+(T17). An owner's credit resolves the dispute at once; a manager's leaves it under review
+with the pending adjustment, and the owner's later approval or rejection finishes it
+through the `ADJUSTMENT_APPROVED` / `ADJUSTMENT_REJECTED` handler, a rejection posting a
+SYSTEM message into the chat (DSP-021). A converted return re-checks RET-003 but
+deliberately not RET-002, because the dispute was opened inside the window (DSP-022).
+`OpenDisputePort` is now real, so an open dispute holds its order open (DSP-004).
+
+Two changes outside P10 were needed: P09's `reject_adjustment` now publishes
+`ADJUSTMENT_REJECTED`, without which a waiting dispute could never learn the owner said
+no; and P10 takes the company/subscription/partnership lock itself rather than through
+`partners.locked`, because a warehouse member may receive a return but holds no partner
+permission. The P10 permission matrix is in `app/core/permissions.py` and matches the TZ
+table, including the operator who may review a dispute but not resolve it.
+
+Validation: 22 service tests passed, covering the window and zero-day rule, the quantity
+left after earlier returns, the credit with a shared order discount, the base-unit restock
+and damaged goods, an untouched order, the real open-dispute port, a dispute that writes
+no ledger row, all three DSP-021 paths, the converted return, a payment dispute leaving
+its payment alone, returns working without a live subscription (RET-014) and the
+permission matrix. The combined run of all 59 P10 tests with the P06-P09 regression passed
+251 tests. Ruff and strict mypy over 125 source files passed, and the tracked manifest now
+maps every P10 requirement except DSP-023 (no escalation exists in the MVP) and the parts
+still to be built.
+
 ## Remaining work
 
-- Services: the return state machine with credit-note and restock posting, dispute
-  resolution including the three resolution types, and the real `OpenDisputePort`.
-- APIs with idempotency keys, the P10 permission matrix, audit records and events.
-- The SLA warning job.
+- APIs with idempotency keys, plus a `DISPUTE` file category: `stored_files` has no such
+  category yet, so a dispute photo cannot be uploaded for attachment.
+- The SLA warning job (DSP-024 has its anchor but nothing emits the event yet).
 - Store and company frontend, including the dispute chat with files.
 - Tests for persisted behaviour, browser acceptance and the Part Acceptance report.
 

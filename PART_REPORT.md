@@ -10,9 +10,14 @@ persistence, services, APIs, workers, frontend and acceptance are all outstandin
 The second increment adds the five P10 tables with the one-open-per-order indexes, the
 quantity ladder, append-only history and messages, immutable record identity and the
 partnership ownership guard.
-Validation: 15 P10 domain tests and 22 database protection tests passed; migrations
-applied from empty, rolled back and re-applied without model drift; Ruff, strict mypy
-over 123 source files and the tracked reference manifest passed.
+The third increment adds the return and dispute services: the return state machine with
+its credit note and restock, dispute resolution in all three forms with the owner/manager
+approval path, the real open-dispute port and the P10 permission matrix.
+Validation: all 59 P10 tests (15 domain, 22 database, 22 service) passed, and the combined
+run with the P06-P09 regression passed 251 tests. Migrations applied from empty, rolled
+back and re-applied without model drift; Ruff, strict mypy over 125 source files and the
+tracked reference manifest passed. No API, worker or screen exists yet, so a user still
+cannot open a return or a dispute.
 See [P10 progress and remaining requirements](docs/P10_ACCEPTANCE.md).
 P11 and later still require separate owner approval.
 

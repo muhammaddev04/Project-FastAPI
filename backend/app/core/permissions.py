@@ -34,6 +34,16 @@ _DELIVERY_ADMIN = _DELIVERY_VIEW | {
 }
 _FINANCE_VIEW = frozenset({"finance.view", "payments.record"})
 _FINANCE_ADMIN = _FINANCE_VIEW | {"payments.confirm", "payments.reject", "adjustments.create"}
+# P10 §6. A store asks for a return and opens a dispute; the company decides on both. A warehouse
+# only receives goods, and review is wider than resolve so an operator can work a dispute without
+# being able to close it.
+_RETURNS_VIEW = frozenset({"returns.view"})
+_RETURNS_ADMIN = _RETURNS_VIEW | {"returns.approve", "returns.receive", "returns.complete"}
+_RETURNS_STORE = _RETURNS_VIEW | {"returns.request", "returns.cancel_own"}
+_DISPUTES_VIEW = frozenset({"disputes.view"})
+_DISPUTES_REVIEW = _DISPUTES_VIEW | {"disputes.message", "disputes.review"}
+_DISPUTES_ADMIN = _DISPUTES_REVIEW | {"disputes.resolve"}
+_DISPUTES_STORE = _DISPUTES_VIEW | {"disputes.open", "disputes.withdraw", "disputes.message"}
 
 PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     ("COMPANY", "OWNER"): _MEMBER_ADMIN
@@ -44,6 +54,8 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _ORDER_ADMIN
     | _DELIVERY_ADMIN
     | _FINANCE_ADMIN
+    | _RETURNS_ADMIN
+    | _DISPUTES_ADMIN
     | {"adjustments.approve"}
     | {"partners.terminate", "terms.manage_credit"}
     | {"subscription.view", "subscription.manage"},
@@ -55,24 +67,36 @@ PERMISSIONS: dict[tuple[str, str], frozenset[str]] = {
     | _PARTNERS_ADMIN
     | _ORDER_ADMIN
     | _DELIVERY_ADMIN
-    | _FINANCE_ADMIN,
+    | _FINANCE_ADMIN
+    | _RETURNS_ADMIN
+    | _DISPUTES_ADMIN,
     ("COMPANY", "OPERATOR"): frozenset({"org.view", "catalog.view", "pricing.view", "stock.view"})
     | _PARTNERS_VIEW
     | _ORDER_COMPANY
     | _DELIVERY_VIEW
-    | _FINANCE_VIEW,
+    | _FINANCE_VIEW
+    | _RETURNS_VIEW
+    | _DISPUTES_REVIEW,
     ("COMPANY", "WAREHOUSE"): frozenset(
         {"org.view", "catalog.view", "stock.view", "stock.receive", "stock.settings", "orders.view", "orders.assemble"}
     )
-    | _DELIVERY_VIEW,
+    | _DELIVERY_VIEW
+    | _RETURNS_VIEW
+    | {"returns.receive"},
     ("COMPANY", "COURIER"): frozenset({"org.view", "delivery.act_own", "payments.record"}),
     ("STORE", "OWNER"): _MEMBER_ADMIN
     | _ORG_OWNER
     | _PARTNERS_VIEW
     | _ORDER_STORE
     | _FINANCE_VIEW
+    | _RETURNS_STORE
+    | _DISPUTES_STORE
     | {"partners.manage", "partners.terminate", "delivery.view_store"},
-    ("STORE", "SELLER"): frozenset({"org.view", "delivery.view_store"}) | _PARTNERS_VIEW | _ORDER_STORE,
+    ("STORE", "SELLER"): frozenset({"org.view", "delivery.view_store"})
+    | _PARTNERS_VIEW
+    | _ORDER_STORE
+    | _RETURNS_VIEW
+    | _DISPUTES_VIEW,
 }
 
 

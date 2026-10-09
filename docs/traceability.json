@@ -703,45 +703,79 @@
     "backend/tests/test_finance_jobs.py::test_reconciliation_detects_corruption_without_repair"
   ],
   "RET-001": [
-    "backend/tests/test_returns_domain.py::test_ret_001_order_status_required"
+    "backend/tests/test_returns_domain.py::test_ret_001_order_status_required",
+    "backend/tests/test_returns_service.py::test_ret_001_order_status_and_window"
   ],
   "RET-002": [
     "backend/tests/test_returns_domain.py::test_ret_002_window_closed",
-    "backend/tests/test_returns_domain.py::test_ret_002_zero_days_forbids_returns"
+    "backend/tests/test_returns_domain.py::test_ret_002_zero_days_forbids_returns",
+    "backend/tests/test_returns_service.py::test_ret_001_order_status_and_window",
+    "backend/tests/test_returns_service.py::test_ret_002_zero_return_days_forbids_a_return"
   ],
   "RET-003": [
     "backend/tests/test_returns_domain.py::test_ret_003_quantity_exceeds_considers_previous_returns",
-    "backend/tests/test_returns_domain.py::test_quantity_ladder_is_bounded_by_the_previous_step"
+    "backend/tests/test_returns_domain.py::test_quantity_ladder_is_bounded_by_the_previous_step",
+    "backend/tests/test_returns_service.py::test_ret_003_quantity_exceeds_considers_previous_returns"
   ],
   "RET-010": [
     "backend/tests/test_returns_domain.py::test_ret_010_credit_with_proportional_discount_no_delivery_fee",
-    "backend/tests/test_returns_domain.py::test_ret_010_rounds_once_per_line"
+    "backend/tests/test_returns_domain.py::test_ret_010_rounds_once_per_line",
+    "backend/tests/test_returns_service.py::test_ret_010_011_credit_note_ledger_and_fifo",
+    "backend/tests/test_returns_service.py::test_ret_010_credit_shares_the_order_discount_and_never_the_delivery_fee"
   ],
   "RET-012": [
     "backend/tests/test_returns_domain.py::test_ret_012_restock_movement_base_units",
-    "backend/tests/test_returns_domain.py::test_ret_012_damaged_not_restocked"
+    "backend/tests/test_returns_domain.py::test_ret_012_damaged_not_restocked",
+    "backend/tests/test_returns_service.py::test_ret_012_restock_movement_base_units_and_damaged_not_restocked"
   ],
   "DSP-001": [
-    "backend/tests/test_returns_domain.py::test_dsp_001_window_and_order_status"
+    "backend/tests/test_returns_domain.py::test_dsp_001_window_and_order_status",
+    "backend/tests/test_returns_service.py::test_dsp_003_single_open_dispute_and_window"
   ],
   "DSP-002": [
-    "backend/tests/test_returns_domain.py::test_dsp_002_payment_dispute_window_is_thirty_days"
+    "backend/tests/test_returns_domain.py::test_dsp_002_payment_dispute_window_is_thirty_days",
+    "backend/tests/test_returns_service.py::test_dsp_002_payment_dispute_leaves_the_payment_alone"
   ],
   "DSP-021": [
-    "backend/tests/test_returns_domain.py::test_dsp_021_adjustment_cannot_exceed_the_order"
+    "backend/tests/test_returns_domain.py::test_dsp_021_adjustment_cannot_exceed_the_order",
+    "backend/tests/test_returns_service.py::test_dsp_021_owner_adjustment_resolves_immediately",
+    "backend/tests/test_returns_service.py::test_dsp_021_manager_pending_then_approved_resolves",
+    "backend/tests/test_returns_service.py::test_dsp_021_rejected_adjustment_returns_the_dispute_to_review",
+    "backend/tests/test_returns_service.py::test_dsp_021_amount_cannot_exceed_the_order"
   ],
   "DSP-024": [
     "backend/tests/test_returns_domain.py::test_dsp_024_sla_warning_idempotent"
   ],
   "RET-004": [
     "backend/tests/test_returns_domain.py::test_return_state_machine_valid_invalid",
-    "backend/tests/test_returns_models.py::test_ret_004_one_open_return_per_order"
+    "backend/tests/test_returns_models.py::test_ret_004_one_open_return_per_order",
+    "backend/tests/test_returns_service.py::test_ret_004_one_open_return_per_order"
   ],
   "DSP-003": [
-    "backend/tests/test_returns_models.py::test_dsp_003_one_open_dispute_per_order"
+    "backend/tests/test_returns_models.py::test_dsp_003_one_open_dispute_per_order",
+    "backend/tests/test_returns_service.py::test_dsp_003_single_open_dispute_and_window"
   ],
   "DSP-010": [
     "backend/tests/test_returns_models.py::test_return_and_dispute_history_is_append_only",
-    "backend/tests/test_returns_models.py::test_dispute_message_body_and_system_author"
+    "backend/tests/test_returns_models.py::test_dispute_message_body_and_system_author",
+    "backend/tests/test_returns_service.py::test_dsp_020_dispute_does_not_touch_the_ledger"
+  ],
+  "RET-011": [
+    "backend/tests/test_returns_service.py::test_ret_010_011_credit_note_ledger_and_fifo"
+  ],
+  "RET-013": [
+    "backend/tests/test_returns_service.py::test_ret_013_return_does_not_change_the_order"
+  ],
+  "DSP-004": [
+    "backend/tests/test_returns_service.py::test_dsp_004_open_dispute_blocks_order_completion"
+  ],
+  "DSP-020": [
+    "backend/tests/test_returns_service.py::test_dsp_020_dispute_does_not_touch_the_ledger"
+  ],
+  "DSP-022": [
+    "backend/tests/test_returns_service.py::test_dsp_022_convert_to_return_bypasses_the_return_window"
+  ],
+  "RET-014": [
+    "backend/tests/test_returns_service.py::test_ret_014_returns_work_without_a_live_subscription"
   ]
 }

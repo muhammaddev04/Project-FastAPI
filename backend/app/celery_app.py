@@ -15,6 +15,7 @@ from app.modules.finance.ports import install as install_finance
 from app.modules.inventory.service import install as install_inventory
 from app.modules.orders.service import install as install_orders
 from app.modules.organizations.ports import install_handlers
+from app.modules.returns.ports import install as install_returns
 from app.modules.subscriptions.service import install as install_subscriptions
 
 install_handlers()
@@ -24,6 +25,7 @@ install_inventory()
 install_orders()
 install_delivery()
 install_finance()
+install_returns()
 
 celery_app = Celery("tezfarmo", broker=get_settings().celery_broker_url)
 celery_app.conf.update(

@@ -577,7 +577,15 @@ class FinanceService:
             adjustment.status, adjustment.rejected_reason = "REJECTED", reason.strip()
             adjustment.version += 1
             await self._logged(
-                session, partner, "adjustment.rejected", "adjustments", adjustment.id, ctx.user.id, reason=reason
+                session,
+                partner,
+                "adjustment.rejected",
+                "adjustments",
+                adjustment.id,
+                ctx.user.id,
+                "ADJUSTMENT_REJECTED",
+                partner.store_id,
+                reason,
             )
             return adjustment
 
