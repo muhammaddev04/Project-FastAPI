@@ -165,6 +165,10 @@ async def handle(session: AsyncSession, update: Update) -> dict[str, Any]:
         return {"ok": True}
     account = await session.scalar(select(TelegramAccount).where(TelegramAccount.telegram_user_id == sender.id))
     user = await session.get(User, account.user_id) if account else None
+    # A new authenticated private update proves the user has unblocked the bot.
+    # Resume future deliveries; previously skipped notifications stay skipped.
+    if account and user and user.status == "ACTIVE":
+        account.is_blocked_by_user = False
     language = user.language if user else sender.language_code or "tg"
     name, _, argument = (message.text or "").partition(" ") if message else ("", "", "")
     name = name.split("@", 1)[0]

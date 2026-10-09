@@ -195,3 +195,16 @@ async def test_tg_005_webhook_cli_requires_https(telegram_config, monkeypatch):
     monkeypatch.setattr(get_settings(), "telegram_webhook_base_url", "http://localhost")
     with pytest.raises(ValueError, match="HTTPS"):
         await set_webhook()
+
+
+async def test_private_update_recovers_an_unblocked_bot(session):
+    user = await make_user(session, language="en")
+    account = TelegramAccount(user_id=user.id, telegram_user_id=123, chat_id=123, is_blocked_by_user=True)
+    session.add(account)
+    await session.flush()
+    assert await bot.handle(session, update("/start", chat_type="group")) == {"ok": True}
+    assert account.is_blocked_by_user
+    reply = await bot.handle(session, update("/start"))
+    assert reply["method"] == "sendMessage"
+    await session.flush()
+    assert not account.is_blocked_by_user
