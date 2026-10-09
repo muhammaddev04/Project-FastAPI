@@ -13,6 +13,7 @@ from app.modules.catalog.service import install as install_catalog
 from app.modules.delivery.ports import install as install_delivery
 from app.modules.finance.ports import install as install_finance
 from app.modules.inventory.service import install as install_inventory
+from app.modules.notifications.service import install as install_notifications
 from app.modules.orders.service import install as install_orders
 from app.modules.organizations.ports import install_handlers
 from app.modules.returns.ports import install as install_returns
@@ -26,6 +27,7 @@ install_orders()
 install_delivery()
 install_finance()
 install_returns()
+install_notifications()
 
 celery_app = Celery("tezfarmo", broker=get_settings().celery_broker_url)
 celery_app.conf.update(
@@ -39,6 +41,12 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     beat_schedule={
+        "send-notifications": {
+            "task": "tezfarmo.send_notifications",
+            "schedule": 5.0,
+            "options": {"queue": "notifications"},
+        },
+        "purge-telegram-records": {"task": "tezfarmo.purge_telegram_records", "schedule": 86400.0},
         "dispatch-outbox": {"task": "tezfarmo.dispatch_outbox", "schedule": 5.0},
         "purge-expired-idempotency": {"task": "tezfarmo.purge_expired_idempotency", "schedule": 86400.0},
         "expire-membership-invitations": {"task": "tezfarmo.expire_membership_invitations", "schedule": 3600.0},
@@ -198,6 +206,35 @@ def purge_courier_sync_operations() -> int:
             result = await session.execute(
                 delete(CourierSyncOperation).where(CourierSyncOperation.received_at < cutoff)
             )
+            deleted: int = result.rowcount  # type: ignore[attr-defined]
+            return deleted
+
+    return _runner().run(purge())
+
+
+@celery_app.task(name="tezfarmo.send_notifications", queue="notifications")
+def send_notifications() -> int:
+    from app.modules.notifications.delivery import send_pending
+
+    return _runner().run(send_pending())
+
+
+@celery_app.task(name="tezfarmo.purge_telegram_records")
+def purge_telegram_records() -> int:
+    from datetime import timedelta
+
+    from sqlalchemy import delete
+
+    from app.core.db import get_sessionmaker
+    from app.core.time import utcnow
+    from app.modules.notifications.models import TelegramLinkToken, TelegramUpdate
+
+    async def purge() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            result = await session.execute(
+                delete(TelegramUpdate).where(TelegramUpdate.received_at < utcnow() - timedelta(days=7))
+            )
+            await session.execute(delete(TelegramLinkToken).where(TelegramLinkToken.expires_at < utcnow()))
             deleted: int = result.rowcount  # type: ignore[attr-defined]
             return deleted
 

@@ -64,6 +64,13 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:5174/auth/google/callback"
 
+    # P11 optional Telegram delivery; credentials never enter API responses.
+    telegram_bot_token: SecretStr = SecretStr("")
+    telegram_bot_username: str = ""
+    telegram_webhook_path_token: SecretStr = SecretStr("")
+    telegram_webhook_secret: SecretStr = SecretStr("")
+    telegram_webhook_base_url: str = ""
+
     default_language: Literal["tg", "ru", "en"] = "tg"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore")
@@ -75,6 +82,10 @@ class Settings(BaseSettings):
     @property
     def google_configured(self) -> bool:
         return bool(self.google_client_id and self.google_client_secret)
+
+    @property
+    def telegram_configured(self) -> bool:
+        return bool(self.telegram_bot_token.get_secret_value() and self.telegram_bot_username)
 
     @model_validator(mode="after")
     def _refuse_insecure_production(self) -> Settings:

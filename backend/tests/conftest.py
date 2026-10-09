@@ -16,6 +16,10 @@ os.environ["S3_ENDPOINT"] = os.environ.get("TEST_S3_ENDPOINT", "localhost:9010")
 os.environ["S3_BUCKET_PRIVATE"] = "tezfarmo-test"
 os.environ["GOOGLE_CLIENT_ID"] = ""
 os.environ["GOOGLE_CLIENT_SECRET"] = ""
+os.environ["TELEGRAM_BOT_TOKEN"] = ""
+os.environ["TELEGRAM_BOT_USERNAME"] = ""
+os.environ["TELEGRAM_WEBHOOK_PATH_TOKEN"] = ""
+os.environ["TELEGRAM_WEBHOOK_SECRET"] = ""
 
 from collections.abc import AsyncIterator  # noqa: E402
 from pathlib import Path  # noqa: E402

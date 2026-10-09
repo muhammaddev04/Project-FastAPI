@@ -22,6 +22,9 @@ from app.modules.identity.router import router as identity_router
 from app.modules.identity.team_router import router as team_router
 from app.modules.inventory.router import router as inventory_router
 from app.modules.inventory.service import install as install_inventory
+from app.modules.notifications.router import router as notifications_router
+from app.modules.notifications.service import install as install_notifications
+from app.modules.notifications.telegram_router import router as telegram_router
 from app.modules.orders.router import router as orders_router
 from app.modules.orders.service import install as install_orders
 from app.modules.organizations.ports import install_handlers
@@ -49,6 +52,7 @@ def create_app() -> FastAPI:
     install_delivery()
     install_finance()
     install_returns()
+    install_notifications()
     app = FastAPI(
         title="TezFarmo API",
         version=settings.app_version,
@@ -97,6 +101,8 @@ def create_app() -> FastAPI:
     app.include_router(delivery_router)
     app.include_router(finance_router)
     app.include_router(returns_router)
+    app.include_router(notifications_router)
+    app.include_router(telegram_router)
     install_error_contract(app)
     return app
 

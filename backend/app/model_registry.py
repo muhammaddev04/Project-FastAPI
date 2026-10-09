@@ -33,6 +33,14 @@ from app.modules.finance.models import (
 )
 from app.modules.identity.models import Membership, MembershipInvitation, OAuthIdentity, Organization, User
 from app.modules.inventory.models import Stock, StockMovement, StockReservation
+from app.modules.notifications.models import (
+    Notification,
+    NotificationDelivery,
+    NotificationPreference,
+    TelegramAccount,
+    TelegramLinkToken,
+    TelegramUpdate,
+)
 from app.modules.orders.models import Cart, CartItem, Order, OrderItem, OrderStatusHistory
 from app.modules.organizations.models import Company, Store
 from app.modules.partnerships.models import Partnership, PartnershipTerms
@@ -55,6 +63,12 @@ from app.modules.support.models import SupportTicket
 from app.modules.verification.models import VerificationDocument, VerificationRequest
 
 __all__ = [
+    "Notification",
+    "NotificationDelivery",
+    "NotificationPreference",
+    "TelegramAccount",
+    "TelegramLinkToken",
+    "TelegramUpdate",
     "Adjustment",
     "Allocation",
     "Charge",

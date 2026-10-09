@@ -51,10 +51,17 @@ async def run(email: str, full_name: str, password: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["create-superadmin"])
-    parser.add_argument("--email", required=True)
-    parser.add_argument("--full-name", required=True)
+    parser.add_argument("command", choices=["create-superadmin", "telegram-set-webhook"])
+    parser.add_argument("--email")
+    parser.add_argument("--full-name")
     args = parser.parse_args()
+    if args.command == "telegram-set-webhook":
+        from app.modules.notifications.webhook_cli import set_webhook
+
+        asyncio.run(set_webhook())
+        return
+    if not args.email or not args.full_name:
+        parser.error("create-superadmin requires --email and --full-name")
     password = getpass("Password: ")
     if password != getpass("Confirm password: "):
         parser.error("Passwords do not match")
