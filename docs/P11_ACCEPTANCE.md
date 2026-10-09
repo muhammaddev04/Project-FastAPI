@@ -63,7 +63,25 @@ Migration: `20261009_0026`, following P10 revision `20261008_0025`.
   the production build and requirement traceability. This full run preceded the
   final bot-unblocking regression; the focused suite verifies that final change.
 
-## Remaining live acceptance
+## Finalization recheck (2026-10-09)
+
+Both isolated browser modes passed again on the P10/P11-only checkout, including
+configured Telegram linking, command permissions, fake outbound delivery and unlinking.
+Each run now writes Playwright artifacts to its own project directory, so concurrent
+acceptance runs cannot delete one another's traces. The live bot health check also
+passed: @TezFarmobot responds, its webhook is registered, pending updates are zero
+and Telegram reports no webhook error. This read-only check sent no messages.
+
+The owner reported pressing Start. The latest database check still shows zero linked
+accounts and zero consumed link tokens. Linking must start from `/profile/telegram`
+and use the generated deep link; ordinary Start does not identify an application user.
+Live acceptance remains pending until that link is consumed and actual delivery and
+tenant-specific commands are verified. The isolated checkout passed all verification stages: 1669 backend tests and 451
+frontend tests, Linux typing/migration checks, lint, production build and traceability.
+The verify command stopped on frontend formatting; after formatting-only fixes,
+its remaining stages were rerun successfully. No backend code changed afterward.
+
+## Remaining live acceptance details
 
 The configured @TezFarmobot authenticated successfully on 2026-10-09. Its registered
 webhook matches the configured HTTPS endpoint, it has no pending updates and no

@@ -47,6 +47,7 @@ from app.modules.partnerships.models import Partnership, PartnershipTerms
 from app.modules.returns.models import (
     Dispute,
     DisputeMessage,
+    DisputeSlaWarning,
     Return,
     ReturnItem,
     ReturnStatusHistory,
@@ -63,6 +64,7 @@ from app.modules.support.models import SupportTicket
 from app.modules.verification.models import VerificationDocument, VerificationRequest
 
 __all__ = [
+    "DisputeSlaWarning",
     "Notification",
     "NotificationDelivery",
     "NotificationPreference",

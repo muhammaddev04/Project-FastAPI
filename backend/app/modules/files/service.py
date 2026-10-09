@@ -50,6 +50,8 @@ async def upload(session: AsyncSession, context: OrgContext, upload_file: Upload
         raise AppError("organization_blocked", 403)
     if category == "VERIFICATION" and "verification.submit" not in context.permissions:
         raise AppError("permission_denied", 403)
+    if category == "DISPUTE" and "disputes.message" not in context.permissions:
+        raise AppError("permission_denied", 403)
     if category == "PRODUCT_IMAGE":
         if "catalog.manage" not in context.permissions:
             raise AppError("permission_denied", 403)
@@ -115,7 +117,26 @@ async def get_owned(session: AsyncSession, organization_id: UUID, file_id: UUID)
 
 async def signed_url(session: AsyncSession, context: OrgContext, file_id: UUID) -> SignedUrl:
     """GET /files/{id}/url: verification documents are readable by the organization OWNER only (VER-004)."""
-    stored = await get_owned(session, context.organization.id, file_id)
+    stored = await session.get(StoredFile, file_id)
+    if stored is None or stored.deleted_at is not None:
+        raise AppError("not_found", 404)
+    if stored.category == "DISPUTE":
+        if "disputes.view" not in context.permissions:
+            raise AppError("permission_denied", 403)
+        if stored.organization_id != context.organization.id:
+            from app.modules.returns.models import Dispute, DisputeMessage
+
+            party = Dispute.company_id if context.organization.type == "COMPANY" else Dispute.store_id
+            attachment = await session.scalar(
+                select(DisputeMessage.id)
+                .join(Dispute, Dispute.id == DisputeMessage.dispute_id)
+                .where(DisputeMessage.file_id == file_id, party == context.organization.id)
+                .limit(1)
+            )
+            if attachment is None:
+                raise AppError("not_found", 404)
+    elif stored.organization_id != context.organization.id:
+        raise AppError("not_found", 404)
     if stored.category == "PRODUCT_IMAGE" and "catalog.view" not in context.permissions:
         raise AppError("permission_denied", 403)
     if stored.category == "VERIFICATION" and "verification.submit" not in context.permissions:

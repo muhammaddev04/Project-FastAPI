@@ -50,7 +50,7 @@ async def upload_file(
     context: OrgContextDep,
     file: Annotated[UploadFile, File()],
     # Import workbooks are uploaded through /imports; exports arrive in P12.
-    category: Annotated[Literal["VERIFICATION", "PRODUCT_IMAGE"], Form()],
+    category: Annotated[Literal["VERIFICATION", "PRODUCT_IMAGE", "DISPUTE"], Form()],
 ) -> FileOut:
     return await service.upload(session, context, file, category)
 

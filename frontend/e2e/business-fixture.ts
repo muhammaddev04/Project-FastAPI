@@ -6,6 +6,8 @@ import { expect as baseExpect, type Page } from '@playwright/test';
 const expect = baseExpect.configure({ timeout: 30_000 });
 const sessions = new WeakMap<Page, Record<string, string>>();
 export function seed() {
+  const project = process.env.P10_COMPOSE_PROJECT ?? 'tezfarmo-p00';
+  const override = process.env.P10_COMPOSE_OVERRIDE;
   const email = `p08-${randomUUID()}@example.tj`;
   const warehouseEmail = `p08-warehouse-${randomUUID()}@example.tj`;
   const output = execFileSync(
@@ -13,9 +15,10 @@ export function seed() {
     [
       'compose',
       '-p',
-      'tezfarmo-p00',
+      project,
       '-f',
       resolve('../docker-compose.p00.yml'),
+      ...(override ? ['-f', override] : []),
       'exec',
       '-T',
       'backend',

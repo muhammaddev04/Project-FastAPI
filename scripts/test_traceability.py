@@ -7,6 +7,20 @@ from check_traceability import check
 
 
 class TraceabilityTests(unittest.TestCase):
+    def test_complete_p10_requires_workflow_coverage_and_defers_p12_admin_view(self) -> None:
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent) as directory:
+            root = Path(directory)
+            (root / "docs").mkdir()
+            (root / "TZ.md").write_text(
+                "## [P10_returns_disputes]\nRET-001 DSP-023 DSP-024\n## [P11_notifications_telegram]",
+                encoding="utf-8",
+            )
+            (root / "docs/traceability.json").write_text("{}", encoding="utf-8")
+            self.assertEqual(
+                check(root, complete_p10=True),
+                ["Unmapped P10 requirement: DSP-024", "Unmapped P10 requirement: RET-001"],
+            )
+
     def test_complete_p09_rejects_unmapped_requirement(self) -> None:
         with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent) as directory:
             root = Path(directory)

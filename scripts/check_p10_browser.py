@@ -1,6 +1,5 @@
-"""P11 browser acceptance on disposable containers with independent ports and no external credentials."""
+"""P10 browser acceptance on disposable containers with independent ports and no external credentials."""
 
-import argparse
 import os
 import subprocess
 from pathlib import Path
@@ -10,12 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--configured-telegram", action="store_true", help="Use isolated fake bot credentials for linking acceptance"
-    )
-    args = parser.parse_args()
-    project = f"tezfarmo-p11-{uuid4().hex[:10]}"
+    project = f"tezfarmo-p10-{uuid4().hex[:10]}"
     override = ROOT / f".env.{project}.yml"
     override.write_text(
         """services:
@@ -31,10 +25,10 @@ def main() -> None:
     working_dir: /app
     volumes:
       - ./backend/alembic.ini:/app/alembic.ini:ro
-    ports: !override ["127.0.0.1:18111:8000"]
+    ports: !override ["127.0.0.1:18110:8000"]
     environment:
-      CORS_ORIGINS: http://127.0.0.1:15111
-      FRONTEND_BASE_URL: http://127.0.0.1:15111
+      CORS_ORIGINS: http://127.0.0.1:15110
+      FRONTEND_BASE_URL: http://127.0.0.1:15110
       TELEGRAM_BOT_TOKEN: ""
       TELEGRAM_BOT_USERNAME: ""
       TELEGRAM_WEBHOOK_PATH_TOKEN: ""
@@ -50,19 +44,10 @@ def main() -> None:
   frontend:
     # Test the built snapshot; concurrent IDE edits must not hot-reload acceptance.
     volumes: !reset []
-    ports: !override ["127.0.0.1:15111:5174"]
+    ports: !override ["127.0.0.1:15110:5174"]
 """,
         encoding="utf-8",
     )
-    if args.configured_telegram:
-        override.write_text(
-            override.read_text(encoding="utf-8")
-            .replace('TELEGRAM_BOT_TOKEN: ""', 'TELEGRAM_BOT_TOKEN: "123456:isolated-test-token"')
-            .replace('TELEGRAM_BOT_USERNAME: ""', 'TELEGRAM_BOT_USERNAME: "isolated_test_bot"')
-            .replace('TELEGRAM_WEBHOOK_PATH_TOKEN: ""', 'TELEGRAM_WEBHOOK_PATH_TOKEN: "isolated-test-path"')
-            .replace('TELEGRAM_WEBHOOK_SECRET: ""', 'TELEGRAM_WEBHOOK_SECRET: "isolated-test-secret"'),
-            encoding="utf-8",
-        )
     compose = ["docker", "compose", "-p", project, "-f", "docker-compose.p00.yml", "-f", str(override)]
     try:
         # backend-ci builds the clean Linux image first; this stack only builds its own frontend.
@@ -72,10 +57,9 @@ def main() -> None:
             check=True,
         )
         environment = os.environ | {
-            "P00_BASE_URL": "http://127.0.0.1:15111",
-            "P11_COMPOSE_PROJECT": project,
-            "P11_COMPOSE_OVERRIDE": str(override),
-            "P11_TELEGRAM_CONFIGURED": "1" if args.configured_telegram else "0",
+            "P00_BASE_URL": "http://127.0.0.1:15110",
+            "P10_COMPOSE_PROJECT": project,
+            "P10_COMPOSE_OVERRIDE": str(override),
         }
         npm = "npm.cmd" if os.name == "nt" else "npm"
         subprocess.run(
@@ -84,7 +68,7 @@ def main() -> None:
                 "run",
                 "test:e2e",
                 "--",
-                "notifications.spec.ts",
+                "returns.spec.ts",
                 "--output",
                 str(ROOT / "frontend/test-results" / project),
             ],

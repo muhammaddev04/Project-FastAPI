@@ -7,7 +7,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 # CR-003 adds USER_AVATAR and ORG_LOGO (see models.FILE_CATEGORIES).
-FileCategory = Literal["VERIFICATION", "IMPORT", "EXPORT", "PRODUCT_IMAGE", "USER_AVATAR", "ORG_LOGO"]
+FileCategory = Literal["VERIFICATION", "IMPORT", "EXPORT", "PRODUCT_IMAGE", "USER_AVATAR", "ORG_LOGO", "DISPUTE"]
 
 
 class FileOut(BaseModel):

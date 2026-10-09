@@ -197,6 +197,15 @@ class Dispute(IdMixin, TimestampMixin, Base):
     version: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
 
 
+class DisputeSlaWarning(IdMixin, CreatedAtMixin, Base):
+    """DSP-024: one durable claim per dispute and 24-hour warning anchor."""
+
+    __tablename__ = "dispute_sla_warnings"
+    __table_args__ = (UniqueConstraint("dispute_id", "anchor_at"),)
+    dispute_id: Mapped[UUID] = mapped_column(ForeignKey("disputes.id"))
+    anchor_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class DisputeMessage(IdMixin, CreatedAtMixin, Base):
     __tablename__ = "dispute_messages"
     __table_args__ = (

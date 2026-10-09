@@ -56,10 +56,16 @@ class DeliveryQuery(ListQuery):
     status: list[DeliveryStatus] = Field(default_factory=list)
     courier_id: UUID | None = None
     run_id: UUID | None = None
+    # P10 §9: a dispute is argued over how the delivery went, so its page needs the attempts of one order.
+    order_id: UUID | None = None
     date: datetime.date | None = None
     unassigned: bool = False
     ordering: Literal["created_at", "-created_at"] = "-created_at"
-    filter_columns = {"courier_id": Delivery.courier_id, "run_id": Delivery.run_id}
+    filter_columns = {
+        "courier_id": Delivery.courier_id,
+        "run_id": Delivery.run_id,
+        "order_id": Delivery.order_id,
+    }
     ordering_columns = {"created_at": Delivery.created_at}
 
 

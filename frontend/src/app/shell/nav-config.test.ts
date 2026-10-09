@@ -5,7 +5,15 @@ import { navByAvailability, navFor } from './nav-config';
 const keys = (
   area: 'company' | 'store' | 'courier',
   role: Role,
-  permissions: string[] = ['partners.view', 'orders.view', 'store_catalog.view', 'cart.manage', 'finance.view'],
+  permissions: string[] = [
+    'partners.view',
+    'orders.view',
+    'store_catalog.view',
+    'cart.manage',
+    'finance.view',
+    'returns.view',
+    'disputes.view',
+  ],
 ) =>
   navFor(area, area === 'store' ? storeMembership({ role, permissions }) : membershipFixture({ role, permissions })).flatMap((section) =>
     section.items.map((item) => item.key),
@@ -25,6 +33,8 @@ const OWNER_PERMS = [
   'cart.manage',
   'finance.view',
   'delivery.view_all',
+  'returns.view',
+  'disputes.view',
 ];
 
 describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
@@ -39,6 +49,7 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
       'delivery',
       'finance',
       'returns',
+      'disputes',
       'reports',
       'team',
       'subscription',
@@ -53,7 +64,7 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
   });
 
   it('limits operators to orders, catalog, clients, payments and disputes', () => {
-    expect(keys('company', 'OPERATOR')).toEqual(['dashboard', 'orders', 'catalog', 'partners', 'finance', 'returns']);
+    expect(keys('company', 'OPERATOR')).toEqual(['dashboard', 'orders', 'catalog', 'partners', 'finance', 'returns', 'disputes']);
   });
 
   it('shows warehouse staff catalog and stock without prices', () => {
@@ -65,7 +76,7 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
     ]);
   });
 
-  it('keeps debt, disputes, team and settings from store sellers', () => {
+  it('keeps debt, team and settings from store sellers, who may still read returns and disputes', () => {
     expect(keys('store', 'OWNER', OWNER_PERMS)).toEqual([
       'dashboard',
       'suppliers',
@@ -74,10 +85,12 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
       'orders',
       'debt',
       'returns',
+      'disputes',
       'team',
       'settings',
     ]);
-    expect(keys('store', 'SELLER')).toEqual(['dashboard', 'suppliers', 'catalog', 'cart', 'orders']);
+    // P10 §6: a seller reads both queues but opens neither, so the pages are visible and their actions are not.
+    expect(keys('store', 'SELLER')).toEqual(['dashboard', 'suppliers', 'catalog', 'cart', 'orders', 'returns', 'disputes']);
   });
 
   it('gives couriers their run screens', () => {
@@ -106,6 +119,8 @@ describe('honest navigation (Phase C8)', () => {
       'partners',
       'delivery',
       'finance',
+      'returns',
+      'disputes',
       'team',
       'subscription',
       'settings',
@@ -113,7 +128,7 @@ describe('honest navigation (Phase C8)', () => {
     // Nothing in the working navigation may carry a phase, which is what marks a placeholder.
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
-    expect(planned.map((item) => item.key)).toEqual(['returns', 'reports']);
+    expect(planned.map((item) => item.key)).toEqual(['reports']);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });
 

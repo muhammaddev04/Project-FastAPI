@@ -94,7 +94,13 @@ async def output(session: SessionDep, ctx: OrgContext, order: Order) -> OrderOut
     else:
         result.items = [ItemOut.model_validate(row) for row in rows]
         if ctx.organization.type == "STORE":
-            result.terms_snapshot = None
+            # P10 store actions need the order's agreed windows; other internal terms stay private.
+            snapshot = order.terms_snapshot
+            result.terms_snapshot = (
+                {key: snapshot[key] for key in ("return_days", "dispute_window_hours") if key in snapshot}
+                if snapshot is not None
+                else None
+            )
     for row in result.items:
         row.rejected_quantity = (
             row.requested_quantity - row.confirmed_quantity if row.confirmed_quantity is not None else service.ZERO

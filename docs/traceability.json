@@ -746,7 +746,9 @@
     "backend/tests/test_returns_api.py::test_dispute_workflow_over_http"
   ],
   "DSP-024": [
-    "backend/tests/test_returns_domain.py::test_dsp_024_sla_warning_idempotent"
+    "backend/tests/test_returns_domain.py::test_dsp_024_sla_warning_idempotent",
+    "backend/tests/test_returns_completion.py::test_dsp_024_sla_warning_idempotent_and_repeats",
+    "backend/tests/test_returns_completion.py::test_dsp_024_rollback_does_not_lose_warning"
   ],
   "RET-004": [
     "backend/tests/test_returns_domain.py::test_return_state_machine_valid_invalid",
@@ -761,7 +763,10 @@
   "DSP-010": [
     "backend/tests/test_returns_models.py::test_return_and_dispute_history_is_append_only",
     "backend/tests/test_returns_models.py::test_dispute_message_body_and_system_author",
-    "backend/tests/test_returns_service.py::test_dsp_020_dispute_does_not_touch_the_ledger"
+    "backend/tests/test_returns_service.py::test_dsp_020_dispute_does_not_touch_the_ledger",
+    "backend/tests/test_returns_completion.py::test_dsp_010_private_attachment_shared_only_with_dispute_parties",
+    "backend/tests/test_returns_completion.py::test_dsp_010_upload_permissions_and_content_validation",
+    "backend/tests/test_returns_completion.py::test_dsp_010_reject_foreign_or_wrong_category_attachments"
   ],
   "RET-011": [
     "backend/tests/test_returns_service.py::test_ret_010_011_credit_note_ledger_and_fifo",

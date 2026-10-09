@@ -133,7 +133,6 @@ async def resolve(session: AsyncSession, event: DomainEvent) -> list[Recipient]:
             add(company, "OWNER MANAGER WAREHOUSE", "returns.view")
         elif name == "DISPUTE_SLA_WARNING":
             add(company, "OWNER MANAGER", "disputes.view")
-            add(store, "OWNER", "disputes.view")
         else:
             add(org, "OWNER MANAGER", "returns.view" if name.startswith("RETURN_") else "disputes.view")
 

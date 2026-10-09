@@ -25,6 +25,7 @@ from app.core.errors import AppError
 from app.core.events import DomainEvent, event_bus
 from app.core.sequences import SequenceService
 from app.core.time import utcnow
+from app.modules.files.service import get_owned
 from app.modules.finance import service as finance
 from app.modules.finance.models import Payment
 from app.modules.identity.deps import OrgContext
@@ -52,6 +53,12 @@ MAX_LINES = 200
 MAX_FILES = 10
 ZERO = Decimal("0.00")
 ZERO_QUANTITY = Decimal("0.000")
+
+
+async def _attachment(session: AsyncSession, ctx: OrgContext, file_id: UUID) -> None:
+    stored = await get_owned(session, ctx.organization.id, file_id)
+    if stored.category != "DISPUTE":
+        raise AppError("file_type_not_allowed", 422)
 
 
 @dataclass(frozen=True)
@@ -635,7 +642,7 @@ class DisputeService:
         files = file_ids or []
         if target_type not in {"ORDER", "PAYMENT"} or type not in DISPUTE_TYPES:
             raise AppError("validation_error", 422, {"field": "type"})
-        if len(description.strip()) < 10 or len(files) > MAX_FILES:
+        if len(description.strip()) < 10 or len(files) > MAX_FILES or len(set(files)) != len(files):
             raise AppError("validation_error", 422, {"field": "description"})
         now = utcnow()
         if target_type == "ORDER":
@@ -682,6 +689,7 @@ class DisputeService:
             # DSP-003 race backstop: the partial unique index decides.
             raise AppError("dispute_already_open", 409) from error
         for file_id in files:
+            await _attachment(session, ctx, file_id)
             # Each attachment is its own chat entry carrying the opening statement, so the
             # company sees what the photo is meant to show (DSP-010, VER-002 file rules).
             session.add(
@@ -722,6 +730,8 @@ class DisputeService:
         record = await self._locked(session, ctx, dispute_id, None)
         if record.status not in domain.OPEN_DISPUTE_STATUSES:
             raise AppError("invalid_transition", 409, {"status": record.status})
+        if file_id is not None:
+            await _attachment(session, ctx, file_id)
         partner = await finance.party(session, record.partnership_id)
         message = DisputeMessage(
             dispute_id=record.id,

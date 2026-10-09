@@ -76,9 +76,9 @@ describe('Company application', () => {
       { path: '/members', body: MEMBERS },
     ]);
     signIn();
-    renderRoutes(routes, '/company/returns');
-    expect(await screen.findByRole('heading', { name: 'Returns & disputes' })).toBeInTheDocument();
-    expect(screen.getByText('Arrives in P10')).toBeInTheDocument();
+    renderRoutes(routes, '/company/reports');
+    expect(await screen.findByRole('heading', { name: 'Reports' })).toBeInTheDocument();
+    expect(screen.getByText('Arrives in P12')).toBeInTheDocument();
   });
 
   it('forbids a planned page the role cannot see', async () => {

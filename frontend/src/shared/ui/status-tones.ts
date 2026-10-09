@@ -1,4 +1,4 @@
-import { CheckCircle2, CircleDashed, Clock3, PauseCircle, ShieldCheck, XCircle, type LucideIcon } from 'lucide-react';
+import { CheckCircle2, CircleDashed, Clock3, PackageCheck, PauseCircle, ShieldCheck, XCircle, type LucideIcon } from 'lucide-react';
 import type { BadgeTone } from './badge';
 
 /**
@@ -40,6 +40,32 @@ export const PRESETS = {
     label: 'team.statuses',
     tones: { ACTIVE: 'success', SUSPENDED: 'warning', REVOKED: 'neutral' },
     icons: { ACTIVE: CheckCircle2, SUSPENDED: PauseCircle, REVOKED: XCircle },
+  },
+  /** P10 return (REQUESTED → APPROVED → RECEIVED → COMPLETED, or REJECTED | CANCELLED). */
+  returnStatus: {
+    label: 'returns.statuses',
+    tones: {
+      REQUESTED: 'info',
+      APPROVED: 'accent',
+      RECEIVED: 'assembling',
+      COMPLETED: 'success',
+      REJECTED: 'danger',
+      CANCELLED: 'neutral',
+    },
+    icons: {
+      REQUESTED: CircleDashed,
+      APPROVED: CheckCircle2,
+      RECEIVED: PackageCheck,
+      COMPLETED: CheckCircle2,
+      REJECTED: XCircle,
+      CANCELLED: XCircle,
+    },
+  },
+  /** P10 dispute (OPEN → UNDER_REVIEW → RESOLVED | REJECTED, or WITHDRAWN by the store). */
+  disputeStatus: {
+    label: 'returns.disputeStatuses',
+    tones: { OPEN: 'disputed', UNDER_REVIEW: 'warning', RESOLVED: 'success', REJECTED: 'danger', WITHDRAWN: 'neutral' },
+    icons: { OPEN: CircleDashed, UNDER_REVIEW: Clock3, RESOLVED: CheckCircle2, REJECTED: XCircle, WITHDRAWN: XCircle },
   },
 } satisfies Record<string, Preset>;
 

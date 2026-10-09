@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAreaContext } from '@/app/shell/use-area-context';
 import { StoreDeliveryBlock } from '@/features/delivery/pages';
+import { OrderReturnActions } from '@/features/returns/order-actions';
 import { catalogKey, useCatalogMutation, useCatalogQuery, type Page } from '@/features/catalog/api';
 import { Feedback, Field } from '@/features/catalog/shared';
 import { useBillingQuery, type Access } from '@/features/subscriptions/api';
@@ -439,6 +440,8 @@ export function OrderPage() {
             {t('orders.repeat')}
           </Button>
         )}
+        {/* P10 §9: the store asks for a return or opens a dispute from the order it is about. */}
+        <OrderReturnActions order={order} />
       </div>
       <Feedback error={repeat.error} />
       {repeated && (

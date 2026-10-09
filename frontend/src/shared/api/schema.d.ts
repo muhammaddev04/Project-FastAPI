@@ -3528,7 +3528,7 @@ export interface components {
              * Category
              * @enum {string}
              */
-            category: "VERIFICATION" | "PRODUCT_IMAGE";
+            category: "VERIFICATION" | "PRODUCT_IMAGE" | "DISPUTE";
         };
         /** BulkPricesIn */
         BulkPricesIn: {
@@ -4444,7 +4444,7 @@ export interface components {
              * Category
              * @enum {string}
              */
-            category: "VERIFICATION" | "IMPORT" | "EXPORT" | "PRODUCT_IMAGE" | "USER_AVATAR" | "ORG_LOGO";
+            category: "VERIFICATION" | "IMPORT" | "EXPORT" | "PRODUCT_IMAGE" | "USER_AVATAR" | "ORG_LOGO" | "DISPUTE";
             /**
              * Created At
              * Format: date-time
@@ -23134,6 +23134,7 @@ export interface operations {
                 status?: ("PLANNED" | "ASSIGNED" | "IN_TRANSIT" | "ARRIVED" | "DELIVERED" | "FAILED" | "CANCELLED")[];
                 courier_id?: string | null;
                 run_id?: string | null;
+                order_id?: string | null;
                 date?: string | null;
                 unassigned?: boolean;
                 ordering?: "created_at" | "-created_at";

@@ -47,6 +47,7 @@ celery_app.conf.update(
             "options": {"queue": "notifications"},
         },
         "purge-telegram-records": {"task": "tezfarmo.purge_telegram_records", "schedule": 86400.0},
+        "dispute-sla-warnings": {"task": "tezfarmo.dispute_sla_warnings", "schedule": 3600.0},
         "dispatch-outbox": {"task": "tezfarmo.dispatch_outbox", "schedule": 5.0},
         "purge-expired-idempotency": {"task": "tezfarmo.purge_expired_idempotency", "schedule": 86400.0},
         "expire-membership-invitations": {"task": "tezfarmo.expire_membership_invitations", "schedule": 3600.0},
@@ -77,6 +78,18 @@ def finance_reminders() -> int:
     async def run() -> int:
         async with get_sessionmaker()() as session, session.begin():
             return await send_reminders(session)
+
+    return _runner().run(run())
+
+
+@celery_app.task(name="tezfarmo.dispute_sla_warnings")
+def dispute_sla_warnings() -> int:
+    from app.core.db import get_sessionmaker
+    from app.modules.returns.jobs import send_sla_warnings
+
+    async def run() -> int:
+        async with get_sessionmaker()() as session, session.begin():
+            return await send_sla_warnings(session)
 
     return _runner().run(run())
 

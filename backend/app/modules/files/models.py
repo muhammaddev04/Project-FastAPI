@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base, CreatedAtMixin, IdMixin
 
 # CR-003 adds USER_AVATAR (owned by a user) and ORG_LOGO (company logo / store image, owned by the organization).
-FILE_CATEGORIES = ("VERIFICATION", "IMPORT", "EXPORT", "PRODUCT_IMAGE", "USER_AVATAR", "ORG_LOGO")
+FILE_CATEGORIES = ("VERIFICATION", "IMPORT", "EXPORT", "PRODUCT_IMAGE", "USER_AVATAR", "ORG_LOGO", "DISPUTE")
 # CR-003: only these can be retired (`deleted_at`); every other file keeps the VER-005 guarantee.
 RETIRABLE_CATEGORIES = ("USER_AVATAR", "ORG_LOGO")
 
@@ -25,7 +25,8 @@ class StoredFile(IdMixin, CreatedAtMixin, Base):
     __tablename__ = "stored_files"
     __table_args__ = (
         CheckConstraint(
-            "category IN ('VERIFICATION','IMPORT','EXPORT','PRODUCT_IMAGE','USER_AVATAR','ORG_LOGO')", name="category"
+            "category IN ('VERIFICATION','IMPORT','EXPORT','PRODUCT_IMAGE','USER_AVATAR','ORG_LOGO','DISPUTE')",
+            name="category",
         ),
         CheckConstraint("(organization_id IS NULL) <> (owner_user_id IS NULL)", name="exactly_one_owner"),
         CheckConstraint("(category = 'USER_AVATAR') = (owner_user_id IS NOT NULL)", name="user_owner_only_for_avatar"),

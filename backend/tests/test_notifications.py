@@ -96,7 +96,7 @@ MATRIX = [
         )
     ],
     ("RETURN_RECEIVED", {"C.OWNER", "C.MANAGER", "C.WAREHOUSE"}),
-    ("DISPUTE_SLA_WARNING", {"C.OWNER", "C.MANAGER", "S.OWNER"}),
+    ("DISPUTE_SLA_WARNING", {"C.OWNER", "C.MANAGER"}),
 ]
 
 

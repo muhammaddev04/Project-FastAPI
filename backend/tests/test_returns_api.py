@@ -29,6 +29,12 @@ async def test_return_workflow_over_http(client: AsyncClient, session: AsyncSess
     ctx, store_ctx, order, item = await delivered(client, session)
     await session.commit()
 
+    detail = await client.get(f"/api/v1/orders/{order.id}", headers=plain(store_ctx))
+    assert detail.status_code == 200, detail.text
+    assert detail.json()["terms_snapshot"] == {
+        key: order.terms_snapshot[key] for key in ("return_days", "dispute_window_hours")
+    }
+
     offered = await client.get(f"/api/v1/orders/{order.id}/returnable", headers=plain(store_ctx))
     assert offered.status_code == 200, offered.text
     line = offered.json()[0]

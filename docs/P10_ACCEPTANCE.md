@@ -1,7 +1,7 @@
 # P10 returns and disputes
 
 Owner approval: 2026-10-08.
-Status: IN PROGRESS. P10 is not DONE.
+Status: DONE.
 
 ## Domain foundation
 
@@ -134,12 +134,88 @@ target reference and description, an operator who may review but not resolve, an
 malformed preview. All 70 P10 backend tests passed together (15 domain, 22 database, 23 service, 10 API). Frontend ESLint, TypeScript
 and Prettier passed against the regenerated types.
 
+## Frontend
+
+The P10 §9 screens are built for both sides. `features/returns/` holds them: `access.ts` reads the
+permission matrix once, `pages.tsx` the return queue and its detail, `disputes.tsx` the dispute queue
+and its detail, and `order-actions.tsx` the two store actions that start a case from the order they
+are about.
+
+Both queues filter on exactly one status per tab, because the endpoint filters on one; a tab is
+therefore its own server-side query and the count beneath it is the real count, rather than a client
+side slice of somebody else's page.
+
+The return detail is a ladder, not a form: approve and receive open each line at the ceiling the
+previous step left it (`stepCeiling`), and lowering a line to zero drops it. Completion is the one
+place where two numbers differ on purpose — accepted drives the credit, restock drives the warehouse,
+and an accepted line with zero restock is damaged goods that never reach the shelf (RET-012). The
+credit shown is the server's own `completion-preview`, requested as repeated
+`items=<id>:<accepted>:<restock>`, so the person approving a credit sees the figure that will be
+posted rather than one the browser computed in parallel.
+
+Cancelling keeps the asymmetry the service already enforces: the store cancels its own request with
+no explanation, the company must give a reason, and the dialog asks for exactly one of those.
+
+The dispute detail is the case file: the claim, the order's lines, how the delivery was confirmed, and
+the chat. A manual override with its reason settles most quantity disputes, so it is shown here rather
+than left in the delivery module; that needed one additive backend change, an `order_id` filter on
+`GET /deliveries` (P08 had no way to find an order's attempts). Resolution is one dialog for all three
+DSP-021/022 outcomes, with the credit bounded by the order total and previewed against the live
+partnership balance, and the manager/owner approval difference stated before the credit is sent.
+
+The queue carries an SLA badge on the same 48h/24h clock DSP-024 defines, so the company sees the
+clock the warning runs on.
+
+Both windows close themselves. The return button hides past `delivered_at + return_days` and the
+dispute button past `delivered_at + dispute_window_hours`, counting down the hours that are left,
+so nobody fills a form the server is going to refuse.
+
+Validation: 16 browser tests passed, covering the RET-003 quantity rule including the whole-piece
+fraction refusal, the step ladder, both closing windows, the SLA colouring, the preview query format,
+the server-side queue filter, a completion that previews 360.00 and posts zero restock with an
+idempotency key, the company-must-explain cancellation, a store return request refused above
+`max_returnable` and then sent, a dispute opened with 46 hours left, the hidden button once the window
+has closed, the chat, the credit bounded by the order total with its balance preview, and a store
+seller who reads both queues and may act on neither. The whole frontend suite passed (51 files, 449
+tests) with ESLint, TypeScript and Prettier clean.
+
 ## Remaining work
 
-- A `DISPUTE` file category: `stored_files` has no such category yet, so a dispute photo
-  cannot be uploaded for attachment even though a message can carry a file id.
-- The SLA warning job (DSP-024 has its anchor but nothing emits the event yet).
-- Store and company frontend, including the dispute chat with files.
-- Tests for persisted behaviour, browser acceptance and the Part Acceptance report.
+- All verification stages and isolated browser acceptance passed.
+- The tested P10 changes are committed separately from the owner's concurrent P12 work.
 
-P11 workflows have not started. Existing authentication behavior is preserved.
+## Finalization work (2026-10-09)
+
+Revision `20261009_p10_finalize` now follows committed P11 revision `20261009_0026`.
+It adds private `DISPUTE` files and immutable, unique `(dispute_id, anchor_at)` SLA claims.
+Only a dispute participant with the corresponding permission can read shared evidence;
+foreign files and other document categories cannot be attached. Both the opening form and
+the reply form upload JPEG, PNG or PDF evidence, with translated labels in tg/ru/en.
+
+The hourly Celery job emits `DISPUTE_SLA_WARNING` after 48 hours in OPEN and every 24 hours
+thereafter, to company OWNER/MANAGER only. Claiming and publishing share a transaction;
+retries deduplicate and a rollback does not consume the warning.
+
+Isolated browser acceptance exposed a missing API integration: store order responses hid
+all of `terms_snapshot`, so the frontend could not show return or dispute actions. The
+store now receives only `return_days` and `dispute_window_hours` from the order snapshot.
+Other internal terms remain private. The HTTP workflow test checks that exact boundary.
+
+The P10 frontend suite passed 18 cases, including private evidence upload, posting its
+identifier in a reply, access throughout the final hour and disabling an open dispute
+form when its deadline passes. The action area refreshes its clock every 30 seconds.
+The generated OpenAPI/type output remained identical across
+successive generations. `scripts/check_p10_browser.py` runs `returns.spec.ts` against
+independent disposable services. Browser acceptance passed the complete return and owner
+credit-resolution workflows, private evidence and 390/768/1440-pixel layouts. Full
+verification stages passed, and browser acceptance was repeated successfully after the expiry regression.
+
+P10 status: DONE. P12 belongs to Claude and is outside this work.
+
+`python scripts/dev.py verify` passed backend lint, strict typing, migration parity and
+1669 backend tests, then stopped on frontend formatting. After formatting-only fixes,
+all remaining stages were rerun successfully: ESLint, TypeScript, Prettier, 451 tests
+in 51 files, production build and requirement traceability. Backend code was unchanged
+after its successful test run. Both generated API outputs remained stable.
+
+Existing authentication behavior is preserved.

@@ -11,6 +11,7 @@ import {
   type LucideIcon,
   Package,
   RotateCcw,
+  Scale,
   Settings,
   ShoppingCart,
   Truck,
@@ -21,7 +22,7 @@ import type { Area } from '@/shared/auth/context';
 import type { Membership, Role } from '@/shared/auth/types';
 
 /** TZ phase that delivers a module. Items with a phase render an honest "planned" page until it ships. */
-export type Phase = 'P02' | 'P03' | 'P04' | 'P05' | 'P06' | 'P07' | 'P08' | 'P09' | 'P10' | 'P12';
+export type Phase = 'P02' | 'P03' | 'P04' | 'P05' | 'P06' | 'P07' | 'P08' | 'P12';
 
 export type NavItem = {
   key: string;
@@ -57,7 +58,8 @@ const COMPANY: NavSection[] = [
       { key: 'partners', path: 'partners', icon: Handshake, roles: ['OWNER', 'MANAGER', 'OPERATOR'], permission: 'partners.view' },
       { key: 'delivery', path: 'delivery', icon: Truck, permission: 'delivery.view_all' },
       { key: 'finance', path: 'finance', icon: Wallet, roles: ['OWNER', 'MANAGER', 'OPERATOR'], permission: 'finance.view' },
-      { key: 'returns', path: 'returns', icon: RotateCcw, roles: ['OWNER', 'MANAGER', 'OPERATOR'], phase: 'P10' },
+      { key: 'returns', path: 'returns', icon: RotateCcw, permission: 'returns.view' },
+      { key: 'disputes', path: 'disputes', icon: Scale, roles: ['OWNER', 'MANAGER', 'OPERATOR'], permission: 'disputes.view' },
       { key: 'reports', path: 'reports', icon: BarChart3, roles: ['OWNER', 'MANAGER'], phase: 'P12' },
     ],
   },
@@ -81,7 +83,8 @@ const STORE: NavSection[] = [
       { key: 'cart', path: 'cart', icon: ShoppingCart, permission: 'cart.manage', primary: true },
       { key: 'orders', path: 'orders', icon: ClipboardList, permission: 'orders.view', primary: true },
       { key: 'debt', path: 'finance', icon: Wallet, roles: ['OWNER'], permission: 'finance.view', primary: true },
-      { key: 'returns', path: 'returns', icon: RotateCcw, roles: ['OWNER'], phase: 'P10' },
+      { key: 'returns', path: 'returns', icon: RotateCcw, permission: 'returns.view' },
+      { key: 'disputes', path: 'disputes', icon: Scale, permission: 'disputes.view' },
     ],
   },
   {

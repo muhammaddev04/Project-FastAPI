@@ -16,6 +16,8 @@ import { PartnersPage, PartnerDetailPage } from '@/features/partnerships/pages';
 import { BuyingPage } from '@/features/orders/buying';
 import { OrdersPage, OrderPage } from '@/features/orders/pages';
 import { FinancePage, PartnerFinancePage, PaymentsPage, AdjustmentsPage } from '@/features/finance/pages';
+import { ReturnsPage, ReturnPage } from '@/features/returns/pages';
+import { DisputesPage, DisputePage } from '@/features/returns/disputes';
 import { DeliveryBoard, DeliveryPage, RunPage } from '@/features/delivery/pages';
 import { CourierPage, CourierStopPage, CourierIssuesPage } from '@/features/delivery/courier-pages';
 import { StoreDashboard } from '@/features/dashboard/store-dashboard';
@@ -197,6 +199,10 @@ export const routes: RouteObject[] = [
       { path: 'finance/payments', element: <PaymentsPage /> },
       { path: 'finance/adjustments', element: <AdjustmentsPage /> },
       { path: 'finance/:partnershipId', element: <PartnerFinancePage /> },
+      { path: 'returns', element: <ReturnsPage /> },
+      { path: 'returns/:returnId', element: <ReturnPage /> },
+      { path: 'disputes', element: <DisputesPage /> },
+      { path: 'disputes/:disputeId', element: <DisputePage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },
@@ -219,6 +225,10 @@ export const routes: RouteObject[] = [
       { path: 'debt', element: <Navigate to="../finance" replace /> },
       { path: 'finance', element: <FinancePage /> },
       { path: 'finance/:partnershipId', element: <PartnerFinancePage /> },
+      { path: 'returns', element: <ReturnsPage /> },
+      { path: 'returns/:returnId', element: <ReturnPage /> },
+      { path: 'disputes', element: <DisputesPage /> },
+      { path: 'disputes/:disputeId', element: <DisputePage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },
