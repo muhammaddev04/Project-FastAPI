@@ -120,6 +120,7 @@ export function NotificationPreferencesPage({ me }: { me: Me }) {
   const { t } = useTranslation();
   const preferences = usePreferences();
   const save = useSavePreference();
+  const [pendingChoice, setPendingChoice] = useState<{ group: string; enabled: boolean } | null>(null);
   const groups = [...new Set(preferences.data?.map((row) => row.event_group))];
   return (
     <NotificationLayout me={me}>
@@ -153,15 +154,20 @@ export function NotificationPreferencesPage({ me }: { me: Me }) {
                     <td className="p-3">
                       <Checkbox
                         aria-label={`Telegram · ${t(`notifications.groups.${group}`)}`}
-                        checked={telegram?.enabled ?? false}
-                        disabled={save.isPending}
-                        onChange={(event) =>
-                          save.mutate({
-                            event_group: group as Parameters<typeof save.mutate>[0]['event_group'],
-                            channel: 'TELEGRAM',
-                            enabled: event.target.checked,
-                          })
-                        }
+                        checked={pendingChoice?.group === group ? pendingChoice.enabled : (telegram?.enabled ?? false)}
+                        disabled={save.isPending || pendingChoice !== null}
+                        onChange={(event) => {
+                          const enabled = event.target.checked;
+                          setPendingChoice({ group, enabled });
+                          save.mutate(
+                            {
+                              event_group: group as Parameters<typeof save.mutate>[0]['event_group'],
+                              channel: 'TELEGRAM',
+                              enabled,
+                            },
+                            { onSettled: () => setPendingChoice(null) },
+                          );
+                        }}
                       />
                     </td>
                   </tr>

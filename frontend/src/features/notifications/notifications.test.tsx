@@ -1,4 +1,4 @@
-import { act, renderHook, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, renderHook, screen, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import { routes } from '@/app/router';
@@ -58,7 +58,6 @@ it('shows personal notifications and sends user-scoped read and unread-filter re
 });
 
 it('saves Telegram preferences and always displays locked in-app delivery without SMS', async () => {
-  const user = userEvent.setup();
   const preferences = [
     { event_group: 'orders', channel: 'IN_APP', enabled: true, locked: true },
     { event_group: 'orders', channel: 'TELEGRAM', enabled: true, locked: false },
@@ -73,7 +72,9 @@ it('saves Telegram preferences and always displays locked in-app delivery withou
   expect(toggle).toBeChecked();
   expect(screen.getByText('Always on')).toBeInTheDocument();
   expect(screen.queryByText('SMS')).not.toBeInTheDocument();
-  await user.click(toggle);
+  fireEvent.click(toggle);
+  expect(toggle).not.toBeChecked();
+  expect(toggle).toBeDisabled();
   expect(await screen.findByRole('status')).toHaveTextContent('Settings saved');
   expect(toggle).not.toBeChecked();
   expect(calls.find((call) => call.method === 'PUT')?.body).toEqual([{ event_group: 'orders', channel: 'TELEGRAM', enabled: false }]);

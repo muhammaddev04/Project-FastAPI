@@ -83,7 +83,18 @@ asyncio.run(seed())
   await page.goto('/profile/notifications');
   const orders = page.getByRole('checkbox', { name: 'Telegram · Orders', exact: true });
   await expect(orders).toBeChecked();
+  let releaseSave!: () => void;
+  const saving = new Promise<void>((resolve) => {
+    releaseSave = resolve;
+  });
+  await page.route('**/api/v1/notifications/preferences', async (route) => {
+    if (route.request().method() === 'PUT') await saving;
+    await route.continue();
+  });
   await orders.uncheck();
+  await expect(orders).not.toBeChecked();
+  await expect(orders).toBeDisabled();
+  releaseSave();
   await expect(page.getByRole('status')).toContainText('Settings saved');
   await page.reload();
   await expect(orders).not.toBeChecked();

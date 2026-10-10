@@ -7,6 +7,14 @@ The code implements personal in-app notifications, preferences, outbox delivery,
 optional Telegram linking, bot commands, retries and blocked-account recovery.
 Detailed evidence is recorded in [P11 acceptance](../P11_ACCEPTANCE.md).
 
+CI regression fix (2026-10-10): Telegram preference checkboxes now update their
+controlled state synchronously while saving, and restore the cached value if the
+request fails. Nine component tests and isolated browser acceptance passed,
+including a deliberately delayed save and persistence after reload. The separate
+outbox warnings for COMPANY_CREATED, STORE_CREATED and MEMBERSHIP_CREATED still
+occur because those events have no registered asynchronous consumer; they did not
+cause the checkbox failure and are not claimed resolved by this frontend fix.
+
 - [x] Automated notification and Telegram integration tests.
 - [x] Isolated browser acceptance with Telegram unconfigured.
 - [x] Isolated browser acceptance with fake Telegram credentials, linking, permissions,
