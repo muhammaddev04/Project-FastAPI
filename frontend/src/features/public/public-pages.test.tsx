@@ -106,10 +106,8 @@ describe('public site', () => {
       expect(ROADMAP.find((entry) => entry.key === 'delivery')?.phase).toBeUndefined();
       expect(plannedKeys.has('returns')).toBe(false);
       expect(ROADMAP.find((entry) => entry.key === 'returns')?.phase).toBeUndefined();
-      for (const key of ['reports']) {
-        expect(plannedKeys.has(key)).toBe(true);
-        expect(ROADMAP.find((entry) => entry.key === key)?.phase).toBeTruthy();
-      }
+      expect(plannedKeys.has('reports')).toBe(false);
+      expect(ROADMAP.find((entry) => entry.key === 'reports')?.phase).toBeUndefined();
     });
   });
 

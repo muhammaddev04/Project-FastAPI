@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAreaContext } from '@/app/shell/use-area-context';
 import { Button, Card } from '@/shared/ui';
+import { StoreFigures } from './figures';
 import { OrgHero } from './org-hero';
 import { AccessCard, ReadinessChecklist, TeamCard } from './widgets';
 
@@ -25,6 +26,9 @@ export function StoreDashboard() {
   return (
     <div className="space-y-6">
       <OrgHero greeting={t('dashboard.store.greeting', { name: me.full_name.split(' ')[0] })} />
+
+      {/* P12 §1.3: active orders, today's deliveries with their code, the debt and what of it is overdue. */}
+      <StoreFigures />
 
       <Card className="relative flex flex-col gap-4 overflow-hidden p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div className="flex items-start gap-3">
@@ -73,6 +77,16 @@ export function StoreDashboard() {
         )}
         {isOwner ? <FinanceOverviewCard /> : null}
       </div>
+
+      {membership.permissions.includes('reports.purchases') ? (
+        <Card className="space-y-3 p-5">
+          <h2>{t('reports.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
+          <Button asChild variant="outline">
+            <Link to="/store/reports">{t('reports.open')}</Link>
+          </Button>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">

@@ -41,6 +41,10 @@ import { PublicShell } from '@/features/public/public-shell';
 import { SupportPage, SupportContent } from '@/features/support/support-page';
 import { ProfilePage } from '@/features/profile/profile-page';
 import { NotificationsPage, NotificationPreferencesPage, TelegramPage } from '@/features/notifications/pages';
+import { ExportsPage, ReportPage, ReportsPage } from '@/features/reports/pages';
+import { AdminAuditPage } from '@/features/admin/audit-page';
+import { AdminNotificationsPage, AdminOutboxPage, AdminReconciliationPage } from '@/features/admin/ops-pages';
+import { AdminDashboardPage, AdminOrganizationsPage, AdminUsersPage } from '@/features/admin/platform-pages';
 import { TeamPage } from '@/features/team/team-page';
 import { InvitationsPage } from '@/features/team/invitations';
 import { useMe } from '@/shared/auth/api';
@@ -148,7 +152,14 @@ export const routes: RouteObject[] = [
     path: '/admin',
     element: <RequireSuperadmin>{(me) => <AdminLayout me={me} />}</RequireSuperadmin>,
     children: [
-      { index: true, element: <Navigate to="verifications" replace /> },
+      { index: true, element: <Navigate to="dashboard" replace /> },
+      { path: 'dashboard', element: <AdminDashboardPage /> },
+      { path: 'users', element: <AdminUsersPage /> },
+      { path: 'organizations', element: <AdminOrganizationsPage /> },
+      { path: 'audit', element: <AdminAuditPage /> },
+      { path: 'outbox', element: <AdminOutboxPage /> },
+      { path: 'notifications', element: <AdminNotificationsPage /> },
+      { path: 'reconciliation', element: <AdminReconciliationPage /> },
       { path: 'support', element: <SupportContent admin /> },
       { path: 'verifications', element: <VerificationsPage /> },
       { path: 'subscriptions', element: <AdminSubscriptionsPage /> },
@@ -203,6 +214,9 @@ export const routes: RouteObject[] = [
       { path: 'returns/:returnId', element: <ReturnPage /> },
       { path: 'disputes', element: <DisputesPage /> },
       { path: 'disputes/:disputeId', element: <DisputePage /> },
+      { path: 'reports', element: <ReportsPage /> },
+      { path: 'reports/:code', element: <ReportPage /> },
+      { path: 'exports', element: <ExportsPage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },
@@ -229,6 +243,9 @@ export const routes: RouteObject[] = [
       { path: 'returns/:returnId', element: <ReturnPage /> },
       { path: 'disputes', element: <DisputesPage /> },
       { path: 'disputes/:disputeId', element: <DisputePage /> },
+      { path: 'reports', element: <ReportsPage /> },
+      { path: 'reports/:code', element: <ReportPage /> },
+      { path: 'exports', element: <ExportsPage /> },
       { path: ':module', element: <PlannedModulePage /> },
     ],
   },

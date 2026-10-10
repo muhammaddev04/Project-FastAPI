@@ -33,12 +33,23 @@ export type NavItem = {
   roles?: Role[];
   /** Permission from /me required to see the item (FE-004). */
   permission?: string;
+  /** At least one of these permissions allows opening a shared module. */
+  anyPermissions?: string[];
   phase?: Phase;
   /** Shown in the Store mobile tab bar. */
   primary?: boolean;
 };
 
 export type NavSection = { key: string; items: NavItem[] };
+
+const COMPANY_REPORT_PERMISSIONS = [
+  'reports.sales',
+  'reports.funnel',
+  'reports.finance',
+  'reports.returns',
+  'reports.delivery',
+  'reports.inventory',
+];
 
 const COMPANY: NavSection[] = [
   {
@@ -60,7 +71,8 @@ const COMPANY: NavSection[] = [
       { key: 'finance', path: 'finance', icon: Wallet, roles: ['OWNER', 'MANAGER', 'OPERATOR'], permission: 'finance.view' },
       { key: 'returns', path: 'returns', icon: RotateCcw, permission: 'returns.view' },
       { key: 'disputes', path: 'disputes', icon: Scale, roles: ['OWNER', 'MANAGER', 'OPERATOR'], permission: 'disputes.view' },
-      { key: 'reports', path: 'reports', icon: BarChart3, roles: ['OWNER', 'MANAGER'], phase: 'P12' },
+      { key: 'reports', path: 'reports', icon: BarChart3, anyPermissions: COMPANY_REPORT_PERMISSIONS },
+      { key: 'exports', path: 'exports', icon: Package, anyPermissions: COMPANY_REPORT_PERMISSIONS },
     ],
   },
   {
@@ -85,6 +97,8 @@ const STORE: NavSection[] = [
       { key: 'debt', path: 'finance', icon: Wallet, roles: ['OWNER'], permission: 'finance.view', primary: true },
       { key: 'returns', path: 'returns', icon: RotateCcw, permission: 'returns.view' },
       { key: 'disputes', path: 'disputes', icon: Scale, permission: 'disputes.view' },
+      { key: 'reports', path: 'reports', icon: BarChart3, roles: ['OWNER'], permission: 'reports.purchases' },
+      { key: 'exports', path: 'exports', icon: Package, roles: ['OWNER'], permission: 'reports.purchases' },
     ],
   },
   {
@@ -111,6 +125,7 @@ const BY_AREA: Record<Area, NavSection[]> = { company: COMPANY, store: STORE, co
 export function canSee(item: NavItem, membership: Membership): boolean {
   if (item.roles && !item.roles.includes(membership.role)) return false;
   if (item.permission && !membership.permissions.includes(item.permission)) return false;
+  if (item.anyPermissions && !item.anyPermissions.some((permission) => membership.permissions.includes(permission))) return false;
   return true;
 }
 

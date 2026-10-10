@@ -45,6 +45,7 @@ describe('Company application', () => {
       { path: '/me', body: meFixture([membershipFixture()]) },
       { path: '/members', body: MEMBERS },
       { path: '/orders', body: { count: 0, limit: 1, offset: 0, results: [] } },
+      { path: '/dashboard', body: { type: 'COMPANY', new_orders: 0 } },
     ]);
     signIn();
     renderRoutes(routes, '/company');
@@ -52,7 +53,11 @@ describe('Company application', () => {
     expect(within(sidebar()).getByRole('link', { name: /subscription/i })).toBeInTheDocument();
     expect(await within(screen.getByRole('main')).findByText('2')).toBeInTheDocument();
     expect(screen.getByText('Getting ready')).toBeInTheDocument();
-    expect(within(screen.getByRole('main')).getByRole('link', { name: 'Orders' })).toHaveAttribute('href', '/company/orders');
+    expect(
+      within(screen.getByRole('main'))
+        .getAllByRole('link')
+        .some((link) => link.getAttribute('href') === '/company/orders'),
+    ).toBe(true);
     const membersCall = calls.find((call) => call.path === '/api/v1/members');
     expect(membersCall?.headers['X-Org-Id']).toBe('org-company');
   });
@@ -70,15 +75,17 @@ describe('Company application', () => {
     expect(calls.some((call) => call.path === '/api/v1/members')).toBe(false);
   });
 
-  it('opens a planned module as an explicit "arrives in" page', async () => {
+  it('opens the delivered reports module from the API', async () => {
     mockApi([
       { path: '/me', body: meFixture([membershipFixture()]) },
       { path: '/members', body: MEMBERS },
+      { path: '/reports', body: [{ code: 'sales_summary', periodic: true, group_by: ['day'], columns: [] }] },
     ]);
     signIn();
     renderRoutes(routes, '/company/reports');
     expect(await screen.findByRole('heading', { name: 'Reports' })).toBeInTheDocument();
-    expect(screen.getByText('Arrives in P12')).toBeInTheDocument();
+    expect(await screen.findByText('Sales by period')).toBeInTheDocument();
+    expect(screen.queryByText('Arrives in P12')).not.toBeInTheDocument();
   });
 
   it('forbids a planned page the role cannot see', async () => {

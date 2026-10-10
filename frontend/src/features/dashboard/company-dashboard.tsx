@@ -1,11 +1,9 @@
 import { FinanceOverviewCard } from '@/features/finance/overview-card';
-import { Bell, PackageSearch } from 'lucide-react';
+import { BarChart3, PackageSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { useCatalogQuery, type Page } from '@/features/catalog/api';
-import { Feedback } from '@/features/catalog/shared';
-import type { OrderView } from '@/features/orders/api';
 import { useAreaContext } from '@/app/shell/use-area-context';
+import { CompanyFigures } from './figures';
 import { OrgHero } from './org-hero';
 import { AccessCard, ReadinessChecklist, TeamCard } from './widgets';
 import { Button, Card, PlannedPanel } from '@/shared/ui';
@@ -29,36 +27,28 @@ export function CompanyDashboard() {
   const { t } = useTranslation();
   const { me, membership } = useAreaContext();
   const isOwnerOrManager = FINANCE_ROLES.includes(membership.role);
-  const orders = useCatalogQuery<Page<OrderView>>(
-    '/orders?status=NEW&status=VIEWED&limit=1',
-    membership.organization_id,
-    membership.permissions.includes('orders.confirm'),
-    30_000,
-  );
 
   return (
     <div className="space-y-6">
       <OrgHero greeting={t('dashboard.company.greeting', { name: me.full_name.split(' ')[0] })} />
 
+      {/* P12 §1.3: the day's figures, each linking to the screen that acts on it. */}
+      <CompanyFigures />
+
       <div className="grid gap-4 lg:grid-cols-3">
-        {membership.permissions.includes('orders.confirm') ? (
+        {isOwnerOrManager ? <FinanceOverviewCard /> : null}
+        {membership.permissions.includes('reports.sales') ? (
           <Card className="space-y-3 p-5">
-            <h2 className="font-semibold">{t('dashboard.company.newOrders')}</h2>
-            <Feedback error={orders.error} />
-            <p>{orders.isLoading ? '…' : (orders.data?.count ?? 0)}</p>
+            <h2 className="flex items-center gap-2 font-semibold">
+              <BarChart3 className="size-4" aria-hidden="true" />
+              {t('reports.title')}
+            </h2>
+            <p className="text-sm text-muted-foreground">{t('reports.description')}</p>
             <Button asChild variant="outline">
-              <Link to="/company/orders">{t('orders.title')}</Link>
+              <Link to="/company/reports">{t('reports.open')}</Link>
             </Button>
           </Card>
         ) : null}
-        {isOwnerOrManager ? <FinanceOverviewCard /> : null}
-        <PlannedPanel
-          emptyTitle={t('dashboard.pending.title')}
-          icon={Bell}
-          title={t('dashboard.notifications.title')}
-          description={t('dashboard.notifications.empty')}
-          phase="P11"
-        />
       </div>
 
       {isOwnerOrManager ? (

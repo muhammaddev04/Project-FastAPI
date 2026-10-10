@@ -35,6 +35,8 @@ const OWNER_PERMS = [
   'delivery.view_all',
   'returns.view',
   'disputes.view',
+  'reports.sales',
+  'reports.purchases',
 ];
 
 describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
@@ -51,6 +53,7 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
       'returns',
       'disputes',
       'reports',
+      'exports',
       'team',
       'subscription',
       'settings',
@@ -86,6 +89,8 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
       'debt',
       'returns',
       'disputes',
+      'reports',
+      'exports',
       'team',
       'settings',
     ]);
@@ -95,6 +100,12 @@ describe('role-aware navigation (TZ §4.5, §17, §32.1)', () => {
 
   it('gives couriers their run screens', () => {
     expect(keys('courier', 'COURIER')).toEqual(['today', 'issues']);
+  });
+
+  it('lets operators and warehouse staff reach their permitted reports and exports', () => {
+    expect(keys('company', 'OPERATOR', ['reports.funnel'])).toEqual(['dashboard', 'catalog', 'reports', 'exports']);
+    expect(keys('company', 'WAREHOUSE', ['reports.inventory'])).toEqual(['dashboard', 'catalog', 'reports', 'exports']);
+    expect(keys('company', 'WAREHOUSE', [])).not.toContain('reports');
   });
 });
 
@@ -121,6 +132,8 @@ describe('honest navigation (Phase C8)', () => {
       'finance',
       'returns',
       'disputes',
+      'reports',
+      'exports',
       'team',
       'subscription',
       'settings',
@@ -128,7 +141,7 @@ describe('honest navigation (Phase C8)', () => {
     // Nothing in the working navigation may carry a phase, which is what marks a placeholder.
     expect(available.flatMap((section) => section.items).every((item) => !item.phase)).toBe(true);
     // ...and everything that does carry one is still reachable, in the roadmap.
-    expect(planned.map((item) => item.key)).toEqual(['reports']);
+    expect(planned.map((item) => item.key)).toEqual([]);
     expect(planned.every((item) => Boolean(item.phase))).toBe(true);
   });
 

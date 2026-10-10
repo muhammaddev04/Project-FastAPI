@@ -144,8 +144,8 @@
     "dispute_already_open": "The operation could not be completed. Check the details and try again.",
     "dispute_window_closed": "The operation could not be completed. Check the details and try again.",
     "email_already_registered": "This email is already registered. Sign in with your existing account.",
-    "export_expired": "The operation could not be completed. Check the details and try again.",
-    "export_not_ready": "The operation could not be completed. Check the details and try again.",
+    "export_expired": "This export has expired. Request a new file.",
+    "export_not_ready": "The file is still being prepared. Try again shortly.",
     "import_file_invalid": "The workbook is invalid. Use the .xlsx template.",
     "import_has_errors": "Fix every row error before confirming.",
     "import_not_ready": "The operation could not be completed. Check the details and try again.",
@@ -167,7 +167,7 @@
     "quantity_invalid": "The operation could not be completed. Check the details and try again.",
     "reason_required": "The operation could not be completed. Check the details and try again.",
     "refund_exceeds_credit": "The operation could not be completed. Check the details and try again.",
-    "report_range_too_large": "The operation could not be completed. Check the details and try again.",
+    "report_range_too_large": "Choose a period of at most 366 days.",
     "return_quantity_exceeds": "The operation could not be completed. Check the details and try again.",
     "return_window_closed": "The operation could not be completed. Check the details and try again.",
     "run_not_editable": "The operation could not be completed. Check the details and try again.",
@@ -504,7 +504,8 @@
       "team": "Team",
       "subscription": "Subscription",
       "settings": "Settings",
-      "warehouseOrders": "Warehouse orders"
+      "warehouseOrders": "Warehouse orders",
+      "exports": "Exports"
     },
     "store": {
       "dashboard": "Home",
@@ -516,7 +517,9 @@
       "returns": "Returns",
       "disputes": "Disputes",
       "team": "Team",
-      "settings": "Settings"
+      "settings": "Settings",
+      "reports": "Reports",
+      "exports": "Exports"
     },
     "courier": {
       "today": "Today",
@@ -533,7 +536,11 @@
       "support": "Support",
       "subscriptions": "Subscriptions",
       "plans": "Plans",
-      "plan-requests": "Plan change requests"
+      "plan-requests": "Plan change requests",
+      "outbox": "Outbox",
+      "notifications": "Notifications",
+      "reconciliation": "Reconciliation",
+      "reports": "Reports"
     }
   },
   "planned": {
@@ -687,6 +694,22 @@
       "title": "Today's run",
       "emptyTitle": "No run assigned",
       "emptyText": "Delivery runs, addresses and confirmation codes will appear here when the delivery module is live."
+    },
+    "figures": {
+      "title": "Today's figures",
+      "open": "Open",
+      "attention": "Attention",
+      "newOrders": "New orders",
+      "deliveriesToday": "Deliveries today",
+      "salesThisMonth": "Sales this month",
+      "receivables": "Receivables",
+      "overdue": "Overdue",
+      "lowStock": "Low stock",
+      "paymentsToConfirm": "Payments to confirm",
+      "openDisputes": "Open disputes",
+      "activeOrders": "Active orders",
+      "debt": "Total debt",
+      "codeHint": "The handover code is shown on the order page."
     }
   },
   "team": {
@@ -891,6 +914,134 @@
       "reasonLabel": "Reason for rejection",
       "reasonHint": "At least 10 characters. The organization sees this text.",
       "confirmReject": "Reject request"
+    },
+    "reason": "Reason",
+    "reasonHint": "At least 10 characters: why this action is being taken.",
+    "reasonRequired": "Every platform action needs a reason, and it stays in the audit log.",
+    "done": "Done.",
+    "dashboard": {
+      "description": "The platform at a glance: organizations, subscriptions, the review queue and operational failures.",
+      "mrr": "MRR",
+      "verifications_pending": "Verification queue",
+      "outbox_failed": "Outbox failures",
+      "reconciliation_issues": "Reconciliation issues",
+      "notifications_failed_24h": "Notification failures (24 h)",
+      "organizations": "Organizations",
+      "subscriptions": "Subscriptions",
+      "org": {
+        "COMPANY_ACTIVE": "Active companies",
+        "COMPANY_SUSPENDED": "Suspended companies",
+        "COMPANY_BLOCKED": "Blocked companies",
+        "STORE_ACTIVE": "Active stores",
+        "STORE_SUSPENDED": "Suspended stores",
+        "STORE_BLOCKED": "Blocked stores"
+      }
+    },
+    "users": {
+      "description": "Search users, see their memberships and manage their access.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "lastLogin": "Last sign-in",
+      "search": "Search by name, phone or email",
+      "anyStatus": "Any status",
+      "empty": "No users found.",
+      "block": "Block",
+      "unblock": "Unblock",
+      "logoutAll": "End every session",
+      "noMemberships": "No memberships.",
+      "statuses": {
+        "ACTIVE": "Active",
+        "BLOCKED": "Blocked"
+      }
+    },
+    "orgs": {
+      "description": "Search organizations, change their status, transfer ownership and correct legal fields.",
+      "name": "Name",
+      "legalName": "Legal name",
+      "type": "Type",
+      "status": "Status",
+      "verification": "Verification",
+      "search": "Search by name",
+      "anyType": "Any type",
+      "anyStatus": "Any status",
+      "empty": "No organizations found.",
+      "tax_identifier": "Tax identifier",
+      "phone": "Phone",
+      "city": "City",
+      "address": "Address",
+      "partnerships": "Partnerships",
+      "newOwner": "New owner",
+      "supportRead": "Read data for support",
+      "supportReadHint": "The read is read-only and is recorded in the audit log with its reason.",
+      "showOrders": "Show orders",
+      "previousOwner": "Previous owner",
+      "keepMembership": "Keep membership with a staff role",
+      "revokeMembership": "Revoke membership",
+      "partnershipId": "Partnership ID",
+      "showStatement": "Show statement",
+      "closingBalance": "Closing balance",
+      "statuses": {
+        "ACTIVE": "Active",
+        "SUSPENDED": "Suspended",
+        "BLOCKED": "Blocked"
+      },
+      "actions": {
+        "suspend": "Suspend",
+        "block": "Block",
+        "activate": "Activate",
+        "transfer": "Transfer ownership",
+        "legal": "Legal fields"
+      }
+    },
+    "audit": {
+      "description": "Search by organization, actor, action, entity and period; a row shows its own change.",
+      "when": "When",
+      "actor": "Actor",
+      "action": "Action",
+      "entity": "Entity",
+      "reason": "Reason",
+      "orgId": "Organization id",
+      "actorId": "Actor id",
+      "before": "Before",
+      "after": "After",
+      "empty": "No records found.",
+      "actors": {
+        "USER": "User",
+        "SYSTEM": "System",
+        "SUPERADMIN": "Platform admin"
+      }
+    },
+    "ops": {
+      "outboxDescription": "Failed events with their error; a retry puts the event back in the queue.",
+      "notificationsDescription": "Notification deliveries that gave up after three attempts.",
+      "reconciliationDescription": "The P09 reconciliation findings; resolving one records your note.",
+      "event": "Event",
+      "status": "Status",
+      "attempts": "Attempts",
+      "error": "Error",
+      "created": "Created",
+      "retry": "Retry",
+      "anyStatus": "Any status",
+      "outboxEmpty": "No failed events.",
+      "channel": "Channel",
+      "user": "User",
+      "notificationsEmpty": "No delivery failures.",
+      "check": "Check",
+      "expected": "Expected",
+      "actual": "Actual",
+      "detected": "Detected",
+      "resolved": "Resolved",
+      "resolve": "Resolve",
+      "resolveHint": "Write a note: why this difference was accepted or corrected.",
+      "note": "Note",
+      "reconciliationEmpty": "No issues.",
+      "statuses": {
+        "PENDING": "Queued",
+        "PROCESSED": "Processed",
+        "FAILED": "Failed"
+      }
     }
   },
   "orgProfile": {
@@ -2096,6 +2247,203 @@
     "confirmations": {
       "CODE": "With the code",
       "MANUAL_OVERRIDE": "By hand, without the code"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Sales, finance, stock and delivery reports over the period you choose.",
+    "open": "Open",
+    "empty": "No data for this period.",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "groupBy": "Group by",
+    "export": "Export {{format}}",
+    "yes": "Yes",
+    "no": "No",
+    "group": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month"
+    },
+    "columns": {
+      "1-30": "1–30",
+      "31-60": "31–60",
+      "61-90": "61–90",
+      "90+": "90+",
+      "action": "Action",
+      "actor_id": "User",
+      "amount": "Amount",
+      "available_quantity": "Available",
+      "average_transit_hours": "Average transit, h",
+      "balance": "Balance",
+      "balance_after": "Balance after",
+      "barcode": "Barcode",
+      "base_unit": "Base unit",
+      "category": "Category",
+      "company_name": "Company",
+      "courier_name": "Courier",
+      "created_at": "Date",
+      "credit": "Credit",
+      "credit_limit": "Credit limit",
+      "current": "Current",
+      "delivered": "Delivered",
+      "delivery_fee": "Delivery fee",
+      "description": "Description",
+      "direction": "Direction",
+      "discount": "Discount",
+      "entity_id": "Entity",
+      "entity_type": "Entity type",
+      "entry_type": "Entry type",
+      "failed": "Failed",
+      "is_active": "Active",
+      "low_stock": "Low stock",
+      "low_stock_threshold": "Low stock threshold",
+      "manual_override_share": "Manual override, %",
+      "method": "Method",
+      "movements": "Movements",
+      "name": "Name",
+      "net_sales": "Net sales",
+      "order_number": "Order number",
+      "orders": "Orders",
+      "org_id": "Organization",
+      "outstanding": "Outstanding",
+      "overdue": "Overdue",
+      "partner_name": "Partner",
+      "payments": "Payments",
+      "period": "Period",
+      "price": "Price",
+      "price_list_code": "Price list code",
+      "product_name": "Product",
+      "quantity": "Quantity",
+      "reason": "Reason",
+      "reason_code": "Reason",
+      "reserved_quantity": "Reserved",
+      "return_credit": "Return credit",
+      "return_quantity": "Returned quantity",
+      "returns": "Returns",
+      "sales": "Sales",
+      "share": "Share, %",
+      "sku": "SKU",
+      "status": "Status",
+      "store_name": "Store",
+      "total": "Total",
+      "type": "Type",
+      "unit_code": "Unit code",
+      "valid_from": "Valid from",
+      "valid_to": "Valid to"
+    },
+    "totals": {
+      "partial_share": "Partially confirmed, %",
+      "rejected_share": "Rejected, %",
+      "cancelled_share": "Cancelled, %",
+      "average_confirm_minutes": "Average confirmation, min",
+      "confirmed_amount": "Confirmed amount",
+      "low_stock_products": "Low-stock products"
+    },
+    "chart": {
+      "empty": "No data to chart."
+    },
+    "codes": {
+      "sales_summary": {
+        "title": "Sales by period",
+        "description": "Orders and sales totals by day, week or month."
+      },
+      "sales_by_store": {
+        "title": "Sales by store",
+        "description": "Sales, return credit and net sales for each store."
+      },
+      "sales_by_product": {
+        "title": "Sales by product",
+        "description": "Base-unit quantity, sales and returns for each product."
+      },
+      "order_funnel": {
+        "title": "Order funnel",
+        "description": "Orders by status and the average time to confirmation."
+      },
+      "receivables_aging": {
+        "title": "Receivables aging",
+        "description": "Each store's debt by age (current, 1–30, 31–60, 61–90, 90+)."
+      },
+      "payments": {
+        "title": "Payments",
+        "description": "Payments by method, status and period."
+      },
+      "returns": {
+        "title": "Returns",
+        "description": "Returns by reason, product and store."
+      },
+      "delivery_performance": {
+        "title": "Delivery performance",
+        "description": "Delivered, failed, manual-override share and average transit time by courier."
+      },
+      "inventory_snapshot": {
+        "title": "Stock snapshot",
+        "description": "Current stock, reserved, available and low-stock products."
+      },
+      "inventory_movements": {
+        "title": "Stock movements",
+        "description": "Movement totals by type over the period."
+      },
+      "purchases": {
+        "title": "Purchases by company",
+        "description": "The store's purchases by company and month."
+      },
+      "store_debt": {
+        "title": "Store debt",
+        "description": "Balance, outstanding and overdue for each company."
+      },
+      "orders": {
+        "title": "Orders",
+        "description": "The order list with its amounts."
+      },
+      "products": {
+        "title": "Products",
+        "description": "The product catalogue."
+      },
+      "prices": {
+        "title": "Prices",
+        "description": "Prices by price list."
+      },
+      "stock": {
+        "title": "Stock",
+        "description": "Current stock by product."
+      },
+      "statement": {
+        "title": "Partnership statement",
+        "description": "The ledger entries of one partnership."
+      },
+      "audit_logs": {
+        "title": "Audit log",
+        "description": "The platform's audit log."
+      }
+    }
+  },
+  "exports": {
+    "title": "Exports",
+    "description": "The files you asked for. A ready file stays available for seven days.",
+    "kind": "Kind",
+    "format": "Format",
+    "status": "Status",
+    "rows": "Rows",
+    "requested": "Requested",
+    "expires": "Expires",
+    "download": "Download",
+    "downloadFailed": "The download failed.",
+    "refresh": "Refresh",
+    "empty": "No exports yet.",
+    "queued": "The export is queued.",
+    "statuses": {
+      "PENDING": "Queued",
+      "RUNNING": "Running",
+      "READY": "Ready",
+      "FAILED": "Failed",
+      "EXPIRED": "Expired"
+    },
+    "errors": {
+      "export_row_limit": "Too many rows: narrow the period.",
+      "permission_denied": "Not permitted.",
+      "TimeoutError": "It took too long.",
+      "OSError": "The file could not be written."
     }
   }
 }

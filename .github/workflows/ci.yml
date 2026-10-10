@@ -161,7 +161,7 @@ jobs:
         run: npm run build
 
   foundation-browser:
-    name: P00-P11 browser acceptance
+    name: P00-P12 browser acceptance
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -184,6 +184,7 @@ jobs:
           # These tests seed the same disposable acceptance stack, never production.
           P10_COMPOSE_PROJECT: tezfarmo-p00
           P11_COMPOSE_PROJECT: tezfarmo-p00
+          P12_COMPOSE_PROJECT: tezfarmo-p00
           P11_TELEGRAM_CONFIGURED: "0"
         run: npm run test:e2e
       - name: Acceptance logs

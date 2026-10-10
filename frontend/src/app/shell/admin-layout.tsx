@@ -19,11 +19,13 @@ const REVIEW: AdminItem[] = [
   { key: 'plan-requests', icon: ClipboardCheck },
 ];
 const PLATFORM: AdminItem[] = [
-  { key: 'dashboard', icon: LayoutDashboard, phase: 'P12' },
-  { key: 'users', icon: Users, phase: 'P12' },
-  { key: 'organizations', icon: Store, phase: 'P12' },
-  { key: 'audit', icon: ScrollText, phase: 'P12' },
-  { key: 'ops', icon: Database, phase: 'P12' },
+  { key: 'dashboard', icon: LayoutDashboard },
+  { key: 'users', icon: Users },
+  { key: 'organizations', icon: Store },
+  { key: 'audit', icon: ScrollText },
+  { key: 'outbox', icon: Database },
+  { key: 'notifications', icon: Activity },
+  { key: 'reconciliation', icon: ClipboardCheck },
 ];
 const ALL = [...REVIEW, ...PLATFORM];
 
