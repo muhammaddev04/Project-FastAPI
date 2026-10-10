@@ -2,6 +2,11 @@ import { meFixture, membershipFixture, storeMembership } from '@/test/fixtures';
 import { areaFor, homePath, resolveActiveMembership, safeNextPath } from './context';
 
 describe('context resolution', () => {
+  it('sends superadmins to the admin dashboard with or without an organization', () => {
+    expect(homePath({ ...meFixture([]), is_superadmin: true }, null)).toBe('/admin/dashboard');
+    expect(homePath({ ...meFixture([membershipFixture()]), is_superadmin: true }, 'org-company')).toBe('/admin/dashboard');
+  });
+
   it('sends users without organizations to onboarding', () => {
     expect(homePath(meFixture([]), null)).toBe('/welcome');
   });

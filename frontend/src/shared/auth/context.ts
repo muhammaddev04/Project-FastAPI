@@ -43,6 +43,7 @@ export function onboardingPath(me: Me): string {
  * area; without an organization, to onboarding for the type chosen at registration (never asked twice).
  */
 export function homePath(me: Me, activeOrgId: string | null): string {
+  if (me.is_superadmin) return '/admin/dashboard';
   const membership = resolveActiveMembership(me, activeOrgId);
   if (!membership) return onboardingPath(me);
   const area = areaFor(membership);
