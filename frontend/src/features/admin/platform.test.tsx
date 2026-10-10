@@ -55,6 +55,44 @@ it('shows the platform figures', async () => {
   expect(await screen.findByText('1500.00 TJS')).toBeInTheDocument();
   expect(screen.getByText('Active companies')).toBeInTheDocument();
   expect(screen.getByText('Notification failures (24 h)')).toBeInTheDocument();
+  expect(screen.queryByText('Planned')).not.toBeInTheDocument();
+  for (const path of ['dashboard', 'users', 'organizations', 'audit', 'outbox', 'notifications', 'reconciliation']) {
+    const links = screen.getAllByRole('link').filter((link) => link.getAttribute('href') === `/admin/${path}`);
+    expect(links.length).toBeGreaterThan(0);
+    expect(links.every((link) => link.closest('details') === null)).toBe(true);
+  }
+});
+
+it('exports the audit filters and enables download only after the worker finishes', async () => {
+  const user = userEvent.setup();
+  const state = {
+    id: 'export-1',
+    kind: 'audit_logs',
+    format: 'CSV',
+    status: 'PENDING',
+    params: {},
+    row_count: null,
+    error: null,
+    created_at: '2026-10-10T00:00:00Z',
+    started_at: null,
+    ready_at: null,
+    expires_at: null,
+  };
+  const { calls } = mockApi([
+    { path: '/me', body: adminMe() },
+    { path: '/admin/audit-logs', body: { count: 0, limit: 20, offset: 0, results: [] } },
+    { method: 'POST', path: '/admin/audit-logs/export', body: { ...state } },
+    { path: '/admin/exports/export-1', body: state },
+  ]);
+  renderRoutes(routes, '/admin/audit');
+  await user.type(await screen.findByPlaceholderText('Action'), 'user.blocked');
+  await user.click(screen.getByRole('button', { name: /CSV/ }));
+  const download = await screen.findByRole('button', { name: 'Download' });
+  expect(download).toBeDisabled();
+  const request = calls.find((call) => call.method === 'POST');
+  expect(request?.query?.get('action')).toBe('user.blocked');
+  state.status = 'READY';
+  await waitFor(() => expect(download).toBeEnabled(), { timeout: 4000 });
 });
 
 it('blocks a user only once a reason has been written, and sends that reason', async () => {

@@ -177,6 +177,20 @@ test('P12 reports match the delivered order, export to a signed file and feed bo
   await page.goto('/admin/audit');
   await page.getByRole('textbox').nth(2).fill('admin.viewed');
   await expect(page.getByText('admin.viewed', { exact: true }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Export CSV', exact: true }).click();
+  const adminDownload = page.getByRole('button', { name: 'Download', exact: true });
+  await expect(adminDownload).toBeEnabled({ timeout: 60_000 });
+  const adminLinkResponse = page.waitForResponse(
+    (response) => response.url().includes('/admin/exports/') && response.url().endsWith('/download') && response.ok(),
+  );
+  await adminDownload.click();
+  const adminLink = (await (await adminLinkResponse).json()) as { url: string };
+  const auditFile = await page.request.get(adminLink.url);
+  expect(auditFile.ok()).toBe(true);
+  const auditCsv = (await auditFile.body()).toString('utf8');
+  expect(auditCsv).toContain('admin.viewed');
+  expect(auditCsv).not.toContain('user.blocked');
+  expect(auditCsv).not.toContain('export.requested');
 
   // Phone, tablet and desktop: the reports table and the admin tables stay usable.
   for (const size of [

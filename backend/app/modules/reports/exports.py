@@ -197,13 +197,38 @@ def authorize(selected: Target, ctx: OrgContext) -> None:
 
 def parameters(selected: Target, params: dict[str, Any], today: date) -> dict[str, Any]:
     """Validate and normalise the stored filters, so the worker never re-interprets client input."""
-    unknown = set(params) - {"date_from", "date_to", "group_by", "partnership_id"}
+    allowed = {"date_from", "date_to", "group_by", "partnership_id"}
+    if selected.data is not None and selected.data.admin:
+        allowed.update({"org_id", "actor_id", "action", "entity_type", "entity_id"})
+    unknown = set(params) - allowed
     if unknown:
         raise AppError("validation_error", 422, {"field": sorted(unknown)[0]})
     stored: dict[str, Any] = {}
+    if selected.data is not None and selected.data.admin:
+        for key in ("org_id", "actor_id", "entity_id"):
+            if params.get(key):
+                try:
+                    stored[key] = str(UUID(str(params[key])))
+                except ValueError as exc:
+                    raise AppError("validation_error", 422, {"field": key}) from exc
+        for key in ("action", "entity_type"):
+            if params.get(key):
+                text_value = str(params[key])
+                if len(text_value) > 64:
+                    raise AppError("validation_error", 422, {"field": key})
+                stored[key] = text_value
     report = selected.report
+    admin_data = selected.data is not None and selected.data.admin
     periodic = report.periodic if report else True
-    if periodic:
+    if admin_data:
+        start, end = _as_date(params, "date_from"), _as_date(params, "date_to")
+        if start and end and start > end:
+            raise AppError("validation_error", 422, {"field": "date_to"})
+        if start:
+            stored["date_from"] = start.isoformat()
+        if end:
+            stored["date_to"] = end.isoformat()
+    elif periodic:
         start, end = domain.period(_as_date(params, "date_from"), _as_date(params, "date_to"), today)
         stored["date_from"], stored["date_to"] = start.isoformat(), end.isoformat()
     if report and report.group_by:
@@ -311,10 +336,17 @@ async def download(session: AsyncSession, ctx: OrgContext, export_id: UUID) -> S
 
 async def download_admin(session: AsyncSession, admin: User, export_id: UUID) -> SignedUrl:
     """ADM-006: an admin export belongs to the platform, so only its requester may download it."""
-    export = await session.scalar(select(Export).where(Export.id == export_id, Export.organization_id.is_(None)))
-    if export is None or export.requested_by != admin.id:
-        raise AppError("not_found", 404)
+    export = await owned_admin(session, admin, export_id)
     return await _signed(session, export, actor_id=admin.id, org_id=None)
+
+
+async def owned_admin(session: AsyncSession, admin: User, export_id: UUID) -> Export:
+    export = await session.scalar(
+        select(Export).where(Export.id == export_id, Export.organization_id.is_(None), Export.requested_by == admin.id)
+    )
+    if export is None:
+        raise AppError("not_found", 404)
+    return export
 
 
 async def _signed(session: AsyncSession, export: Export, *, actor_id: UUID, org_id: UUID | None) -> SignedUrl:
@@ -545,7 +577,19 @@ def _audit_query(params: dict[str, Any]) -> Select[Any]:
         AuditLog.entity_id.label("entity_id"),
         AuditLog.reason.label("reason"),
     ).order_by(AuditLog.created_at, AuditLog.id)
-    return _in_period(query, AuditLog.created_at, params)
+    for key in ("org_id", "actor_id", "entity_id", "action", "entity_type"):
+        if params.get(key):
+            value = UUID(str(params[key])) if key.endswith("_id") else params[key]
+            query = query.where(getattr(AuditLog, key) == value)
+    if params.get("date_from"):
+        query = query.where(
+            AuditLog.created_at >= datetime.combine(date.fromisoformat(params["date_from"]), datetime.min.time())
+        )
+    if params.get("date_to"):
+        query = query.where(
+            AuditLog.created_at <= datetime.combine(date.fromisoformat(params["date_to"]), datetime.max.time())
+        )
+    return query
 
 
 async def rows_of(

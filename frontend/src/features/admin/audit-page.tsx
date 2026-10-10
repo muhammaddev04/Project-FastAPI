@@ -3,7 +3,15 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Feedback } from '@/features/catalog/shared';
 import { Badge, Button, Card, DataTable, Dialog, DialogContent, DialogHeader, Input, PageHeader, toast, type Column } from '@/shared/ui';
-import { PAGE_SIZE, useAuditExport, useAdminExportDownload, useAuditLogs, type AuditFilters, type AuditLog } from './platform-api';
+import {
+  PAGE_SIZE,
+  useAuditExport,
+  useAdminExport,
+  useAdminExportDownload,
+  useAuditLogs,
+  type AuditFilters,
+  type AuditLog,
+} from './platform-api';
 
 /** ADM-006: the viewer shows what changed, so a row opens its own before/after rather than a flat message. */
 function JsonBlock({ title, value }: { title: string; value: Record<string, unknown> | null }) {
@@ -23,6 +31,9 @@ export function AdminAuditPage() {
   const logs = useAuditLogs(filters, offset);
   const exportLogs = useAuditExport();
   const download = useAdminExportDownload();
+  const exportStatus = useAdminExport(exportLogs.data?.id);
+  const currentExport = exportStatus.data ?? exportLogs.data;
+  const exportExpired = Boolean(currentExport?.expires_at && new Date(currentExport.expires_at).getTime() <= Date.now());
 
   const set = (key: keyof AuditFilters) => (event: { target: { value: string } }) => {
     setFilters((current) => ({ ...current, [key]: event.target.value || undefined }));
@@ -63,10 +74,7 @@ export function AdminAuditPage() {
                 variant="outline"
                 disabled={exportLogs.isPending}
                 onClick={() =>
-                  exportLogs.mutate(
-                    { format, date_from: filters.date_from, date_to: filters.date_to },
-                    { onSuccess: () => toast({ tone: 'success', title: t('exports.queued') }) },
-                  )
+                  exportLogs.mutate({ ...filters, format }, { onSuccess: () => toast({ tone: 'success', title: t('exports.queued') }) })
                 }
               >
                 <FileSpreadsheet />
@@ -76,13 +84,16 @@ export function AdminAuditPage() {
           </div>
         }
       />
-      <Feedback error={logs.error ?? exportLogs.error ?? download.error} />
+      <Feedback error={logs.error ?? exportLogs.error ?? exportStatus.error ?? download.error} />
       {exportLogs.data ? (
         <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <p>{t('exports.queued')}</p>
+          <div>
+            <p>{t(`exports.statuses.${exportExpired ? 'EXPIRED' : (currentExport?.status ?? 'PENDING')}`)}</p>
+            {currentExport?.error ? <p className="text-sm text-destructive">{currentExport.error}</p> : null}
+          </div>
           <Button
             variant="outline"
-            disabled={download.isPending}
+            disabled={download.isPending || currentExport?.status !== 'READY' || exportExpired || Boolean(exportStatus.error)}
             onClick={() => download.mutate(exportLogs.data!.id, { onSuccess: (link) => window.open(link.url, '_blank', 'noopener') })}
           >
             {t('exports.download')}

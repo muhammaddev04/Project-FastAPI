@@ -3,12 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import type { Me } from '@/shared/auth/types';
 import { Card, EmptyState, PageHeader, PhaseBadge } from '@/shared/ui';
-import { HeaderTools, PlannedGroup, ShellFrame, type Crumb, type ShellSection } from './app-shell';
+import { HeaderTools, ShellFrame, type Crumb, type ShellSection } from './app-shell';
 import type { AdminContext } from './use-admin-context';
 
 /**
- * Administration menu (FND-032 AdminLayout). Only the screens the TZ names for /admin (P12 §5): the P02 verification
- * queue is built; the P12 screens are listed with their phase and open an honest "planned" page.
+ * Administration menu (FND-032 AdminLayout): review workflows and built platform screens.
  */
 type AdminItem = { key: string; icon: LucideIcon; phase?: 'P12' };
 const REVIEW: AdminItem[] = [
@@ -40,8 +39,10 @@ export function AdminLayout({ me }: { me: Me }) {
       label: t(`nav.admin.${item.key}`),
       phase: item.phase,
     }));
-  // Only the built screen is navigation; the five P12 screens are the roadmap (C8).
-  const sections: ShellSection[] = [{ key: 'review', label: t('nav.sections.review'), links: toLinks(REVIEW) }];
+  const sections: ShellSection[] = [
+    { key: 'review', label: t('nav.sections.review'), links: toLinks(REVIEW) },
+    { key: 'platform', label: t('admin.eyebrow'), links: toLinks(PLATFORM) },
+  ];
   const current = ALL.find((item) => pathname.startsWith(`/admin/${item.key}`)) ?? REVIEW[0]!;
   const crumbs: Crumb[] = [{ label: t('admin.eyebrow'), to: '/admin' }, { label: t(`nav.admin.${current.key}`) }];
   return (
@@ -59,7 +60,6 @@ export function AdminLayout({ me }: { me: Me }) {
         </div>
       }
       sections={sections}
-      navFooter={<PlannedGroup links={toLinks(PLATFORM)} />}
       crumbs={crumbs}
       headerEnd={<HeaderTools me={me} notifications={false} />}
     >

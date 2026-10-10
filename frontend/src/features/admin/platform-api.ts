@@ -136,10 +136,9 @@ export function useAuditLogs(filters: AuditFilters, offset = 0) {
 export function useAuditExport() {
   const cache = useQueryClient();
   return useMutation({
-    mutationFn: (filters: { format: 'CSV' | 'XLSX'; date_from?: string; date_to?: string }) => {
+    mutationFn: (filters: AuditFilters & { format: 'CSV' | 'XLSX' }) => {
       const params = new URLSearchParams({ format: filters.format });
-      if (filters.date_from) params.set('date_from', filters.date_from);
-      if (filters.date_to) params.set('date_to', filters.date_to);
+      for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value);
       return apiRequest<AdminExport>(`/admin/audit-logs/export?${params}`, {
         method: 'POST',
         idempotencyKey: crypto.randomUUID(),
@@ -153,6 +152,18 @@ export function useAdminExportDownload() {
   return useMutation({
     mutationFn: (exportId: string) => apiRequest<{ url: string; expires_at: string }>(`/admin/exports/${exportId}/download`),
     gcTime: 0,
+  });
+}
+
+export function useAdminExport(exportId: string | undefined) {
+  return useQuery({
+    queryKey: ['admin-export', exportId],
+    queryFn: () => apiRequest<AdminExport>(`/admin/exports/${exportId}`),
+    enabled: Boolean(exportId),
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return !query.state.error && (!status || status === 'PENDING' || status === 'RUNNING') ? 2000 : false;
+    },
   });
 }
 

@@ -1,9 +1,17 @@
+# P12 reports, exports and admin - 2026-10-10
+
+P12 implementation and recorded acceptance are documented in
+[P12 report](docs/P12/PART_REPORT.md) and [P12 acceptance](docs/P12_ACCEPTANCE.md).
+The current maintenance change fixes admin navigation, matching audit export filters
+and export readiness tracking; see [maintenance validation](docs/ADMIN_PANEL_FIXES.md)
+separately from the original P12 acceptance. P11 live Telegram acceptance remains pending.
+
 # P11 notifications and Telegram - 2026-10-09
 
 Owner authorized implementation and local commits on 2026-10-09. Backend, frontend
 and automated acceptance are implemented. Status: NOT DONE until live Telegram
 linking, outbound receipt and tenant-specific bot commands are verified with the
-owner's account. SMS is deferred by CR-004; P12 has not been started.
+owner's account. SMS is deferred by CR-004; P12 is covered by its separate report above.
 
 The header notification bell now opens the latest notifications and links to the
 full list, preferences and Telegram linking page. Telegram is also available through

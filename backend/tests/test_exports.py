@@ -1,7 +1,7 @@
 """P12 §2 exports: the request, the worker, the file format and the download rules."""
 
 import csv
-from datetime import timedelta
+from datetime import UTC, timedelta
 from decimal import Decimal
 from io import BytesIO, StringIO
 from uuid import uuid4
@@ -330,15 +330,61 @@ async def test_admin_export_belongs_to_the_platform(client: AsyncClient, session
         params={"format": "CSV"},
     )
     assert created.status_code == 202, created.text
+    status_url = f"/api/v1/admin/exports/{created.json()['id']}"
+    pending = await client.get(status_url, headers=auth(admin))
+    assert pending.status_code == 200 and pending.json()["status"] == "PENDING"
+    assert (await client.get(status_url, headers=auth(other))).status_code == 404
     await session.commit()
     assert await exports.process_pending() == 1
     export = await session.get(Export, created.json()["id"], populate_existing=True)
     assert export is not None and export.status == "READY" and export.organization_id is None
+    ready = await client.get(status_url, headers=auth(admin))
+    assert ready.status_code == 200 and ready.json()["status"] == "READY"
 
     link = await client.get(f"/api/v1/admin/exports/{export.id}/download", headers=auth(admin))
     assert link.status_code == 200, link.text
     stranger = await client.get(f"/api/v1/admin/exports/{export.id}/download", headers=auth(other))
     assert stranger.status_code == 404
+
+
+async def test_admin_export_matches_viewer_filters(client: AsyncClient, session: AsyncSession):
+    from datetime import datetime
+
+    admin = await make_user(session, is_superadmin=True)
+    entity_id = uuid4()
+    for action in ("fixture.selected", "fixture.other"):
+        session.add(
+            AuditLog(
+                actor_id=admin.id,
+                actor_type="SUPERADMIN",
+                action=action,
+                entity_type="users",
+                entity_id=entity_id,
+                created_at=datetime(2025, 1, 2, 12, tzinfo=UTC),
+            )
+        )
+    await session.commit()
+    filters = {
+        "actor_id": str(admin.id),
+        "entity_id": str(entity_id),
+        "entity_type": "users",
+        "action": "fixture.selected",
+    }
+    viewer = await client.get("/api/v1/admin/audit-logs", headers=auth(admin), params=filters)
+    assert viewer.status_code == 200 and viewer.json()["count"] == 1
+    created = await client.post(
+        "/api/v1/admin/audit-logs/export",
+        headers={**auth(admin), "Idempotency-Key": str(uuid4())},
+        params={**filters, "format": "CSV"},
+    )
+    assert created.status_code == 202, created.text
+    assert created.json()["params"] == filters
+    await session.commit()
+    assert await exports.process_pending() == 1
+    export = await session.get(Export, created.json()["id"], populate_existing=True)
+    assert export is not None and export.status == "READY" and export.row_count == 1
+    content = (await download_bytes(session, export)).decode("utf-8-sig")
+    assert "fixture.selected" in content and "fixture.other" not in content
 
 
 async def test_exp_005_a_lost_run_is_failed_not_left_running(client: AsyncClient, session: AsyncSession):

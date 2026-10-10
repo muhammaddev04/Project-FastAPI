@@ -278,12 +278,30 @@ async def export_audit_logs(
     file_format: Annotated[ExportFormat, Query(alias="format")] = "CSV",
     date_from: Annotated[date | None, Query()] = None,
     date_to: Annotated[date | None, Query()] = None,
+    org_id: UUID | None = None,
+    actor_id: UUID | None = None,
+    entity_id: UUID | None = None,
+    action: Annotated[str | None, Query(max_length=64)] = None,
+    entity_type: Annotated[str | None, Query(max_length=64)] = None,
 ) -> ExportOut:
-    params = {"date_from": date_from, "date_to": date_to}
+    params = {
+        "date_from": date_from,
+        "date_to": date_to,
+        "org_id": org_id,
+        "actor_id": actor_id,
+        "entity_id": entity_id,
+        "action": action,
+        "entity_type": entity_type,
+    }
     export = await exports.create_admin(
         session, admin, "audit_logs", file_format, {k: v for k, v in params.items() if v is not None}
     )
     return ExportOut.model_validate(export)
+
+
+@router.get("/exports/{export_id}", response_model=ExportOut, responses=_ERRORS)
+async def get_admin_export(session: SessionDep, admin: SuperadminDep, export_id: UUID) -> ExportOut:
+    return ExportOut.model_validate(await exports.owned_admin(session, admin, export_id))
 
 
 @router.get(
