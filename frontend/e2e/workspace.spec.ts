@@ -36,6 +36,8 @@ for (const area of ['company', 'store', 'courier']) {
     await expect(page.getByText('Your profile was saved.', { exact: true })).toBeVisible({ timeout: 30_000 });
     await page.reload();
     await expect(name).toHaveValue('Workspace Acceptance');
+    // Audit the loaded page immediately; entrance fades must not wash out text.
+    expect(await page.locator('main').evaluate((main) => getComputedStyle(main).opacity)).toBe('1');
     const accessibility = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
     expect(accessibility.violations).toEqual([]);
     await page.goto(`/${area}`);

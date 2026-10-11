@@ -549,23 +549,9 @@ body:has(.workspace),
     color 180ms ease,
     box-shadow 180ms ease;
 }
-.workspace main {
-  animation: workspace-enter 220ms ease-out;
-}
-@keyframes workspace-enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Render signed-in text at full opacity immediately: fading the entire page
+ * temporarily lowers the contrast of every caption and status badge. */
 @media (prefers-reduced-motion: reduce) {
-  .workspace main {
-    animation: none;
-  }
   .workspace-stat,
   .workspace nav a {
     transition: none;
