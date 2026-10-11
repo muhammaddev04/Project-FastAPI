@@ -36,7 +36,7 @@ function SidebarLink({ link, onNavigate }: { link: ShellLink; onNavigate?: () =>
       onClick={onNavigate}
       className={({ isActive }) =>
         cn(
-          'flex h-9 items-center gap-2.5 rounded-xl px-2.5 text-label transition-colors duration-fast',
+          'flex min-h-11 items-center gap-2.5 rounded-xl px-3 py-2 text-label transition-colors duration-fast',
           isActive
             ? 'bg-primary-strong font-medium text-primary-foreground shadow-sm'
             : 'text-sidebar-muted hover:bg-sidebar-active hover:text-sidebar-foreground',
@@ -44,7 +44,7 @@ function SidebarLink({ link, onNavigate }: { link: ShellLink; onNavigate?: () =>
       }
     >
       <Icon className="size-4 shrink-0" aria-hidden="true" />
-      <span className="flex-1 truncate">{link.label}</span>
+      <span className="min-w-0 flex-1">{link.label}</span>
     </NavLink>
   );
 }
@@ -110,7 +110,7 @@ export function SidebarNav({
       {sections.map((section) => (
         <div key={section.key}>
           {/* Group labels organise the list; they are not entries in it, so they stop shouting. */}
-          <p className="mb-1.5 px-2.5 text-caption font-medium text-sidebar-muted">{section.label}</p>
+          <p className="mb-2 px-3 text-caption font-semibold text-sidebar-muted">{section.label}</p>
           <div className="space-y-0.5">
             {section.links.map((link) => (
               <SidebarLink key={link.key} link={link} onNavigate={onNavigate} />
@@ -139,7 +139,7 @@ export function SidebarBody({
 }) {
   return (
     <>
-      <div className={cn('flex h-14 shrink-0 items-center justify-between gap-2 px-4', onNavigate && 'pr-14')}>
+      <div className={cn('flex min-h-20 shrink-0 flex-wrap items-center justify-between gap-2 px-5 py-4', onNavigate && 'pr-14')}>
         <BrandMark size="xs" />
         {/* Which area this is, stated plainly. It was an uppercase outlined pill competing with the mark. */}
         <span className="truncate text-caption font-medium text-sidebar-muted">{areaLabel}</span>
@@ -244,7 +244,7 @@ export function ShellFrame({
       )}
 
       <div className={cn('relative', !hideSidebar && 'lg:pl-[17rem]')}>
-        <header className="chrome sticky top-0 z-20 flex h-14 items-center gap-2 border-x-0 border-t-0 border-b px-3 sm:gap-3 sm:px-6 lg:px-8">
+        <header className="chrome sticky top-0 z-20 flex h-16 items-center gap-2 border-x-0 border-t-0 border-b px-3 sm:gap-3 sm:px-6 lg:px-8">
           {hideSidebar ? null : (
             <Button variant="ghost" size="icon" className="lg:hidden" aria-label={t('shell.openMenu')} onClick={() => setDrawerOpen(true)}>
               <Menu />

@@ -34,7 +34,7 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <header className={cn('space-y-4', className)}>
+    <header className={cn('workspace-page-heading space-y-4', className)}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1
@@ -47,7 +47,7 @@ export function PageHeader({
           </h1>
           {description ? <p className="mt-1 max-w-prose text-label leading-relaxed text-muted-foreground">{description}</p> : null}
         </div>
-        {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+        {actions ? <div className="workspace-page-actions flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
       {children}
     </header>

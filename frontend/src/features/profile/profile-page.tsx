@@ -212,18 +212,18 @@ export function ProfilePage({ me }: { me: Me }) {
           }
         />
 
-        <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="min-w-0 space-y-6 lg:col-span-2">
+        <div className="grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="min-w-0 space-y-6">
             <Card className="profile-details min-w-0 p-4 sm:p-6">
               <SectionHeader icon={UserRound} title={t('profile.details')} subtitle={t('profile.detailsHint')} />
               <form onSubmit={onSubmit} noValidate className="mt-4 space-y-4">
-                <div className="profile-details-fields grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2">
-                  <div className="min-w-0 md:col-span-2">
+                <div className="profile-details-fields grid min-w-0 grid-cols-1 gap-5">
+                  <div className="min-w-0">
                     <FormField label={t('auth.fields.fullName')} error={errors.full_name?.message && t(errors.full_name.message)}>
                       <Input autoComplete="name" {...form.register('full_name')} />
                     </FormField>
                   </div>
-                  <div className="min-w-0 md:col-span-2">
+                  <div className="min-w-0">
                     <FormField label={t('auth.fields.email')} hint={t('profile.emailHint')}>
                       <Input value={me.email} readOnly aria-readonly />
                     </FormField>

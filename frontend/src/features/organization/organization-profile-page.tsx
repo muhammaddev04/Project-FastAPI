@@ -272,8 +272,8 @@ export function OrganizationProfilePage() {
 
       <SettingsTabs />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <form onSubmit={onSubmit} noValidate className="space-y-6 lg:col-span-2">
+      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <form onSubmit={onSubmit} noValidate className="min-w-0 space-y-6">
           <Card className="space-y-4 p-5 sm:p-6">
             <SectionHeader
               icon={FileText}
@@ -294,8 +294,8 @@ export function OrganizationProfilePage() {
             ) : !perms.includes('org.edit_legal') ? (
               <Alert tone="info">{t('orgProfile.legalOwnerOnly')}</Alert>
             ) : null}
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="sm:col-span-2">
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="md:col-span-2">
                 {field('name', isStore ? t('onboarding.storeName') : t('onboarding.companyName'), { maxLength: 200 })}
               </div>
               {field('legal_name', t('onboarding.fields.legalName'), { maxLength: 255 })}
@@ -309,16 +309,16 @@ export function OrganizationProfilePage() {
               title={t('orgProfile.contacts')}
               subtitle={canContacts ? t('orgProfile.contactsHint') : t('orgProfile.readOnly')}
             />
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-2">
               {field('phone', t('onboarding.fields.phone'), { type: 'tel', maxLength: 20 })}
               {field('email', t('onboarding.fields.email'), { type: 'email', maxLength: 254 })}
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-5">
               {field('city', t('onboarding.fields.city'), { maxLength: 100 })}
-              <div className="sm:col-span-2">{field('address', t('onboarding.fields.address'), { maxLength: 500 })}</div>
+              <div>{field('address', t('onboarding.fields.address'), { maxLength: 500 })}</div>
             </div>
             {isStore ? (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-5 md:grid-cols-2">
                 {field('latitude', t('onboarding.fields.latitude'), { inputMode: 'decimal', maxLength: 11 })}
                 {field('longitude', t('onboarding.fields.longitude'), { inputMode: 'decimal', maxLength: 11 })}
               </div>
@@ -332,7 +332,7 @@ export function OrganizationProfilePage() {
             </Alert>
           ) : null}
           {editable.size > 0 ? (
-            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <div className="workspace-form-actions flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Button type="button" variant="secondary" onClick={() => form.reset(toValues(data))}>
                 {t('common.cancel')}
               </Button>
